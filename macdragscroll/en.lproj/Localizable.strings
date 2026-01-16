@@ -1,0 +1,47 @@
+/* 
+  Localizable.strings (English)
+  macdragscroll
+
+  Created by Martin Calander on 2026-01-16.
+*/
+
+// App Name
+"app_name" = "Mac Drag Scroll";
+
+// Footer
+"made_by" = "Made by Martin Calander";
+"quit" = "Quit";
+
+// Permission Required View
+"accessibility_permissions_required" = "Accessibility Permissions Required";
+"app_needs_permission" = "Mac Drag Scroll needs this to be able to work.";
+"open_system_settings" = "Open System Settings";
+
+// Permission Dialogs
+"permission_required_title" = "Accessibility Permission Required";
+"permission_required_message" = "Mac Drag Scroll needs Accessibility permission to detect middle mouse button events and enable drag scrolling.\n\nPlease grant permission in System Settings.";
+"permission_lost_title" = "Accessibility Permission Lost";
+"permission_lost_message" = "Mac Drag Scroll no longer has Accessibility permission. Drag scrolling has been disabled.\n\nPlease re-grant permission in System Settings to continue using the app.";
+"later" = "Later";
+"ok" = "OK";
+
+// Settings Labels
+"speed" = "Speed";
+"acceleration" = "Acceleration";
+"dead_zone" = "Dead Zone";
+"opacity" = "Opacity";
+"show_indicator" = "Show Indicator & Animations";
+"launch_at_login" = "Launch at Login";
+"excluded_apps" = "Excluded Apps";
+
+// Acceleration Levels
+"acceleration_low" = "Low";
+"acceleration_med" = "Med";
+"acceleration_high" = "High";
+"acceleration_max" = "Max";
+
+// App Picker
+"search" = "Search";
+"no_apps_found" = "No apps found";
+"done" = "Done";
+"current" = "Current";

@@ -11,8 +11,10 @@ import Combine
 import ApplicationServices
 
 class AppDelegate: NSObject, NSApplicationDelegate {
-    static let appVersion = "1.17.0"
-    static let appName = "Mac Drag Scroll"
+    static let appVersion = "1.18.0"
+    static var appName: String {
+        NSLocalizedString("app_name", comment: "App name")
+    }
     
     private var statusItem: NSStatusItem!
     private var mouseMonitor: MouseMonitor!
@@ -83,11 +85,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     private func showPermissionDialog() {
         let alert = NSAlert()
-        alert.messageText = "Accessibility Permission Required"
-        alert.informativeText = "\(AppDelegate.appName) needs Accessibility permission to detect middle mouse button events and enable drag scrolling.\n\nPlease grant permission in System Settings."
+        alert.messageText = NSLocalizedString("permission_required_title", comment: "Permission required alert title")
+        alert.informativeText = NSLocalizedString("permission_required_message", comment: "Permission required alert message")
         alert.alertStyle = .warning
-        alert.addButton(withTitle: "Open System Settings")
-        alert.addButton(withTitle: "Later")
+        alert.addButton(withTitle: NSLocalizedString("open_system_settings", comment: "Open System Settings button"))
+        alert.addButton(withTitle: NSLocalizedString("later", comment: "Later button"))
         
         let response = alert.runModal()
         if response == .alertFirstButtonReturn {
@@ -97,11 +99,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     private func showPermissionRevokedDialog() {
         let alert = NSAlert()
-        alert.messageText = "Accessibility Permission Lost"
-        alert.informativeText = "\(AppDelegate.appName) no longer has Accessibility permission. Drag scrolling has been disabled.\n\nPlease re-grant permission in System Settings to continue using the app."
+        alert.messageText = NSLocalizedString("permission_lost_title", comment: "Permission lost alert title")
+        alert.informativeText = NSLocalizedString("permission_lost_message", comment: "Permission lost alert message")
         alert.alertStyle = .warning
-        alert.addButton(withTitle: "Open System Settings")
-        alert.addButton(withTitle: "OK")
+        alert.addButton(withTitle: NSLocalizedString("open_system_settings", comment: "Open System Settings button"))
+        alert.addButton(withTitle: NSLocalizedString("ok", comment: "OK button"))
         
         let response = alert.runModal()
         if response == .alertFirstButtonReturn {

@@ -65,11 +65,11 @@ struct MenuBarSettingsView: View {
                 Text("•")
                     .font(.system(size: 9))
                     .foregroundColor(.secondary.opacity(0.5))
-                Text("Made by Martin Calander ©")
+                Text("\(NSLocalizedString("made_by", comment: "Made by")) ©")
                     .font(.system(size: 9))
                     .foregroundColor(.secondary)
                 Spacer()
-                Button("Quit") {
+                Button(NSLocalizedString("quit", comment: "Quit button")) {
                     NSApplication.shared.terminate(nil)
                 }
                 .buttonStyle(.plain)
@@ -100,9 +100,9 @@ struct MenuBarSettingsView: View {
                 .foregroundColor(.orange)
             
             VStack(spacing: 8) {
-                Text("Accessibility Permissions Required")
+                Text(NSLocalizedString("accessibility_permissions_required", comment: "Permission required title"))
                     .font(.system(size: 14, weight: .semibold))
-                Text("\(AppDelegate.appName) needs this to be able to work.")
+                Text(NSLocalizedString("app_needs_permission", comment: "App needs permission message"))
                     .font(.system(size: 12))
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -111,7 +111,7 @@ struct MenuBarSettingsView: View {
             Button(action: {
                 AppDelegate.openAccessibilitySettings()
             }) {
-                Text("Open System Settings")
+                Text(NSLocalizedString("open_system_settings", comment: "Open System Settings button"))
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.white)
                     .padding(.horizontal, 20)
@@ -135,7 +135,7 @@ struct MenuBarSettingsView: View {
                 VStack(spacing: 12) {
                     SliderRow(
                         icon: "gauge.with.dots.needle.50percent",
-                        title: "Speed",
+                        title: NSLocalizedString("speed", comment: "Speed setting"),
                         value: $settings.scrollSpeed,
                         range: 0.5...5.0,
                         step: 0.5,
@@ -144,23 +144,23 @@ struct MenuBarSettingsView: View {
                     
                     SliderRow(
                         icon: "arrow.up.right",
-                        title: "Acceleration",
+                        title: NSLocalizedString("acceleration", comment: "Acceleration setting"),
                         value: $settings.acceleration,
                         range: 1.0...3.0,
                         step: 0.2,
                         format: { v in
                             switch v {
-                            case ..<1.4: return "Low"
-                            case ..<2.0: return "Med"
-                            case ..<2.6: return "High"
-                            default: return "Max"
+                            case ..<1.4: return NSLocalizedString("acceleration_low", comment: "Low")
+                            case ..<2.0: return NSLocalizedString("acceleration_med", comment: "Med")
+                            case ..<2.6: return NSLocalizedString("acceleration_high", comment: "High")
+                            default: return NSLocalizedString("acceleration_max", comment: "Max")
                             }
                         }
                     )
                     
                     SliderRow(
                         icon: "circle.dashed",
-                        title: "Dead Zone",
+                        title: NSLocalizedString("dead_zone", comment: "Dead Zone setting"),
                         value: $settings.deadZoneRadius,
                         range: 5...50,
                         step: 5,
@@ -169,7 +169,7 @@ struct MenuBarSettingsView: View {
                     
                     SliderRow(
                         icon: "circle.lefthalf.filled",
-                        title: "Opacity",
+                        title: NSLocalizedString("opacity", comment: "Opacity setting"),
                         value: $settings.overlayOpacity,
                         range: 0.2...1.0,
                         step: 0.05,
@@ -191,7 +191,7 @@ struct MenuBarSettingsView: View {
                             .font(.system(size: 12))
                             .foregroundColor(.secondary)
                             .frame(width: 18)
-                        Text("Show Indicator & Animations")
+                        Text(NSLocalizedString("show_indicator", comment: "Show Indicator toggle"))
                             .font(.system(size: 12))
                         Spacer()
                         Toggle("", isOn: $settings.animationsEnabled)
@@ -207,7 +207,7 @@ struct MenuBarSettingsView: View {
                             .font(.system(size: 12))
                             .foregroundColor(.secondary)
                             .frame(width: 18)
-                        Text("Launch at Login")
+                        Text(NSLocalizedString("launch_at_login", comment: "Launch at Login toggle"))
                             .font(.system(size: 12))
                         Spacer()
                         Toggle("", isOn: $settings.launchAtLogin)
@@ -227,7 +227,7 @@ struct MenuBarSettingsView: View {
                             .font(.system(size: 12))
                             .foregroundColor(.secondary)
                             .frame(width: 18)
-                        Text("Excluded Apps")
+                        Text(NSLocalizedString("excluded_apps", comment: "Excluded Apps section"))
                             .font(.system(size: 12))
                         Spacer()
                         Button(action: { showingAppPicker = true }) {
@@ -404,7 +404,7 @@ struct AppPickerView: View {
                     .foregroundColor(.secondary)
                     .font(.system(size: 11))
                 
-                TextField("Search", text: $searchText)
+                TextField(NSLocalizedString("search", comment: "Search placeholder"), text: $searchText)
                     .textFieldStyle(.plain)
                     .font(.system(size: 12))
                 
@@ -436,7 +436,7 @@ struct AppPickerView: View {
                     Image(systemName: "app.badge.questionmark")
                         .font(.system(size: 24))
                         .foregroundColor(.secondary)
-                    Text("No apps found")
+                    Text(NSLocalizedString("no_apps_found", comment: "No apps found"))
                         .font(.system(size: 11))
                         .foregroundColor(.secondary)
                 }
@@ -463,7 +463,7 @@ struct AppPickerView: View {
             // Done button
             HStack {
                 Spacer()
-                Button("Done") { onDismiss() }
+                Button(NSLocalizedString("done", comment: "Done button")) { onDismiss() }
                     .keyboardShortcut(.defaultAction)
                     .controlSize(.small)
             }
@@ -520,7 +520,7 @@ struct AppPickerRow: View {
                         .lineLimit(1)
                     
                     if isFrontmost {
-                        Text("Current")
+                        Text(NSLocalizedString("current", comment: "Current app badge"))
                             .font(.system(size: 9, weight: .medium))
                             .foregroundColor(.white)
                             .padding(.horizontal, 5)

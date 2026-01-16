@@ -1,0 +1,47 @@
+/* 
+  Localizable.strings (Simplified Chinese)
+  macdragscroll
+
+  Created by Martin Calander on 2026-01-16.
+*/
+
+// App Name
+"app_name" = "Mac 拖拽滚动";
+
+// Footer
+"made_by" = "由 Martin Calander 开发";
+"quit" = "退出";
+
+// Permission Required View
+"accessibility_permissions_required" = "需要辅助功能权限";
+"app_needs_permission" = "Mac 拖拽滚动需要此权限才能正常工作。";
+"open_system_settings" = "打开系统设置";
+
+// Permission Dialogs
+"permission_required_title" = "需要辅助功能权限";
+"permission_required_message" = "Mac 拖拽滚动需要辅助功能权限来检测鼠标中键事件并启用拖拽滚动功能。\n\n请在系统设置中授予权限。";
+"permission_lost_title" = "辅助功能权限已失效";
+"permission_lost_message" = "Mac 拖拽滚动已失去辅助功能权限。拖拽滚动功能已被禁用。\n\n请在系统设置中重新授予权限以继续使用此应用。";
+"later" = "稍后";
+"ok" = "好";
+
+// Settings Labels
+"speed" = "速度";
+"acceleration" = "加速度";
+"dead_zone" = "死区";
+"opacity" = "不透明度";
+"show_indicator" = "显示指示器和动画";
+"launch_at_login" = "登录时启动";
+"excluded_apps" = "排除的应用";
+
+// Acceleration Levels
+"acceleration_low" = "低";
+"acceleration_med" = "中";
+"acceleration_high" = "高";
+"acceleration_max" = "最大";
+
+// App Picker
+"search" = "搜索";
+"no_apps_found" = "未找到应用";
+"done" = "完成";
+"current" = "当前";

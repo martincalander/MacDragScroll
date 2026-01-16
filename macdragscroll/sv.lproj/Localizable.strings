@@ -1,0 +1,47 @@
+/* 
+  Localizable.strings (Swedish)
+  macdragscroll
+
+  Created by Martin Calander on 2026-01-16.
+*/
+
+// App Name
+"app_name" = "Mac Drag Scroll";
+
+// Footer
+"made_by" = "Skapad av Martin Calander";
+"quit" = "Avsluta";
+
+// Permission Required View
+"accessibility_permissions_required" = "Tillgänglighetsbehörighet krävs";
+"app_needs_permission" = "Mac Drag Scroll behöver detta för att fungera.";
+"open_system_settings" = "Öppna Systeminställningar";
+
+// Permission Dialogs
+"permission_required_title" = "Tillgänglighetsbehörighet krävs";
+"permission_required_message" = "Mac Drag Scroll behöver tillgänglighetsbehörighet för att upptäcka musens mittenknapp och aktivera drag-scrollning.\n\nVänligen ge behörighet i Systeminställningar.";
+"permission_lost_title" = "Tillgänglighetsbehörighet förlorad";
+"permission_lost_message" = "Mac Drag Scroll har inte längre tillgänglighetsbehörighet. Drag-scrollning har inaktiverats.\n\nVänligen ge behörighet igen i Systeminställningar för att fortsätta använda appen.";
+"later" = "Senare";
+"ok" = "OK";
+
+// Settings Labels
+"speed" = "Hastighet";
+"acceleration" = "Acceleration";
+"dead_zone" = "Dödzon";
+"opacity" = "Opacitet";
+"show_indicator" = "Visa indikator & animationer";
+"launch_at_login" = "Starta vid inloggning";
+"excluded_apps" = "Exkluderade appar";
+
+// Acceleration Levels
+"acceleration_low" = "Låg";
+"acceleration_med" = "Med";
+"acceleration_high" = "Hög";
+"acceleration_max" = "Max";
+
+// App Picker
+"search" = "Sök";
+"no_apps_found" = "Inga appar hittades";
+"done" = "Klar";
+"current" = "Aktiv";

@@ -22,6 +22,7 @@ class SettingsManager: ObservableObject {
     private let scrollSpeedKey = "scrollSpeed"
     private let deadZoneRadiusKey = "deadZoneRadius"
     private let accelerationKey = "acceleration"
+    private let overlayOpacityKey = "overlayOpacity"
     
     // Launch at Login using SMAppService (macOS 13+)
     @Published var launchAtLogin: Bool {
@@ -54,6 +55,10 @@ class SettingsManager: ObservableObject {
         didSet { defaults.set(acceleration, forKey: accelerationKey) }
     }
     
+    @Published var overlayOpacity: Double {
+        didSet { defaults.set(overlayOpacity, forKey: overlayOpacityKey) }
+    }
+    
     private init() {
         defaults.register(defaults: [
             isEnabledKey: true,
@@ -61,7 +66,8 @@ class SettingsManager: ObservableObject {
             excludedAppsKey: [String](),
             scrollSpeedKey: 2.0,
             deadZoneRadiusKey: 20.0,
-            accelerationKey: 1.8
+            accelerationKey: 1.8,
+            overlayOpacityKey: 1.0
         ])
         
         self.isEnabled = defaults.bool(forKey: isEnabledKey)
@@ -70,6 +76,7 @@ class SettingsManager: ObservableObject {
         self.scrollSpeed = defaults.double(forKey: scrollSpeedKey)
         self.deadZoneRadius = defaults.double(forKey: deadZoneRadiusKey)
         self.acceleration = defaults.double(forKey: accelerationKey)
+        self.overlayOpacity = defaults.object(forKey: overlayOpacityKey) as? Double ?? 1.0
         
         // Check actual launch at login status from system
         self.launchAtLogin = SMAppService.mainApp.status == .enabled
@@ -180,3 +187,4 @@ class SettingsManager: ObservableObject {
         }
     }
 }
+

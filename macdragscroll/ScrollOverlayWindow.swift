@@ -52,13 +52,13 @@ class ScrollOverlayWindow: NSWindow {
             NSAnimationContext.runAnimationGroup { context in
                 context.duration = 0.12
                 context.timingFunction = CAMediaTimingFunction(name: .easeOut)
-                self.animator().alphaValue = 1
+                self.animator().alphaValue = SettingsManager.shared.overlayOpacity
             }
             
             // Bouncy spring animation for scale
             overlayView.animateBounceIn()
         } else {
-            self.alphaValue = 1
+            self.alphaValue = SettingsManager.shared.overlayOpacity
         }
     }
     
@@ -212,6 +212,8 @@ class ScrollOverlayView: NSView {
         
         guard let context = NSGraphicsContext.current?.cgContext else { return }
         
+        let opacity = CGFloat(SettingsManager.shared.overlayOpacity)
+        
         // Convert to view coordinates
         let viewOrigin = screenToView(originScreen)
         let viewCurrent = screenToView(currentScreen)
@@ -221,7 +223,7 @@ class ScrollOverlayView: NSView {
         let distance = sqrt(deltaX * deltaX + deltaY * deltaY)
         
         // Draw dead zone circle
-        context.setStrokeColor(NSColor.gray.withAlphaComponent(0.4).cgColor)
+        context.setStrokeColor(NSColor.gray.withAlphaComponent(0.4 * opacity).cgColor)
         context.setLineWidth(1.5)
         context.addEllipse(in: CGRect(
             x: viewOrigin.x - deadZoneRadius,
@@ -233,8 +235,8 @@ class ScrollOverlayView: NSView {
         
         // Draw center dot with shadow
         context.saveGState()
-        context.setShadow(offset: CGSize(width: 0, height: -1), blur: 4, color: NSColor.black.withAlphaComponent(0.5).cgColor)
-        context.setFillColor(NSColor.white.cgColor)
+        context.setShadow(offset: CGSize(width: 0, height: -1), blur: 4, color: NSColor.black.withAlphaComponent(0.5 * opacity).cgColor)
+        context.setFillColor(NSColor.white.withAlphaComponent(opacity).cgColor)
         context.addEllipse(in: CGRect(
             x: viewOrigin.x - centerDotRadius,
             y: viewOrigin.y - centerDotRadius,
@@ -246,7 +248,7 @@ class ScrollOverlayView: NSView {
         
         // Draw inner blue dot
         let innerRadius = centerDotRadius - 3
-        context.setFillColor(NSColor.systemBlue.cgColor)
+        context.setFillColor(NSColor.systemBlue.withAlphaComponent(opacity).cgColor)
         context.addEllipse(in: CGRect(
             x: viewOrigin.x - innerRadius,
             y: viewOrigin.y - innerRadius,
@@ -265,6 +267,7 @@ class ScrollOverlayView: NSView {
     }
     
     private func drawDirectionArrow(context: CGContext, at center: CGPoint, dirX: CGFloat, dirY: CGFloat) {
+        let opacity = CGFloat(SettingsManager.shared.overlayOpacity)
         let arrowDistance = deadZoneRadius + 12
         
         // Arrow tip position
@@ -290,8 +293,8 @@ class ScrollOverlayView: NSView {
         
         // Draw arrow with shadow
         context.saveGState()
-        context.setShadow(offset: CGSize(width: 0, height: -1), blur: 3, color: NSColor.black.withAlphaComponent(0.4).cgColor)
-        context.setFillColor(NSColor.white.cgColor)
+        context.setShadow(offset: CGSize(width: 0, height: -1), blur: 3, color: NSColor.black.withAlphaComponent(0.4 * opacity).cgColor)
+        context.setFillColor(NSColor.white.withAlphaComponent(opacity).cgColor)
         
         context.move(to: tip)
         context.addLine(to: leftWing)
@@ -301,3 +304,4 @@ class ScrollOverlayView: NSView {
         context.restoreGState()
     }
 }
+

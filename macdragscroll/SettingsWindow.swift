@@ -166,6 +166,18 @@ struct MenuBarSettingsView: View {
                         step: 5,
                         format: "%.0fpx"
                     )
+                    
+                    SliderRow(
+                        icon: "circle.lefthalf.filled",
+                        title: "Opacity",
+                        value: $settings.overlayOpacity,
+                        range: 0.2...1.0,
+                        step: 0.05,
+                        format: { v in
+                            let pct = Int((v * 100).rounded())
+                            return "\(pct)%"
+                        }
+                    )
                 }
                 .padding(12)
                 .background(Color(nsColor: .controlBackgroundColor).opacity(0.5))
@@ -179,7 +191,7 @@ struct MenuBarSettingsView: View {
                             .font(.system(size: 12))
                             .foregroundColor(.secondary)
                             .frame(width: 18)
-                        Text("Show Indicator")
+                        Text("Show Indicator & Animations")
                             .font(.system(size: 12))
                         Spacer()
                         Toggle("", isOn: $settings.animationsEnabled)

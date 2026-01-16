@@ -9,7 +9,7 @@ import AppKit
 import ApplicationServices
 
 class AppDelegate: NSObject, NSApplicationDelegate {
-    static let appVersion = "1.6.0"
+    static let appVersion = "1.11.0"
     
     private var statusItem: NSStatusItem!
     private var mouseMonitor: MouseMonitor!
@@ -94,6 +94,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         menu.addItem(NSMenuItem.separator())
         
+        let settingsItem = NSMenuItem(title: "Settings...", action: #selector(openSettings), keyEquivalent: ",")
+        menu.addItem(settingsItem)
+        
+        menu.addItem(NSMenuItem.separator())
+        
         menu.addItem(NSMenuItem(title: "Quit MacDragScroll", action: #selector(quitApp), keyEquivalent: "q"))
         
         statusItem.menu = menu
@@ -102,6 +107,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func toggleEnabled(_ sender: NSMenuItem) {
         SettingsManager.shared.isEnabled.toggle()
         sender.state = SettingsManager.shared.isEnabled ? .on : .off
+    }
+    
+    @objc private func openSettings() {
+        SettingsWindowController.shared.showSettings()
     }
     
     @objc private func quitApp() {

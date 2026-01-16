@@ -125,9 +125,14 @@ class MouseMonitor {
         
         guard distance > deadZoneRadius else { return }
         
-        // Calculate scroll intensity based on distance
+        // Calculate scroll intensity with exponential acceleration
+        // The further from origin, the faster it accelerates
         let effectiveDistance = distance - deadZoneRadius
-        let intensity = min(effectiveDistance / 50.0, 5.0) * scrollSpeed
+        
+        // Use power function for acceleration: starts slow, ramps up quickly
+        // pow(x, 1.8) gives nice exponential feel
+        let acceleratedDistance = pow(effectiveDistance / 30.0, 1.8)
+        let intensity = min(acceleratedDistance, 50.0) * scrollSpeed
         
         // Normalize direction
         let normalizedX = deltaX / distance
@@ -143,8 +148,6 @@ class MouseMonitor {
         guard scrollDeltaX != 0 || scrollDeltaY != 0 else { return }
         
         // Create scroll wheel event
-        // wheel1 = vertical (negative = scroll down/content moves up)
-        // wheel2 = horizontal (positive = scroll right)
         let event = CGEvent(scrollWheelEvent2Source: nil,
                            units: .pixel,
                            wheelCount: 2,

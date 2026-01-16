@@ -9,7 +9,7 @@ import AppKit
 import ApplicationServices
 
 class AppDelegate: NSObject, NSApplicationDelegate {
-    static let appVersion = "1.4.0"
+    static let appVersion = "1.6.0"
     
     private var statusItem: NSStatusItem!
     private var mouseMonitor: MouseMonitor!

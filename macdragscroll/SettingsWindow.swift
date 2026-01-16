@@ -69,11 +69,17 @@ struct MenuBarSettingsView: View {
                     .font(.system(size: 9))
                     .foregroundColor(.secondary)
                 Spacer()
-                Button(NSLocalizedString("quit", comment: "Quit button")) {
+                Button(action: {
                     NSApplication.shared.terminate(nil)
+                }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "power")
+                            .font(.system(size: 10))
+                        Text(NSLocalizedString("quit", comment: "Quit button"))
+                            .font(.system(size: 11))
+                    }
                 }
                 .buttonStyle(.plain)
-                .font(.system(size: 11))
                 .foregroundColor(.secondary)
             }
             .padding(.horizontal, 16)

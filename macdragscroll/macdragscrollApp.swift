@@ -8,10 +8,12 @@
 import SwiftUI
 
 @main
-struct macdragscrollApp: App {
+struct MacDragScrollApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    
     var body: some Scene {
-        WindowGroup {
-            ContentView()
+        Settings {
+            EmptyView()
         }
     }
 }

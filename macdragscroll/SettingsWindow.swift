@@ -7,270 +7,363 @@
 
 import SwiftUI
 import AppKit
+import ApplicationServices
 
-struct SettingsView: View {
+// MARK: - Layout Configuration
+// Adjust these values to change the popover dimensions
+private let kPopoverWidth: CGFloat = 380          // Width of the settings popover
+private let kPopoverHeightWithPermission: CGFloat = 440   // Height when permission granted
+private let kPopoverHeightNoPermission: CGFloat = 220     // Height when permission required
+private let kAppPickerWidth: CGFloat = 340        // Width of the app picker sheet
+private let kAppPickerHeight: CGFloat = 380       // Height of the app picker sheet
+
+// MARK: - Menu Bar Settings View (Popover)
+
+struct MenuBarSettingsView: View {
     @ObservedObject var settings = SettingsManager.shared
+    @ObservedObject var permissionState = AppDelegate.permissionState
     @State private var showingAppPicker = false
     
-    private func accelerationLabel(_ value: Double) -> String {
-        if value < 1.4 { return "Linear" }
-        if value < 1.8 { return "Light" }
-        if value < 2.2 { return "Normal" }
-        if value < 2.6 { return "Strong" }
-        return "Aggressive"
+    private var hasPermission: Bool {
+        permissionState.hasAccessibilityPermission
     }
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header
-            HStack {
-                Text("Settings")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                Spacer()
+            if hasPermission {
+                // Header - only shown when permission is granted
+                HStack {
+                    Image(systemName: "arrow.up.and.down.and.arrow.left.and.right")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.secondary)
+                    Text(AppDelegate.appName)
+                        .font(.system(size: 13, weight: .semibold))
+                    Spacer()
+                    Toggle("", isOn: $settings.isEnabled)
+                        .toggleStyle(.switch)
+                        .controlSize(.small)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                
+                Divider()
+                
+                // Normal settings view
+                settingsContent
+            } else {
+                // Permission required view (no header)
+                permissionRequiredView
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 20)
-            .padding(.bottom, 16)
             
             Divider()
             
-            ScrollView {
-                VStack(spacing: 24) {
-                    // General Section
-                    SettingsSection(title: "General") {
-                        SettingsToggle(
-                            title: "Enable Drag Scrolling",
-                            subtitle: "Hold middle mouse button to scroll",
-                            isOn: $settings.isEnabled
-                        )
-                    }
-                    
-                    // Appearance Section
-                    SettingsSection(title: "Appearance") {
-                        SettingsToggle(
-                            title: "Animations",
-                            subtitle: "Bouncy animations on the scroll indicator",
-                            isOn: $settings.animationsEnabled
-                        )
-                    }
-                    
-                    // Scroll Behavior Section
-                    SettingsSection(title: "Scroll Behavior") {
-                        VStack(alignment: .leading, spacing: 12) {
-                            VStack(alignment: .leading, spacing: 6) {
-                                HStack {
-                                    Text("Scroll Speed")
-                                        .font(.system(size: 13))
-                                    Spacer()
-                                    Text(String(format: "%.1fx", settings.scrollSpeed))
-                                        .font(.system(size: 12))
-                                        .foregroundColor(.secondary)
-                                }
-                                Slider(value: $settings.scrollSpeed, in: 0.5...5.0, step: 0.5)
-                                    .controlSize(.small)
-                            }
-                            
-                            Divider()
-                                .padding(.vertical, 4)
-                            
-                            VStack(alignment: .leading, spacing: 6) {
-                                HStack {
-                                    Text("Acceleration")
-                                        .font(.system(size: 13))
-                                    Spacer()
-                                    Text(accelerationLabel(settings.acceleration))
-                                        .font(.system(size: 12))
-                                        .foregroundColor(.secondary)
-                                }
-                                Slider(value: $settings.acceleration, in: 1.0...3.0, step: 0.2)
-                                    .controlSize(.small)
-                                Text("How quickly scroll speed increases with distance")
-                                    .font(.system(size: 11))
-                                    .foregroundColor(.secondary)
-                            }
-                            
-                            Divider()
-                                .padding(.vertical, 4)
-                            
-                            VStack(alignment: .leading, spacing: 6) {
-                                HStack {
-                                    Text("Dead Zone")
-                                        .font(.system(size: 13))
-                                    Spacer()
-                                    Text("\(Int(settings.deadZoneRadius))px")
-                                        .font(.system(size: 12))
-                                        .foregroundColor(.secondary)
-                                }
-                                Slider(value: $settings.deadZoneRadius, in: 5...50, step: 5)
-                                    .controlSize(.small)
-                                Text("Area around origin where scrolling doesn't activate")
-                                    .font(.system(size: 11))
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                    }
-                    
-                    // Excluded Apps Section
-                    SettingsSection(title: "Excluded Apps") {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Scrolling is disabled in these apps")
-                                .font(.system(size: 11))
-                                .foregroundColor(.secondary)
-                            
-                            if settings.excludedApps.isEmpty {
-                                HStack {
-                                    Spacer()
-                                    Text("No excluded apps")
-                                        .font(.system(size: 12))
-                                        .foregroundColor(.secondary)
-                                    Spacer()
-                                }
-                                .padding(.vertical, 8)
-                            } else {
-                                VStack(spacing: 4) {
-                                    ForEach(settings.excludedApps, id: \.self) { bundleId in
-                                        ExcludedAppRow(bundleId: bundleId) {
-                                            settings.removeExcludedApp(bundleId)
-                                        }
-                                    }
-                                }
-                            }
-                            
-                            Button(action: {
-                                showingAppPicker = true
-                            }) {
-                                HStack {
-                                    Image(systemName: "plus.circle.fill")
-                                        .font(.system(size: 14))
-                                    Text("Add Application")
-                                        .font(.system(size: 13))
-                                }
-                            }
-                            .buttonStyle(.plain)
-                            .foregroundColor(.accentColor)
-                        }
-                    }
+            // Footer
+            HStack(spacing: 4) {
+                Text("v\(AppDelegate.appVersion)")
+                    .font(.system(size: 9))
+                    .foregroundColor(.secondary)
+                Text("•")
+                    .font(.system(size: 9))
+                    .foregroundColor(.secondary.opacity(0.5))
+                Text("Made by Martin Calander ©")
+                    .font(.system(size: 9))
+                    .foregroundColor(.secondary)
+                Spacer()
+                Button("Quit") {
+                    NSApplication.shared.terminate(nil)
                 }
-                .padding(20)
+                .buttonStyle(.plain)
+                .font(.system(size: 11))
+                .foregroundColor(.secondary)
             }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
         }
-        .frame(width: 380, height: 560)
-        .background(Color(NSColor.windowBackgroundColor))
+        .frame(width: kPopoverWidth, height: hasPermission ? kPopoverHeightWithPermission : kPopoverHeightNoPermission)
         .sheet(isPresented: $showingAppPicker) {
             AppPickerView(
                 excludedApps: settings.excludedApps,
-                onAdd: { bundleId in
-                    settings.addExcludedApp(bundleId)
-                },
-                onDismiss: {
-                    showingAppPicker = false
-                }
+                onAdd: { settings.addExcludedApp($0) },
+                onDismiss: { showingAppPicker = false }
             )
         }
     }
-}
-
-struct SettingsSection<Content: View>: View {
-    let title: String
-    @ViewBuilder let content: Content
     
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(title)
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundColor(.secondary)
-                .textCase(.uppercase)
+    // MARK: - Permission Required View
+    
+    private var permissionRequiredView: some View {
+        VStack(spacing: 16) {
+            Spacer()
             
-            VStack(alignment: .leading, spacing: 0) {
-                content
+            Image(systemName: "hand.raised.circle")
+                .font(.system(size: 40))
+                .foregroundColor(.orange)
+            
+            VStack(spacing: 8) {
+                Text("Accessibility Permissions Required")
+                    .font(.system(size: 14, weight: .semibold))
+                Text("\(AppDelegate.appName) needs this to be able to work.")
+                    .font(.system(size: 12))
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+            
+            Button(action: {
+                AppDelegate.openAccessibilitySettings()
+            }) {
+                Text("Open System Settings")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 8)
+                    .background(Color.accentColor)
+                    .cornerRadius(6)
+            }
+            .buttonStyle(.plain)
+            
+            Spacer()
+        }
+        .frame(maxWidth: .infinity)
+    }
+    
+    // MARK: - Settings Content
+    
+    private var settingsContent: some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                // Sliders Section
+                VStack(spacing: 12) {
+                    SliderRow(
+                        icon: "gauge.with.dots.needle.50percent",
+                        title: "Speed",
+                        value: $settings.scrollSpeed,
+                        range: 0.5...5.0,
+                        step: 0.5,
+                        format: "%.1fx"
+                    )
+                    
+                    SliderRow(
+                        icon: "arrow.up.right",
+                        title: "Acceleration",
+                        value: $settings.acceleration,
+                        range: 1.0...3.0,
+                        step: 0.2,
+                        format: { v in
+                            switch v {
+                            case ..<1.4: return "Low"
+                            case ..<2.0: return "Med"
+                            case ..<2.6: return "High"
+                            default: return "Max"
+                            }
+                        }
+                    )
+                    
+                    SliderRow(
+                        icon: "circle.dashed",
+                        title: "Dead Zone",
+                        value: $settings.deadZoneRadius,
+                        range: 5...50,
+                        step: 5,
+                        format: "%.0fpx"
+                    )
+                }
+                .padding(12)
+                .background(Color(nsColor: .controlBackgroundColor).opacity(0.5))
+                .cornerRadius(8)
+                
+                // Toggles Section
+                VStack(spacing: 8) {
+                    // Show Indicator Toggle
+                    HStack {
+                        Image(systemName: "dot.circle")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                            .frame(width: 18)
+                        Text("Show Indicator")
+                            .font(.system(size: 12))
+                        Spacer()
+                        Toggle("", isOn: $settings.animationsEnabled)
+                            .toggleStyle(.switch)
+                            .controlSize(.mini)
+                    }
+                    
+                    Divider()
+                    
+                    // Launch at Login Toggle
+                    HStack {
+                        Image(systemName: "power")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                            .frame(width: 18)
+                        Text("Launch at Login")
+                            .font(.system(size: 12))
+                        Spacer()
+                        Toggle("", isOn: $settings.launchAtLogin)
+                            .toggleStyle(.switch)
+                            .controlSize(.mini)
+                    }
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
+                .background(Color(nsColor: .controlBackgroundColor).opacity(0.5))
+                .cornerRadius(8)
+                
+                // Excluded Apps
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Image(systemName: "app.badge.fill")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                            .frame(width: 18)
+                        Text("Excluded Apps")
+                            .font(.system(size: 12))
+                        Spacer()
+                        Button(action: { showingAppPicker = true }) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 14))
+                                .foregroundColor(.accentColor)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    
+                    if !settings.excludedApps.isEmpty {
+                        VStack(spacing: 4) {
+                            ForEach(settings.excludedApps, id: \.self) { bundleId in
+                                CompactAppRow(bundleId: bundleId) {
+                                    withAnimation(.easeOut(duration: 0.15)) {
+                                        settings.removeExcludedApp(bundleId)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding(12)
+                .background(Color(nsColor: .controlBackgroundColor).opacity(0.5))
+                .cornerRadius(8)
             }
             .padding(12)
-            .background(Color(NSColor.controlBackgroundColor))
-            .cornerRadius(8)
         }
     }
 }
 
-struct SettingsToggle: View {
+// MARK: - Slider Row
+
+struct SliderRow: View {
+    let icon: String
     let title: String
-    let subtitle: String
-    @Binding var isOn: Bool
+    @Binding var value: Double
+    let range: ClosedRange<Double>
+    let step: Double
+    let formatString: String?
+    let formatFunc: ((Double) -> String)?
+    
+    init(icon: String, title: String, value: Binding<Double>, range: ClosedRange<Double>, step: Double, format: String) {
+        self.icon = icon
+        self.title = title
+        self._value = value
+        self.range = range
+        self.step = step
+        self.formatString = format
+        self.formatFunc = nil
+    }
+    
+    init(icon: String, title: String, value: Binding<Double>, range: ClosedRange<Double>, step: Double, format: @escaping (Double) -> String) {
+        self.icon = icon
+        self.title = title
+        self._value = value
+        self.range = range
+        self.step = step
+        self.formatString = nil
+        self.formatFunc = format
+    }
     
     var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.system(size: 13))
-                Text(subtitle)
-                    .font(.system(size: 11))
-                    .foregroundColor(.secondary)
-            }
-            Spacer()
-            Toggle("", isOn: $isOn)
-                .toggleStyle(.switch)
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 11))
+                .foregroundColor(.secondary)
+                .frame(width: 16)
+            
+            Text(title)
+                .font(.system(size: 11))
+                .frame(width: 70, alignment: .leading)
+            
+            Slider(value: $value, in: range, step: step)
                 .controlSize(.small)
+            
+            Text(formattedValue)
+                .font(.system(size: 10, weight: .medium, design: .rounded))
+                .foregroundColor(.secondary)
+                .frame(width: 32, alignment: .trailing)
         }
+    }
+    
+    private var formattedValue: String {
+        if let formatFunc = formatFunc {
+            return formatFunc(value)
+        } else if let formatString = formatString {
+            return String(format: formatString, value)
+        }
+        return "\(value)"
     }
 }
 
-struct ExcludedAppRow: View {
+// MARK: - Compact App Row
+
+struct CompactAppRow: View {
     let bundleId: String
     let onRemove: () -> Void
     
     @State private var appName: String = ""
     @State private var appIcon: NSImage?
+    @State private var isHovered = false
     
     var body: some View {
-        HStack(spacing: 10) {
-            if let icon = appIcon {
-                Image(nsImage: icon)
-                    .resizable()
-                    .frame(width: 24, height: 24)
-            } else {
-                Image(systemName: "app.fill")
-                    .frame(width: 24, height: 24)
-                    .foregroundColor(.secondary)
-            }
-            
-            VStack(alignment: .leading, spacing: 1) {
-                Text(appName.isEmpty ? bundleId : appName)
-                    .font(.system(size: 12))
-                    .lineLimit(1)
-                if !appName.isEmpty {
-                    Text(bundleId)
-                        .font(.system(size: 10))
+        HStack(spacing: 8) {
+            Group {
+                if let icon = appIcon {
+                    Image(nsImage: icon)
+                        .resizable()
+                        .interpolation(.high)
+                } else {
+                    Image(systemName: "app.fill")
                         .foregroundColor(.secondary)
-                        .lineLimit(1)
                 }
             }
+            .frame(width: 16, height: 16)
+            
+            Text(appName.isEmpty ? bundleId : appName)
+                .font(.system(size: 11))
+                .lineLimit(1)
             
             Spacer()
             
             Button(action: onRemove) {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 14))
-                    .foregroundColor(.secondary)
+                Image(systemName: "minus.circle.fill")
+                    .font(.system(size: 12))
+                    .foregroundColor(isHovered ? .red : .secondary.opacity(0.6))
             }
             .buttonStyle(.plain)
         }
-        .padding(.vertical, 6)
+        .padding(.vertical, 4)
         .padding(.horizontal, 8)
-        .background(Color(NSColor.separatorColor).opacity(0.1))
+        .background(Color(nsColor: .controlBackgroundColor))
         .cornerRadius(6)
-        .onAppear {
-            loadAppInfo()
-        }
+        .contentShape(Rectangle())
+        .onHover { isHovered = $0 }
+        .onAppear { loadAppInfo() }
     }
     
     private func loadAppInfo() {
         if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleId) {
             appIcon = NSWorkspace.shared.icon(forFile: url.path)
-            let name = (url.lastPathComponent as NSString).deletingPathExtension
-            appName = name
+            appName = (url.lastPathComponent as NSString).deletingPathExtension
         }
     }
 }
+
+// MARK: - App Picker View
 
 struct AppPickerView: View {
     let excludedApps: [String]
@@ -280,53 +373,61 @@ struct AppPickerView: View {
     @State private var apps: [(name: String, bundleId: String, icon: NSImage?)] = []
     @State private var searchText = ""
     @State private var isLoading = true
+    @State private var frontmostBundleId: String? = nil
     
     var filteredApps: [(name: String, bundleId: String, icon: NSImage?)] {
-        if searchText.isEmpty {
-            return apps.filter { !excludedApps.contains($0.bundleId) }
-        }
-        return apps.filter { 
-            !excludedApps.contains($0.bundleId) &&
-            ($0.name.localizedCaseInsensitiveContains(searchText) ||
-             $0.bundleId.localizedCaseInsensitiveContains(searchText))
+        let available = apps.filter { !excludedApps.contains($0.bundleId) }
+        guard !searchText.isEmpty else { return available }
+        return available.filter {
+            $0.name.localizedCaseInsensitiveContains(searchText) ||
+            $0.bundleId.localizedCaseInsensitiveContains(searchText)
         }
     }
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header
-            HStack {
-                Text("Add Application")
-                    .font(.headline)
-                Spacer()
-                Button("Done") {
-                    onDismiss()
-                }
-                .buttonStyle(.plain)
-                .foregroundColor(.accentColor)
-            }
-            .padding(16)
-            
-            Divider()
-            
-            // Search
-            HStack {
+            // Search bar
+            HStack(spacing: 6) {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(.secondary)
-                TextField("Search apps...", text: $searchText)
+                    .font(.system(size: 11))
+                
+                TextField("Search", text: $searchText)
                     .textFieldStyle(.plain)
+                    .font(.system(size: 12))
+                
+                if !searchText.isEmpty {
+                    Button(action: { searchText = "" }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.secondary)
+                            .font(.system(size: 11))
+                    }
+                    .buttonStyle(.plain)
+                }
             }
-            .padding(10)
-            .background(Color(NSColor.controlBackgroundColor))
-            .cornerRadius(8)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .padding(8)
+            .background(Color(nsColor: .controlBackgroundColor))
+            .cornerRadius(6)
+            .padding(12)
+            
+            Divider()
             
             // App List
             if isLoading {
                 Spacer()
                 ProgressView()
-                    .scaleEffect(0.8)
+                    .scaleEffect(0.6)
+                Spacer()
+            } else if filteredApps.isEmpty {
+                Spacer()
+                VStack(spacing: 6) {
+                    Image(systemName: "app.badge.questionmark")
+                        .font(.system(size: 24))
+                        .foregroundColor(.secondary)
+                    Text("No apps found")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                }
                 Spacer()
             } else {
                 ScrollView {
@@ -335,111 +436,108 @@ struct AppPickerView: View {
                             AppPickerRow(
                                 name: app.name,
                                 bundleId: app.bundleId,
-                                icon: app.icon
-                            ) {
-                                onAdd(app.bundleId)
-                            }
+                                icon: app.icon,
+                                isFrontmost: app.bundleId == frontmostBundleId,
+                                onAdd: { onAdd(app.bundleId) }
+                            )
                         }
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 16)
+                    .padding(8)
                 }
             }
+            
+            Divider()
+            
+            // Done button
+            HStack {
+                Spacer()
+                Button("Done") { onDismiss() }
+                    .keyboardShortcut(.defaultAction)
+                    .controlSize(.small)
+            }
+            .padding(10)
         }
-        .frame(width: 340, height: 400)
-        .background(Color(NSColor.windowBackgroundColor))
-        .onAppear {
-            loadApps()
-        }
+        .frame(width: kAppPickerWidth, height: kAppPickerHeight)
+        .onAppear { loadApps() }
     }
     
     private func loadApps() {
+        // Capture frontmost app before opening sheet (it's likely the app user wants to exclude)
+        let frontmost = SettingsManager.shared.getFrontmostAppBundleId()
+        
         DispatchQueue.global(qos: .userInitiated).async {
-            let loadedApps = SettingsManager.shared.getInstalledApps()
+            let loadedApps = SettingsManager.shared.getInstalledApps(frontmostBundleId: frontmost)
             DispatchQueue.main.async {
-                self.apps = loadedApps
-                self.isLoading = false
+                frontmostBundleId = frontmost
+                apps = loadedApps
+                isLoading = false
             }
         }
     }
 }
 
+// MARK: - App Picker Row
+
 struct AppPickerRow: View {
     let name: String
     let bundleId: String
     let icon: NSImage?
+    let isFrontmost: Bool
     let onAdd: () -> Void
     
     @State private var isHovered = false
     
     var body: some View {
         HStack(spacing: 10) {
-            if let icon = icon {
-                Image(nsImage: icon)
-                    .resizable()
-                    .frame(width: 28, height: 28)
-            } else {
-                Image(systemName: "app.fill")
-                    .frame(width: 28, height: 28)
-                    .foregroundColor(.secondary)
+            Group {
+                if let icon = icon {
+                    Image(nsImage: icon)
+                        .resizable()
+                        .interpolation(.high)
+                } else {
+                    Image(systemName: "app.fill")
+                        .foregroundColor(.secondary)
+                }
             }
+            .frame(width: 20, height: 20)
             
             VStack(alignment: .leading, spacing: 1) {
-                Text(name)
-                    .font(.system(size: 12))
-                    .lineLimit(1)
-                Text(bundleId)
-                    .font(.system(size: 10))
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
+                HStack(spacing: 4) {
+                    Text(name)
+                        .font(.system(size: 12))
+                        .lineLimit(1)
+                    
+                    if isFrontmost {
+                        Text("Current")
+                            .font(.system(size: 9, weight: .medium))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 1)
+                            .background(Color.accentColor.opacity(0.8))
+                            .cornerRadius(3)
+                    }
+                }
             }
             
             Spacer()
             
-            Button(action: onAdd) {
-                Image(systemName: "plus.circle.fill")
-                    .font(.system(size: 16))
-                    .foregroundColor(.accentColor)
+            if isHovered {
+                Button(action: onAdd) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 14))
+                        .foregroundColor(.accentColor)
+                }
+                .buttonStyle(.plain)
+                .transition(.opacity)
             }
-            .buttonStyle(.plain)
-            .opacity(isHovered ? 1 : 0.7)
         }
-        .padding(.vertical, 8)
         .padding(.horizontal, 10)
-        .background(isHovered ? Color(NSColor.separatorColor).opacity(0.15) : Color.clear)
+        .padding(.vertical, 6)
+        .background(isHovered ? Color(nsColor: .controlBackgroundColor) : Color.clear)
         .cornerRadius(6)
+        .contentShape(Rectangle())
         .onHover { hovering in
-            isHovered = hovering
+            withAnimation(.easeOut(duration: 0.1)) { isHovered = hovering }
         }
-    }
-}
-
-// Window controller for settings
-class SettingsWindowController: NSWindowController {
-    static let shared = SettingsWindowController()
-    
-    private init() {
-        let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 380, height: 560),
-            styleMask: [.titled, .closable],
-            backing: .buffered,
-            defer: false
-        )
-        window.title = "MacDragScroll Settings"
-        window.center()
-        window.contentView = NSHostingView(rootView: SettingsView())
-        window.isReleasedWhenClosed = false
-        
-        super.init(window: window)
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    func showSettings() {
-        window?.center()
-        window?.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
     }
 }

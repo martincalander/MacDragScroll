@@ -142,6 +142,8 @@ class MouseMonitor {
     }
     
     private func showOverlay() {
+        // Don't show overlay if animations are disabled
+        guard SettingsManager.shared.animationsEnabled else { return }
         guard isActivated, !isOverlayVisible else { return }
         isOverlayVisible = true
         

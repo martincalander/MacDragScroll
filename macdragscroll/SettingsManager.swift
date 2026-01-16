@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 import AppKit
+import ServiceManagement
 
 class SettingsManager: ObservableObject {
     static let shared = SettingsManager()
@@ -21,6 +22,13 @@ class SettingsManager: ObservableObject {
     private let scrollSpeedKey = "scrollSpeed"
     private let deadZoneRadiusKey = "deadZoneRadius"
     private let accelerationKey = "acceleration"
+    
+    // Launch at Login using SMAppService (macOS 13+)
+    @Published var launchAtLogin: Bool {
+        didSet {
+            setLaunchAtLogin(launchAtLogin)
+        }
+    }
     
     @Published var isEnabled: Bool {
         didSet { defaults.set(isEnabled, forKey: isEnabledKey) }
@@ -62,6 +70,9 @@ class SettingsManager: ObservableObject {
         self.scrollSpeed = defaults.double(forKey: scrollSpeedKey)
         self.deadZoneRadius = defaults.double(forKey: deadZoneRadiusKey)
         self.acceleration = defaults.double(forKey: accelerationKey)
+        
+        // Check actual launch at login status from system
+        self.launchAtLogin = SMAppService.mainApp.status == .enabled
     }
     
     // Check if app is excluded by bundle identifier
@@ -83,8 +94,21 @@ class SettingsManager: ObservableObject {
             .sorted { $0.name.lowercased() < $1.name.lowercased() }
     }
     
-    // Get all installed applications
-    func getInstalledApps() -> [(name: String, bundleId: String, icon: NSImage?)] {
+    // Get the bundle identifier of the currently frontmost app (excluding our own app)
+    func getFrontmostAppBundleId() -> String? {
+        // Get the frontmost app that isn't our own app
+        if let frontmost = NSWorkspace.shared.frontmostApplication,
+           let bundleId = frontmost.bundleIdentifier,
+           bundleId != Bundle.main.bundleIdentifier {
+            return bundleId
+        }
+        // If frontmost is our app, try to get the previously active app
+        // by looking at running apps
+        return nil
+    }
+    
+    // Get all installed applications, with optional frontmost app bundle ID to prioritize
+    func getInstalledApps(frontmostBundleId: String? = nil) -> [(name: String, bundleId: String, icon: NSImage?)] {
         var apps: [(name: String, bundleId: String, icon: NSImage?)] = []
         
         let appDirectories = [
@@ -111,7 +135,17 @@ class SettingsManager: ObservableObject {
             }
         }
         
-        return apps.sorted { $0.name.lowercased() < $1.name.lowercased() }
+        // Sort alphabetically
+        apps.sort { $0.name.lowercased() < $1.name.lowercased() }
+        
+        // If we have a frontmost app, move it to the top
+        if let frontmost = frontmostBundleId,
+           let index = apps.firstIndex(where: { $0.bundleId == frontmost }) {
+            let frontmostApp = apps.remove(at: index)
+            apps.insert(frontmostApp, at: 0)
+        }
+        
+        return apps
     }
     
     func addExcludedApp(_ bundleId: String) {
@@ -122,5 +156,27 @@ class SettingsManager: ObservableObject {
     
     func removeExcludedApp(_ bundleId: String) {
         excludedApps.removeAll { $0 == bundleId }
+    }
+    
+    // MARK: - Launch at Login
+    
+    private func getLaunchAtLoginStatus() -> Bool {
+        return SMAppService.mainApp.status == .enabled
+    }
+    
+    private func setLaunchAtLogin(_ enabled: Bool) {
+        do {
+            if enabled {
+                try SMAppService.mainApp.register()
+            } else {
+                try SMAppService.mainApp.unregister()
+            }
+        } catch {
+            print("Failed to \(enabled ? "enable" : "disable") launch at login: \(error)")
+            // Revert the published value if operation failed
+            DispatchQueue.main.async {
+                self.launchAtLogin = self.getLaunchAtLoginStatus()
+            }
+        }
     }
 }

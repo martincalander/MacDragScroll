@@ -28,9 +28,22 @@
 		5BTEST0062F1AB49400A09C9E /* macdragscrollTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = macdragscrollTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		5B5EA24B2F1AB49400A09C9F /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 5B5EA2472F1AB49400A09C9E /* macdragscroll */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		5B5EA24A2F1AB49400A09C9E /* macdragscroll */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				5B5EA24B2F1AB49400A09C9F /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
+			);
 			path = macdragscroll;
 			sourceTree = "<group>";
 		};

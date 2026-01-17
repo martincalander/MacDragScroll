@@ -135,19 +135,35 @@ class SettingsManager: ObservableObject {
     }
     
     @Published var scrollSpeed: Double {
-        didSet { defaults.set(scrollSpeed, forKey: scrollSpeedKey) }
+        didSet {
+            let clamped = min(max(scrollSpeed, 0.5), 5.0)
+            if clamped != scrollSpeed { scrollSpeed = clamped }
+            defaults.set(scrollSpeed, forKey: scrollSpeedKey)
+        }
     }
-    
+
     @Published var deadZoneRadius: Double {
-        didSet { defaults.set(deadZoneRadius, forKey: deadZoneRadiusKey) }
+        didSet {
+            let clamped = min(max(deadZoneRadius, 5.0), 50.0)
+            if clamped != deadZoneRadius { deadZoneRadius = clamped }
+            defaults.set(deadZoneRadius, forKey: deadZoneRadiusKey)
+        }
     }
-    
+
     @Published var acceleration: Double {
-        didSet { defaults.set(acceleration, forKey: accelerationKey) }
+        didSet {
+            let clamped = min(max(acceleration, 1.0), 3.0)
+            if clamped != acceleration { acceleration = clamped }
+            defaults.set(acceleration, forKey: accelerationKey)
+        }
     }
-    
+
     @Published var overlayOpacity: Double {
-        didSet { defaults.set(overlayOpacity, forKey: overlayOpacityKey) }
+        didSet {
+            let clamped = min(max(overlayOpacity, 0.2), 1.0)
+            if clamped != overlayOpacity { overlayOpacity = clamped }
+            defaults.set(overlayOpacity, forKey: overlayOpacityKey)
+        }
     }
     
     @Published var triggerConfig: TriggerConfig {
@@ -168,10 +184,20 @@ class SettingsManager: ObservableObject {
         self.isEnabled = defaults.bool(forKey: isEnabledKey)
         self.animationsEnabled = defaults.bool(forKey: animationsEnabledKey)
         self.excludedApps = defaults.stringArray(forKey: excludedAppsKey) ?? []
-        self.scrollSpeed = defaults.double(forKey: scrollSpeedKey)
-        self.deadZoneRadius = defaults.double(forKey: deadZoneRadiusKey)
-        self.acceleration = defaults.double(forKey: accelerationKey)
-        self.overlayOpacity = defaults.object(forKey: overlayOpacityKey) as? Double ?? 1.0
+
+        // Load and clamp values to valid ranges (protects against corrupted UserDefaults)
+        let loadedSpeed = defaults.double(forKey: scrollSpeedKey)
+        self.scrollSpeed = min(max(loadedSpeed, 0.5), 5.0)
+
+        let loadedDeadZone = defaults.double(forKey: deadZoneRadiusKey)
+        self.deadZoneRadius = min(max(loadedDeadZone, 5.0), 50.0)
+
+        let loadedAcceleration = defaults.double(forKey: accelerationKey)
+        self.acceleration = min(max(loadedAcceleration, 1.0), 3.0)
+
+        let loadedOpacity = defaults.object(forKey: overlayOpacityKey) as? Double ?? 1.0
+        self.overlayOpacity = min(max(loadedOpacity, 0.2), 1.0)
+
         self.triggerConfig = Self.loadTriggerConfig(from: defaults)
         
         // Check actual launch at login status from system

@@ -318,14 +318,17 @@ class MouseMonitor {
         let scrollDeltaX = Int32(round(normalizedX * intensity))
         
         guard scrollDeltaX != 0 || scrollDeltaY != 0 else { return }
-        
-        let event = CGEvent(scrollWheelEvent2Source: nil,
-                           units: .pixel,
-                           wheelCount: 2,
-                           wheel1: scrollDeltaY,
-                           wheel2: scrollDeltaX,
-                           wheel3: 0)
-        
-        event?.post(tap: .cghidEventTap)
+
+        guard let event = CGEvent(scrollWheelEvent2Source: nil,
+                                  units: .pixel,
+                                  wheelCount: 2,
+                                  wheel1: scrollDeltaY,
+                                  wheel2: scrollDeltaX,
+                                  wheel3: 0) else {
+            // CGEvent creation failed - this can happen in rare system conditions
+            return
+        }
+
+        event.post(tap: .cghidEventTap)
     }
 }

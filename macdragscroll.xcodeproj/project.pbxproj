@@ -6,8 +6,26 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		5BTEST0012F1AB49400A09C9E /* SettingsManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BTEST0022F1AB49400A09C9E /* SettingsManagerTests.swift */; };
+		5BTEST0032F1AB49400A09C9E /* ScrollCalculationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BTEST0042F1AB49400A09C9E /* ScrollCalculationTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		5BTEST0052F1AB49400A09C9E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5B5EA2402F1AB49400A09C9E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5B5EA2472F1AB49400A09C9E;
+			remoteInfo = macdragscroll;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		5B5EA2482F1AB49400A09C9E /* macdragscroll.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = macdragscroll.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5BTEST0062F1AB49400A09C9E /* macdragscrollTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = macdragscrollTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5BTEST0022F1AB49400A09C9E /* SettingsManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManagerTests.swift; sourceTree = "<group>"; };
+		5BTEST0042F1AB49400A09C9E /* ScrollCalculationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollCalculationTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -26,6 +44,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5BTEST0072F1AB49400A09C9E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -33,6 +58,7 @@
 			isa = PBXGroup;
 			children = (
 				5B5EA24A2F1AB49400A09C9E /* macdragscroll */,
+				5BTEST0082F1AB49400A09C9E /* macdragscrollTests */,
 				5B5EA2492F1AB49400A09C9E /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,8 +67,18 @@
 			isa = PBXGroup;
 			children = (
 				5B5EA2482F1AB49400A09C9E /* macdragscroll.app */,
+				5BTEST0062F1AB49400A09C9E /* macdragscrollTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		5BTEST0082F1AB49400A09C9E /* macdragscrollTests */ = {
+			isa = PBXGroup;
+			children = (
+				5BTEST0022F1AB49400A09C9E /* SettingsManagerTests.swift */,
+				5BTEST0042F1AB49400A09C9E /* ScrollCalculationTests.swift */,
+			);
+			path = macdragscrollTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -70,6 +106,24 @@
 			productReference = 5B5EA2482F1AB49400A09C9E /* macdragscroll.app */;
 			productType = "com.apple.product-type.application";
 		};
+		5BTEST0092F1AB49400A09C9E /* macdragscrollTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5BTEST0102F1AB49500A09C9E /* Build configuration list for PBXNativeTarget "macdragscrollTests" */;
+			buildPhases = (
+				5BTEST0112F1AB49400A09C9E /* Sources */,
+				5BTEST0072F1AB49400A09C9E /* Frameworks */,
+				5BTEST0122F1AB49400A09C9E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5BTEST0132F1AB49400A09C9E /* PBXTargetDependency */,
+			);
+			name = macdragscrollTests;
+			productName = macdragscrollTests;
+			productReference = 5BTEST0062F1AB49400A09C9E /* macdragscrollTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -82,6 +136,10 @@
 				TargetAttributes = {
 					5B5EA2472F1AB49400A09C9E = {
 						CreatedOnToolsVersion = 26.2;
+					};
+					5BTEST0092F1AB49400A09C9E = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = 5B5EA2472F1AB49400A09C9E;
 					};
 				};
 			};
@@ -102,12 +160,20 @@
 			projectRoot = "";
 			targets = (
 				5B5EA2472F1AB49400A09C9E /* macdragscroll */,
+				5BTEST0092F1AB49400A09C9E /* macdragscrollTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		5B5EA2462F1AB49400A09C9E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5BTEST0122F1AB49400A09C9E /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -124,7 +190,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5BTEST0112F1AB49400A09C9E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5BTEST0012F1AB49400A09C9E /* SettingsManagerTests.swift in Sources */,
+				5BTEST0032F1AB49400A09C9E /* ScrollCalculationTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		5BTEST0132F1AB49400A09C9E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5B5EA2472F1AB49400A09C9E /* macdragscroll */;
+			targetProxy = 5BTEST0052F1AB49400A09C9E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		5B5EA2512F1AB49500A09C9E /* Debug */ = {
@@ -315,6 +398,46 @@
 			};
 			name = Release;
 		};
+		5BTEST0142F1AB49500A09C9E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K59U5BDYA9;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.martincalander.macdragscrollTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/macdragscroll.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/macdragscroll";
+			};
+			name = Debug;
+		};
+		5BTEST0152F1AB49500A09C9E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K59U5BDYA9;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.martincalander.macdragscrollTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/macdragscroll.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/macdragscroll";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -332,6 +455,15 @@
 			buildConfigurations = (
 				5B5EA2542F1AB49500A09C9E /* Debug */,
 				5B5EA2552F1AB49500A09C9E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5BTEST0102F1AB49500A09C9E /* Build configuration list for PBXNativeTarget "macdragscrollTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5BTEST0142F1AB49500A09C9E /* Debug */,
+				5BTEST0152F1AB49500A09C9E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

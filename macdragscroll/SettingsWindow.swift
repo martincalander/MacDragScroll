@@ -23,6 +23,7 @@ struct MenuBarSettingsView: View {
     @ObservedObject var settings = SettingsManager.shared
     @ObservedObject var permissionState = AppDelegate.permissionState
     @State private var showingAppPicker = false
+    @State private var capturedFrontmostBundleId: String? = nil
     
     private var hasPermission: Bool {
         permissionState.hasAccessibilityPermission
@@ -89,6 +90,7 @@ struct MenuBarSettingsView: View {
         .sheet(isPresented: $showingAppPicker) {
             AppPickerView(
                 excludedApps: settings.excludedApps,
+                frontmostBundleId: capturedFrontmostBundleId,
                 onAdd: { settings.addExcludedApp($0) },
                 onDismiss: { showingAppPicker = false }
             )
@@ -236,7 +238,11 @@ struct MenuBarSettingsView: View {
                         Text(NSLocalizedString("excluded_apps", comment: "Excluded Apps section"))
                             .font(.system(size: 12))
                         Spacer()
-                        Button(action: { showingAppPicker = true }) {
+                        Button(action: {
+                            // Capture frontmost app BEFORE opening the picker
+                            capturedFrontmostBundleId = SettingsManager.shared.getFrontmostAppBundleId()
+                            showingAppPicker = true
+                        }) {
                             Image(systemName: "plus.circle.fill")
                                 .font(.system(size: 14))
                                 .foregroundColor(.accentColor)
@@ -381,17 +387,82 @@ struct CompactAppRow: View {
     }
 }
 
+// MARK: - Skeleton Shimmer Effect
+
+struct ShimmerModifier: ViewModifier {
+    @State private var phase: CGFloat = 0
+    
+    func body(content: Content) -> some View {
+        content
+            .overlay(
+                GeometryReader { geometry in
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color.clear,
+                            Color.white.opacity(0.4),
+                            Color.clear
+                        ]),
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                    .frame(width: geometry.size.width * 0.6)
+                    .offset(x: -geometry.size.width * 0.3 + (geometry.size.width * 1.6) * phase)
+                }
+            )
+            .mask(content)
+            .onAppear {
+                withAnimation(
+                    Animation.linear(duration: 1.2)
+                        .repeatForever(autoreverses: false)
+                ) {
+                    phase = 1
+                }
+            }
+    }
+}
+
+extension View {
+    func shimmer() -> some View {
+        modifier(ShimmerModifier())
+    }
+}
+
+// MARK: - Skeleton Row
+
+struct SkeletonAppRow: View {
+    var body: some View {
+        HStack(spacing: 10) {
+            // Icon placeholder
+            RoundedRectangle(cornerRadius: 4)
+                .fill(Color(nsColor: .separatorColor).opacity(0.3))
+                .frame(width: 20, height: 20)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                // Name placeholder
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(Color(nsColor: .separatorColor).opacity(0.3))
+                    .frame(width: CGFloat.random(in: 80...140), height: 12)
+            }
+            
+            Spacer()
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .shimmer()
+    }
+}
+
 // MARK: - App Picker View
 
 struct AppPickerView: View {
     let excludedApps: [String]
+    let frontmostBundleId: String?
     let onAdd: (String) -> Void
     let onDismiss: () -> Void
     
     @State private var apps: [(name: String, bundleId: String, icon: NSImage?)] = []
     @State private var searchText = ""
     @State private var isLoading = true
-    @State private var frontmostBundleId: String? = nil
     
     var filteredApps: [(name: String, bundleId: String, icon: NSImage?)] {
         let available = apps.filter { !excludedApps.contains($0.bundleId) }
@@ -432,10 +503,14 @@ struct AppPickerView: View {
             
             // App List
             if isLoading {
-                Spacer()
-                ProgressView()
-                    .scaleEffect(0.6)
-                Spacer()
+                ScrollView {
+                    LazyVStack(spacing: 2) {
+                        ForEach(0..<10, id: \.self) { _ in
+                            SkeletonAppRow()
+                        }
+                    }
+                    .padding(8)
+                }
             } else if filteredApps.isEmpty {
                 Spacer()
                 VStack(spacing: 6) {
@@ -462,6 +537,7 @@ struct AppPickerView: View {
                     }
                     .padding(8)
                 }
+                .transition(.opacity.combined(with: .scale(scale: 0.98)))
             }
             
             Divider()
@@ -480,15 +556,13 @@ struct AppPickerView: View {
     }
     
     private func loadApps() {
-        // Capture frontmost app before opening sheet (it's likely the app user wants to exclude)
-        let frontmost = SettingsManager.shared.getFrontmostAppBundleId()
-        
         DispatchQueue.global(qos: .userInitiated).async {
-            let loadedApps = SettingsManager.shared.getInstalledApps(frontmostBundleId: frontmost)
+            let loadedApps = SettingsManager.shared.getInstalledApps(frontmostBundleId: frontmostBundleId)
             DispatchQueue.main.async {
-                frontmostBundleId = frontmost
-                apps = loadedApps
-                isLoading = false
+                withAnimation(.easeOut(duration: 0.25)) {
+                    apps = loadedApps
+                    isLoading = false
+                }
             }
         }
     }

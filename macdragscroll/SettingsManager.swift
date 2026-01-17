@@ -109,8 +109,26 @@ class SettingsManager: ObservableObject {
            bundleId != Bundle.main.bundleIdentifier {
             return bundleId
         }
-        // If frontmost is our app, try to get the previously active app
-        // by looking at running apps
+        
+        // If frontmost is our app, try to find the most recently active app
+        // by looking at running apps with windows (menuBarOwningApplication is another option)
+        if let menuBarApp = NSWorkspace.shared.menuBarOwningApplication,
+           let bundleId = menuBarApp.bundleIdentifier,
+           bundleId != Bundle.main.bundleIdentifier {
+            return bundleId
+        }
+        
+        // Fallback: find any regular app that isn't ours
+        let runningApps = NSWorkspace.shared.runningApplications
+        for app in runningApps {
+            if app.activationPolicy == .regular,
+               let bundleId = app.bundleIdentifier,
+               bundleId != Bundle.main.bundleIdentifier,
+               app.isActive || app.ownsMenuBar {
+                return bundleId
+            }
+        }
+        
         return nil
     }
     

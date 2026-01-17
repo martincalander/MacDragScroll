@@ -45,3 +45,44 @@
 "no_apps_found" = "未找到应用";
 "done" = "完成";
 "current" = "当前";
+
+// Trigger Button
+"trigger_button" = "触发按钮";
+"trigger_middle_click" = "中键点击";
+"trigger_right_click" = "右键点击";
+"trigger_left_click" = "左键点击";
+"trigger_button_n" = "按钮 %d";
+"trigger_command_click" = "Command + 点击";
+"trigger_option_click" = "Option + 点击";
+"trigger_control_click" = "Control + 点击";
+"trigger_shift_click" = "Shift + 点击";
+"trigger_middle_short" = "中键";
+"trigger_right_short" = "右键";
+"recording" = "录制中...";
+
+// Reset
+"reset_to_defaults" = "恢复默认设置";
+"reset_confirm_title" = "重置设置？";
+"reset_confirm_message" = "这将把所有设置恢复为默认值。此操作无法撤销。";
+"reset" = "重置";
+"cancel" = "取消";
+
+// Tooltips
+"tooltip_speed" = "滚动速度。数值越高，滚动越快。";
+"tooltip_acceleration" = "拖动距离越远，滚动加速越多。";
+"tooltip_dead_zone" = "点击位置周围不会滚动的区域。有助于精确控制。";
+"tooltip_opacity" = "滚动指示器的透明度。";
+"tooltip_trigger" = "点击以录制新的鼠标按钮+修饰键组合来触发滚动。";
+"tooltip_show_indicator" = "拖拽滚动激活时显示视觉反馈。";
+"tooltip_launch_at_login" = "登录时自动启动 Mac Drag Scroll。";
+"tooltip_excluded_apps" = "将禁用拖拽滚动的应用程序。";
+"tooltip_reset" = "将所有设置重置为默认值。";
+
+// Crash Handler
+"crash_detected_title" = "Mac Drag Scroll 崩溃了";
+"crash_detected_message" = "应用在上次会话中意外崩溃。您可以复制崩溃报告以帮助诊断问题。";
+"copy_report" = "复制报告";
+"dismiss" = "关闭";
+"error_occurred_title" = "发生错误";
+"error_occurred_message" = "在 %@ 时发生错误:\n\n%@";
+"fatal_error_title" = "致命错误";

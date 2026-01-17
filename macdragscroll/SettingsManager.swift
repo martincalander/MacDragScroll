@@ -10,6 +10,96 @@ import Combine
 import AppKit
 import ServiceManagement
 
+// MARK: - Scroll Trigger Configuration
+
+struct TriggerConfig: Codable, Equatable {
+    var mouseButton: Int  // 0 = left, 1 = right, 2 = middle, 3+ = other buttons
+    var requiresCommand: Bool
+    var requiresOption: Bool
+    var requiresControl: Bool
+    var requiresShift: Bool
+    
+    // Default: middle click
+    static let `default` = TriggerConfig(
+        mouseButton: 2,
+        requiresCommand: false,
+        requiresOption: false,
+        requiresControl: false,
+        requiresShift: false
+    )
+    
+    var hasModifiers: Bool {
+        requiresCommand || requiresOption || requiresControl || requiresShift
+    }
+    
+    var modifierFlags: NSEvent.ModifierFlags {
+        var flags: NSEvent.ModifierFlags = []
+        if requiresCommand { flags.insert(.command) }
+        if requiresOption { flags.insert(.option) }
+        if requiresControl { flags.insert(.control) }
+        if requiresShift { flags.insert(.shift) }
+        return flags
+    }
+    
+    var displayName: String {
+        var parts: [String] = []
+        
+        // Add modifier symbols
+        if requiresControl { parts.append("⌃") }
+        if requiresOption { parts.append("⌥") }
+        if requiresShift { parts.append("⇧") }
+        if requiresCommand { parts.append("⌘") }
+        
+        // Add mouse button name
+        let buttonName: String
+        switch mouseButton {
+        case 0:
+            buttonName = NSLocalizedString("trigger_left_click", comment: "Left Click")
+        case 1:
+            buttonName = NSLocalizedString("trigger_right_click", comment: "Right Click")
+        case 2:
+            buttonName = NSLocalizedString("trigger_middle_click", comment: "Middle Click")
+        default:
+            buttonName = String(format: NSLocalizedString("trigger_button_n", comment: "Button %d"), mouseButton)
+        }
+        
+        if parts.isEmpty {
+            return buttonName
+        } else {
+            parts.append(buttonName)
+            return parts.joined(separator: " + ")
+        }
+    }
+    
+    func matches(button: Int, modifiers: NSEvent.ModifierFlags) -> Bool {
+        guard button == mouseButton else { return false }
+        
+        // Check each required modifier
+        if requiresCommand && !modifiers.contains(.command) { return false }
+        if requiresOption && !modifiers.contains(.option) { return false }
+        if requiresControl && !modifiers.contains(.control) { return false }
+        if requiresShift && !modifiers.contains(.shift) { return false }
+        
+        // If trigger requires no modifiers, make sure none are pressed
+        // (except for middle/right click which can be pressed with modifiers)
+        if !hasModifiers && mouseButton == 0 {
+            // Left click without modifiers is too easy to trigger accidentally
+            // so we require at least one modifier for left click
+            return false
+        }
+        
+        return true
+    }
+    
+    func modifiersStillHeld(_ modifiers: NSEvent.ModifierFlags) -> Bool {
+        if requiresCommand && !modifiers.contains(.command) { return false }
+        if requiresOption && !modifiers.contains(.option) { return false }
+        if requiresControl && !modifiers.contains(.control) { return false }
+        if requiresShift && !modifiers.contains(.shift) { return false }
+        return true
+    }
+}
+
 class SettingsManager: ObservableObject {
     static let shared = SettingsManager()
     
@@ -23,6 +113,7 @@ class SettingsManager: ObservableObject {
     private let deadZoneRadiusKey = "deadZoneRadius"
     private let accelerationKey = "acceleration"
     private let overlayOpacityKey = "overlayOpacity"
+    private let triggerConfigKey = "triggerConfig"
     
     // Launch at Login using SMAppService (macOS 13+)
     @Published var launchAtLogin: Bool {
@@ -59,6 +150,10 @@ class SettingsManager: ObservableObject {
         didSet { defaults.set(overlayOpacity, forKey: overlayOpacityKey) }
     }
     
+    @Published var triggerConfig: TriggerConfig {
+        didSet { saveTriggerConfig() }
+    }
+    
     private init() {
         defaults.register(defaults: [
             isEnabledKey: true,
@@ -77,9 +172,26 @@ class SettingsManager: ObservableObject {
         self.deadZoneRadius = defaults.double(forKey: deadZoneRadiusKey)
         self.acceleration = defaults.double(forKey: accelerationKey)
         self.overlayOpacity = defaults.object(forKey: overlayOpacityKey) as? Double ?? 1.0
+        self.triggerConfig = Self.loadTriggerConfig(from: defaults)
         
         // Check actual launch at login status from system
         self.launchAtLogin = SMAppService.mainApp.status == .enabled
+    }
+    
+    // MARK: - Trigger Config Persistence
+    
+    private static func loadTriggerConfig(from defaults: UserDefaults) -> TriggerConfig {
+        guard let data = defaults.data(forKey: "triggerConfig"),
+              let config = try? JSONDecoder().decode(TriggerConfig.self, from: data) else {
+            return .default
+        }
+        return config
+    }
+    
+    private func saveTriggerConfig() {
+        if let data = try? JSONEncoder().encode(triggerConfig) {
+            defaults.set(data, forKey: triggerConfigKey)
+        }
     }
     
     // Check if app is excluded by bundle identifier
@@ -181,6 +293,20 @@ class SettingsManager: ObservableObject {
     
     func removeExcludedApp(_ bundleId: String) {
         excludedApps.removeAll { $0 == bundleId }
+    }
+    
+    // MARK: - Reset to Defaults
+    
+    func resetToDefaults() {
+        isEnabled = true
+        animationsEnabled = true
+        scrollSpeed = 2.0
+        deadZoneRadius = 20.0
+        acceleration = 1.8
+        overlayOpacity = 1.0
+        triggerConfig = .default
+        excludedApps = []
+        // Note: launchAtLogin is not reset as it's a system preference
     }
     
     // MARK: - Launch at Login

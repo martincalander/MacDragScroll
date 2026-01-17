@@ -91,6 +91,20 @@ class ScrollOverlayWindow: NSWindow {
         guard SettingsManager.shared.animationsEnabled else { return }
         overlayView.animateClickBounce()
     }
+    
+    func setPaused(_ paused: Bool) {
+        let targetOpacity = paused ? SettingsManager.shared.overlayOpacity * 0.3 : SettingsManager.shared.overlayOpacity
+        
+        if SettingsManager.shared.animationsEnabled {
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.15
+                context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                self.animator().alphaValue = targetOpacity
+            }
+        } else {
+            self.alphaValue = targetOpacity
+        }
+    }
 }
 
 class ScrollOverlayView: NSView {

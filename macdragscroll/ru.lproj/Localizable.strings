@@ -45,3 +45,44 @@
 "no_apps_found" = "Приложения не найдены";
 "done" = "Готово";
 "current" = "Текущее";
+
+// Trigger Button
+"trigger_button" = "Кнопка запуска";
+"trigger_middle_click" = "Средняя кнопка";
+"trigger_right_click" = "Правая кнопка";
+"trigger_left_click" = "Левая кнопка";
+"trigger_button_n" = "Кнопка %d";
+"trigger_command_click" = "Command + клик";
+"trigger_option_click" = "Option + клик";
+"trigger_control_click" = "Control + клик";
+"trigger_shift_click" = "Shift + клик";
+"trigger_middle_short" = "Средняя";
+"trigger_right_short" = "Правая";
+"recording" = "Запись...";
+
+// Reset
+"reset_to_defaults" = "Сбросить настройки";
+"reset_confirm_title" = "Сбросить настройки?";
+"reset_confirm_message" = "Все настройки будут сброшены к значениям по умолчанию. Это действие нельзя отменить.";
+"reset" = "Сбросить";
+"cancel" = "Отмена";
+
+// Tooltips
+"tooltip_speed" = "Скорость прокрутки. Большие значения = быстрее прокрутка.";
+"tooltip_acceleration" = "Насколько ускоряется прокрутка при отдалении от начальной точки.";
+"tooltip_dead_zone" = "Область вокруг точки клика, где прокрутка не происходит. Помогает с точностью.";
+"tooltip_opacity" = "Прозрачность индикатора прокрутки.";
+"tooltip_trigger" = "Нажмите, чтобы записать новую комбинацию кнопки мыши + модификатора для активации прокрутки.";
+"tooltip_show_indicator" = "Показывать визуальную обратную связь при активной прокрутке перетаскиванием.";
+"tooltip_launch_at_login" = "Автоматически запускать Mac Drag Scroll при входе в систему.";
+"tooltip_excluded_apps" = "Приложения, в которых прокрутка перетаскиванием будет отключена.";
+"tooltip_reset" = "Сбросить все настройки к значениям по умолчанию.";
+
+// Crash Handler
+"crash_detected_title" = "Mac Drag Scroll аварийно завершился";
+"crash_detected_message" = "Приложение неожиданно завершилось во время последнего сеанса. Вы можете скопировать отчёт об ошибке для диагностики проблемы.";
+"copy_report" = "Копировать отчёт";
+"dismiss" = "Закрыть";
+"error_occurred_title" = "Произошла ошибка";
+"error_occurred_message" = "Произошла ошибка при %@:\n\n%@";
+"fatal_error_title" = "Критическая ошибка";

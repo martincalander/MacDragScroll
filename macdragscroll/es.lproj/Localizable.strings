@@ -45,3 +45,44 @@
 "no_apps_found" = "No se encontraron apps";
 "done" = "Listo";
 "current" = "Actual";
+
+// Trigger Button
+"trigger_button" = "Botón de activación";
+"trigger_middle_click" = "Clic central";
+"trigger_right_click" = "Clic derecho";
+"trigger_left_click" = "Clic izquierdo";
+"trigger_button_n" = "Botón %d";
+"trigger_command_click" = "Comando + Clic";
+"trigger_option_click" = "Opción + Clic";
+"trigger_control_click" = "Control + Clic";
+"trigger_shift_click" = "Mayús + Clic";
+"trigger_middle_short" = "Central";
+"trigger_right_short" = "Derecho";
+"recording" = "Grabando...";
+
+// Reset
+"reset_to_defaults" = "Restablecer valores";
+"reset_confirm_title" = "¿Restablecer configuración?";
+"reset_confirm_message" = "Esto restablecerá todas las configuraciones a sus valores predeterminados. Esta acción no se puede deshacer.";
+"reset" = "Restablecer";
+"cancel" = "Cancelar";
+
+// Tooltips
+"tooltip_speed" = "Qué tan rápido se desplaza. Valores más altos = desplazamiento más rápido.";
+"tooltip_acceleration" = "Cuánto se acelera el desplazamiento cuanto más lejos arrastras del punto de inicio.";
+"tooltip_dead_zone" = "El área alrededor del punto de clic donde no ocurre desplazamiento. Ayuda con la precisión.";
+"tooltip_opacity" = "Transparencia del indicador de desplazamiento.";
+"tooltip_trigger" = "Haz clic para grabar una nueva combinación de botón + modificador para activar el desplazamiento.";
+"tooltip_show_indicator" = "Mostrar retroalimentación visual cuando el desplazamiento por arrastre está activo.";
+"tooltip_launch_at_login" = "Iniciar Mac Drag Scroll automáticamente al iniciar sesión.";
+"tooltip_excluded_apps" = "Apps donde el desplazamiento por arrastre estará desactivado.";
+"tooltip_reset" = "Restablecer todas las configuraciones a los valores predeterminados.";
+
+// Crash Handler
+"crash_detected_title" = "Mac Drag Scroll se bloqueó";
+"crash_detected_message" = "La app se bloqueó inesperadamente durante la última sesión. Puedes copiar el informe de bloqueo para ayudar a diagnosticar el problema.";
+"copy_report" = "Copiar informe";
+"dismiss" = "Descartar";
+"error_occurred_title" = "Ocurrió un error";
+"error_occurred_message" = "Ocurrió un error durante %@:\n\n%@";
+"fatal_error_title" = "Error fatal";

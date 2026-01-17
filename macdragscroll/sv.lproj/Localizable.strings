@@ -45,3 +45,44 @@
 "no_apps_found" = "Inga appar hittades";
 "done" = "Klar";
 "current" = "Aktiv";
+
+// Trigger Button
+"trigger_button" = "Utlösarknapp";
+"trigger_middle_click" = "Mittenklick";
+"trigger_right_click" = "Högerklick";
+"trigger_left_click" = "Vänsterklick";
+"trigger_button_n" = "Knapp %d";
+"trigger_command_click" = "Kommando + Klick";
+"trigger_option_click" = "Option + Klick";
+"trigger_control_click" = "Kontroll + Klick";
+"trigger_shift_click" = "Skift + Klick";
+"trigger_middle_short" = "Mitten";
+"trigger_right_short" = "Höger";
+"recording" = "Spelar in...";
+
+// Reset
+"reset_to_defaults" = "Återställ till standard";
+"reset_confirm_title" = "Återställ inställningar?";
+"reset_confirm_message" = "Detta återställer alla inställningar till standardvärden. Denna åtgärd kan inte ångras.";
+"reset" = "Återställ";
+"cancel" = "Avbryt";
+
+// Tooltips
+"tooltip_speed" = "Hur snabbt scrollningen rör sig. Högre värden = snabbare scrollning.";
+"tooltip_acceleration" = "Hur mycket scrollningen accelererar ju längre du drar från startpunkten.";
+"tooltip_dead_zone" = "Området runt klickpunkten där ingen scrollning sker. Hjälper med precision.";
+"tooltip_opacity" = "Genomskinlighet för scroll-indikatorn.";
+"tooltip_trigger" = "Klicka för att spela in en ny musknapp + modifierarkombination för att aktivera scrollning.";
+"tooltip_show_indicator" = "Visa visuell feedback när drag-scrollning är aktiv.";
+"tooltip_launch_at_login" = "Starta Mac Drag Scroll automatiskt vid inloggning.";
+"tooltip_excluded_apps" = "Appar där drag-scrollning kommer att inaktiveras.";
+"tooltip_reset" = "Återställ alla inställningar till standardvärden.";
+
+// Crash Handler
+"crash_detected_title" = "Mac Drag Scroll kraschade";
+"crash_detected_message" = "Appen kraschade oväntat under föregående session. Du kan kopiera kraschrapprten för att hjälpa diagnostisera problemet.";
+"copy_report" = "Kopiera rapport";
+"dismiss" = "Avfärda";
+"error_occurred_title" = "Ett fel uppstod";
+"error_occurred_message" = "Ett fel uppstod under %@:\n\n%@";
+"fatal_error_title" = "Kritiskt fel";

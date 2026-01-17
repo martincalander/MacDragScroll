@@ -45,3 +45,44 @@
 "no_apps_found" = "アプリが見つかりません";
 "done" = "完了";
 "current" = "現在";
+
+// Trigger Button
+"trigger_button" = "トリガーボタン";
+"trigger_middle_click" = "中クリック";
+"trigger_right_click" = "右クリック";
+"trigger_left_click" = "左クリック";
+"trigger_button_n" = "ボタン %d";
+"trigger_command_click" = "Command + クリック";
+"trigger_option_click" = "Option + クリック";
+"trigger_control_click" = "Control + クリック";
+"trigger_shift_click" = "Shift + クリック";
+"trigger_middle_short" = "中央";
+"trigger_right_short" = "右";
+"recording" = "記録中...";
+
+// Reset
+"reset_to_defaults" = "デフォルトに戻す";
+"reset_confirm_title" = "設定をリセットしますか？";
+"reset_confirm_message" = "すべての設定がデフォルト値にリセットされます。この操作は元に戻せません。";
+"reset" = "リセット";
+"cancel" = "キャンセル";
+
+// Tooltips
+"tooltip_speed" = "スクロールの速度。値が高いほど速くスクロールします。";
+"tooltip_acceleration" = "開始点から離れるほどスクロールが加速する度合い。";
+"tooltip_dead_zone" = "クリック点周辺でスクロールが発生しない領域。精度向上に役立ちます。";
+"tooltip_opacity" = "スクロールインジケーターの透明度。";
+"tooltip_trigger" = "クリックして、スクロールを開始する新しいマウスボタン+修飾キーの組み合わせを記録します。";
+"tooltip_show_indicator" = "ドラッグスクロールがアクティブな時に視覚的フィードバックを表示します。";
+"tooltip_launch_at_login" = "ログイン時にMac Drag Scrollを自動的に起動します。";
+"tooltip_excluded_apps" = "ドラッグスクロールが無効になるアプリ。";
+"tooltip_reset" = "すべての設定をデフォルト値にリセットします。";
+
+// Crash Handler
+"crash_detected_title" = "Mac Drag Scrollがクラッシュしました";
+"crash_detected_message" = "前回のセッション中にアプリが予期せずクラッシュしました。問題の診断に役立てるため、クラッシュレポートをコピーできます。";
+"copy_report" = "レポートをコピー";
+"dismiss" = "閉じる";
+"error_occurred_title" = "エラーが発生しました";
+"error_occurred_message" = "%@中にエラーが発生しました:\n\n%@";
+"fatal_error_title" = "致命的なエラー";

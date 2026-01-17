@@ -45,3 +45,44 @@
 "no_apps_found" = "Aucune app trouvée";
 "done" = "Terminé";
 "current" = "Actuelle";
+
+// Trigger Button
+"trigger_button" = "Bouton déclencheur";
+"trigger_middle_click" = "Clic molette";
+"trigger_right_click" = "Clic droit";
+"trigger_left_click" = "Clic gauche";
+"trigger_button_n" = "Bouton %d";
+"trigger_command_click" = "Commande + Clic";
+"trigger_option_click" = "Option + Clic";
+"trigger_control_click" = "Contrôle + Clic";
+"trigger_shift_click" = "Maj + Clic";
+"trigger_middle_short" = "Molette";
+"trigger_right_short" = "Droit";
+"recording" = "Enregistrement...";
+
+// Reset
+"reset_to_defaults" = "Réinitialiser";
+"reset_confirm_title" = "Réinitialiser les paramètres ?";
+"reset_confirm_message" = "Tous les paramètres seront réinitialisés à leurs valeurs par défaut. Cette action est irréversible.";
+"reset" = "Réinitialiser";
+"cancel" = "Annuler";
+
+// Tooltips
+"tooltip_speed" = "Vitesse de défilement. Valeurs plus élevées = défilement plus rapide.";
+"tooltip_acceleration" = "Accélération du défilement en fonction de la distance par rapport au point de départ.";
+"tooltip_dead_zone" = "Zone autour du point de clic où aucun défilement ne se produit. Aide à la précision.";
+"tooltip_opacity" = "Transparence de l'indicateur de défilement.";
+"tooltip_trigger" = "Cliquez pour enregistrer une nouvelle combinaison bouton + modificateur pour déclencher le défilement.";
+"tooltip_show_indicator" = "Afficher un retour visuel lorsque le défilement par glissement est actif.";
+"tooltip_launch_at_login" = "Démarrer Mac Drag Scroll automatiquement à la connexion.";
+"tooltip_excluded_apps" = "Applications où le défilement par glissement sera désactivé.";
+"tooltip_reset" = "Réinitialiser tous les paramètres aux valeurs par défaut.";
+
+// Crash Handler
+"crash_detected_title" = "Mac Drag Scroll a planté";
+"crash_detected_message" = "L'application a planté de manière inattendue lors de la dernière session. Vous pouvez copier le rapport de plantage pour aider au diagnostic.";
+"copy_report" = "Copier le rapport";
+"dismiss" = "Ignorer";
+"error_occurred_title" = "Une erreur s'est produite";
+"error_occurred_message" = "Une erreur s'est produite lors de %@:\n\n%@";
+"fatal_error_title" = "Erreur fatale";

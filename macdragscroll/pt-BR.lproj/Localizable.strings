@@ -45,3 +45,44 @@
 "no_apps_found" = "Nenhum app encontrado";
 "done" = "Concluído";
 "current" = "Atual";
+
+// Trigger Button
+"trigger_button" = "Botão de Ativação";
+"trigger_middle_click" = "Clique do Meio";
+"trigger_right_click" = "Clique Direito";
+"trigger_left_click" = "Clique Esquerdo";
+"trigger_button_n" = "Botão %d";
+"trigger_command_click" = "Command + Clique";
+"trigger_option_click" = "Option + Clique";
+"trigger_control_click" = "Control + Clique";
+"trigger_shift_click" = "Shift + Clique";
+"trigger_middle_short" = "Meio";
+"trigger_right_short" = "Direito";
+"recording" = "Gravando...";
+
+// Reset
+"reset_to_defaults" = "Restaurar Padrões";
+"reset_confirm_title" = "Restaurar Configurações?";
+"reset_confirm_message" = "Isso restaurará todas as configurações para os valores padrão. Esta ação não pode ser desfeita.";
+"reset" = "Restaurar";
+"cancel" = "Cancelar";
+
+// Tooltips
+"tooltip_speed" = "Velocidade da rolagem. Valores maiores = rolagem mais rápida.";
+"tooltip_acceleration" = "Quanto a rolagem acelera conforme você arrasta mais longe do ponto inicial.";
+"tooltip_dead_zone" = "A área ao redor do ponto de clique onde não ocorre rolagem. Ajuda na precisão.";
+"tooltip_opacity" = "Transparência do indicador de rolagem.";
+"tooltip_trigger" = "Clique para gravar uma nova combinação de botão + modificador para ativar a rolagem.";
+"tooltip_show_indicator" = "Mostrar feedback visual quando a rolagem por arrasto estiver ativa.";
+"tooltip_launch_at_login" = "Iniciar o Mac Drag Scroll automaticamente ao fazer login.";
+"tooltip_excluded_apps" = "Apps onde a rolagem por arrasto será desativada.";
+"tooltip_reset" = "Restaurar todas as configurações para os valores padrão.";
+
+// Crash Handler
+"crash_detected_title" = "Mac Drag Scroll travou";
+"crash_detected_message" = "O app travou inesperadamente durante a última sessão. Você pode copiar o relatório de travamento para ajudar a diagnosticar o problema.";
+"copy_report" = "Copiar Relatório";
+"dismiss" = "Dispensar";
+"error_occurred_title" = "Ocorreu um Erro";
+"error_occurred_message" = "Ocorreu um erro durante %@:\n\n%@";
+"fatal_error_title" = "Erro Fatal";

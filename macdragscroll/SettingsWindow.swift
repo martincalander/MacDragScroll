@@ -24,6 +24,7 @@ struct MenuBarSettingsView: View {
     @ObservedObject var permissionState = AppDelegate.permissionState
     @State private var showingAppPicker = false
     @State private var capturedFrontmostBundleId: String? = nil
+    @State private var showingResetConfirmation = false
     
     private var hasPermission: Bool {
         permissionState.hasAccessibilityPermission
@@ -140,7 +141,8 @@ struct MenuBarSettingsView: View {
                         value: $settings.scrollSpeed,
                         range: 0.5...5.0,
                         step: 0.5,
-                        format: "%.1fx"
+                        format: "%.1fx",
+                        tooltip: NSLocalizedString("tooltip_speed", comment: "Speed tooltip")
                     )
                     
                     SliderRow(
@@ -156,7 +158,8 @@ struct MenuBarSettingsView: View {
                             case ..<2.6: return NSLocalizedString("acceleration_high", comment: "High")
                             default: return NSLocalizedString("acceleration_max", comment: "Max")
                             }
-                        }
+                        },
+                        tooltip: NSLocalizedString("tooltip_acceleration", comment: "Acceleration tooltip")
                     )
                     
                     SliderRow(
@@ -165,7 +168,8 @@ struct MenuBarSettingsView: View {
                         value: $settings.deadZoneRadius,
                         range: 5...50,
                         step: 5,
-                        format: "%.0fpx"
+                        format: "%.0fpx",
+                        tooltip: NSLocalizedString("tooltip_dead_zone", comment: "Dead zone tooltip")
                     )
                     
                     SliderRow(
@@ -177,10 +181,30 @@ struct MenuBarSettingsView: View {
                         format: { v in
                             let pct = Int((v * 100).rounded())
                             return "\(pct)%"
-                        }
+                        },
+                        tooltip: NSLocalizedString("tooltip_opacity", comment: "Opacity tooltip")
                     )
                 }
                 .padding(12)
+                .background(Color(nsColor: .controlBackgroundColor).opacity(0.5))
+                .cornerRadius(8)
+                
+                // Trigger Button Selection
+                VStack(spacing: 8) {
+                    HStack {
+                        Image(systemName: "computermouse")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                            .frame(width: 18)
+                        Text(NSLocalizedString("trigger_button", comment: "Trigger Button setting"))
+                            .font(.system(size: 12))
+                        Spacer()
+                        TriggerCaptureButton(triggerConfig: $settings.triggerConfig)
+                    }
+                    .help(NSLocalizedString("tooltip_trigger", comment: "Trigger button tooltip"))
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
                 .background(Color(nsColor: .controlBackgroundColor).opacity(0.5))
                 .cornerRadius(8)
                 
@@ -199,6 +223,7 @@ struct MenuBarSettingsView: View {
                             .toggleStyle(.switch)
                             .controlSize(.mini)
                     }
+                    .help(NSLocalizedString("tooltip_show_indicator", comment: "Show indicator tooltip"))
                     
                     Divider()
                     
@@ -215,6 +240,7 @@ struct MenuBarSettingsView: View {
                             .toggleStyle(.switch)
                             .controlSize(.mini)
                     }
+                    .help(NSLocalizedString("tooltip_launch_at_login", comment: "Launch at login tooltip"))
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
@@ -246,6 +272,7 @@ struct MenuBarSettingsView: View {
                         }
                         .buttonStyle(.plain)
                     }
+                    .help(NSLocalizedString("tooltip_excluded_apps", comment: "Excluded apps tooltip"))
                     
                     if !settings.excludedApps.isEmpty {
                         VStack(spacing: 4) {
@@ -274,6 +301,36 @@ struct MenuBarSettingsView: View {
                 .padding(12)
                 .background(Color(nsColor: .controlBackgroundColor).opacity(0.5))
                 .cornerRadius(8)
+                
+                // Reset to Defaults Button
+                Button(action: {
+                    showingResetConfirmation = true
+                }) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "arrow.counterclockwise")
+                            .font(.system(size: 11))
+                        Text(NSLocalizedString("reset_to_defaults", comment: "Reset to Defaults button"))
+                            .font(.system(size: 11))
+                    }
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color(nsColor: .controlBackgroundColor).opacity(0.5))
+                    .cornerRadius(6)
+                }
+                .buttonStyle(.plain)
+                .help(NSLocalizedString("tooltip_reset", comment: "Reset to defaults tooltip"))
+                .alert(
+                    NSLocalizedString("reset_confirm_title", comment: "Reset confirmation title"),
+                    isPresented: $showingResetConfirmation
+                ) {
+                    Button(NSLocalizedString("cancel", comment: "Cancel button"), role: .cancel) { }
+                    Button(NSLocalizedString("reset", comment: "Reset button"), role: .destructive) {
+                        settings.resetToDefaults()
+                    }
+                } message: {
+                    Text(NSLocalizedString("reset_confirm_message", comment: "Reset confirmation message"))
+                }
             }
             .padding(12)
         }
@@ -290,8 +347,9 @@ struct SliderRow: View {
     let step: Double
     let formatString: String?
     let formatFunc: ((Double) -> String)?
+    let tooltip: String?
     
-    init(icon: String, title: String, value: Binding<Double>, range: ClosedRange<Double>, step: Double, format: String) {
+    init(icon: String, title: String, value: Binding<Double>, range: ClosedRange<Double>, step: Double, format: String, tooltip: String? = nil) {
         self.icon = icon
         self.title = title
         self._value = value
@@ -299,9 +357,10 @@ struct SliderRow: View {
         self.step = step
         self.formatString = format
         self.formatFunc = nil
+        self.tooltip = tooltip
     }
     
-    init(icon: String, title: String, value: Binding<Double>, range: ClosedRange<Double>, step: Double, format: @escaping (Double) -> String) {
+    init(icon: String, title: String, value: Binding<Double>, range: ClosedRange<Double>, step: Double, format: @escaping (Double) -> String, tooltip: String? = nil) {
         self.icon = icon
         self.title = title
         self._value = value
@@ -309,6 +368,7 @@ struct SliderRow: View {
         self.step = step
         self.formatString = nil
         self.formatFunc = format
+        self.tooltip = tooltip
     }
     
     var body: some View {
@@ -330,6 +390,7 @@ struct SliderRow: View {
                 .foregroundColor(.secondary)
                 .frame(width: 32, alignment: .trailing)
         }
+        .help(tooltip ?? "")
     }
     
     private var formattedValue: String {
@@ -798,6 +859,107 @@ struct AppPickerRow: View {
         .contentShape(Rectangle())
         .onHover { hovering in
             withAnimation(.easeOut(duration: 0.1)) { isHovered = hovering }
+        }
+    }
+}
+
+// MARK: - Trigger Capture Button
+
+struct TriggerCaptureButton: View {
+    @Binding var triggerConfig: TriggerConfig
+    @State private var isRecording = false
+    @State private var localMonitor: Any?
+    @State private var globalMonitor: Any?
+    
+    var body: some View {
+        Button(action: {
+            if isRecording {
+                stopRecording()
+            } else {
+                startRecording()
+            }
+        }) {
+            HStack(spacing: 4) {
+                if isRecording {
+                    Circle()
+                        .fill(Color.red)
+                        .frame(width: 6, height: 6)
+                    Text(NSLocalizedString("recording", comment: "Recording..."))
+                        .font(.system(size: 11))
+                } else {
+                    Text(triggerConfig.displayName)
+                        .font(.system(size: 11))
+                }
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(isRecording ? Color.red.opacity(0.15) : Color(nsColor: .controlBackgroundColor))
+            .cornerRadius(4)
+            .overlay(
+                RoundedRectangle(cornerRadius: 4)
+                    .stroke(isRecording ? Color.red.opacity(0.5) : Color.clear, lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+        .onDisappear {
+            stopRecording()
+        }
+    }
+    
+    private func startRecording() {
+        isRecording = true
+        
+        // Monitor for mouse button events
+        let eventMask: NSEvent.EventTypeMask = [
+            .leftMouseDown, .rightMouseDown, .otherMouseDown
+        ]
+        
+        // Local monitor for events in our app
+        localMonitor = NSEvent.addLocalMonitorForEvents(matching: eventMask) { event in
+            self.handleMouseEvent(event)
+            return nil // Consume the event
+        }
+        
+        // Global monitor for events outside our app
+        globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: eventMask) { event in
+            self.handleMouseEvent(event)
+        }
+    }
+    
+    private func stopRecording() {
+        isRecording = false
+        if let monitor = localMonitor {
+            NSEvent.removeMonitor(monitor)
+            localMonitor = nil
+        }
+        if let monitor = globalMonitor {
+            NSEvent.removeMonitor(monitor)
+            globalMonitor = nil
+        }
+    }
+    
+    private func handleMouseEvent(_ event: NSEvent) {
+        let button = Int(event.buttonNumber)
+        let modifiers = event.modifierFlags
+        
+        // Create new trigger config
+        var newConfig = TriggerConfig(
+            mouseButton: button,
+            requiresCommand: modifiers.contains(.command),
+            requiresOption: modifiers.contains(.option),
+            requiresControl: modifiers.contains(.control),
+            requiresShift: modifiers.contains(.shift)
+        )
+        
+        // Safety check: left click without modifiers is too easy to trigger accidentally
+        if button == 0 && !newConfig.hasModifiers {
+            // Require at least one modifier for left click
+            newConfig.requiresCommand = true
+        }
+        
+        DispatchQueue.main.async {
+            self.triggerConfig = newConfig
+            self.stopRecording()
         }
     }
 }

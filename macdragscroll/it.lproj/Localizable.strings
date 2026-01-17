@@ -45,3 +45,44 @@
 "no_apps_found" = "Nessuna app trovata";
 "done" = "Fine";
 "current" = "Attuale";
+
+// Trigger Button
+"trigger_button" = "Pulsante di attivazione";
+"trigger_middle_click" = "Clic centrale";
+"trigger_right_click" = "Clic destro";
+"trigger_left_click" = "Clic sinistro";
+"trigger_button_n" = "Pulsante %d";
+"trigger_command_click" = "Comando + Clic";
+"trigger_option_click" = "Opzione + Clic";
+"trigger_control_click" = "Controllo + Clic";
+"trigger_shift_click" = "Maiusc + Clic";
+"trigger_middle_short" = "Centrale";
+"trigger_right_short" = "Destro";
+"recording" = "Registrazione...";
+
+// Reset
+"reset_to_defaults" = "Ripristina predefiniti";
+"reset_confirm_title" = "Ripristinare le impostazioni?";
+"reset_confirm_message" = "Questo ripristinerà tutte le impostazioni ai valori predefiniti. Questa azione non può essere annullata.";
+"reset" = "Ripristina";
+"cancel" = "Annulla";
+
+// Tooltips
+"tooltip_speed" = "Velocità di scorrimento. Valori più alti = scorrimento più veloce.";
+"tooltip_acceleration" = "Quanto lo scorrimento accelera man mano che trascini più lontano dal punto di partenza.";
+"tooltip_dead_zone" = "L'area intorno al punto di clic dove non avviene lo scorrimento. Aiuta con la precisione.";
+"tooltip_opacity" = "Trasparenza dell'indicatore di scorrimento.";
+"tooltip_trigger" = "Fai clic per registrare una nuova combinazione pulsante + modificatore per attivare lo scorrimento.";
+"tooltip_show_indicator" = "Mostra feedback visivo quando lo scorrimento tramite trascinamento è attivo.";
+"tooltip_launch_at_login" = "Avvia Mac Drag Scroll automaticamente al login.";
+"tooltip_excluded_apps" = "App dove lo scorrimento tramite trascinamento sarà disabilitato.";
+"tooltip_reset" = "Ripristina tutte le impostazioni ai valori predefiniti.";
+
+// Crash Handler
+"crash_detected_title" = "Mac Drag Scroll si è bloccato";
+"crash_detected_message" = "L'app si è bloccata inaspettatamente durante l'ultima sessione. Puoi copiare il rapporto di crash per aiutare a diagnosticare il problema.";
+"copy_report" = "Copia Rapporto";
+"dismiss" = "Ignora";
+"error_occurred_title" = "Si è verificato un errore";
+"error_occurred_message" = "Si è verificato un errore durante %@:\n\n%@";
+"fatal_error_title" = "Errore fatale";

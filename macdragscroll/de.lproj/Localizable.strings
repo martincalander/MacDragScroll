@@ -45,3 +45,44 @@
 "no_apps_found" = "Keine Apps gefunden";
 "done" = "Fertig";
 "current" = "Aktuell";
+
+// Trigger Button
+"trigger_button" = "Auslösetaste";
+"trigger_middle_click" = "Mittelklick";
+"trigger_right_click" = "Rechtsklick";
+"trigger_left_click" = "Linksklick";
+"trigger_button_n" = "Taste %d";
+"trigger_command_click" = "Befehl + Klick";
+"trigger_option_click" = "Option + Klick";
+"trigger_control_click" = "Strg + Klick";
+"trigger_shift_click" = "Umschalt + Klick";
+"trigger_middle_short" = "Mitte";
+"trigger_right_short" = "Rechts";
+"recording" = "Aufnahme...";
+
+// Reset
+"reset_to_defaults" = "Auf Standard zurücksetzen";
+"reset_confirm_title" = "Einstellungen zurücksetzen?";
+"reset_confirm_message" = "Alle Einstellungen werden auf die Standardwerte zurückgesetzt. Diese Aktion kann nicht rückgängig gemacht werden.";
+"reset" = "Zurücksetzen";
+"cancel" = "Abbrechen";
+
+// Tooltips
+"tooltip_speed" = "Wie schnell das Scrollen erfolgt. Höhere Werte = schnelleres Scrollen.";
+"tooltip_acceleration" = "Wie stark das Scrollen beschleunigt, je weiter Sie vom Startpunkt ziehen.";
+"tooltip_dead_zone" = "Der Bereich um den Klickpunkt, in dem kein Scrollen erfolgt. Hilft bei der Präzision.";
+"tooltip_opacity" = "Transparenz der Scroll-Anzeige.";
+"tooltip_trigger" = "Klicken Sie, um eine neue Maustaste + Modifikator-Kombination zum Auslösen des Scrollens aufzuzeichnen.";
+"tooltip_show_indicator" = "Zeigt visuelles Feedback an, wenn das Zieh-Scrollen aktiv ist.";
+"tooltip_launch_at_login" = "Mac Drag Scroll automatisch bei der Anmeldung starten.";
+"tooltip_excluded_apps" = "Apps, in denen das Zieh-Scrollen deaktiviert wird.";
+"tooltip_reset" = "Alle Einstellungen auf Standardwerte zurücksetzen.";
+
+// Crash Handler
+"crash_detected_title" = "Mac Drag Scroll ist abgestürzt";
+"crash_detected_message" = "Die App ist während der letzten Sitzung unerwartet abgestürzt. Sie können den Absturzbericht kopieren, um bei der Diagnose zu helfen.";
+"copy_report" = "Bericht kopieren";
+"dismiss" = "Verwerfen";
+"error_occurred_title" = "Ein Fehler ist aufgetreten";
+"error_occurred_message" = "Beim %@ ist ein Fehler aufgetreten:\n\n%@";
+"fatal_error_title" = "Schwerwiegender Fehler";

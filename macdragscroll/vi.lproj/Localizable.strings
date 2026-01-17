@@ -45,3 +45,44 @@
 "no_apps_found" = "Không tìm thấy ứng dụng";
 "done" = "Xong";
 "current" = "Hiện tại";
+
+// Trigger Button
+"trigger_button" = "Nút kích hoạt";
+"trigger_middle_click" = "Nhấp chuột giữa";
+"trigger_right_click" = "Nhấp chuột phải";
+"trigger_left_click" = "Nhấp chuột trái";
+"trigger_button_n" = "Nút %d";
+"trigger_command_click" = "Command + Nhấp";
+"trigger_option_click" = "Option + Nhấp";
+"trigger_control_click" = "Control + Nhấp";
+"trigger_shift_click" = "Shift + Nhấp";
+"trigger_middle_short" = "Giữa";
+"trigger_right_short" = "Phải";
+"recording" = "Đang ghi...";
+
+// Reset
+"reset_to_defaults" = "Đặt lại mặc định";
+"reset_confirm_title" = "Đặt lại Cài đặt?";
+"reset_confirm_message" = "Thao tác này sẽ đặt lại tất cả cài đặt về giá trị mặc định. Không thể hoàn tác hành động này.";
+"reset" = "Đặt lại";
+"cancel" = "Hủy";
+
+// Tooltips
+"tooltip_speed" = "Tốc độ cuộn. Giá trị cao hơn = cuộn nhanh hơn.";
+"tooltip_acceleration" = "Cuộn tăng tốc bao nhiêu khi bạn kéo xa hơn điểm bắt đầu.";
+"tooltip_dead_zone" = "Vùng xung quanh điểm nhấp không xảy ra cuộn. Giúp tăng độ chính xác.";
+"tooltip_opacity" = "Độ trong suốt của chỉ báo cuộn.";
+"tooltip_trigger" = "Nhấp để ghi lại tổ hợp nút chuột + phím bổ trợ mới để kích hoạt cuộn.";
+"tooltip_show_indicator" = "Hiển thị phản hồi trực quan khi cuộn kéo đang hoạt động.";
+"tooltip_launch_at_login" = "Tự động khởi động Mac Drag Scroll khi đăng nhập.";
+"tooltip_excluded_apps" = "Các ứng dụng sẽ tắt tính năng cuộn kéo.";
+"tooltip_reset" = "Đặt lại tất cả cài đặt về giá trị mặc định.";
+
+// Crash Handler
+"crash_detected_title" = "Mac Drag Scroll bị lỗi";
+"crash_detected_message" = "Ứng dụng đã bị lỗi bất ngờ trong phiên trước. Bạn có thể sao chép báo cáo lỗi để giúp chẩn đoán vấn đề.";
+"copy_report" = "Sao chép Báo cáo";
+"dismiss" = "Bỏ qua";
+"error_occurred_title" = "Đã xảy ra lỗi";
+"error_occurred_message" = "Đã xảy ra lỗi khi %@:\n\n%@";
+"fatal_error_title" = "Lỗi nghiêm trọng";

@@ -45,3 +45,44 @@
 "no_apps_found" = "Geen apps gevonden";
 "done" = "Gereed";
 "current" = "Huidig";
+
+// Trigger Button
+"trigger_button" = "Activeringsknop";
+"trigger_middle_click" = "Middelklik";
+"trigger_right_click" = "Rechtsklik";
+"trigger_left_click" = "Linksklik";
+"trigger_button_n" = "Knop %d";
+"trigger_command_click" = "Command + Klik";
+"trigger_option_click" = "Option + Klik";
+"trigger_control_click" = "Control + Klik";
+"trigger_shift_click" = "Shift + Klik";
+"trigger_middle_short" = "Midden";
+"trigger_right_short" = "Rechts";
+"recording" = "Opnemen...";
+
+// Reset
+"reset_to_defaults" = "Standaard herstellen";
+"reset_confirm_title" = "Instellingen herstellen?";
+"reset_confirm_message" = "Dit zal alle instellingen terugzetten naar de standaardwaarden. Deze actie kan niet ongedaan worden gemaakt.";
+"reset" = "Herstellen";
+"cancel" = "Annuleren";
+
+// Tooltips
+"tooltip_speed" = "Hoe snel het scrollen gaat. Hogere waarden = sneller scrollen.";
+"tooltip_acceleration" = "Hoeveel het scrollen versnelt naarmate je verder sleept vanaf het startpunt.";
+"tooltip_dead_zone" = "Het gebied rond het klikpunt waar geen scrollen plaatsvindt. Helpt bij precisie.";
+"tooltip_opacity" = "Transparantie van de scroll-indicator.";
+"tooltip_trigger" = "Klik om een nieuwe muisknop + modifier-combinatie op te nemen om scrollen te activeren.";
+"tooltip_show_indicator" = "Toon visuele feedback wanneer sleep-scrollen actief is.";
+"tooltip_launch_at_login" = "Start Mac Drag Scroll automatisch bij inloggen.";
+"tooltip_excluded_apps" = "Apps waar sleep-scrollen wordt uitgeschakeld.";
+"tooltip_reset" = "Herstel alle instellingen naar standaardwaarden.";
+
+// Crash Handler
+"crash_detected_title" = "Mac Drag Scroll is gecrasht";
+"crash_detected_message" = "De app is onverwacht gecrasht tijdens de laatste sessie. Je kunt het crashrapport kopiëren om het probleem te helpen diagnosticeren.";
+"copy_report" = "Kopieer Rapport";
+"dismiss" = "Negeren";
+"error_occurred_title" = "Er is een fout opgetreden";
+"error_occurred_message" = "Er is een fout opgetreden tijdens %@:\n\n%@";
+"fatal_error_title" = "Fatale fout";

@@ -15,12 +15,19 @@ class MouseMonitor {
     private var overlayWindow: ScrollOverlayWindow?
     private var overlayShowTimer: Timer?  // Delay before showing overlay
     
-    private var isMiddleButtonDown = false
+    private var isTriggerActive = false
     private var originPoint: CGPoint = .zero
     private var currentPoint: CGPoint = .zero
     private var isActivated = false
     private var isOverlayVisible = false  // Track if overlay is actually shown
     private var hasMovedOutsideDeadZone = false  // Track if moved outside dead zone
+    
+    // Window tracking - pause scroll when cursor leaves original window
+    private var originWindowNumber: Int?  // The window where drag started
+    private var isCursorInOriginWindow = true  // Track if cursor is in original window
+    
+    // Track current modifier state
+    private var currentModifiers: NSEvent.ModifierFlags = []
     
     // Quick click threshold - if released before this, don't show overlay
     private let overlayShowDelay: TimeInterval = 0.15  // 150ms
@@ -29,13 +36,23 @@ class MouseMonitor {
     private var scrollSpeed: Double { SettingsManager.shared.scrollSpeed }
     private var deadZoneRadius: Double { SettingsManager.shared.deadZoneRadius }
     private var acceleration: Double { SettingsManager.shared.acceleration }
+    private var triggerConfig: TriggerConfig { SettingsManager.shared.triggerConfig }
     
     func start() {
-        globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.otherMouseDown, .otherMouseUp, .otherMouseDragged, .mouseMoved]) { [weak self] event in
+        // Monitor all mouse events we might need
+        let eventMask: NSEvent.EventTypeMask = [
+            .otherMouseDown, .otherMouseUp, .otherMouseDragged,  // Middle/other buttons
+            .rightMouseDown, .rightMouseUp, .rightMouseDragged,  // Right button
+            .leftMouseDown, .leftMouseUp, .leftMouseDragged,     // Left button (with modifiers)
+            .mouseMoved,
+            .flagsChanged  // For tracking modifier keys
+        ]
+        
+        globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: eventMask) { [weak self] event in
             self?.handleMouseEvent(event)
         }
         
-        localMonitor = NSEvent.addLocalMonitorForEvents(matching: [.otherMouseDown, .otherMouseUp, .otherMouseDragged, .mouseMoved]) { [weak self] event in
+        localMonitor = NSEvent.addLocalMonitorForEvents(matching: eventMask) { [weak self] event in
             self?.handleMouseEvent(event)
             return event
         }
@@ -59,19 +76,55 @@ class MouseMonitor {
         // Check if current app is excluded
         if isCurrentAppExcluded() { return }
         
+        // Track modifier changes
+        if event.type == .flagsChanged {
+            currentModifiers = event.modifierFlags
+            // If trigger is active and required modifiers are no longer held, stop
+            if isTriggerActive && triggerConfig.hasModifiers {
+                if !triggerConfig.modifiersStillHeld(currentModifiers) {
+                    handleTriggerRelease()
+                }
+            }
+            return
+        }
+        
+        let config = triggerConfig
+        
+        // Handle mouse down events
         switch event.type {
+        case .leftMouseDown:
+            if config.mouseButton == 0 && config.matches(button: 0, modifiers: event.modifierFlags) {
+                handleTriggerPress(at: NSEvent.mouseLocation)
+            }
+        case .rightMouseDown:
+            if config.mouseButton == 1 && config.matches(button: 1, modifiers: event.modifierFlags) {
+                handleTriggerPress(at: NSEvent.mouseLocation)
+            }
         case .otherMouseDown:
-            if event.buttonNumber == 2 {
-                handleMiddleMouseDown(at: NSEvent.mouseLocation)
+            if event.buttonNumber == config.mouseButton && config.matches(button: event.buttonNumber, modifiers: event.modifierFlags) {
+                handleTriggerPress(at: NSEvent.mouseLocation)
+            }
+            
+        // Handle mouse up events
+        case .leftMouseUp:
+            if isTriggerActive && config.mouseButton == 0 {
+                handleTriggerRelease()
+            }
+        case .rightMouseUp:
+            if isTriggerActive && config.mouseButton == 1 {
+                handleTriggerRelease()
             }
         case .otherMouseUp:
-            if event.buttonNumber == 2 {
-                handleMiddleMouseUp()
+            if isTriggerActive && event.buttonNumber == config.mouseButton {
+                handleTriggerRelease()
             }
-        case .otherMouseDragged, .mouseMoved:
-            if isMiddleButtonDown {
+            
+        // Handle mouse drag/move events
+        case .leftMouseDragged, .rightMouseDragged, .otherMouseDragged, .mouseMoved:
+            if isTriggerActive {
                 handleMouseMoved(at: NSEvent.mouseLocation)
             }
+            
         default:
             break
         }
@@ -85,26 +138,31 @@ class MouseMonitor {
         return SettingsManager.shared.isAppExcluded(bundleIdentifier: bundleId)
     }
     
-    private func handleMiddleMouseDown(at point: CGPoint) {
-        isMiddleButtonDown = true
+    // MARK: - Core Logic
+    
+    private func handleTriggerPress(at point: CGPoint) {
+        isTriggerActive = true
         hasMovedOutsideDeadZone = false
         isOverlayVisible = false
         originPoint = point
         currentPoint = point
         
+        // Capture the window under the cursor when drag starts
+        originWindowNumber = getWindowNumberAtPoint(point)
+        isCursorInOriginWindow = true
+        
         // Activate scroll mode immediately (logic runs), but delay showing the overlay
         activateScrollMode()
         
         // Schedule overlay to appear after a short delay
-        // If user releases before this, overlay never shows (quick click)
         overlayShowTimer = Timer.scheduledTimer(withTimeInterval: overlayShowDelay, repeats: false) { [weak self] _ in
-            guard let self = self, self.isMiddleButtonDown, self.isActivated else { return }
+            guard let self = self, self.isTriggerActive, self.isActivated else { return }
             self.showOverlay()
         }
     }
     
-    private func handleMiddleMouseUp() {
-        isMiddleButtonDown = false
+    private func handleTriggerRelease() {
+        isTriggerActive = false
         
         // Cancel the overlay show timer if it hasn't fired yet
         overlayShowTimer?.invalidate()
@@ -116,6 +174,18 @@ class MouseMonitor {
     private func handleMouseMoved(at point: CGPoint) {
         currentPoint = point
         
+        // Check if cursor is still in the original window
+        let wasInOriginWindow = isCursorInOriginWindow
+        isCursorInOriginWindow = isCursorOverOriginWindow(at: point)
+        
+        // Update overlay opacity when entering/leaving origin window
+        if wasInOriginWindow != isCursorInOriginWindow && isOverlayVisible {
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                self.overlayWindow?.setPaused(!self.isCursorInOriginWindow)
+            }
+        }
+        
         let deltaX = currentPoint.x - originPoint.x
         let deltaY = currentPoint.y - originPoint.y
         let distance = sqrt(deltaX * deltaX + deltaY * deltaY)
@@ -125,7 +195,7 @@ class MouseMonitor {
             hasMovedOutsideDeadZone = true
             
             // Trigger click bounce when starting to scroll (if overlay is visible)
-            if isOverlayVisible {
+            if isOverlayVisible && isCursorInOriginWindow {
                 DispatchQueue.main.async { [weak self] in
                     self?.overlayWindow?.animateClickBounce()
                 }
@@ -141,8 +211,55 @@ class MouseMonitor {
         }
     }
     
+    // MARK: - Window Tracking
+    
+    private func getWindowNumberAtPoint(_ point: CGPoint) -> Int? {
+        let windowListOptions: CGWindowListOption = [.optionOnScreenOnly, .excludeDesktopElements]
+        guard let windowInfoList = CGWindowListCopyWindowInfo(windowListOptions, kCGNullWindowID) as? [[String: Any]] else {
+            return nil
+        }
+        
+        for windowInfo in windowInfoList {
+            guard let bounds = windowInfo[kCGWindowBounds as String] as? [String: CGFloat],
+                  let windowNumber = windowInfo[kCGWindowNumber as String] as? Int,
+                  let ownerPID = windowInfo[kCGWindowOwnerPID as String] as? Int32 else {
+                continue
+            }
+            
+            // Skip our own app's windows
+            if ownerPID == ProcessInfo.processInfo.processIdentifier {
+                continue
+            }
+            
+            let windowFrame = CGRect(
+                x: bounds["X"] ?? 0,
+                y: bounds["Y"] ?? 0,
+                width: bounds["Width"] ?? 0,
+                height: bounds["Height"] ?? 0
+            )
+            
+            // CGWindowListCopyWindowInfo uses top-left origin, NSEvent uses bottom-left
+            let screenHeight = NSScreen.main?.frame.height ?? 0
+            let flippedY = screenHeight - point.y
+            let checkPoint = CGPoint(x: point.x, y: flippedY)
+            
+            if windowFrame.contains(checkPoint) {
+                return windowNumber
+            }
+        }
+        
+        return nil
+    }
+    
+    private func isCursorOverOriginWindow(at point: CGPoint) -> Bool {
+        guard let originWindow = originWindowNumber else { return true }
+        let currentWindow = getWindowNumberAtPoint(point)
+        return currentWindow == originWindow
+    }
+    
+    // MARK: - Overlay & Scrolling
+    
     private func showOverlay() {
-        // Don't show overlay if animations are disabled
         guard SettingsManager.shared.animationsEnabled else { return }
         guard isActivated, !isOverlayVisible else { return }
         isOverlayVisible = true
@@ -155,10 +272,9 @@ class MouseMonitor {
     }
     
     private func activateScrollMode() {
-        guard isMiddleButtonDown else { return }
+        guard isTriggerActive else { return }
         isActivated = true
         
-        // Start scroll timer immediately (logic runs even if overlay not visible yet)
         scrollTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
             self?.performScroll()
         }
@@ -171,6 +287,10 @@ class MouseMonitor {
         scrollTimer?.invalidate()
         scrollTimer = nil
         
+        // Reset window tracking
+        originWindowNumber = nil
+        isCursorInOriginWindow = true
+        
         DispatchQueue.main.async { [weak self] in
             self?.overlayWindow?.hide()
             self?.overlayWindow = nil
@@ -178,8 +298,7 @@ class MouseMonitor {
     }
     
     private func performScroll() {
-        // Don't scroll if not activated
-        guard isActivated else { return }
+        guard isActivated, isCursorInOriginWindow else { return }
         
         let deltaX = currentPoint.x - originPoint.x
         let deltaY = currentPoint.y - originPoint.y
@@ -188,29 +307,18 @@ class MouseMonitor {
         
         guard distance > deadZoneRadius else { return }
         
-        // Calculate scroll intensity with exponential acceleration
-        // The further from origin, the faster it accelerates
         let effectiveDistance = distance - deadZoneRadius
-        
-        // Use power function for acceleration: starts slow, ramps up quickly
-        // acceleration setting controls the exponent (default 1.8)
         let acceleratedDistance = pow(effectiveDistance / 30.0, acceleration)
         let intensity = min(acceleratedDistance, 50.0) * scrollSpeed
         
-        // Normalize direction
         let normalizedX = deltaX / distance
         let normalizedY = deltaY / distance
         
-        // Calculate scroll amounts
-        // Drag up (positive Y) = scroll up = positive wheel value
-        // Drag right (positive X) = scroll right = positive wheel value
         let scrollDeltaY = Int32(round(normalizedY * intensity))
         let scrollDeltaX = Int32(round(normalizedX * intensity))
         
-        // Only post if there's actual movement
         guard scrollDeltaX != 0 || scrollDeltaY != 0 else { return }
         
-        // Create scroll wheel event
         let event = CGEvent(scrollWheelEvent2Source: nil,
                            units: .pixel,
                            wheelCount: 2,

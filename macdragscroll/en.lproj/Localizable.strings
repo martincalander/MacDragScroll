@@ -45,3 +45,44 @@
 "no_apps_found" = "No apps found";
 "done" = "Done";
 "current" = "Current";
+
+// Trigger Button
+"trigger_button" = "Trigger Button";
+"trigger_middle_click" = "Middle Click";
+"trigger_right_click" = "Right Click";
+"trigger_left_click" = "Left Click";
+"trigger_button_n" = "Button %d";
+"trigger_command_click" = "Command + Click";
+"trigger_option_click" = "Option + Click";
+"trigger_control_click" = "Control + Click";
+"trigger_shift_click" = "Shift + Click";
+"trigger_middle_short" = "Middle";
+"trigger_right_short" = "Right";
+"recording" = "Recording...";
+
+// Reset
+"reset_to_defaults" = "Reset to Defaults";
+"reset_confirm_title" = "Reset Settings?";
+"reset_confirm_message" = "This will reset all settings to their default values. This action cannot be undone.";
+"reset" = "Reset";
+"cancel" = "Cancel";
+
+// Tooltips
+"tooltip_speed" = "How fast scrolling moves. Higher values = faster scrolling.";
+"tooltip_acceleration" = "How much scrolling speeds up the farther you drag from the start point.";
+"tooltip_dead_zone" = "The area around the click point where no scrolling occurs. Helps with precision.";
+"tooltip_opacity" = "Transparency of the scroll indicator overlay.";
+"tooltip_trigger" = "Click to record a new mouse button + modifier combination to trigger scrolling.";
+"tooltip_show_indicator" = "Show visual feedback when drag scrolling is active.";
+"tooltip_launch_at_login" = "Automatically start Mac Drag Scroll when you log in.";
+"tooltip_excluded_apps" = "Apps where drag scrolling will be disabled.";
+"tooltip_reset" = "Reset all settings to their default values.";
+
+// Crash Handler
+"crash_detected_title" = "Mac Drag Scroll Crashed";
+"crash_detected_message" = "The app crashed unexpectedly during the last session. You can copy the crash report to help diagnose the issue.";
+"copy_report" = "Copy Report";
+"dismiss" = "Dismiss";
+"error_occurred_title" = "An Error Occurred";
+"error_occurred_message" = "An error occurred while %@:\n\n%@";
+"fatal_error_title" = "Fatal Error";

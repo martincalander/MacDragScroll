@@ -35,6 +35,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Setup crash handling first
+        CrashHandler.appVersion = AppDelegate.appVersion
+        CrashHandler.shared.setup()
+        
         setupMenuBar()
         setupPopover()
         

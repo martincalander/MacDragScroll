@@ -86,15 +86,8 @@ struct MenuBarSettingsView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
         }
-        .frame(width: kPopoverWidth, height: hasPermission ? kPopoverHeightWithPermission : kPopoverHeightNoPermission)
-        .sheet(isPresented: $showingAppPicker) {
-            AppPickerView(
-                excludedApps: settings.excludedApps,
-                frontmostBundleId: capturedFrontmostBundleId,
-                onAdd: { settings.addExcludedApp($0) },
-                onDismiss: { showingAppPicker = false }
-            )
-        }
+        .frame(width: kPopoverWidth, height: hasPermission ? (showingAppPicker ? kPopoverHeightWithPermission + 200 : kPopoverHeightWithPermission) : kPopoverHeightNoPermission)
+        .animation(.easeInOut(duration: 0.2), value: showingAppPicker)
     }
     
     // MARK: - Permission Required View
@@ -240,12 +233,16 @@ struct MenuBarSettingsView: View {
                         Spacer()
                         Button(action: {
                             // Capture frontmost app BEFORE opening the picker
-                            capturedFrontmostBundleId = SettingsManager.shared.getFrontmostAppBundleId()
-                            showingAppPicker = true
+                            if !showingAppPicker {
+                                capturedFrontmostBundleId = SettingsManager.shared.getFrontmostAppBundleId()
+                            }
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                showingAppPicker.toggle()
+                            }
                         }) {
-                            Image(systemName: "plus.circle.fill")
+                            Image(systemName: showingAppPicker ? "xmark.circle.fill" : "plus.circle.fill")
                                 .font(.system(size: 14))
-                                .foregroundColor(.accentColor)
+                                .foregroundColor(showingAppPicker ? .secondary : .accentColor)
                         }
                         .buttonStyle(.plain)
                     }
@@ -260,6 +257,18 @@ struct MenuBarSettingsView: View {
                                 }
                             }
                         }
+                    }
+                    
+                    // Inline App Picker
+                    if showingAppPicker {
+                        InlineAppPickerView(
+                            excludedApps: settings.excludedApps,
+                            frontmostBundleId: capturedFrontmostBundleId,
+                            onAdd: { bundleId in
+                                settings.addExcludedApp(bundleId)
+                            }
+                        )
+                        .transition(.opacity.combined(with: .move(edge: .top)))
                     }
                 }
                 .padding(12)
@@ -387,6 +396,158 @@ struct CompactAppRow: View {
     }
 }
 
+// MARK: - Inline App Picker View
+
+struct InlineAppPickerView: View {
+    let excludedApps: [String]
+    let frontmostBundleId: String?
+    let onAdd: (String) -> Void
+    
+    @State private var apps: [(name: String, bundleId: String, icon: NSImage?)] = []
+    @State private var searchText = ""
+    @State private var isLoading = true
+    
+    var filteredApps: [(name: String, bundleId: String, icon: NSImage?)] {
+        let available = apps.filter { !excludedApps.contains($0.bundleId) }
+        guard !searchText.isEmpty else { return Array(available.prefix(8)) }
+        return Array(available.filter {
+            $0.name.localizedCaseInsensitiveContains(searchText) ||
+            $0.bundleId.localizedCaseInsensitiveContains(searchText)
+        }.prefix(8))
+    }
+    
+    var body: some View {
+        VStack(spacing: 8) {
+            // Search bar
+            HStack(spacing: 6) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.secondary)
+                    .font(.system(size: 10))
+                
+                TextField(NSLocalizedString("search", comment: "Search placeholder"), text: $searchText)
+                    .textFieldStyle(.plain)
+                    .font(.system(size: 11))
+                
+                if !searchText.isEmpty {
+                    Button(action: { searchText = "" }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.secondary)
+                            .font(.system(size: 10))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(6)
+            .background(Color(nsColor: .textBackgroundColor))
+            .cornerRadius(4)
+            
+            // App List
+            if isLoading {
+                VStack(spacing: 2) {
+                    ForEach(0..<4, id: \.self) { index in
+                        SkeletonAppRow(index: index)
+                    }
+                }
+            } else if filteredApps.isEmpty {
+                VStack(spacing: 4) {
+                    Image(systemName: "questionmark.app")
+                        .font(.system(size: 16))
+                        .foregroundColor(.secondary)
+                    Text(NSLocalizedString("no_apps_found", comment: "No apps found"))
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
+                }
+                .frame(height: 60)
+            } else {
+                VStack(spacing: 2) {
+                    ForEach(filteredApps, id: \.bundleId) { app in
+                        InlineAppPickerRow(
+                            name: app.name,
+                            bundleId: app.bundleId,
+                            icon: app.icon,
+                            isFrontmost: app.bundleId == frontmostBundleId,
+                            onAdd: { onAdd(app.bundleId) }
+                        )
+                    }
+                }
+            }
+        }
+        .padding(.top, 8)
+        .onAppear { loadApps() }
+    }
+    
+    private func loadApps() {
+        DispatchQueue.global(qos: .userInitiated).async {
+            let loadedApps = SettingsManager.shared.getInstalledApps(frontmostBundleId: frontmostBundleId)
+            DispatchQueue.main.async {
+                apps = loadedApps
+                withAnimation(.easeOut(duration: 0.2)) {
+                    isLoading = false
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Inline App Picker Row
+
+struct InlineAppPickerRow: View {
+    let name: String
+    let bundleId: String
+    let icon: NSImage?
+    let isFrontmost: Bool
+    let onAdd: () -> Void
+    
+    @State private var isHovered = false
+    
+    var body: some View {
+        HStack(spacing: 8) {
+            Group {
+                if let icon = icon {
+                    Image(nsImage: icon)
+                        .resizable()
+                        .interpolation(.high)
+                } else {
+                    Image(systemName: "app.fill")
+                        .foregroundColor(.secondary)
+                }
+            }
+            .frame(width: 16, height: 16)
+            
+            Text(name)
+                .font(.system(size: 11))
+                .lineLimit(1)
+            
+            if isFrontmost {
+                Text(NSLocalizedString("current", comment: "Current app badge"))
+                    .font(.system(size: 8, weight: .medium))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 4)
+                    .padding(.vertical, 1)
+                    .background(Color.accentColor.opacity(0.8))
+                    .cornerRadius(2)
+            }
+            
+            Spacer()
+            
+            Button(action: onAdd) {
+                Image(systemName: "plus.circle.fill")
+                    .font(.system(size: 12))
+                    .foregroundColor(isHovered ? .accentColor : .secondary.opacity(0.6))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(isHovered ? Color(nsColor: .controlBackgroundColor) : Color.clear)
+        .cornerRadius(4)
+        .contentShape(Rectangle())
+        .onHover { hovering in
+            withAnimation(.easeOut(duration: 0.1)) { isHovered = hovering }
+        }
+    }
+}
+
 // MARK: - Skeleton Shimmer Effect
 
 struct ShimmerModifier: ViewModifier {
@@ -395,24 +556,22 @@ struct ShimmerModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .overlay(
-                GeometryReader { geometry in
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            Color.clear,
-                            Color.white.opacity(0.4),
-                            Color.clear
-                        ]),
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                    .frame(width: geometry.size.width * 0.6)
-                    .offset(x: -geometry.size.width * 0.3 + (geometry.size.width * 1.6) * phase)
-                }
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color.clear,
+                        Color.white.opacity(0.3),
+                        Color.clear
+                    ]),
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+                .rotationEffect(.degrees(30))
+                .offset(x: phase * 350 - 175)
             )
-            .mask(content)
+            .clipped()
             .onAppear {
                 withAnimation(
-                    Animation.linear(duration: 1.2)
+                    Animation.linear(duration: 1.5)
                         .repeatForever(autoreverses: false)
                 ) {
                     phase = 1
@@ -430,6 +589,15 @@ extension View {
 // MARK: - Skeleton Row
 
 struct SkeletonAppRow: View {
+    let index: Int
+    
+    // Pre-computed widths to avoid random during render
+    private static let widths: [CGFloat] = [120, 95, 140, 85, 110, 130, 100, 115, 90, 125]
+    
+    private var nameWidth: CGFloat {
+        SkeletonAppRow.widths[index % SkeletonAppRow.widths.count]
+    }
+    
     var body: some View {
         HStack(spacing: 10) {
             // Icon placeholder
@@ -441,7 +609,7 @@ struct SkeletonAppRow: View {
                 // Name placeholder
                 RoundedRectangle(cornerRadius: 3)
                     .fill(Color(nsColor: .separatorColor).opacity(0.3))
-                    .frame(width: CGFloat.random(in: 80...140), height: 12)
+                    .frame(width: nameWidth, height: 12)
             }
             
             Spacer()
@@ -505,8 +673,8 @@ struct AppPickerView: View {
             if isLoading {
                 ScrollView {
                     LazyVStack(spacing: 2) {
-                        ForEach(0..<10, id: \.self) { _ in
-                            SkeletonAppRow()
+                        ForEach(0..<10, id: \.self) { index in
+                            SkeletonAppRow(index: index)
                         }
                     }
                     .padding(8)
@@ -514,7 +682,7 @@ struct AppPickerView: View {
             } else if filteredApps.isEmpty {
                 Spacer()
                 VStack(spacing: 6) {
-                    Image(systemName: "app.badge.questionmark")
+                    Image(systemName: "questionmark.app")
                         .font(.system(size: 24))
                         .foregroundColor(.secondary)
                     Text(NSLocalizedString("no_apps_found", comment: "No apps found"))
@@ -558,9 +726,9 @@ struct AppPickerView: View {
     private func loadApps() {
         DispatchQueue.global(qos: .userInitiated).async {
             let loadedApps = SettingsManager.shared.getInstalledApps(frontmostBundleId: frontmostBundleId)
-            DispatchQueue.main.async {
-                withAnimation(.easeOut(duration: 0.25)) {
-                    apps = loadedApps
+            DispatchQueue.main.async { [loadedApps] in
+                apps = loadedApps
+                withAnimation(.easeOut(duration: 0.2)) {
                     isLoading = false
                 }
             }

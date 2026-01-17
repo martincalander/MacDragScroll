@@ -1,0 +1,47 @@
+/* 
+  Localizable.strings (Korean)
+  macdragscroll
+
+  Created by Martin Calander on 2026-01-17.
+*/
+
+// App Name
+"app_name" = "Mac Drag Scroll";
+
+// Footer
+"made_by" = "제작: Martin Calander";
+"quit" = "종료";
+
+// Permission Required View
+"accessibility_permissions_required" = "손쉬운 사용 권한 필요";
+"app_needs_permission" = "Mac Drag Scroll이 작동하려면 이 권한이 필요합니다.";
+"open_system_settings" = "시스템 설정 열기";
+
+// Permission Dialogs
+"permission_required_title" = "손쉬운 사용 권한 필요";
+"permission_required_message" = "Mac Drag Scroll은 마우스 가운데 버튼 이벤트를 감지하고 드래그 스크롤을 활성화하기 위해 손쉬운 사용 권한이 필요합니다.\n\n시스템 설정에서 권한을 허용해 주세요.";
+"permission_lost_title" = "손쉬운 사용 권한 상실";
+"permission_lost_message" = "Mac Drag Scroll의 손쉬운 사용 권한이 없어졌습니다. 드래그 스크롤이 비활성화되었습니다.\n\n앱을 계속 사용하려면 시스템 설정에서 권한을 다시 허용해 주세요.";
+"later" = "나중에";
+"ok" = "확인";
+
+// Settings Labels
+"speed" = "속도";
+"acceleration" = "가속";
+"dead_zone" = "데드존";
+"opacity" = "불투명도";
+"show_indicator" = "표시기 및 애니메이션 보기";
+"launch_at_login" = "로그인 시 실행";
+"excluded_apps" = "제외된 앱";
+
+// Acceleration Levels
+"acceleration_low" = "낮음";
+"acceleration_med" = "중간";
+"acceleration_high" = "높음";
+"acceleration_max" = "최대";
+
+// App Picker
+"search" = "검색";
+"no_apps_found" = "앱을 찾을 수 없음";
+"done" = "완료";
+"current" = "현재";

@@ -1,0 +1,47 @@
+/* 
+  Localizable.strings (Vietnamese)
+  macdragscroll
+
+  Created by Martin Calander on 2026-01-17.
+*/
+
+// App Name
+"app_name" = "Mac Drag Scroll";
+
+// Footer
+"made_by" = "Tạo bởi Martin Calander";
+"quit" = "Thoát";
+
+// Permission Required View
+"accessibility_permissions_required" = "Yêu cầu Quyền Trợ năng";
+"app_needs_permission" = "Mac Drag Scroll cần quyền này để hoạt động.";
+"open_system_settings" = "Mở Cài đặt Hệ thống";
+
+// Permission Dialogs
+"permission_required_title" = "Yêu cầu Quyền Trợ năng";
+"permission_required_message" = "Mac Drag Scroll cần quyền Trợ năng để phát hiện sự kiện nút chuột giữa và bật tính năng cuộn bằng kéo.\n\nVui lòng cấp quyền trong Cài đặt Hệ thống.";
+"permission_lost_title" = "Đã mất Quyền Trợ năng";
+"permission_lost_message" = "Mac Drag Scroll không còn quyền Trợ năng. Tính năng cuộn bằng kéo đã bị tắt.\n\nVui lòng cấp lại quyền trong Cài đặt Hệ thống để tiếp tục sử dụng ứng dụng.";
+"later" = "Để sau";
+"ok" = "OK";
+
+// Settings Labels
+"speed" = "Tốc độ";
+"acceleration" = "Gia tốc";
+"dead_zone" = "Vùng chết";
+"opacity" = "Độ mờ";
+"show_indicator" = "Hiển thị chỉ báo & hiệu ứng";
+"launch_at_login" = "Mở khi đăng nhập";
+"excluded_apps" = "Ứng dụng loại trừ";
+
+// Acceleration Levels
+"acceleration_low" = "Thấp";
+"acceleration_med" = "TB";
+"acceleration_high" = "Cao";
+"acceleration_max" = "Tối đa";
+
+// App Picker
+"search" = "Tìm kiếm";
+"no_apps_found" = "Không tìm thấy ứng dụng";
+"done" = "Xong";
+"current" = "Hiện tại";

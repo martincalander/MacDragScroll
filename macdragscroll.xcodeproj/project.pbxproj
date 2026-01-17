@@ -23,9 +23,9 @@
 
 /* Begin PBXFileReference section */
 		5B5EA2482F1AB49400A09C9E /* macdragscroll.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = macdragscroll.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		5BTEST0062F1AB49400A09C9E /* macdragscrollTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = macdragscrollTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5BTEST0022F1AB49400A09C9E /* SettingsManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManagerTests.swift; sourceTree = "<group>"; };
 		5BTEST0042F1AB49400A09C9E /* ScrollCalculationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollCalculationTests.swift; sourceTree = "<group>"; };
+		5BTEST0062F1AB49400A09C9E /* macdragscrollTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = macdragscrollTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -151,6 +151,17 @@
 				Base,
 				sv,
 				"zh-Hans",
+				ja,
+				de,
+				fr,
+				es,
+				"pt-BR",
+				ko,
+				it,
+				"zh-Hant",
+				nl,
+				ru,
+				vi,
 			);
 			mainGroup = 5B5EA23F2F1AB49400A09C9E;
 			minimizedProjectReferenceProxies = 1;

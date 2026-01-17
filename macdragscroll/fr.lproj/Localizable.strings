@@ -1,0 +1,47 @@
+/* 
+  Localizable.strings (French)
+  macdragscroll
+
+  Created by Martin Calander on 2026-01-17.
+*/
+
+// App Name
+"app_name" = "Mac Drag Scroll";
+
+// Footer
+"made_by" = "Créé par Martin Calander";
+"quit" = "Quitter";
+
+// Permission Required View
+"accessibility_permissions_required" = "Autorisation d'accessibilité requise";
+"app_needs_permission" = "Mac Drag Scroll a besoin de cette autorisation pour fonctionner.";
+"open_system_settings" = "Ouvrir les Réglages Système";
+
+// Permission Dialogs
+"permission_required_title" = "Autorisation d'accessibilité requise";
+"permission_required_message" = "Mac Drag Scroll a besoin de l'autorisation d'accessibilité pour détecter les événements du bouton central de la souris et activer le défilement par glissement.\n\nVeuillez accorder l'autorisation dans les Réglages Système.";
+"permission_lost_title" = "Autorisation d'accessibilité perdue";
+"permission_lost_message" = "Mac Drag Scroll n'a plus l'autorisation d'accessibilité. Le défilement par glissement a été désactivé.\n\nVeuillez réaccorder l'autorisation dans les Réglages Système pour continuer à utiliser l'application.";
+"later" = "Plus tard";
+"ok" = "OK";
+
+// Settings Labels
+"speed" = "Vitesse";
+"acceleration" = "Accélération";
+"dead_zone" = "Zone morte";
+"opacity" = "Opacité";
+"show_indicator" = "Afficher l'indicateur et animations";
+"launch_at_login" = "Lancer à la connexion";
+"excluded_apps" = "Apps exclues";
+
+// Acceleration Levels
+"acceleration_low" = "Faible";
+"acceleration_med" = "Moyen";
+"acceleration_high" = "Élevé";
+"acceleration_max" = "Max";
+
+// App Picker
+"search" = "Rechercher";
+"no_apps_found" = "Aucune app trouvée";
+"done" = "Terminé";
+"current" = "Actuelle";

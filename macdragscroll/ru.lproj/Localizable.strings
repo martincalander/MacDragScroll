@@ -1,0 +1,47 @@
+/* 
+  Localizable.strings (Russian)
+  macdragscroll
+
+  Created by Martin Calander on 2026-01-17.
+*/
+
+// App Name
+"app_name" = "Mac Drag Scroll";
+
+// Footer
+"made_by" = "Автор: Martin Calander";
+"quit" = "Завершить";
+
+// Permission Required View
+"accessibility_permissions_required" = "Требуется разрешение Универсального доступа";
+"app_needs_permission" = "Mac Drag Scroll требуется это разрешение для работы.";
+"open_system_settings" = "Открыть Системные настройки";
+
+// Permission Dialogs
+"permission_required_title" = "Требуется разрешение Универсального доступа";
+"permission_required_message" = "Mac Drag Scroll требуется разрешение Универсального доступа для обнаружения событий средней кнопки мыши и включения прокрутки перетаскиванием.\n\nПредоставьте разрешение в Системных настройках.";
+"permission_lost_title" = "Разрешение Универсального доступа утрачено";
+"permission_lost_message" = "Mac Drag Scroll больше не имеет разрешения Универсального доступа. Прокрутка перетаскиванием отключена.\n\nПовторно предоставьте разрешение в Системных настройках для продолжения использования приложения.";
+"later" = "Позже";
+"ok" = "ОК";
+
+// Settings Labels
+"speed" = "Скорость";
+"acceleration" = "Ускорение";
+"dead_zone" = "Мёртвая зона";
+"opacity" = "Непрозрачность";
+"show_indicator" = "Показывать индикатор и анимации";
+"launch_at_login" = "Запускать при входе";
+"excluded_apps" = "Исключённые приложения";
+
+// Acceleration Levels
+"acceleration_low" = "Низк.";
+"acceleration_med" = "Сред.";
+"acceleration_high" = "Выс.";
+"acceleration_max" = "Макс.";
+
+// App Picker
+"search" = "Поиск";
+"no_apps_found" = "Приложения не найдены";
+"done" = "Готово";
+"current" = "Текущее";

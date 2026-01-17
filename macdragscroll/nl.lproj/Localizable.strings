@@ -1,0 +1,47 @@
+/* 
+  Localizable.strings (Dutch)
+  macdragscroll
+
+  Created by Martin Calander on 2026-01-17.
+*/
+
+// App Name
+"app_name" = "Mac Drag Scroll";
+
+// Footer
+"made_by" = "Gemaakt door Martin Calander";
+"quit" = "Stop";
+
+// Permission Required View
+"accessibility_permissions_required" = "Toegankelijkheidsrechten Vereist";
+"app_needs_permission" = "Mac Drag Scroll heeft deze rechten nodig om te werken.";
+"open_system_settings" = "Open Systeeminstellingen";
+
+// Permission Dialogs
+"permission_required_title" = "Toegankelijkheidsrechten Vereist";
+"permission_required_message" = "Mac Drag Scroll heeft toegankelijkheidsrechten nodig om middelste muisknop-gebeurtenissen te detecteren en sleep-scrollen in te schakelen.\n\nVerleen de rechten in Systeeminstellingen.";
+"permission_lost_title" = "Toegankelijkheidsrechten Verloren";
+"permission_lost_message" = "Mac Drag Scroll heeft geen toegankelijkheidsrechten meer. Sleep-scrollen is uitgeschakeld.\n\nVerleen de rechten opnieuw in Systeeminstellingen om de app te blijven gebruiken.";
+"later" = "Later";
+"ok" = "OK";
+
+// Settings Labels
+"speed" = "Snelheid";
+"acceleration" = "Versnelling";
+"dead_zone" = "Dode zone";
+"opacity" = "Dekking";
+"show_indicator" = "Toon indicator & animaties";
+"launch_at_login" = "Open bij inloggen";
+"excluded_apps" = "Uitgesloten apps";
+
+// Acceleration Levels
+"acceleration_low" = "Laag";
+"acceleration_med" = "Gem.";
+"acceleration_high" = "Hoog";
+"acceleration_max" = "Max";
+
+// App Picker
+"search" = "Zoeken";
+"no_apps_found" = "Geen apps gevonden";
+"done" = "Gereed";
+"current" = "Huidig";

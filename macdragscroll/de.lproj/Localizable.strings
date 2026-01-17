@@ -1,0 +1,47 @@
+/* 
+  Localizable.strings (German)
+  macdragscroll
+
+  Created by Martin Calander on 2026-01-17.
+*/
+
+// App Name
+"app_name" = "Mac Drag Scroll";
+
+// Footer
+"made_by" = "Erstellt von Martin Calander";
+"quit" = "Beenden";
+
+// Permission Required View
+"accessibility_permissions_required" = "Bedienungshilfen-Berechtigung erforderlich";
+"app_needs_permission" = "Mac Drag Scroll benötigt diese Berechtigung, um zu funktionieren.";
+"open_system_settings" = "Systemeinstellungen öffnen";
+
+// Permission Dialogs
+"permission_required_title" = "Bedienungshilfen-Berechtigung erforderlich";
+"permission_required_message" = "Mac Drag Scroll benötigt die Bedienungshilfen-Berechtigung, um mittlere Maustastenereignisse zu erkennen und das Zieh-Scrollen zu aktivieren.\n\nBitte erteilen Sie die Berechtigung in den Systemeinstellungen.";
+"permission_lost_title" = "Bedienungshilfen-Berechtigung verloren";
+"permission_lost_message" = "Mac Drag Scroll hat keine Bedienungshilfen-Berechtigung mehr. Das Zieh-Scrollen wurde deaktiviert.\n\nBitte erteilen Sie die Berechtigung erneut in den Systemeinstellungen, um die App weiter zu verwenden.";
+"later" = "Später";
+"ok" = "OK";
+
+// Settings Labels
+"speed" = "Geschwindigkeit";
+"acceleration" = "Beschleunigung";
+"dead_zone" = "Totzone";
+"opacity" = "Deckkraft";
+"show_indicator" = "Anzeige & Animationen";
+"launch_at_login" = "Bei Anmeldung starten";
+"excluded_apps" = "Ausgeschlossene Apps";
+
+// Acceleration Levels
+"acceleration_low" = "Niedrig";
+"acceleration_med" = "Mittel";
+"acceleration_high" = "Hoch";
+"acceleration_max" = "Max";
+
+// App Picker
+"search" = "Suchen";
+"no_apps_found" = "Keine Apps gefunden";
+"done" = "Fertig";
+"current" = "Aktuell";

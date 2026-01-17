@@ -1,0 +1,47 @@
+/* 
+  Localizable.strings (Chinese Traditional)
+  macdragscroll
+
+  Created by Martin Calander on 2026-01-17.
+*/
+
+// App Name
+"app_name" = "Mac Drag Scroll";
+
+// Footer
+"made_by" = "由 Martin Calander 製作";
+"quit" = "結束";
+
+// Permission Required View
+"accessibility_permissions_required" = "需要輔助使用權限";
+"app_needs_permission" = "Mac Drag Scroll 需要此權限才能運作。";
+"open_system_settings" = "開啟系統設定";
+
+// Permission Dialogs
+"permission_required_title" = "需要輔助使用權限";
+"permission_required_message" = "Mac Drag Scroll 需要輔助使用權限來偵測滑鼠中鍵事件並啟用拖曳捲動。\n\n請在系統設定中授予權限。";
+"permission_lost_title" = "輔助使用權限已失效";
+"permission_lost_message" = "Mac Drag Scroll 已失去輔助使用權限。拖曳捲動已被停用。\n\n請在系統設定中重新授予權限以繼續使用此 App。";
+"later" = "稍後";
+"ok" = "好";
+
+// Settings Labels
+"speed" = "速度";
+"acceleration" = "加速度";
+"dead_zone" = "死區";
+"opacity" = "不透明度";
+"show_indicator" = "顯示指示器與動畫";
+"launch_at_login" = "登入時啟動";
+"excluded_apps" = "已排除的 App";
+
+// Acceleration Levels
+"acceleration_low" = "低";
+"acceleration_med" = "中";
+"acceleration_high" = "高";
+"acceleration_max" = "最大";
+
+// App Picker
+"search" = "搜尋";
+"no_apps_found" = "找不到 App";
+"done" = "完成";
+"current" = "目前";

@@ -2,87 +2,169 @@
   Localizable.strings (Swedish)
   macdragscroll
 
-  Created by Martin Calander on 2026-01-16.
+  Generated for the current app UI strings.
 */
 
-// App Name
 "app_name" = "Mac Drag Scroll";
-
-// Footer
-"made_by" = "Skapad av Martin Calander";
-"quit" = "Avsluta";
-
-// Permission Required View
-"accessibility_permissions_required" = "Tillgänglighetsbehörighet krävs";
-"app_needs_permission" = "Mac Drag Scroll behöver detta för att fungera.";
-"open_system_settings" = "Öppna Systeminställningar";
-
-// Permission Dialogs
-"permission_required_title" = "Tillgänglighetsbehörighet krävs";
-"permission_required_message" = "Mac Drag Scroll behöver tillgänglighetsbehörighet för att upptäcka musens mittenknapp och aktivera drag-scrollning.\n\nVänligen ge behörighet i Systeminställningar.";
-"permission_lost_title" = "Tillgänglighetsbehörighet förlorad";
-"permission_lost_message" = "Mac Drag Scroll har inte längre tillgänglighetsbehörighet. Drag-scrollning har inaktiverats.\n\nVänligen ge behörighet igen i Systeminställningar för att fortsätta använda appen.";
-"later" = "Senare";
-"ok" = "OK";
-
-// Settings Labels
+"enabled" = "Aktiverad";
+"trigger_button" = "Utlösningsknapp";
+"launch_at_login" = "Starta vid inloggning";
+"language" = "Språk";
+"appearance" = "Utseende";
+"system_default" = "Systemstandard";
+"appearance_light" = "Ljus";
+"appearance_dark" = "Mörkt";
 "speed" = "Hastighet";
 "acceleration" = "Acceleration";
-"dead_zone" = "Dödzon";
-"opacity" = "Opacitet";
-"show_indicator" = "Visa indikator & animationer";
-"launch_at_login" = "Starta vid inloggning";
-"excluded_apps" = "Exkluderade appar";
-
-// Acceleration Levels
+"dead_zone" = "Död zon";
+"reverse_direction" = "Omvänd riktning";
+"horizontal_scrolling" = "Horisontell rullning";
+"invert_horizontal" = "Invertera horisontellt";
 "acceleration_low" = "Låg";
 "acceleration_med" = "Med";
 "acceleration_high" = "Hög";
 "acceleration_max" = "Max";
-
-// App Picker
+"show_indicator" = "Visa indikator";
+"visualizer_size" = "Storlek";
+"liquid_glass" = "Liquid Glass";
+"opacity" = "Opacitet";
+"visualizer_tint" = "Nyans";
+"visualizer_tint_clear" = "Rensa";
+"visualizer_tint_graphite" = "Grafit";
+"visualizer_tint_accent" = "Accent";
+"visualizer_tint_aqua" = "Aqua";
+"visualizer_tint_warm" = "Varm";
+"live_preview" = "Live Preview";
+"drag_preview_hint" = "Dra i förhandsvisningen";
+"excluded_apps" = "Ignorerade appar";
+"excluded_apps_detail" = "Drag-scrollning är avstängd i dessa appar. Lägg till en aktiv app, installerad app eller manuell paketidentifierare.";
+"ignored_apps_list" = "Ignorerade appar";
+"add_ignored_app" = "Lägg till ignorerad app";
+"hide_picker" = "Göm Picker";
+"show_picker" = "Visa Väljare";
+"no_excluded_apps" = "Inga ignorerade appar ännu.";
 "search" = "Sök";
 "no_apps_found" = "Inga appar hittades";
-"done" = "Klar";
-"current" = "Aktiv";
-
-// Trigger Button
-"trigger_button" = "Utlösarknapp";
-"trigger_middle_click" = "Mittenklick";
-"trigger_right_click" = "Högerklick";
-"trigger_left_click" = "Vänsterklick";
+"custom_bundle_id" = "Anpassat paket-ID";
+"add" = "Lägg till";
+"remove" = "Ta bort";
+"current" = "Aktuell";
+"accessibility_permissions_required" = "Tillgänglighetsbehörighet krävs";
+"app_needs_permission" = "Mac Drag Scroll behöver tillstånd för att övervaka musinmatning globalt.";
+"permission_accessibility" = "Tillgänglighetstillstånd";
+"permission_accessibility_granted_detail" = "Mac Drag Scroll kan övervaka den konfigurerade musutlösaren och skicka rullningshändelser.";
+"permission_accessibility_missing_detail" = "Ge tillgänglighetsbehörighet så att appen kan upptäcka musdrag globalt.";
+"permission_granted" = "Beviljas";
+"permission_needed" = "Behövs";
+"permission_required_title" = "Tillgänglighetsbehörighet krävs";
+"permission_required_message" = "Mac Drag Scroll behöver tillgänglighetsbehörighet för att övervaka mushändelser globalt.";
+"permission_lost_title" = "Tillgänglighet förlorad";
+"permission_lost_message" = "Mac Drag Scroll kan inte längre övervaka mushändelser. Återaktivera tillgänglighetsbehörighet för att fortsätta använda dragrullning.";
+"open_system_settings" = "Öppna Systeminställningar";
+"refresh" = "Uppdatera";
+"later" = "Senare";
+"ok" = "OK";
+"event_monitoring" = "Händelseövervakning";
+"app_state" = "Appens tillstånd";
+"status_active" = "Aktiv";
+"status_enabled" = "Aktiv";
+"status_disabled" = "Inaktiverad";
+"status_waiting" = "Väntar";
+"auto_update" = "Automatisk uppdatering";
+"current_version" = "Aktuell version";
+"last_checked" = "Senast kontrollerad";
+"never" = "Aldrig";
+"checking" = "Kontrollerar";
+"check_for_update" = "Sök efter uppdatering";
+"open_release" = "Öppna Release";
+"update_history" = "Uppdatera historik";
+"update_menu_checking" = "Söker efter uppdateringar...";
+"update_menu_up_to_date" = "Upp till datum";
+"update_menu_available" = "Uppdatering tillgänglig: %@";
+"update_menu_unavailable" = "Uppdateringskontroll ej tillgänglig";
+"update_status_checking" = "Kontrollerar...";
+"update_status_up_to_date" = "Upp till datum";
+"update_status_available" = "Uppdatering tillgänglig: %@";
+"update_status_unable" = "Kan inte kontrollera";
+"update_detail_checking" = "Kontakta GitHub Releases.";
+"update_detail_up_to_date" = "Du kör den senaste kända versionen.";
+"update_detail_available" = "Version %@ är tillgänglig från GitHub Releases.";
+"about_slogan" = "Dragrullning i Windows-stil, byggd för macOS.";
+"about_author" = "Tillverkad av Martin Calander";
+"about_runtime_note" = "Designad som ett tyst menyradsverktyg med inbyggda macOS-kontroller och en Liquid Glass-dragindikator.";
+"app_logo" = "Appens logotyp";
+"version" = "Version";
+"github_repository" = "GitHub Repository";
+"website" = "Webbplats";
+"support_email" = "Supportmejl";
+"show_welcome" = "Visa Välkommen";
+"open" = "Öppna";
+"welcome_window_title" = "Välkommen till Mac Drag Scroll";
+"welcome_title" = "Välkommen till Mac Drag Scroll";
+"welcome_subtitle" = "Dragrullning i Windows-stil, formad för macOS.";
+"welcome_author" = "Tillverkad av Martin Calander";
+"welcome_permission_title" = "Tillgänglighetstillstånd";
+"welcome_permission_granted" = "Redo att övervaka din konfigurerade musutlösare.";
+"welcome_permission_needed" = "Krävs så att dragrullning kan lyssna efter musinmatning globalt.";
+"welcome_star_title" = "Stjärna Mac Drag Scroll på GitHub";
+"welcome_star_detail" = "Det hjälper projektet och gör det lättare att hitta senare.";
+"star_on_github" = "Stjärna";
+"welcome_get_started" = "Kom igång";
+"menu_disable" = "Inaktivera Mac Drag Scroll";
+"menu_enable" = "Aktivera Mac Drag Scroll";
+"menu_settings" = "Inställningar...";
+"menu_ignore_current_app" = "Ignorera aktuell app";
+"menu_ignore_app" = "Ignorera %@";
+"menu_ignored_app" = "%@ Ignoreras";
+"current_app" = "Aktuell app";
+"quit" = "Avsluta";
+"trigger_middle_click" = "Mellanklick";
+"trigger_right_click" = "Högerklicka";
+"trigger_left_click" = "Vänsterklicka";
 "trigger_button_n" = "Knapp %d";
-"trigger_command_click" = "Kommando + Klick";
-"trigger_option_click" = "Option + Klick";
-"trigger_control_click" = "Kontroll + Klick";
-"trigger_shift_click" = "Skift + Klick";
-"trigger_middle_short" = "Mitten";
-"trigger_right_short" = "Höger";
 "recording" = "Spelar in...";
-
-// Reset
-"reset_to_defaults" = "Återställ till standard";
-"reset_confirm_title" = "Återställ inställningar?";
-"reset_confirm_message" = "Detta återställer alla inställningar till standardvärden. Denna åtgärd kan inte ångras.";
+"reset_to_defaults" = "Återställ till standardinställningar";
+"reset_confirm_title" = "Återställa inställningarna?";
+"reset_confirm_message" = "Detta återställer standardinställningarna för dragrullning.";
 "reset" = "Återställ";
 "cancel" = "Avbryt";
-
-// Tooltips
-"tooltip_speed" = "Hur snabbt scrollningen rör sig. Högre värden = snabbare scrollning.";
-"tooltip_acceleration" = "Hur mycket scrollningen accelererar ju längre du drar från startpunkten.";
-"tooltip_dead_zone" = "Området runt klickpunkten där ingen scrollning sker. Hjälper med precision.";
-"tooltip_opacity" = "Genomskinlighet för scroll-indikatorn.";
-"tooltip_trigger" = "Klicka för att spela in en ny musknapp + modifierarkombination för att aktivera scrollning.";
-"tooltip_show_indicator" = "Visa visuell feedback när drag-scrollning är aktiv.";
-"tooltip_launch_at_login" = "Starta Mac Drag Scroll automatiskt vid inloggning.";
-"tooltip_excluded_apps" = "Appar där drag-scrollning kommer att inaktiveras.";
-"tooltip_reset" = "Återställ alla inställningar till standardvärden.";
-
-// Crash Handler
+"tooltip_enabled" = "Aktivera eller inaktivera dragrullning.";
+"tooltip_trigger" = "Klicka för att fånga en ny musutlösare.";
+"tooltip_launch_at_login" = "Starta Mac Drag Scroll automatiskt när du loggar in.";
+"tooltip_language" = "Välj appens språk eller följ ditt systemstandard.";
+"tooltip_appearance" = "Välj Ljus, Mörk eller följ systemets utseende.";
+"tooltip_speed" = "Styr rullningshastigheten.";
+"tooltip_acceleration" = "Styr hur snabbt rullningen ökar.";
+"tooltip_dead_zone" = "Musrörelse innan rullningen börjar.";
+"tooltip_reverse_direction" = "Vänd rullningsriktningen om den känns bakvänd.";
+"tooltip_horizontal_scrolling" = "Tillåt sidledes dragrörelse för att skicka horisontella rullningshändelser.";
+"tooltip_invert_horizontal" = "Vänd endast den horisontella rullningsriktningen.";
+"tooltip_show_indicator" = "Visa den visuella indikatorn medan du drar rullar.";
+"tooltip_visualizer_size" = "Styr storleken på dragvisualiseraren.";
+"tooltip_liquid_glass" = "Kontrollerar glasets brytning, glans och drag-reaktiva rörelser.";
+"tooltip_opacity" = "Styr visualiserarens opacitet.";
+"tooltip_visualizer_tint" = "Kontrollerar den subtila nyansen av glasvisualiseraren.";
+"tooltip_auto_update" = "Kontrollera automatiskt GitHub Releases för nyare versioner.";
+"tooltip_show_welcome" = "Öppna välkomstsidan igen.";
+"tooltip_custom_bundle_id" = "Använd detta när en app inte hittas i väljaren. Exempel: com.company.AppName";
+"settings_general" = "Allmänt";
+"settings_visualizer" = "Visualiserare";
+"settings_scrolling" = "Scrollar";
+"settings_apps" = "Ignorerade appar";
+"settings_permissions" = "Behörigheter";
+"settings_updates" = "Uppdateringar";
+"settings_about" = "Om";
+"settings_general_subtitle" = "Aktivering, trigger och startbeteende.";
+"settings_visualizer_subtitle" = "Ställ in dragvisualiseraren och förhandsgranska den direkt.";
+"settings_scrolling_subtitle" = "Justera hastighet, acceleration och dödzon.";
+"settings_apps_subtitle" = "Inaktivera dragrullning i valda appar.";
+"settings_permissions_subtitle" = "Kontrollera nödvändiga macOS-behörigheter och körtidsstatus.";
+"settings_updates_subtitle" = "Kontrollera releaser, automatisk uppdateringsstatus och uppdateringshistorik.";
+"settings_about_subtitle" = "Produktidentitet, länkar och krediter.";
 "crash_detected_title" = "Mac Drag Scroll kraschade";
-"crash_detected_message" = "Appen kraschade oväntat under föregående session. Du kan kopiera kraschrapprten för att hjälpa diagnostisera problemet.";
+"crash_detected_message" = "Appen kraschade oväntat under den senaste sessionen. Du kan kopiera kraschrapporten för att diagnostisera problemet.";
 "copy_report" = "Kopiera rapport";
-"dismiss" = "Avfärda";
+"dismiss" = "Avvisa";
 "error_occurred_title" = "Ett fel uppstod";
-"error_occurred_message" = "Ett fel uppstod under %@:\n\n%@";
-"fatal_error_title" = "Kritiskt fel";
+"error_occurred_message" = "Ett fel uppstod när %@:\n\n%@";
+"fatal_error_title" = "Fatalt fel";

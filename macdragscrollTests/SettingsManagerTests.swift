@@ -13,23 +13,28 @@ final class SettingsManagerTests: XCTestCase {
     var settings: SettingsManager!
     private var originalHasCompletedWelcome = false
     private var originalAppLanguage: AppLanguage = .system
+    private var originalAppAppearance: AppAppearance = .system
     
     override func setUp() {
         super.setUp()
         settings = SettingsManager.shared
         originalHasCompletedWelcome = settings.hasCompletedWelcome
         originalAppLanguage = settings.appLanguage
+        originalAppAppearance = settings.appAppearance
     }
     
     override func tearDown() {
         // Reset excluded apps after each test
         settings.excludedApps = []
         settings.reverseScrollDirection = false
+        settings.horizontalScrollingEnabled = true
+        settings.invertHorizontalScroll = false
         settings.visualizerSize = 1.0
         settings.visualizerTintStyle = .clear
         settings.liquidGlassIntensity = 1.35
         settings.hasCompletedWelcome = originalHasCompletedWelcome
         settings.appLanguage = originalAppLanguage
+        settings.appAppearance = originalAppAppearance
         super.tearDown()
     }
     
@@ -64,6 +69,14 @@ final class SettingsManagerTests: XCTestCase {
         
         let count = settings.excludedApps.filter { $0 == testBundleId }.count
         XCTAssertEqual(count, 1, "Should not create duplicate entries")
+    }
+
+    func testAddExcludedAppTrimsCustomBundleIdentifier() {
+        settings.excludedApps = []
+
+        settings.addExcludedApp("  com.example.CustomApp\n")
+
+        XCTAssertEqual(settings.excludedApps, ["com.example.CustomApp"])
     }
     
     func testRemoveExcludedApp() {
@@ -142,12 +155,55 @@ final class SettingsManagerTests: XCTestCase {
         XCTAssertEqual(settings.appLanguage, .system)
     }
 
+    func testDefaultAppearanceUsesSystemDefault() {
+        settings.resetToDefaults()
+
+        XCTAssertEqual(settings.appAppearance, .system)
+    }
+
     func testLanguageSelectionCanBePersisted() {
         settings.appLanguage = .swedish
         XCTAssertEqual(settings.appLanguage, .swedish)
 
         settings.appLanguage = .system
         XCTAssertEqual(settings.appLanguage, .system)
+    }
+
+    func testSelectedLanguageLoadsBundledTranslation() {
+        settings.appLanguage = .swedish
+
+        let translated = AppLocalization.shared.localizedString("appearance", value: "Appearance", comment: "Appearance setting")
+
+        XCTAssertEqual(translated, "Utseende")
+    }
+
+    func testAllBundledLanguageFilesHaveSameLocalizationKeys() {
+        guard let englishKeys = localizationKeys(for: "en") else {
+            return XCTFail("Expected English localization to be bundled")
+        }
+
+        for language in AppLanguage.allCases {
+            guard let code = language.lprojCode else { continue }
+            guard let keys = localizationKeys(for: code) else {
+                XCTFail("Expected localization bundle for \(code)")
+                continue
+            }
+
+            XCTAssertEqual(keys, englishKeys, "\(code) should contain the same localization keys as English")
+        }
+    }
+
+    func testAppearanceSelectionCanBePersisted() {
+        settings.appAppearance = .dark
+        XCTAssertEqual(settings.appAppearance, .dark)
+
+        settings.appAppearance = .system
+        XCTAssertEqual(settings.appAppearance, .system)
+    }
+
+    func testSystemDefaultsUseSystemLanguageAndAppearance() {
+        XCTAssertNil(AppLanguage.system.lprojCode)
+        XCTAssertNil(AppAppearance.system.nsAppearance)
     }
     
     func testDefaultAccelerationPositive() {
@@ -156,16 +212,22 @@ final class SettingsManagerTests: XCTestCase {
 
     func testResetToDefaultsUsesNormalScrollDirection() {
         settings.reverseScrollDirection = true
+        settings.horizontalScrollingEnabled = false
+        settings.invertHorizontalScroll = true
         settings.visualizerSize = 1.4
         settings.visualizerTintStyle = .aqua
         settings.liquidGlassIntensity = 1.9
+        settings.appAppearance = .dark
 
         settings.resetToDefaults()
 
         XCTAssertFalse(settings.reverseScrollDirection, "Default drag scroll direction should not be reversed")
+        XCTAssertTrue(settings.horizontalScrollingEnabled, "Horizontal scrolling should be enabled by default")
+        XCTAssertFalse(settings.invertHorizontalScroll, "Horizontal scrolling should not be inverted by default")
         XCTAssertEqual(settings.visualizerSize, 1.0, accuracy: 0.001)
         XCTAssertEqual(settings.visualizerTintStyle, .clear)
         XCTAssertEqual(settings.liquidGlassIntensity, 1.35, accuracy: 0.001)
+        XCTAssertEqual(settings.appAppearance, .system)
     }
 
     func testSettingsTabKeyboardShortcutsMatchSidebarOrder() {
@@ -197,6 +259,15 @@ final class SettingsManagerTests: XCTestCase {
             XCTAssertTrue(settings.isAppExcluded(bundleIdentifier: app), "\(app) should be excluded")
         }
     }
+
+    private func localizationKeys(for lprojCode: String) -> Set<String>? {
+        guard let path = Bundle.main.path(forResource: lprojCode, ofType: "lproj"),
+              let strings = NSDictionary(contentsOfFile: (path as NSString).appendingPathComponent("Localizable.strings")) as? [String: String] else {
+            return nil
+        }
+
+        return Set(strings.keys)
+    }
 }
 
 final class TriggerConfigTests: XCTestCase {
@@ -218,6 +289,18 @@ final class TriggerConfigTests: XCTestCase {
         )
 
         XCTAssertFalse(unsafeLeftClick.matches(button: 0, modifiers: []))
+    }
+
+    func testRightClickRequiresModifierForTrackpadSafety() {
+        let unsafeRightClick = TriggerConfig(
+            mouseButton: 1,
+            requiresCommand: false,
+            requiresOption: false,
+            requiresControl: false,
+            requiresShift: false
+        )
+
+        XCTAssertFalse(unsafeRightClick.matches(button: 1, modifiers: []))
     }
 
     func testRequiredModifiersMustRemainHeld() {

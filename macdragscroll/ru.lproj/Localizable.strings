@@ -2,87 +2,169 @@
   Localizable.strings (Russian)
   macdragscroll
 
-  Created by Martin Calander on 2026-01-17.
+  Generated for the current app UI strings.
 */
 
-// App Name
 "app_name" = "Mac Drag Scroll";
-
-// Footer
-"made_by" = "Автор: Martin Calander";
-"quit" = "Завершить";
-
-// Permission Required View
-"accessibility_permissions_required" = "Требуется разрешение Универсального доступа";
-"app_needs_permission" = "Mac Drag Scroll требуется это разрешение для работы.";
-"open_system_settings" = "Открыть Системные настройки";
-
-// Permission Dialogs
-"permission_required_title" = "Требуется разрешение Универсального доступа";
-"permission_required_message" = "Mac Drag Scroll требуется разрешение Универсального доступа для обнаружения событий средней кнопки мыши и включения прокрутки перетаскиванием.\n\nПредоставьте разрешение в Системных настройках.";
-"permission_lost_title" = "Разрешение Универсального доступа утрачено";
-"permission_lost_message" = "Mac Drag Scroll больше не имеет разрешения Универсального доступа. Прокрутка перетаскиванием отключена.\n\nПовторно предоставьте разрешение в Системных настройках для продолжения использования приложения.";
-"later" = "Позже";
-"ok" = "ОК";
-
-// Settings Labels
+"enabled" = "Включено";
+"trigger_button" = "Кнопка триггера";
+"launch_at_login" = "Запуск при входе в систему";
+"language" = "Язык";
+"appearance" = "Внешний вид";
+"system_default" = "Системные настройки по умолчанию";
+"appearance_light" = "Свет";
+"appearance_dark" = "Темный";
 "speed" = "Скорость";
 "acceleration" = "Ускорение";
-"dead_zone" = "Мёртвая зона";
+"dead_zone" = "Мертвая зона";
+"reverse_direction" = "Обратное направление";
+"horizontal_scrolling" = "Горизонтальная прокрутка";
+"invert_horizontal" = "Инвертировать по горизонтали";
+"acceleration_low" = "Низкий";
+"acceleration_med" = "Мед";
+"acceleration_high" = "Высокий";
+"acceleration_max" = "Макс";
+"show_indicator" = "Показать индикатор";
+"visualizer_size" = "Размер";
+"liquid_glass" = "ЖИДКОСТЕКЛОСТОКЕН";
 "opacity" = "Непрозрачность";
-"show_indicator" = "Показывать индикатор и анимации";
-"launch_at_login" = "Запускать при входе";
-"excluded_apps" = "Исключённые приложения";
-
-// Acceleration Levels
-"acceleration_low" = "Низк.";
-"acceleration_med" = "Сред.";
-"acceleration_high" = "Выс.";
-"acceleration_max" = "Макс.";
-
-// App Picker
+"visualizer_tint" = "оттенок";
+"visualizer_tint_clear" = "Очистить";
+"visualizer_tint_graphite" = "Графит";
+"visualizer_tint_accent" = "Акцент";
+"visualizer_tint_aqua" = "Аква";
+"visualizer_tint_warm" = "Теплый";
+"live_preview" = "Живой просмотр";
+"drag_preview_hint" = "Перетащите в предварительный просмотр";
+"excluded_apps" = "Игнорируемые приложения";
+"excluded_apps_detail" = "В этих приложениях прокрутка с помощью перетаскивания отключена. Добавьте работающее приложение, установленное приложение или идентификатор пакета вручную.";
+"ignored_apps_list" = "Игнорируемые приложения";
+"add_ignored_app" = "Добавить игнорируемое приложение";
+"hide_picker" = "Скрыть окно выбора";
+"show_picker" = "Выбор шоу";
+"no_excluded_apps" = "Игнорируемых приложений пока нет.";
 "search" = "Поиск";
 "no_apps_found" = "Приложения не найдены";
-"done" = "Готово";
-"current" = "Текущее";
-
-// Trigger Button
-"trigger_button" = "Кнопка запуска";
-"trigger_middle_click" = "Средняя кнопка";
-"trigger_right_click" = "Правая кнопка";
-"trigger_left_click" = "Левая кнопка";
+"custom_bundle_id" = "Пользовательский идентификатор пакета";
+"add" = "Добавить";
+"remove" = "Удалить";
+"current" = "Текущий";
+"accessibility_permissions_required" = "Требуется разрешение на доступ";
+"app_needs_permission" = "Mac Drag Scroll требуется разрешение на глобальное отслеживание ввода с помощью мыши.";
+"permission_accessibility" = "Разрешение на доступность";
+"permission_accessibility_granted_detail" = "Mac Drag Scroll может отслеживать настроенный триггер мыши и отправлять события прокрутки.";
+"permission_accessibility_missing_detail" = "Предоставьте разрешение на специальные возможности, чтобы приложение могло глобально обнаруживать перетаскивание мышью.";
+"permission_granted" = "Предоставлено";
+"permission_needed" = "Нужен";
+"permission_required_title" = "Требуется разрешение на доступ";
+"permission_required_message" = "Mac Drag Scroll требуется разрешение на доступ для глобального мониторинга событий мыши.";
+"permission_lost_title" = "Разрешение на доступ потеряно";
+"permission_lost_message" = "Mac Drag Scroll больше не может отслеживать события мыши. Снова включите разрешение специальных возможностей, чтобы продолжать использовать прокрутку с помощью перетаскивания.";
+"open_system_settings" = "Открыть настройки системы";
+"refresh" = "Обновить";
+"later" = "Позже";
+"ok" = "ОК";
+"event_monitoring" = "Мониторинг событий";
+"app_state" = "Состояние приложения";
+"status_active" = "Активный";
+"status_enabled" = "Активный";
+"status_disabled" = "Отключено";
+"status_waiting" = "Ожидание";
+"auto_update" = "Автоматическое обновление";
+"current_version" = "Текущая версия";
+"last_checked" = "Последняя проверка";
+"never" = "Никогда";
+"checking" = "Проверка";
+"check_for_update" = "Проверить наличие обновлений";
+"open_release" = "Открытый выпуск";
+"update_history" = "Обновить историю";
+"update_menu_checking" = "Проверка обновлений...";
+"update_menu_up_to_date" = "Актуально";
+"update_menu_available" = "Доступно обновление: %@.";
+"update_menu_unavailable" = "Проверка обновлений недоступна";
+"update_status_checking" = "Проверка...";
+"update_status_up_to_date" = "Актуально";
+"update_status_available" = "Доступно обновление: %@.";
+"update_status_unable" = "Невозможно проверить";
+"update_detail_checking" = "Обращение к GitHub Releases.";
+"update_detail_up_to_date" = "Вы используете новейшую известную версию.";
+"update_detail_available" = "Версия %@ доступна на GitHub Releases.";
+"about_slogan" = "Прокрутка с перетаскиванием в стиле Windows, созданная для macOS.";
+"about_author" = "Автор: Мартин Каландер";
+"about_runtime_note" = "Разработан как тихая утилита в строке меню со встроенными элементами управления macOS и индикатором перетаскивания Liquid Glass.";
+"app_logo" = "Логотип приложения";
+"version" = "Версия";
+"github_repository" = "GitHub Repository";
+"website" = "Веб-сайт";
+"support_email" = "Электронная почта поддержки";
+"show_welcome" = "Показать приветствие";
+"open" = "Открыть";
+"welcome_window_title" = "Добро пожаловать в Mac Drag Scroll";
+"welcome_title" = "Добро пожаловать в Mac Drag Scroll";
+"welcome_subtitle" = "Прокрутка с помощью перетаскивания в стиле Windows, адаптированная для macOS.";
+"welcome_author" = "Автор: Мартин Каландер";
+"welcome_permission_title" = "Разрешение на доступ";
+"welcome_permission_granted" = "Готов контролировать настроенный триггер мыши.";
+"welcome_permission_needed" = "Требуется, чтобы прокрутка при перетаскивании могла глобально прослушивать ввод мыши.";
+"welcome_star_title" = "Отметьте Mac Drag Scroll на GitHub";
+"welcome_star_detail" = "Это помогает проекту и облегчает его поиск в дальнейшем.";
+"star_on_github" = "Звезда";
+"welcome_get_started" = "Начать";
+"menu_disable" = "Отключить Mac Drag Scroll";
+"menu_enable" = "Включить Mac Drag Scroll";
+"menu_settings" = "Настройки...";
+"menu_ignore_current_app" = "Игнорировать текущее приложение";
+"menu_ignore_app" = "Игнорировать %@";
+"menu_ignored_app" = "%@ игнорируется";
+"current_app" = "Текущее приложение";
+"quit" = "Выйти";
+"trigger_middle_click" = "Средний щелчок";
+"trigger_right_click" = "Щелкните правой кнопкой мыши";
+"trigger_left_click" = "Щелкните левой кнопкой мыши";
 "trigger_button_n" = "Кнопка %d";
-"trigger_command_click" = "Command + клик";
-"trigger_option_click" = "Option + клик";
-"trigger_control_click" = "Control + клик";
-"trigger_shift_click" = "Shift + клик";
-"trigger_middle_short" = "Средняя";
-"trigger_right_short" = "Правая";
 "recording" = "Запись...";
-
-// Reset
-"reset_to_defaults" = "Сбросить настройки";
+"reset_to_defaults" = "Сброс к настройкам по умолчанию";
 "reset_confirm_title" = "Сбросить настройки?";
-"reset_confirm_message" = "Все настройки будут сброшены к значениям по умолчанию. Это действие нельзя отменить.";
-"reset" = "Сбросить";
+"reset_confirm_message" = "Это восстановит настройки перетаскивания по умолчанию.";
+"reset" = "Сброс";
 "cancel" = "Отмена";
-
-// Tooltips
-"tooltip_speed" = "Скорость прокрутки. Большие значения = быстрее прокрутка.";
-"tooltip_acceleration" = "Насколько ускоряется прокрутка при отдалении от начальной точки.";
-"tooltip_dead_zone" = "Область вокруг точки клика, где прокрутка не происходит. Помогает с точностью.";
-"tooltip_opacity" = "Прозрачность индикатора прокрутки.";
-"tooltip_trigger" = "Нажмите, чтобы записать новую комбинацию кнопки мыши + модификатора для активации прокрутки.";
-"tooltip_show_indicator" = "Показывать визуальную обратную связь при активной прокрутке перетаскиванием.";
+"tooltip_enabled" = "Включите или отключите прокрутку с помощью перетаскивания.";
+"tooltip_trigger" = "Нажмите, чтобы захватить новый триггер мыши.";
 "tooltip_launch_at_login" = "Автоматически запускать Mac Drag Scroll при входе в систему.";
-"tooltip_excluded_apps" = "Приложения, в которых прокрутка перетаскиванием будет отключена.";
-"tooltip_reset" = "Сбросить все настройки к значениям по умолчанию.";
-
-// Crash Handler
-"crash_detected_title" = "Mac Drag Scroll аварийно завершился";
-"crash_detected_message" = "Приложение неожиданно завершилось во время последнего сеанса. Вы можете скопировать отчёт об ошибке для диагностики проблемы.";
-"copy_report" = "Копировать отчёт";
-"dismiss" = "Закрыть";
+"tooltip_language" = "Выберите язык приложения или используйте язык вашей системы по умолчанию.";
+"tooltip_appearance" = "Выберите «Светлый», «Темный» или следуйте внешнему виду системы.";
+"tooltip_speed" = "Управляет скоростью прокрутки.";
+"tooltip_acceleration" = "Управляет скоростью ускорения прокрутки.";
+"tooltip_dead_zone" = "Движение мыши перед началом прокрутки.";
+"tooltip_reverse_direction" = "Инвертирует направление прокрутки, если оно кажется обратным.";
+"tooltip_horizontal_scrolling" = "Разрешить перетаскивание вбок для отправки событий горизонтальной прокрутки.";
+"tooltip_invert_horizontal" = "Переверните только горизонтальное направление прокрутки.";
+"tooltip_show_indicator" = "Показывать визуальный индикатор во время прокрутки.";
+"tooltip_visualizer_size" = "Управляет размером визуализатора перетаскивания.";
+"tooltip_liquid_glass" = "Контролирует преломление стекла, блеск и движение, реагирующее на сопротивление.";
+"tooltip_opacity" = "Управляет непрозрачностью визуализатора.";
+"tooltip_visualizer_tint" = "Управляет тонким оттенком стеклянного визуализатора.";
+"tooltip_auto_update" = "Автоматически проверять GitHub Releases на наличие новых версий.";
+"tooltip_show_welcome" = "Откройте страницу приветствия еще раз.";
+"tooltip_custom_bundle_id" = "Используйте это, если приложение не найдено в средстве выбора. Пример: com.company.AppName";
+"settings_general" = "Общий";
+"settings_visualizer" = "Визуализатор";
+"settings_scrolling" = "Прокрутка";
+"settings_apps" = "Игнорируемые приложения";
+"settings_permissions" = "Разрешения";
+"settings_updates" = "Обновления";
+"settings_about" = "О";
+"settings_general_subtitle" = "Активация, триггер и поведение при запуске.";
+"settings_visualizer_subtitle" = "Настройте визуализатор перетаскивания и мгновенно просмотрите его.";
+"settings_scrolling_subtitle" = "Отрегулируйте скорость, ускорение и мертвую зону.";
+"settings_apps_subtitle" = "Отключите прокрутку с помощью перетаскивания в выбранных приложениях.";
+"settings_permissions_subtitle" = "Проверьте необходимые разрешения macOS и состояние выполнения.";
+"settings_updates_subtitle" = "Проверьте выпуски, статус автоматического обновления и историю обновлений.";
+"settings_about_subtitle" = "Идентичность продукта, ссылки и сведения об авторах.";
+"crash_detected_title" = "Mac Drag Scroll разбился";
+"crash_detected_message" = "Приложение неожиданно аварийно завершилось во время последнего сеанса. Вы можете скопировать отчет о сбое, чтобы диагностировать проблему.";
+"copy_report" = "Копировать отчет";
+"dismiss" = "Уволить";
 "error_occurred_title" = "Произошла ошибка";
 "error_occurred_message" = "Произошла ошибка при %@:\n\n%@";
-"fatal_error_title" = "Критическая ошибка";
+"fatal_error_title" = "Неустранимая ошибка";

@@ -4,6 +4,11 @@ All notable user-facing changes to Mac Drag Scroll are tracked here.
 
 ## Unreleased
 
+- Added reliability controls for horizontal scrolling, horizontal inversion, and safer trackpad behavior.
+- Added Settings appearance mode for System Default, Light, and Dark.
+- Improved ignored-app management with an expanded picker and manual bundle ID entry.
+- Completed current UI localization coverage across all bundled languages.
+- Cancel active drag sessions when macOS screen configuration changes.
 - Added a first-run welcome window.
 - Added Permissions, Updates, and About sections in Settings.
 - Added a Liquid Glass visual style for the drag indicator and settings surface.

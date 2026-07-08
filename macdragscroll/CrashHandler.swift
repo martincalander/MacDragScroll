@@ -132,11 +132,11 @@ final class CrashHandler {
     
     private func showCrashAlert(crashLog: String) {
         let alert = NSAlert()
-        alert.messageText = NSLocalizedString("crash_detected_title", comment: "Crash detected alert title")
-        alert.informativeText = NSLocalizedString("crash_detected_message", comment: "Crash detected alert message")
+        alert.messageText = Self.localized("crash_detected_title", value: "Mac Drag Scroll Crashed", comment: "Crash detected alert title")
+        alert.informativeText = Self.localized("crash_detected_message", value: "The app crashed unexpectedly during the last session. You can copy the crash report to help diagnose the issue.", comment: "Crash detected alert message")
         alert.alertStyle = .warning
-        alert.addButton(withTitle: NSLocalizedString("copy_report", comment: "Copy crash report button"))
-        alert.addButton(withTitle: NSLocalizedString("dismiss", comment: "Dismiss button"))
+        alert.addButton(withTitle: Self.localized("copy_report", value: "Copy Report", comment: "Copy crash report button"))
+        alert.addButton(withTitle: Self.localized("dismiss", value: "Dismiss", comment: "Dismiss button"))
         
         let response = alert.runModal()
         if response == .alertFirstButtonReturn {
@@ -177,10 +177,10 @@ final class CrashHandler {
     
     private func showErrorAlert(operation: String, error: Error) {
         let alert = NSAlert()
-        alert.messageText = NSLocalizedString("error_occurred_title", comment: "Error occurred alert title")
-        alert.informativeText = String(format: NSLocalizedString("error_occurred_message", comment: "Error occurred message"), operation, error.localizedDescription)
+        alert.messageText = Self.localized("error_occurred_title", value: "An Error Occurred", comment: "Error occurred alert title")
+        alert.informativeText = String(format: Self.localized("error_occurred_message", value: "An error occurred while %@:\n\n%@", comment: "Error occurred message"), operation, error.localizedDescription)
         alert.alertStyle = .warning
-        alert.addButton(withTitle: NSLocalizedString("ok", comment: "OK button"))
+        alert.addButton(withTitle: Self.localized("ok", value: "OK", comment: "OK button"))
         alert.runModal()
     }
     
@@ -190,14 +190,14 @@ final class CrashHandler {
     static func fatalError(_ message: String, shouldQuit: Bool = false) {
         DispatchQueue.main.async {
             let alert = NSAlert()
-            alert.messageText = NSLocalizedString("fatal_error_title", comment: "Fatal error alert title")
+            alert.messageText = localized("fatal_error_title", value: "Fatal Error", comment: "Fatal error alert title")
             alert.informativeText = message
             alert.alertStyle = .critical
             
             if shouldQuit {
-                alert.addButton(withTitle: NSLocalizedString("quit", comment: "Quit button"))
+                alert.addButton(withTitle: localized("quit", value: "Quit", comment: "Quit button"))
             } else {
-                alert.addButton(withTitle: NSLocalizedString("ok", comment: "OK button"))
+                alert.addButton(withTitle: localized("ok", value: "OK", comment: "OK button"))
             }
             
             alert.runModal()
@@ -206,5 +206,9 @@ final class CrashHandler {
                 NSApplication.shared.terminate(nil)
             }
         }
+    }
+
+    private static func localized(_ key: String, value: String, comment: String) -> String {
+        AppLocalization.shared.localizedString(key, value: value, comment: comment)
     }
 }

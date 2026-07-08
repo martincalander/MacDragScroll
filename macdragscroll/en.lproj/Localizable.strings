@@ -2,83 +2,165 @@
   Localizable.strings (English)
   macdragscroll
 
-  Created by Martin Calander on 2026-01-16.
+  Generated for the current app UI strings.
 */
 
-// App Name
 "app_name" = "Mac Drag Scroll";
-
-// Footer
-"made_by" = "Made by Martin Calander";
-"quit" = "Quit";
-
-// Permission Required View
-"accessibility_permissions_required" = "Accessibility Permissions Required";
-"app_needs_permission" = "Mac Drag Scroll needs this to be able to work.";
-"open_system_settings" = "Open System Settings";
-
-// Permission Dialogs
-"permission_required_title" = "Accessibility Permission Required";
-"permission_required_message" = "Mac Drag Scroll needs Accessibility permission to detect middle mouse button events and enable drag scrolling.\n\nPlease grant permission in System Settings.";
-"permission_lost_title" = "Accessibility Permission Lost";
-"permission_lost_message" = "Mac Drag Scroll no longer has Accessibility permission. Drag scrolling has been disabled.\n\nPlease re-grant permission in System Settings to continue using the app.";
-"later" = "Later";
-"ok" = "OK";
-
-// Settings Labels
+"enabled" = "Enabled";
+"trigger_button" = "Trigger Button";
+"launch_at_login" = "Launch at Login";
+"language" = "Language";
+"appearance" = "Appearance";
+"system_default" = "System Default";
+"appearance_light" = "Light";
+"appearance_dark" = "Dark";
 "speed" = "Speed";
 "acceleration" = "Acceleration";
 "dead_zone" = "Dead Zone";
-"opacity" = "Opacity";
-"show_indicator" = "Show Indicator & Animations";
-"launch_at_login" = "Launch at Login";
-"excluded_apps" = "Excluded Apps";
-
-// Acceleration Levels
+"reverse_direction" = "Reverse Direction";
+"horizontal_scrolling" = "Horizontal Scrolling";
+"invert_horizontal" = "Invert Horizontal";
 "acceleration_low" = "Low";
 "acceleration_med" = "Med";
 "acceleration_high" = "High";
 "acceleration_max" = "Max";
-
-// App Picker
+"show_indicator" = "Show Indicator";
+"visualizer_size" = "Size";
+"liquid_glass" = "Liquid Glass";
+"opacity" = "Opacity";
+"visualizer_tint" = "Tint";
+"visualizer_tint_clear" = "Clear";
+"visualizer_tint_graphite" = "Graphite";
+"visualizer_tint_accent" = "Accent";
+"visualizer_tint_aqua" = "Aqua";
+"visualizer_tint_warm" = "Warm";
+"live_preview" = "Live Preview";
+"drag_preview_hint" = "Drag in the preview";
+"excluded_apps" = "Ignored Apps";
+"excluded_apps_detail" = "Drag scrolling stays off in these apps. Add a running app, installed app, or manual bundle identifier.";
+"ignored_apps_list" = "Ignored Apps";
+"add_ignored_app" = "Add Ignored App";
+"hide_picker" = "Hide Picker";
+"show_picker" = "Show Picker";
+"no_excluded_apps" = "No ignored apps yet.";
 "search" = "Search";
 "no_apps_found" = "No apps found";
-"done" = "Done";
+"custom_bundle_id" = "Custom bundle ID";
+"add" = "Add";
+"remove" = "Remove";
 "current" = "Current";
-
-// Trigger Button
-"trigger_button" = "Trigger Button";
+"accessibility_permissions_required" = "Accessibility Permission Required";
+"app_needs_permission" = "Mac Drag Scroll needs permission to monitor mouse input globally.";
+"permission_accessibility" = "Accessibility Permission";
+"permission_accessibility_granted_detail" = "Mac Drag Scroll can monitor the configured mouse trigger and send scroll events.";
+"permission_accessibility_missing_detail" = "Grant Accessibility permission so the app can detect mouse drags globally.";
+"permission_granted" = "Granted";
+"permission_needed" = "Needed";
+"permission_required_title" = "Accessibility Permission Required";
+"permission_required_message" = "Mac Drag Scroll needs Accessibility permission to monitor mouse events globally.";
+"permission_lost_title" = "Accessibility Permission Lost";
+"permission_lost_message" = "Mac Drag Scroll can no longer monitor mouse events. Re-enable Accessibility permission to keep using drag scrolling.";
+"open_system_settings" = "Open System Settings";
+"refresh" = "Refresh";
+"later" = "Later";
+"ok" = "OK";
+"event_monitoring" = "Event Monitoring";
+"app_state" = "App State";
+"status_active" = "Active";
+"status_enabled" = "Active";
+"status_disabled" = "Disabled";
+"status_waiting" = "Waiting";
+"auto_update" = "Auto Update";
+"current_version" = "Current Version";
+"last_checked" = "Last Checked";
+"never" = "Never";
+"checking" = "Checking";
+"check_for_update" = "Check For Update";
+"open_release" = "Open Release";
+"update_history" = "Update History";
+"update_menu_checking" = "Checking for Updates...";
+"update_menu_up_to_date" = "Up to Date";
+"update_menu_available" = "Update Available: %@";
+"update_menu_unavailable" = "Update Check Unavailable";
+"update_status_checking" = "Checking...";
+"update_status_up_to_date" = "Up to Date";
+"update_status_available" = "Update Available: %@";
+"update_status_unable" = "Unable to Check";
+"update_detail_checking" = "Contacting GitHub Releases.";
+"update_detail_up_to_date" = "You are running the newest known version.";
+"update_detail_available" = "Version %@ is available from GitHub Releases.";
+"about_slogan" = "Windows-style drag scrolling, built for macOS.";
+"about_author" = "Made by Martin Calander";
+"about_runtime_note" = "Designed as a quiet menu bar utility with native macOS controls and a Liquid Glass drag indicator.";
+"app_logo" = "App logo";
+"version" = "Version";
+"github_repository" = "GitHub Repository";
+"website" = "Website";
+"support_email" = "Support Email";
+"show_welcome" = "Show Welcome";
+"open" = "Open";
+"welcome_window_title" = "Welcome to Mac Drag Scroll";
+"welcome_title" = "Welcome to Mac Drag Scroll";
+"welcome_subtitle" = "Windows-style drag scrolling, shaped for macOS.";
+"welcome_author" = "Made by Martin Calander";
+"welcome_permission_title" = "Accessibility permission";
+"welcome_permission_granted" = "Ready to monitor your configured mouse trigger.";
+"welcome_permission_needed" = "Required so drag scrolling can listen for mouse input globally.";
+"welcome_star_title" = "Star Mac Drag Scroll on GitHub";
+"welcome_star_detail" = "It helps the project and makes it easier to find later.";
+"star_on_github" = "Star";
+"welcome_get_started" = "Get Started";
+"menu_disable" = "Disable Mac Drag Scroll";
+"menu_enable" = "Enable Mac Drag Scroll";
+"menu_settings" = "Settings...";
+"menu_ignore_current_app" = "Ignore Current App";
+"menu_ignore_app" = "Ignore %@";
+"menu_ignored_app" = "%@ Ignored";
+"current_app" = "Current App";
+"quit" = "Quit";
 "trigger_middle_click" = "Middle Click";
 "trigger_right_click" = "Right Click";
 "trigger_left_click" = "Left Click";
 "trigger_button_n" = "Button %d";
-"trigger_command_click" = "Command + Click";
-"trigger_option_click" = "Option + Click";
-"trigger_control_click" = "Control + Click";
-"trigger_shift_click" = "Shift + Click";
-"trigger_middle_short" = "Middle";
-"trigger_right_short" = "Right";
 "recording" = "Recording...";
-
-// Reset
 "reset_to_defaults" = "Reset to Defaults";
 "reset_confirm_title" = "Reset Settings?";
-"reset_confirm_message" = "This will reset all settings to their default values. This action cannot be undone.";
+"reset_confirm_message" = "This will restore the default drag scroll settings.";
 "reset" = "Reset";
 "cancel" = "Cancel";
-
-// Tooltips
-"tooltip_speed" = "How fast scrolling moves. Higher values = faster scrolling.";
-"tooltip_acceleration" = "How much scrolling speeds up the farther you drag from the start point.";
-"tooltip_dead_zone" = "The area around the click point where no scrolling occurs. Helps with precision.";
-"tooltip_opacity" = "Transparency of the scroll indicator overlay.";
-"tooltip_trigger" = "Click to record a new mouse button + modifier combination to trigger scrolling.";
-"tooltip_show_indicator" = "Show visual feedback when drag scrolling is active.";
+"tooltip_enabled" = "Turn drag scrolling on or off.";
+"tooltip_trigger" = "Click to capture a new mouse trigger.";
 "tooltip_launch_at_login" = "Automatically start Mac Drag Scroll when you log in.";
-"tooltip_excluded_apps" = "Apps where drag scrolling will be disabled.";
-"tooltip_reset" = "Reset all settings to their default values.";
-
-// Crash Handler
+"tooltip_language" = "Choose the app language, or follow your system default.";
+"tooltip_appearance" = "Choose Light, Dark, or follow the system appearance.";
+"tooltip_speed" = "Controls scroll speed.";
+"tooltip_acceleration" = "Controls how quickly scrolling ramps up.";
+"tooltip_dead_zone" = "Mouse movement before scrolling starts.";
+"tooltip_reverse_direction" = "Flip drag scrolling if the direction feels backwards.";
+"tooltip_horizontal_scrolling" = "Allow sideways drag movement to send horizontal scroll events.";
+"tooltip_invert_horizontal" = "Flip only the horizontal scroll direction.";
+"tooltip_show_indicator" = "Show the visual indicator while drag scrolling.";
+"tooltip_visualizer_size" = "Controls the size of the drag visualizer.";
+"tooltip_liquid_glass" = "Controls glass refraction, sheen, and drag-reactive movement.";
+"tooltip_opacity" = "Controls visualizer opacity.";
+"tooltip_visualizer_tint" = "Controls the subtle tint of the glass visualizer.";
+"tooltip_auto_update" = "Automatically check GitHub Releases for newer versions.";
+"tooltip_show_welcome" = "Open the welcome page again.";
+"tooltip_custom_bundle_id" = "Use this when an app is not found in the picker. Example: com.company.AppName";
+"settings_general" = "General";
+"settings_visualizer" = "Visualizer";
+"settings_scrolling" = "Scrolling";
+"settings_apps" = "Ignored Apps";
+"settings_permissions" = "Permissions";
+"settings_updates" = "Updates";
+"settings_about" = "About";
+"settings_general_subtitle" = "Activation, trigger, and startup behavior.";
+"settings_visualizer_subtitle" = "Tune the drag visualizer and preview it instantly.";
+"settings_scrolling_subtitle" = "Adjust speed, acceleration, and dead zone.";
+"settings_apps_subtitle" = "Disable drag scrolling in selected apps.";
+"settings_permissions_subtitle" = "Check required macOS permissions and runtime status.";
+"settings_updates_subtitle" = "Check releases, auto update status, and update history.";
+"settings_about_subtitle" = "Product identity, links, and credits.";
 "crash_detected_title" = "Mac Drag Scroll Crashed";
 "crash_detected_message" = "The app crashed unexpectedly during the last session. You can copy the crash report to help diagnose the issue.";
 "copy_report" = "Copy Report";

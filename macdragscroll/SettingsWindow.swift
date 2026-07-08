@@ -19,9 +19,10 @@ struct SettingsWindowView: View {
     @ObservedObject private var updateManager = UpdateManager.shared
     @ObservedObject private var navigation = SettingsWindowNavigation.shared
 
-    @State private var showingAppPicker = false
+    @State private var showingAppPicker = true
     @State private var capturedFrontmostBundleId: String?
     @State private var showingResetConfirmation = false
+    @State private var logoPop = false
     @FocusState private var focusedSidebarTab: SettingsTab?
 
     var body: some View {
@@ -57,6 +58,7 @@ struct SettingsWindowView: View {
             }
         }
         .frame(minWidth: 760, minHeight: 560)
+        .preferredColorScheme(settings.appAppearance.colorScheme)
         .background {
             SettingsKeyboardMonitor { command in
                 handleKeyboardCommand(command)
@@ -188,15 +190,6 @@ struct SettingsWindowView: View {
                 Divider()
 
                 ToggleRow(
-                    icon: "arrow.up.arrow.down",
-                    title: localized("reverse_direction", value: "Reverse Direction", comment: "Reverse Direction toggle"),
-                    isOn: $settings.reverseScrollDirection,
-                    tooltip: localized("tooltip_reverse_direction", value: "Flip drag scrolling if the direction feels backwards.", comment: "Reverse direction tooltip")
-                )
-            }
-
-            GlassSection {
-                ToggleRow(
                     icon: "rectangle.on.rectangle",
                     title: localized("launch_at_login", value: "Launch at Login", comment: "Launch at Login toggle"),
                     isOn: $settings.launchAtLogin,
@@ -206,6 +199,10 @@ struct SettingsWindowView: View {
                 Divider()
 
                 LanguagePickerRow(selection: $settings.appLanguage)
+
+                Divider()
+
+                AppearancePickerRow(selection: $settings.appAppearance)
             }
         }
     }
@@ -290,70 +287,117 @@ struct SettingsWindowView: View {
                 format: "%.0fpx",
                 tooltip: localized("tooltip_dead_zone", value: "Mouse movement before scrolling starts.", comment: "Dead zone tooltip")
             )
+
+            Divider()
+
+            ToggleRow(
+                icon: "arrow.up.arrow.down",
+                title: localized("reverse_direction", value: "Reverse Direction", comment: "Reverse Direction toggle"),
+                isOn: $settings.reverseScrollDirection,
+                tooltip: localized("tooltip_reverse_direction", value: "Flip drag scrolling if the direction feels backwards.", comment: "Reverse direction tooltip")
+            )
+
+            Divider()
+
+            ToggleRow(
+                icon: "arrow.left.and.right",
+                title: localized("horizontal_scrolling", value: "Horizontal Scrolling", comment: "Horizontal scrolling toggle"),
+                isOn: $settings.horizontalScrollingEnabled,
+                tooltip: localized("tooltip_horizontal_scrolling", value: "Allow sideways drag movement to send horizontal scroll events.", comment: "Horizontal scrolling tooltip")
+            )
+
+            Divider()
+
+            ToggleRow(
+                icon: "arrow.left.arrow.right",
+                title: localized("invert_horizontal", value: "Invert Horizontal", comment: "Invert horizontal scrolling toggle"),
+                isOn: $settings.invertHorizontalScroll,
+                tooltip: localized("tooltip_invert_horizontal", value: "Flip only the horizontal scroll direction.", comment: "Invert horizontal tooltip")
+            )
+            .disabled(!settings.horizontalScrollingEnabled)
+            .opacity(settings.horizontalScrollingEnabled ? 1 : 0.55)
         }
     }
 
     private var appSettings: some View {
-        GlassSection {
-            HStack(spacing: 8) {
-                Image(systemName: "app.badge")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(.secondary)
-                    .frame(width: 18)
+        VStack(spacing: 14) {
+            GlassSection {
+                HStack(alignment: .top, spacing: 10) {
+                    Image(systemName: "app.badge")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 24)
 
-                Text(localized("excluded_apps", value: "Ignored Apps", comment: "Excluded Apps section"))
-                    .font(.system(size: 12, weight: .medium))
-
-                Spacer()
-
-                Button {
-                    if !showingAppPicker {
-                        capturedFrontmostBundleId = SettingsManager.shared.getFrontmostAppBundleId()
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(localized("excluded_apps", value: "Ignored Apps", comment: "Excluded Apps section"))
+                            .font(.system(size: 13, weight: .semibold))
+                        Text(localized("excluded_apps_detail", value: "Drag scrolling stays off in these apps. Add a running app, installed app, or manual bundle identifier.", comment: "Excluded apps detail"))
+                            .font(.system(size: 11))
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
-                    withAnimation(.easeInOut(duration: 0.18)) {
-                        showingAppPicker.toggle()
+
+                    Spacer()
+
+                    Button {
+                        if !showingAppPicker {
+                            capturedFrontmostBundleId = SettingsManager.shared.getFrontmostAppBundleId()
+                        }
+                        withAnimation(.easeInOut(duration: 0.18)) {
+                            showingAppPicker.toggle()
+                        }
+                    } label: {
+                        Label(
+                            showingAppPicker ? localized("hide_picker", value: "Hide Picker", comment: "Hide picker button") : localized("show_picker", value: "Show Picker", comment: "Show picker button"),
+                            systemImage: showingAppPicker ? "chevron.up.circle.fill" : "plus.circle.fill"
+                        )
+                        .font(.system(size: 11, weight: .medium))
                     }
-                } label: {
-                    Label(
-                        showingAppPicker ? localized("cancel", value: "Cancel", comment: "Cancel button") : localized("add_app", value: "Add App", comment: "Add app button"),
-                        systemImage: showingAppPicker ? "xmark.circle.fill" : "plus.circle.fill"
-                    )
-                    .font(.system(size: 11, weight: .medium))
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
             }
 
-            if !settings.excludedApps.isEmpty {
-                VStack(spacing: 4) {
-                    ForEach(settings.excludedApps, id: \.self) { bundleId in
-                        CompactAppRow(bundleId: bundleId) {
-                            withAnimation(.easeOut(duration: 0.15)) {
-                                settings.removeExcludedApp(bundleId)
+            GlassSection {
+                Label(localized("ignored_apps_list", value: "Ignored Apps", comment: "Ignored apps list title"), systemImage: "hand.raised.slash")
+                    .font(.system(size: 12, weight: .semibold))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                if !settings.excludedApps.isEmpty {
+                    VStack(spacing: 4) {
+                        ForEach(settings.excludedApps, id: \.self) { bundleId in
+                            CompactAppRow(bundleId: bundleId) {
+                                withAnimation(.easeOut(duration: 0.15)) {
+                                    settings.removeExcludedApp(bundleId)
+                                }
                             }
                         }
                     }
+                } else {
+                    Text(localized("no_excluded_apps", value: "No ignored apps yet.", comment: "No excluded apps message"))
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
-            } else if !showingAppPicker {
-                Text(localized("no_excluded_apps", value: "No ignored apps yet.", comment: "No excluded apps message"))
-                    .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.leading, 26)
             }
 
             if showingAppPicker {
-                InlineAppPickerView(
-                    excludedApps: settings.excludedApps,
-                    frontmostBundleId: capturedFrontmostBundleId,
-                    onAdd: { bundleId in
-                        withAnimation(.easeOut(duration: 0.15)) {
-                            settings.addExcludedApp(bundleId)
+                GlassSection {
+                    InlineAppPickerView(
+                        excludedApps: settings.excludedApps,
+                        frontmostBundleId: capturedFrontmostBundleId,
+                        onAdd: { bundleId in
+                            withAnimation(.easeOut(duration: 0.15)) {
+                                settings.addExcludedApp(bundleId)
+                            }
                         }
-                    }
-                )
+                    )
+                }
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }
+        }
+        .onAppear {
+            capturedFrontmostBundleId = SettingsManager.shared.getFrontmostAppBundleId()
         }
     }
 
@@ -540,15 +584,30 @@ struct SettingsWindowView: View {
         VStack(spacing: 14) {
             GlassSection {
                 HStack(spacing: 16) {
-                    Image("BrandMark")
-                        .resizable()
-                        .interpolation(.high)
-                        .frame(width: 92, height: 92)
-                        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                        .shadow(color: .black.opacity(0.18), radius: 14, x: 0, y: 6)
+                    Button {
+                        withAnimation(.spring(response: 0.22, dampingFraction: 0.46)) {
+                            logoPop = true
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
+                            withAnimation(.spring(response: 0.28, dampingFraction: 0.72)) {
+                                logoPop = false
+                            }
+                        }
+                    } label: {
+                        Image("BrandMark")
+                            .resizable()
+                            .interpolation(.high)
+                            .frame(width: 92, height: 92)
+                            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                            .shadow(color: .black.opacity(0.18), radius: 14, x: 0, y: 6)
+                    }
+                    .buttonStyle(.plain)
+                    .scaleEffect(logoPop ? 1.08 : 1.0)
+                    .rotationEffect(.degrees(logoPop ? -2.5 : 0))
+                    .accessibilityLabel(localized("app_logo", value: "App logo", comment: "App logo accessibility label"))
 
                     VStack(alignment: .leading, spacing: 6) {
-                        Text(AppDelegate.appName)
+                        Text("\(AppDelegate.appName) ©")
                             .font(.system(size: 28, weight: .semibold))
                         Text(localized("about_slogan", value: "Windows-style drag scrolling, built for macOS.", comment: "About slogan"))
                             .font(.system(size: 13))
@@ -582,6 +641,15 @@ struct SettingsWindowView: View {
                     icon: "globe",
                     title: localized("website", value: "Website", comment: "Website label"),
                     url: UpdateManager.websiteURL
+                )
+
+                Divider()
+
+                LinkRow(
+                    icon: "envelope",
+                    title: localized("support_email", value: "Support Email", comment: "Support email label"),
+                    url: URL(string: "mailto:macdragscroll@martincalander.com")!,
+                    displayText: "macdragscroll@martincalander.com"
                 )
 
                 Divider()
@@ -1328,6 +1396,27 @@ private struct LanguagePickerRow: View {
     }
 }
 
+private struct AppearancePickerRow: View {
+    @Binding var selection: AppAppearance
+
+    var body: some View {
+        SettingRow(
+            icon: "circle.lefthalf.filled",
+            title: localized("appearance", value: "Appearance", comment: "Appearance setting"),
+            tooltip: localized("tooltip_appearance", value: "Choose Light, Dark, or follow the system appearance.", comment: "Appearance tooltip")
+        ) {
+            Picker("", selection: $selection) {
+                ForEach(AppAppearance.allCases) { appearance in
+                    Text(appearance.displayName).tag(appearance)
+                }
+            }
+            .pickerStyle(.menu)
+            .controlSize(.small)
+            .frame(width: 176)
+        }
+    }
+}
+
 private struct InfoRow: View {
     let icon: String
     let title: String
@@ -1358,6 +1447,7 @@ private struct LinkRow: View {
     let icon: String
     let title: String
     let url: URL
+    var displayText: String? = nil
 
     var body: some View {
         HStack(spacing: 8) {
@@ -1372,7 +1462,7 @@ private struct LinkRow: View {
             Spacer(minLength: 8)
 
             Link(destination: url) {
-                Label(url.host ?? url.absoluteString, systemImage: "arrow.up.forward")
+                Label(displayText ?? url.host ?? url.absoluteString, systemImage: "arrow.up.forward")
                     .font(.system(size: 11, weight: .medium))
             }
             .controlSize(.small)
@@ -1537,7 +1627,7 @@ private struct CompactAppRow: View {
             }
             .buttonStyle(.plain)
             .foregroundColor(isHovered ? .red : .secondary)
-            .help("Remove")
+            .help(localized("remove", value: "Remove", comment: "Remove button"))
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 5)
@@ -1579,6 +1669,7 @@ private struct InlineAppPickerView: View {
 
     @State private var apps: [(name: String, bundleId: String, icon: NSImage?)] = []
     @State private var searchText = ""
+    @State private var customBundleId = ""
     @State private var isLoading = true
 
     private var filteredApps: [(name: String, bundleId: String, icon: NSImage?)] {
@@ -1594,9 +1685,23 @@ private struct InlineAppPickerView: View {
         }.prefix(7))
     }
 
+    private var normalizedCustomBundleId: String {
+        SettingsManager.normalizedBundleIdentifier(customBundleId)
+    }
+
+    private var canAddCustomBundleId: Bool {
+        let bundleId = normalizedCustomBundleId
+        return !bundleId.isEmpty && !excludedApps.contains(bundleId)
+    }
+
     var body: some View {
         VStack(spacing: 7) {
+            Label(localized("add_ignored_app", value: "Add Ignored App", comment: "Add ignored app title"), systemImage: "plus.app")
+                .font(.system(size: 12, weight: .semibold))
+                .frame(maxWidth: .infinity, alignment: .leading)
+
             searchField
+            customBundleField
 
             if isLoading {
                 ProgressView()
@@ -1652,6 +1757,39 @@ private struct InlineAppPickerView: View {
         .background(.quaternary, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
     }
 
+    private var customBundleField: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "curlybraces")
+                .font(.system(size: 10))
+                .foregroundStyle(.secondary)
+
+            TextField(localized("custom_bundle_id", value: "Custom bundle ID", comment: "Custom bundle ID placeholder"), text: $customBundleId)
+                .textFieldStyle(.plain)
+                .font(.system(size: 11))
+                .onSubmit(addCustomBundleId)
+
+            Button {
+                addCustomBundleId()
+            } label: {
+                Label(localized("add", value: "Add", comment: "Add button"), systemImage: "plus.circle.fill")
+                    .font(.system(size: 10, weight: .medium))
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.mini)
+            .disabled(!canAddCustomBundleId)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .background(.quaternary.opacity(0.62), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+        .help(localized("tooltip_custom_bundle_id", value: "Use this when an app is not found in the picker. Example: com.company.AppName", comment: "Custom bundle ID tooltip"))
+    }
+
+    private func addCustomBundleId() {
+        guard canAddCustomBundleId else { return }
+        onAdd(normalizedCustomBundleId)
+        customBundleId = ""
+    }
+
     private func loadApps() {
         isLoading = true
 
@@ -1664,6 +1802,19 @@ private struct InlineAppPickerView: View {
                     isLoading = false
                 }
             }
+        }
+    }
+}
+
+private extension AppAppearance {
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system:
+            return nil
+        case .light:
+            return .light
+        case .dark:
+            return .dark
         }
     }
 }

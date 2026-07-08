@@ -53,6 +53,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         setupMenuBar()
         observeSettings()
         observeSystemAppearance()
+        applyAppearanceMode()
         updateDockIcon()
         
         NSApp.setActivationPolicy(.accessory)
@@ -229,6 +230,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             .sink { [weak self] _ in self?.refreshLocalizedChrome() }
             .store(in: &cancellables)
 
+        SettingsManager.shared.$appAppearance
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.applyAppearanceMode() }
+            .store(in: &cancellables)
+
         NotificationCenter.default.publisher(for: Self.showWelcomeNotification)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.showWelcomeWindow() }
@@ -374,6 +380,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     }
 
     @objc private func systemAppearanceDidChange(_ notification: Notification) {
+        guard SettingsManager.shared.appAppearance == .system else { return }
+        updateDockIcon()
+        refreshStatusItem()
+    }
+
+    private func applyAppearanceMode() {
+        NSApp.appearance = SettingsManager.shared.appAppearance.nsAppearance
         updateDockIcon()
         refreshStatusItem()
     }

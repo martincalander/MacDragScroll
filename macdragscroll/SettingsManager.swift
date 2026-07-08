@@ -102,6 +102,38 @@ enum AppLanguage: String, CaseIterable, Identifiable, Codable {
     }
 }
 
+// MARK: - App Appearance
+
+enum AppAppearance: String, CaseIterable, Identifiable, Codable {
+    case system
+    case light
+    case dark
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .system:
+            return AppLocalization.shared.localizedString("system_default", value: "System Default", comment: "System default appearance")
+        case .light:
+            return AppLocalization.shared.localizedString("appearance_light", value: "Light", comment: "Light appearance")
+        case .dark:
+            return AppLocalization.shared.localizedString("appearance_dark", value: "Dark", comment: "Dark appearance")
+        }
+    }
+
+    var nsAppearance: NSAppearance? {
+        switch self {
+        case .system:
+            return nil
+        case .light:
+            return NSAppearance(named: .aqua)
+        case .dark:
+            return NSAppearance(named: .darkAqua)
+        }
+    }
+}
+
 // MARK: - Scroll Trigger Configuration
 
 struct TriggerConfig: Codable, Equatable {
@@ -173,11 +205,9 @@ struct TriggerConfig: Codable, Equatable {
         if requiresControl && !modifiers.contains(.control) { return false }
         if requiresShift && !modifiers.contains(.shift) { return false }
         
-        // If trigger requires no modifiers, make sure none are pressed
-        // (except for middle/right click which can be pressed with modifiers)
-        if !hasModifiers && mouseButton == 0 {
-            // Left click without modifiers is too easy to trigger accidentally
-            // so we require at least one modifier for left click
+        // Primary and secondary clicks are common trackpad gestures. Require a
+        // modifier for them so normal trackpad clicking and dragging stays safe.
+        if !hasModifiers && mouseButton <= 1 {
             return false
         }
         
@@ -265,9 +295,12 @@ class SettingsManager: ObservableObject {
     private let visualizerTintStyleKey = "visualizerTintStyle"
     private let liquidGlassIntensityKey = "liquidGlassIntensity"
     private let reverseScrollDirectionKey = "reverseScrollDirection"
+    private let horizontalScrollingEnabledKey = "horizontalScrollingEnabled"
+    private let invertHorizontalScrollKey = "invertHorizontalScroll"
     private let triggerConfigKey = "triggerConfig"
     private let hasCompletedWelcomeKey = "hasCompletedWelcome"
     private let appLanguageKey = "appLanguage"
+    private let appAppearanceKey = "appAppearance"
     
     // Launch at Login using SMAppService (macOS 13+)
     @Published var launchAtLogin: Bool {
@@ -286,6 +319,14 @@ class SettingsManager: ObservableObject {
 
     @Published var reverseScrollDirection: Bool {
         didSet { defaults.set(reverseScrollDirection, forKey: reverseScrollDirectionKey) }
+    }
+
+    @Published var horizontalScrollingEnabled: Bool {
+        didSet { defaults.set(horizontalScrollingEnabled, forKey: horizontalScrollingEnabledKey) }
+    }
+
+    @Published var invertHorizontalScroll: Bool {
+        didSet { defaults.set(invertHorizontalScroll, forKey: invertHorizontalScrollKey) }
     }
     
     @Published var excludedApps: [String] {
@@ -351,6 +392,10 @@ class SettingsManager: ObservableObject {
     @Published var appLanguage: AppLanguage {
         didSet { defaults.set(appLanguage.rawValue, forKey: appLanguageKey) }
     }
+
+    @Published var appAppearance: AppAppearance {
+        didSet { defaults.set(appAppearance.rawValue, forKey: appAppearanceKey) }
+    }
     
     @Published var triggerConfig: TriggerConfig {
         didSet { saveTriggerConfig() }
@@ -369,16 +414,23 @@ class SettingsManager: ObservableObject {
             visualizerTintStyleKey: VisualizerTintStyle.clear.rawValue,
             liquidGlassIntensityKey: 1.35,
             reverseScrollDirectionKey: false,
+            horizontalScrollingEnabledKey: true,
+            invertHorizontalScrollKey: false,
             hasCompletedWelcomeKey: false,
-            appLanguageKey: AppLanguage.system.rawValue
+            appLanguageKey: AppLanguage.system.rawValue,
+            appAppearanceKey: AppAppearance.system.rawValue
         ])
         
         self.isEnabled = defaults.bool(forKey: isEnabledKey)
         self.animationsEnabled = defaults.bool(forKey: animationsEnabledKey)
         self.reverseScrollDirection = defaults.bool(forKey: reverseScrollDirectionKey)
+        self.horizontalScrollingEnabled = defaults.object(forKey: horizontalScrollingEnabledKey) == nil ? true : defaults.bool(forKey: horizontalScrollingEnabledKey)
+        self.invertHorizontalScroll = defaults.bool(forKey: invertHorizontalScrollKey)
         self.hasCompletedWelcome = defaults.bool(forKey: hasCompletedWelcomeKey)
         let appLanguageRawValue = defaults.string(forKey: appLanguageKey) ?? AppLanguage.system.rawValue
         self.appLanguage = AppLanguage(rawValue: appLanguageRawValue) ?? .system
+        let appAppearanceRawValue = defaults.string(forKey: appAppearanceKey) ?? AppAppearance.system.rawValue
+        self.appAppearance = AppAppearance(rawValue: appAppearanceRawValue) ?? .system
         self.excludedApps = defaults.stringArray(forKey: excludedAppsKey) ?? []
 
         // Load and clamp values to valid ranges (protects against corrupted UserDefaults)
@@ -526,13 +578,20 @@ class SettingsManager: ObservableObject {
     }
     
     func addExcludedApp(_ bundleId: String) {
-        if !excludedApps.contains(bundleId) {
-            excludedApps.append(bundleId)
+        let normalizedBundleId = Self.normalizedBundleIdentifier(bundleId)
+        guard !normalizedBundleId.isEmpty else { return }
+
+        if !excludedApps.contains(normalizedBundleId) {
+            excludedApps.append(normalizedBundleId)
         }
     }
     
     func removeExcludedApp(_ bundleId: String) {
         excludedApps.removeAll { $0 == bundleId }
+    }
+
+    static func normalizedBundleIdentifier(_ bundleId: String) -> String {
+        bundleId.trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
     // MARK: - Reset to Defaults
@@ -541,6 +600,8 @@ class SettingsManager: ObservableObject {
         isEnabled = true
         animationsEnabled = true
         reverseScrollDirection = false
+        horizontalScrollingEnabled = true
+        invertHorizontalScroll = false
         scrollSpeed = 2.0
         deadZoneRadius = 20.0
         acceleration = 1.8
@@ -549,6 +610,7 @@ class SettingsManager: ObservableObject {
         visualizerTintStyle = .clear
         liquidGlassIntensity = 1.35
         appLanguage = .system
+        appAppearance = .system
         triggerConfig = .default
         excludedApps = []
         // Note: launchAtLogin is not reset as it's a system preference

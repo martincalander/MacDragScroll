@@ -23,37 +23,40 @@ enum UpdateStatus: Equatable {
     var menuTitle: String {
         switch self {
         case .checking:
-            return "Checking for Updates..."
+            return localized("update_menu_checking", value: "Checking for Updates...")
         case .upToDate:
-            return "Up to Date"
+            return localized("update_menu_up_to_date", value: "Up to Date")
         case let .available(version, _):
-            return "Update Available: \(version)"
+            let format = localized("update_menu_available", value: "Update Available: %@")
+            return String(format: format, version)
         case .failed:
-            return "Update Check Unavailable"
+            return localized("update_menu_unavailable", value: "Update Check Unavailable")
         }
     }
 
     var statusTitle: String {
         switch self {
         case .checking:
-            return "Checking..."
+            return localized("update_status_checking", value: "Checking...")
         case .upToDate:
-            return "Up to Date"
+            return localized("update_status_up_to_date", value: "Up to Date")
         case let .available(version, _):
-            return "Update Available: \(version)"
+            let format = localized("update_status_available", value: "Update Available: %@")
+            return String(format: format, version)
         case .failed:
-            return "Unable to Check"
+            return localized("update_status_unable", value: "Unable to Check")
         }
     }
 
     var statusDetail: String {
         switch self {
         case .checking:
-            return "Contacting GitHub Releases."
+            return localized("update_detail_checking", value: "Contacting GitHub Releases.")
         case .upToDate:
-            return "You are running the newest known version."
+            return localized("update_detail_up_to_date", value: "You are running the newest known version.")
         case let .available(version, _):
-            return "Version \(version) is available from GitHub Releases."
+            let format = localized("update_detail_available", value: "Version %@ is available from GitHub Releases.")
+            return String(format: format, version)
         case let .failed(message):
             return message
         }
@@ -62,6 +65,10 @@ enum UpdateStatus: Equatable {
     var isMenuActionEnabled: Bool {
         if case .available = self { return true }
         return false
+    }
+
+    private func localized(_ key: String, value: String) -> String {
+        AppLocalization.shared.localizedString(key, value: value, comment: key)
     }
 }
 

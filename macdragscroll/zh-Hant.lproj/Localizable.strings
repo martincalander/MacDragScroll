@@ -1,88 +1,170 @@
 /* 
-  Localizable.strings (Chinese Traditional)
+  Localizable.strings (Traditional Chinese)
   macdragscroll
 
-  Created by Martin Calander on 2026-01-17.
+  Generated for the current app UI strings.
 */
 
-// App Name
 "app_name" = "Mac Drag Scroll";
-
-// Footer
-"made_by" = "由 Martin Calander 製作";
-"quit" = "結束";
-
-// Permission Required View
-"accessibility_permissions_required" = "需要輔助使用權限";
-"app_needs_permission" = "Mac Drag Scroll 需要此權限才能運作。";
-"open_system_settings" = "開啟系統設定";
-
-// Permission Dialogs
-"permission_required_title" = "需要輔助使用權限";
-"permission_required_message" = "Mac Drag Scroll 需要輔助使用權限來偵測滑鼠中鍵事件並啟用拖曳捲動。\n\n請在系統設定中授予權限。";
-"permission_lost_title" = "輔助使用權限已失效";
-"permission_lost_message" = "Mac Drag Scroll 已失去輔助使用權限。拖曳捲動已被停用。\n\n請在系統設定中重新授予權限以繼續使用此 App。";
-"later" = "稍後";
-"ok" = "好";
-
-// Settings Labels
-"speed" = "速度";
-"acceleration" = "加速度";
-"dead_zone" = "死區";
-"opacity" = "不透明度";
-"show_indicator" = "顯示指示器與動畫";
-"launch_at_login" = "登入時啟動";
-"excluded_apps" = "已排除的 App";
-
-// Acceleration Levels
-"acceleration_low" = "低";
-"acceleration_med" = "中";
-"acceleration_high" = "高";
-"acceleration_max" = "最大";
-
-// App Picker
-"search" = "搜尋";
-"no_apps_found" = "找不到 App";
-"done" = "完成";
-"current" = "目前";
-
-// Trigger Button
+"enabled" = "啟用";
 "trigger_button" = "觸發按鈕";
-"trigger_middle_click" = "中鍵點擊";
-"trigger_right_click" = "右鍵點擊";
-"trigger_left_click" = "左鍵點擊";
+"launch_at_login" = "登入時啟動";
+"language" = "語言";
+"appearance" = "外觀";
+"system_default" = "系統預設值";
+"appearance_light" = "光";
+"appearance_dark" = "黑暗的";
+"speed" = "速度";
+"acceleration" = "加速";
+"dead_zone" = "死區";
+"reverse_direction" = "反向";
+"horizontal_scrolling" = "水平捲動";
+"invert_horizontal" = "水平反轉";
+"acceleration_low" = "低的";
+"acceleration_med" = "醫學";
+"acceleration_high" = "高的";
+"acceleration_max" = "最大限度";
+"show_indicator" = "顯示指標";
+"visualizer_size" = "尺寸";
+"liquid_glass" = "液體玻璃斯托肯";
+"opacity" = "不透明度";
+"visualizer_tint" = "著色";
+"visualizer_tint_clear" = "清除";
+"visualizer_tint_graphite" = "石墨";
+"visualizer_tint_accent" = "口音";
+"visualizer_tint_aqua" = "阿誇";
+"visualizer_tint_warm" = "溫暖的";
+"live_preview" = "即時預覽";
+"drag_preview_hint" = "拖入預覽";
+"excluded_apps" = "被忽略的應用程式";
+"excluded_apps_detail" = "這些 App 中會停用拖曳捲動。新增正在執行的 App、已安裝的 App，或手動輸入套件識別碼。";
+"ignored_apps_list" = "被忽略的應用程式";
+"add_ignored_app" = "添加忽略的應用程式";
+"hide_picker" = "隱藏選擇器";
+"show_picker" = "顯示選擇器";
+"no_excluded_apps" = "還沒有被忽略的應用程式。";
+"search" = "搜尋";
+"no_apps_found" = "沒有找到應用程式";
+"custom_bundle_id" = "自訂捆綁包 ID";
+"add" = "添加";
+"remove" = "消除";
+"current" = "目前的";
+"accessibility_permissions_required" = "需要無障礙許可";
+"app_needs_permission" = "Mac Drag Scroll 需要取得全域監控滑鼠輸入的權限。";
+"permission_accessibility" = "無障礙許可";
+"permission_accessibility_granted_detail" = "Mac Drag Scroll 可以監控配置的滑鼠觸發並傳送捲動事件。";
+"permission_accessibility_missing_detail" = "授予輔助功能權限，以便應用程式可以全域檢測滑鼠拖曳。";
+"permission_granted" = "的確";
+"permission_needed" = "需要";
+"permission_required_title" = "需要無障礙許可";
+"permission_required_message" = "Mac Drag Scroll 需要輔助權限才能全域監控滑鼠事件。";
+"permission_lost_title" = "輔助功能權限遺失";
+"permission_lost_message" = "Mac Drag Scroll 無法再監視滑鼠事件。重新啟用輔助功能權限以繼續使用拖曳滾動。";
+"open_system_settings" = "開啟系統設定";
+"refresh" = "重新整理";
+"later" = "之後";
+"ok" = "好的";
+"event_monitoring" = "事件監控";
+"app_state" = "應用程式狀態";
+"status_active" = "積極的";
+"status_enabled" = "積極的";
+"status_disabled" = "殘障人士";
+"status_waiting" = "等待";
+"auto_update" = "自動更新";
+"current_version" = "目前版本";
+"last_checked" = "最後檢查";
+"never" = "絕不";
+"checking" = "檢查";
+"check_for_update" = "檢查更新";
+"open_release" = "開放發布";
+"update_history" = "更新歷史";
+"update_menu_checking" = "正在檢查更新...";
+"update_menu_up_to_date" = "最新";
+"update_menu_available" = "可用更新：%@";
+"update_menu_unavailable" = "更新檢查不可用";
+"update_status_checking" = "檢查...";
+"update_status_up_to_date" = "最新";
+"update_status_available" = "可用更新：%@";
+"update_status_unable" = "無法檢查";
+"update_detail_checking" = "聯絡 GitHub Releases。";
+"update_detail_up_to_date" = "您正在運行最新的已知版本。";
+"update_detail_available" = "版本 %@ 可從 GitHub Releases 取得。";
+"about_slogan" = "Windows 風格的拖曳滾動，專為 macOS 建置。";
+"about_author" = "馬丁卡蘭德製作";
+"about_runtime_note" = "設計為一個安靜的選單列實用程序，具有本機 macOS 控制和 Liquid Glass 拖曳指示器。";
+"app_logo" = "應用程式標誌";
+"version" = "版本";
+"github_repository" = "GitHub 儲存庫令牌";
+"website" = "網站";
+"support_email" = "支援電子郵件";
+"show_welcome" = "顯示歡迎";
+"open" = "打開";
+"welcome_window_title" = "歡迎使用Mac Drag Scroll";
+"welcome_title" = "歡迎使用Mac Drag Scroll";
+"welcome_subtitle" = "Windows 風格的拖曳滾動，專為 macOS 設計。";
+"welcome_author" = "馬丁卡蘭德製作";
+"welcome_permission_title" = "無障礙權限";
+"welcome_permission_granted" = "準備好監視您配置的滑鼠觸發器。";
+"welcome_permission_needed" = "必需的，以便拖曳滾動可以全域監聽滑鼠輸入。";
+"welcome_star_title" = "在 GitHub 上星標 Mac Drag Scroll";
+"welcome_star_detail" = "它對項目有幫助，並且讓以後更容易找到。";
+"star_on_github" = "星星";
+"welcome_get_started" = "開始使用";
+"menu_disable" = "停用 Mac Drag Scroll";
+"menu_enable" = "啟用應用程式令牌";
+"menu_settings" = "設定...";
+"menu_ignore_current_app" = "忽略當前應用程式";
+"menu_ignore_app" = "忽略 %@";
+"menu_ignored_app" = "忽略 %@";
+"current_app" = "目前應用程式";
+"quit" = "辭職";
+"trigger_middle_click" = "中鍵點選";
+"trigger_right_click" = "右鍵單擊";
+"trigger_left_click" = "左鍵點選";
 "trigger_button_n" = "按鈕 %d";
-"trigger_command_click" = "Command + 點擊";
-"trigger_option_click" = "Option + 點擊";
-"trigger_control_click" = "Control + 點擊";
-"trigger_shift_click" = "Shift + 點擊";
-"trigger_middle_short" = "中鍵";
-"trigger_right_short" = "右鍵";
-"recording" = "錄製中...";
-
-// Reset
-"reset_to_defaults" = "恢復預設值";
-"reset_confirm_title" = "重設設定？";
-"reset_confirm_message" = "這將把所有設定恢復為預設值。此操作無法復原。";
-"reset" = "重設";
+"recording" = "記錄...";
+"reset_to_defaults" = "重設為預設值";
+"reset_confirm_title" = "重置設定？";
+"reset_confirm_message" = "這將恢復預設的拖曳滾動設定。";
+"reset" = "重置";
 "cancel" = "取消";
-
-// Tooltips
-"tooltip_speed" = "捲動速度。數值越高，捲動越快。";
-"tooltip_acceleration" = "拖動距離越遠，捲動加速越多。";
-"tooltip_dead_zone" = "點擊位置周圍不會捲動的區域。有助於精確控制。";
-"tooltip_opacity" = "捲動指示器的透明度。";
-"tooltip_trigger" = "點擊以錄製新的滑鼠按鈕+修飾鍵組合來觸發捲動。";
-"tooltip_show_indicator" = "拖曳捲動啟用時顯示視覺回饋。";
+"tooltip_enabled" = "開啟或關閉拖曳滾動。";
+"tooltip_trigger" = "點擊以捕獲新的滑鼠觸發器。";
 "tooltip_launch_at_login" = "登入時自動啟動 Mac Drag Scroll。";
-"tooltip_excluded_apps" = "將停用拖曳捲動的應用程式。";
-"tooltip_reset" = "將所有設定重設為預設值。";
-
-// Crash Handler
-"crash_detected_title" = "Mac Drag Scroll 當機了";
-"crash_detected_message" = "應用程式在上次工作階段中意外當機。您可以複製當機報告以協助診斷問題。";
+"tooltip_language" = "選擇應用程式語言，或遵循系統預設語言。";
+"tooltip_appearance" = "選擇淺色、深色或遵循系統外觀。";
+"tooltip_speed" = "控制滾動速度。";
+"tooltip_acceleration" = "控制滾動的速度。";
+"tooltip_dead_zone" = "滾動開始前的滑鼠移動。";
+"tooltip_reverse_direction" = "如果方向感覺相反，則反轉拖曳捲動方向。";
+"tooltip_horizontal_scrolling" = "允許側向拖曳移動以發送水平滾動事件。";
+"tooltip_invert_horizontal" = "僅翻轉水平滾動方向。";
+"tooltip_show_indicator" = "拖曳滾動時顯示視覺指示器。";
+"tooltip_visualizer_size" = "控制拖曳可視化工具的大小。";
+"tooltip_liquid_glass" = "控制玻璃折射、光澤和拖曳反應運動。";
+"tooltip_opacity" = "控制可視化工具的不透明度。";
+"tooltip_visualizer_tint" = "控制玻璃觀察器的微妙色調。";
+"tooltip_auto_update" = "自動檢查 GitHub Releases 是否有較新版本。";
+"tooltip_show_welcome" = "再次開啟歡迎頁面。";
+"tooltip_custom_bundle_id" = "當選擇器中找不到應用程式時使用此選項。範例：com.company.AppName";
+"settings_general" = "一般的";
+"settings_visualizer" = "展示台";
+"settings_scrolling" = "捲動";
+"settings_apps" = "被忽略的應用程式";
+"settings_permissions" = "權限";
+"settings_updates" = "更新";
+"settings_about" = "關於";
+"settings_general_subtitle" = "激活、觸發和啟動行為。";
+"settings_visualizer_subtitle" = "調整拖曳視覺化工具並立即預覽。";
+"settings_scrolling_subtitle" = "調整速度、加速度和死區。";
+"settings_apps_subtitle" = "在選定的應用程式中停用拖曳滾動。";
+"settings_permissions_subtitle" = "檢查所需的 macOS 權限和執行時間狀態。";
+"settings_updates_subtitle" = "檢查版本、自動更新狀態和更新歷史記錄。";
+"settings_about_subtitle" = "產品標識、連結和信用。";
+"crash_detected_title" = "Mac Drag Scroll 崩潰";
+"crash_detected_message" = "該應用程式在上次會話期間意外崩潰。您可以複製崩潰報告來幫助診斷問題。";
 "copy_report" = "複製報告";
-"dismiss" = "關閉";
+"dismiss" = "解僱";
 "error_occurred_title" = "發生錯誤";
-"error_occurred_message" = "在 %@ 時發生錯誤:\n\n%@";
-"fatal_error_title" = "嚴重錯誤";
+"error_occurred_message" = "%@ 時發生錯誤：\n\n%@";
+"fatal_error_title" = "致命錯誤";

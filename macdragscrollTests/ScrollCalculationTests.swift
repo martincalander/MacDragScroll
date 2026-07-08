@@ -14,6 +14,8 @@ struct ScrollCalculator {
     let deadZoneRadius: Double
     let acceleration: Double
     var reversesDirection = false
+    var allowsHorizontal = true
+    var invertsHorizontal = false
     
     /// Calculate the distance between two points
     func calculateDistance(from origin: CGPoint, to current: CGPoint) -> Double {
@@ -48,7 +50,9 @@ struct ScrollCalculator {
             scrollSpeed: scrollSpeed,
             deadZoneRadius: deadZoneRadius,
             acceleration: acceleration,
-            reversesDirection: reversesDirection
+            reversesDirection: reversesDirection,
+            allowsHorizontal: allowsHorizontal,
+            invertsHorizontal: invertsHorizontal
         )
 
         return (deltas.horizontal, deltas.vertical)
@@ -332,6 +336,39 @@ final class ScrollDeltaTests: XCTestCase {
         let deltas = calculator.calculateScrollDeltas(from: origin, to: current)
         XCTAssertLessThan(deltas.deltaY, 0, "Moving down should produce negative vertical wheel delta by default")
     }
+
+    func testHorizontalScrollingCanBeDisabled() {
+        let calculator = ScrollCalculator(
+            scrollSpeed: 2.0,
+            deadZoneRadius: 20.0,
+            acceleration: 1.8,
+            allowsHorizontal: false
+        )
+
+        let deltas = calculator.calculateScrollDeltas(
+            from: CGPoint(x: 100, y: 100),
+            to: CGPoint(x: 220, y: 140)
+        )
+
+        XCTAssertEqual(deltas.deltaX, 0)
+        XCTAssertNotEqual(deltas.deltaY, 0)
+    }
+
+    func testHorizontalScrollingCanBeInvertedIndependently() {
+        let normal = ScrollCalculator(scrollSpeed: 2.0, deadZoneRadius: 20.0, acceleration: 1.8)
+        let inverted = ScrollCalculator(
+            scrollSpeed: 2.0,
+            deadZoneRadius: 20.0,
+            acceleration: 1.8,
+            invertsHorizontal: true
+        )
+
+        let origin = CGPoint(x: 100, y: 100)
+        let current = CGPoint(x: 220, y: 100)
+
+        XCTAssertGreaterThan(normal.calculateScrollDeltas(from: origin, to: current).deltaX, 0)
+        XCTAssertLessThan(inverted.calculateScrollDeltas(from: origin, to: current).deltaX, 0)
+    }
 }
 
 // MARK: - Configuration Tests
@@ -488,6 +525,47 @@ final class ProductionScrollPhysicsTests: XCTestCase {
         let fast = ScrollPhysics.intensity(distance: 120, deadZoneRadius: 20, acceleration: 1.8, scrollSpeed: 3.0)
 
         XCTAssertEqual(fast, slow * 3.0, accuracy: 0.001)
+    }
+
+    func testProductionPhysicsCanDisableHorizontalAxis() {
+        let diagonal = ScrollPhysics.deltas(
+            from: CGPoint(x: 100, y: 100),
+            to: CGPoint(x: 220, y: 160),
+            scrollSpeed: 2.0,
+            deadZoneRadius: 20.0,
+            acceleration: 1.8,
+            reversesDirection: false,
+            allowsHorizontal: false
+        )
+
+        XCTAssertEqual(diagonal.horizontal, 0)
+        XCTAssertGreaterThan(diagonal.vertical, 0)
+    }
+
+    func testProductionPhysicsCanInvertHorizontalAxisOnly() {
+        let normal = ScrollPhysics.deltas(
+            from: CGPoint(x: 100, y: 100),
+            to: CGPoint(x: 220, y: 100),
+            scrollSpeed: 2.0,
+            deadZoneRadius: 20.0,
+            acceleration: 1.8,
+            reversesDirection: false
+        )
+
+        let inverted = ScrollPhysics.deltas(
+            from: CGPoint(x: 100, y: 100),
+            to: CGPoint(x: 220, y: 100),
+            scrollSpeed: 2.0,
+            deadZoneRadius: 20.0,
+            acceleration: 1.8,
+            reversesDirection: false,
+            invertsHorizontal: true
+        )
+
+        XCTAssertGreaterThan(normal.horizontal, 0)
+        XCTAssertLessThan(inverted.horizontal, 0)
+        XCTAssertEqual(normal.vertical, 0)
+        XCTAssertEqual(inverted.vertical, 0)
     }
 }
 

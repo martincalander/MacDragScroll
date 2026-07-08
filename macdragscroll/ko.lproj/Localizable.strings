@@ -2,87 +2,169 @@
   Localizable.strings (Korean)
   macdragscroll
 
-  Created by Martin Calander on 2026-01-17.
+  Generated for the current app UI strings.
 */
 
-// App Name
 "app_name" = "Mac Drag Scroll";
-
-// Footer
-"made_by" = "제작: Martin Calander";
-"quit" = "종료";
-
-// Permission Required View
-"accessibility_permissions_required" = "손쉬운 사용 권한 필요";
-"app_needs_permission" = "Mac Drag Scroll이 작동하려면 이 권한이 필요합니다.";
-"open_system_settings" = "시스템 설정 열기";
-
-// Permission Dialogs
-"permission_required_title" = "손쉬운 사용 권한 필요";
-"permission_required_message" = "Mac Drag Scroll은 마우스 가운데 버튼 이벤트를 감지하고 드래그 스크롤을 활성화하기 위해 손쉬운 사용 권한이 필요합니다.\n\n시스템 설정에서 권한을 허용해 주세요.";
-"permission_lost_title" = "손쉬운 사용 권한 상실";
-"permission_lost_message" = "Mac Drag Scroll의 손쉬운 사용 권한이 없어졌습니다. 드래그 스크롤이 비활성화되었습니다.\n\n앱을 계속 사용하려면 시스템 설정에서 권한을 다시 허용해 주세요.";
-"later" = "나중에";
-"ok" = "확인";
-
-// Settings Labels
+"enabled" = "활성화됨";
+"trigger_button" = "트리거 버튼";
+"launch_at_login" = "로그인 시 실행";
+"language" = "언어";
+"appearance" = "모습";
+"system_default" = "시스템 기본값";
+"appearance_light" = "빛";
+"appearance_dark" = "어두운";
 "speed" = "속도";
 "acceleration" = "가속";
 "dead_zone" = "데드존";
-"opacity" = "불투명도";
-"show_indicator" = "표시기 및 애니메이션 보기";
-"launch_at_login" = "로그인 시 실행";
-"excluded_apps" = "제외된 앱";
-
-// Acceleration Levels
-"acceleration_low" = "낮음";
-"acceleration_med" = "중간";
-"acceleration_high" = "높음";
-"acceleration_max" = "최대";
-
-// App Picker
-"search" = "검색";
-"no_apps_found" = "앱을 찾을 수 없음";
-"done" = "완료";
-"current" = "현재";
-
-// Trigger Button
-"trigger_button" = "트리거 버튼";
+"reverse_direction" = "역방향";
+"horizontal_scrolling" = "수평 스크롤";
+"invert_horizontal" = "수평 반전";
+"acceleration_low" = "낮은";
+"acceleration_med" = "메드";
+"acceleration_high" = "높은";
+"acceleration_max" = "맥스";
+"show_indicator" = "표시기 표시";
+"visualizer_size" = "크기";
+"liquid_glass" = "액체유리토큰";
+"opacity" = "불투명";
+"visualizer_tint" = "색조";
+"visualizer_tint_clear" = "분명한";
+"visualizer_tint_graphite" = "석묵";
+"visualizer_tint_accent" = "악센트";
+"visualizer_tint_aqua" = "아쿠아";
+"visualizer_tint_warm" = "따뜻한";
+"live_preview" = "실시간 미리보기";
+"drag_preview_hint" = "미리보기에서 드래그하세요.";
+"excluded_apps" = "무시된 앱";
+"excluded_apps_detail" = "이러한 앱에서는 드래그 스크롤이 꺼져 있습니다. 실행 중인 앱, 설치된 앱 또는 수동 번들 식별자를 추가합니다.";
+"ignored_apps_list" = "무시된 앱";
+"add_ignored_app" = "무시된 앱 추가";
+"hide_picker" = "피커 숨기기";
+"show_picker" = "선택도구 표시";
+"no_excluded_apps" = "아직 무시된 앱이 없습니다.";
+"search" = "찾다";
+"no_apps_found" = "앱을 찾을 수 없습니다.";
+"custom_bundle_id" = "맞춤 번들 ID";
+"add" = "추가하다";
+"remove" = "제거하다";
+"current" = "현재의";
+"accessibility_permissions_required" = "접근성 권한 필요";
+"app_needs_permission" = "Mac Drag Scroll은 마우스 입력을 전역적으로 모니터링하려면 권한이 필요합니다.";
+"permission_accessibility" = "접근성 권한";
+"permission_accessibility_granted_detail" = "Mac Drag Scroll은 구성된 마우스 트리거를 모니터링하고 스크롤 이벤트를 보낼 수 있습니다.";
+"permission_accessibility_missing_detail" = "앱이 전역적으로 마우스 끌기를 감지할 수 있도록 접근성 권한을 부여합니다.";
+"permission_granted" = "부여된";
+"permission_needed" = "필요";
+"permission_required_title" = "접근성 권한 필요";
+"permission_required_message" = "Mac Drag Scroll은 마우스 이벤트를 전 세계적으로 모니터링하려면 접근성 권한이 필요합니다.";
+"permission_lost_title" = "접근성 권한 상실";
+"permission_lost_message" = "Mac Drag Scroll은 더 이상 마우스 이벤트를 모니터링할 수 없습니다. 드래그 스크롤을 계속 사용하려면 접근성 권한을 다시 활성화하세요.";
+"open_system_settings" = "시스템 설정 열기";
+"refresh" = "새로 고치다";
+"later" = "나중에";
+"ok" = "좋아요";
+"event_monitoring" = "이벤트 모니터링";
+"app_state" = "앱 상태";
+"status_active" = "활동적인";
+"status_enabled" = "활동적인";
+"status_disabled" = "장애가 있는";
+"status_waiting" = "대기 중";
+"auto_update" = "자동 업데이트";
+"current_version" = "현재 버전";
+"last_checked" = "마지막 확인";
+"never" = "절대";
+"checking" = "확인 중";
+"check_for_update" = "업데이트 확인";
+"open_release" = "공개 릴리스";
+"update_history" = "업데이트 기록";
+"update_menu_checking" = "업데이트 확인 중...";
+"update_menu_up_to_date" = "최신";
+"update_menu_available" = "업데이트 가능: %@";
+"update_menu_unavailable" = "업데이트 확인 불가";
+"update_status_checking" = "확인 중...";
+"update_status_up_to_date" = "최신";
+"update_status_available" = "업데이트 가능: %@";
+"update_status_unable" = "확인할 수 없음";
+"update_detail_checking" = "GitHub Releases에 문의 중입니다.";
+"update_detail_up_to_date" = "알려진 최신 버전을 실행하고 있습니다.";
+"update_detail_available" = "%@ 버전은 GitHub Releases에서 사용할 수 있습니다.";
+"about_slogan" = "macOS용으로 제작된 Windows 스타일 드래그 스크롤.";
+"about_author" = "마틴 캘랜더(Martin Calander)가 만든";
+"about_runtime_note" = "기본 macOS 컨트롤과 Liquid Glass 드래그 표시기를 갖춘 조용한 메뉴 표시줄 유틸리티로 설계되었습니다.";
+"app_logo" = "앱 로고";
+"version" = "버전";
+"github_repository" = "GitHub Repository";
+"website" = "웹사이트";
+"support_email" = "지원 이메일";
+"show_welcome" = "환영 표시";
+"open" = "열려 있는";
+"welcome_window_title" = "Mac Drag Scroll에 오신 것을 환영합니다.";
+"welcome_title" = "Mac Drag Scroll에 오신 것을 환영합니다.";
+"welcome_subtitle" = "macOS용으로 만들어진 Windows 스타일의 드래그 스크롤입니다.";
+"welcome_author" = "마틴 캘랜더(Martin Calander)가 만든";
+"welcome_permission_title" = "접근성 권한";
+"welcome_permission_granted" = "구성된 마우스 트리거를 모니터링할 준비가 되었습니다.";
+"welcome_permission_needed" = "드래그 스크롤이 전역적으로 마우스 입력을 수신할 수 있도록 하는 데 필요합니다.";
+"welcome_star_title" = "GitHub에서 Mac Drag Scroll 별표 표시";
+"welcome_star_detail" = "프로젝트에 도움이 되고 나중에 쉽게 찾을 수 있습니다.";
+"star_on_github" = "별";
+"welcome_get_started" = "시작하기";
+"menu_disable" = "Mac Drag Scroll 비활성화";
+"menu_enable" = "Mac Drag Scroll 활성화";
+"menu_settings" = "설정...";
+"menu_ignore_current_app" = "현재 앱 무시";
+"menu_ignore_app" = "%@ 무시";
+"menu_ignored_app" = "%@이 무시되었습니다.";
+"current_app" = "현재 앱";
+"quit" = "그만두다";
 "trigger_middle_click" = "가운데 클릭";
-"trigger_right_click" = "오른쪽 클릭";
+"trigger_right_click" = "마우스 오른쪽 버튼 클릭";
 "trigger_left_click" = "왼쪽 클릭";
 "trigger_button_n" = "버튼 %d";
-"trigger_command_click" = "Command + 클릭";
-"trigger_option_click" = "Option + 클릭";
-"trigger_control_click" = "Control + 클릭";
-"trigger_shift_click" = "Shift + 클릭";
-"trigger_middle_short" = "가운데";
-"trigger_right_short" = "오른쪽";
-"recording" = "녹음 중...";
-
-// Reset
+"recording" = "녹음...";
 "reset_to_defaults" = "기본값으로 재설정";
 "reset_confirm_title" = "설정을 재설정하시겠습니까?";
-"reset_confirm_message" = "모든 설정이 기본값으로 재설정됩니다. 이 작업은 취소할 수 없습니다.";
-"reset" = "재설정";
+"reset_confirm_message" = "그러면 기본 드래그 스크롤 설정이 복원됩니다.";
+"reset" = "다시 놓기";
 "cancel" = "취소";
-
-// Tooltips
-"tooltip_speed" = "스크롤 속도. 값이 높을수록 더 빠르게 스크롤됩니다.";
-"tooltip_acceleration" = "시작점에서 멀리 드래그할수록 스크롤이 빨라지는 정도.";
-"tooltip_dead_zone" = "클릭 지점 주변에서 스크롤이 발생하지 않는 영역. 정밀도에 도움이 됩니다.";
-"tooltip_opacity" = "스크롤 표시기의 투명도.";
-"tooltip_trigger" = "클릭하여 스크롤을 트리거할 새 마우스 버튼 + 수정자 조합을 녹음합니다.";
-"tooltip_show_indicator" = "드래그 스크롤이 활성화되면 시각적 피드백을 표시합니다.";
-"tooltip_launch_at_login" = "로그인 시 Mac Drag Scroll을 자동으로 시작합니다.";
-"tooltip_excluded_apps" = "드래그 스크롤이 비활성화될 앱.";
-"tooltip_reset" = "모든 설정을 기본값으로 재설정합니다.";
-
-// Crash Handler
-"crash_detected_title" = "Mac Drag Scroll이 충돌했습니다";
-"crash_detected_message" = "마지막 세션에서 앱이 예기치 않게 충돌했습니다. 문제 진단에 도움이 되도록 충돌 보고서를 복사할 수 있습니다.";
+"tooltip_enabled" = "드래그 스크롤을 켜거나 끕니다.";
+"tooltip_trigger" = "새 마우스 트리거를 캡처하려면 클릭하세요.";
+"tooltip_launch_at_login" = "로그인하면 자동으로 Mac Drag Scroll이 시작됩니다.";
+"tooltip_language" = "앱 언어를 선택하거나 시스템 기본값을 따르세요.";
+"tooltip_appearance" = "밝음, 어두움을 선택하거나 시스템 모양을 따릅니다.";
+"tooltip_speed" = "스크롤 속도를 제어합니다.";
+"tooltip_acceleration" = "스크롤이 얼마나 빠르게 증가하는지 제어합니다.";
+"tooltip_dead_zone" = "스크롤이 시작되기 전의 마우스 움직임.";
+"tooltip_reverse_direction" = "방향이 반대로 느껴지면 드래그 스크롤 방향을 바꿉니다.";
+"tooltip_horizontal_scrolling" = "가로 스크롤 이벤트를 보내려면 옆으로 드래그 이동을 허용하세요.";
+"tooltip_invert_horizontal" = "가로 스크롤 방향만 뒤집습니다.";
+"tooltip_show_indicator" = "드래그 스크롤하는 동안 시각적 표시기를 표시합니다.";
+"tooltip_visualizer_size" = "드래그 시각화 도우미의 크기를 제어합니다.";
+"tooltip_liquid_glass" = "유리 굴절, 광택 및 드래그 반응 움직임을 제어합니다.";
+"tooltip_opacity" = "시각화 장치 불투명도를 제어합니다.";
+"tooltip_visualizer_tint" = "유리 시각화 장치의 미묘한 색조를 제어합니다.";
+"tooltip_auto_update" = "최신 버전이 있는지 GitHub Releases을 자동으로 확인하세요.";
+"tooltip_show_welcome" = "환영 페이지를 다시 엽니다.";
+"tooltip_custom_bundle_id" = "선택기에서 앱을 찾을 수 없을 때 사용하세요. 예: com.company.AppName";
+"settings_general" = "일반적인";
+"settings_visualizer" = "시각화 장치";
+"settings_scrolling" = "스크롤링";
+"settings_apps" = "무시된 앱";
+"settings_permissions" = "권한";
+"settings_updates" = "업데이트";
+"settings_about" = "에 대한";
+"settings_general_subtitle" = "활성화, 트리거 및 시작 동작.";
+"settings_visualizer_subtitle" = "드래그 시각화 도우미를 조정하고 즉시 미리 보세요.";
+"settings_scrolling_subtitle" = "속도, 가속도, 데드존을 조정합니다.";
+"settings_apps_subtitle" = "선택한 앱에서 드래그 스크롤을 비활성화합니다.";
+"settings_permissions_subtitle" = "필요한 macOS 권한과 런타임 상태를 확인하세요.";
+"settings_updates_subtitle" = "릴리스, 자동 업데이트 상태, 업데이트 내역을 확인하세요.";
+"settings_about_subtitle" = "제품 ID, 링크 및 크레딧.";
+"crash_detected_title" = "Mac Drag Scroll이 다운되었습니다.";
+"crash_detected_message" = "마지막 세션 중에 앱이 예기치 않게 충돌했습니다. 문제 진단에 도움이 되도록 충돌 보고서를 복사할 수 있습니다.";
 "copy_report" = "보고서 복사";
-"dismiss" = "닫기";
+"dismiss" = "해고하다";
 "error_occurred_title" = "오류가 발생했습니다";
-"error_occurred_message" = "%@ 중 오류가 발생했습니다:\n\n%@";
-"fatal_error_title" = "치명적 오류";
+"error_occurred_message" = "%@ 중에 오류가 발생했습니다.\n\n%@";
+"fatal_error_title" = "치명적인 오류";

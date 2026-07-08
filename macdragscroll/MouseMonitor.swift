@@ -49,7 +49,9 @@ enum ScrollPhysics {
         scrollSpeed: Double,
         deadZoneRadius: Double,
         acceleration: Double,
-        reversesDirection: Bool
+        reversesDirection: Bool,
+        allowsHorizontal: Bool = true,
+        invertsHorizontal: Bool = false
     ) -> ScrollDeltas {
         let distance = distance(from: origin, to: current)
         guard distance > deadZoneRadius else {
@@ -64,10 +66,13 @@ enum ScrollPhysics {
             scrollSpeed: scrollSpeed
         )
 
-        return ScrollDeltas(
-            horizontal: wheelDelta(directionComponent: direction.x, intensity: intensity, reversesDirection: reversesDirection),
-            vertical: wheelDelta(directionComponent: direction.y, intensity: intensity, reversesDirection: reversesDirection)
-        )
+        let horizontalReverses = reversesDirection != invertsHorizontal
+        let horizontal = allowsHorizontal
+            ? wheelDelta(directionComponent: direction.x, intensity: intensity, reversesDirection: horizontalReverses)
+            : 0
+        let vertical = wheelDelta(directionComponent: direction.y, intensity: intensity, reversesDirection: reversesDirection)
+
+        return ScrollDeltas(horizontal: horizontal, vertical: vertical)
     }
 
     private static func wheelDelta(directionComponent: Double, intensity: Double, reversesDirection: Bool) -> Int32 {
@@ -155,7 +160,10 @@ final class MouseMonitor {
     private var deadZoneRadius: Double { SettingsManager.shared.deadZoneRadius }
     private var acceleration: Double { SettingsManager.shared.acceleration }
     private var reverseScrollDirection: Bool { SettingsManager.shared.reverseScrollDirection }
+    private var horizontalScrollingEnabled: Bool { SettingsManager.shared.horizontalScrollingEnabled }
+    private var invertHorizontalScroll: Bool { SettingsManager.shared.invertHorizontalScroll }
     private var triggerConfig: TriggerConfig { SettingsManager.shared.triggerConfig }
+    private var screenParametersObserver: NSObjectProtocol?
 
     @discardableResult
     func start() -> Bool {
@@ -189,6 +197,7 @@ final class MouseMonitor {
             CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
         }
 
+        installScreenParametersObserver()
         CGEvent.tapEnable(tap: tap, enable: true)
         return true
     }
@@ -205,6 +214,33 @@ final class MouseMonitor {
         if let source = eventTapRunLoopSource {
             CFRunLoopRemoveSource(CFRunLoopGetMain(), source, .commonModes)
             eventTapRunLoopSource = nil
+        }
+
+        removeScreenParametersObserver()
+    }
+
+    private func installScreenParametersObserver() {
+        guard screenParametersObserver == nil else { return }
+
+        screenParametersObserver = NotificationCenter.default.addObserver(
+            forName: NSApplication.didChangeScreenParametersNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.handleScreenParametersChanged()
+        }
+    }
+
+    private func removeScreenParametersObserver() {
+        if let screenParametersObserver {
+            NotificationCenter.default.removeObserver(screenParametersObserver)
+            self.screenParametersObserver = nil
+        }
+    }
+
+    private func handleScreenParametersChanged() {
+        if isTriggerActive || isActivated {
+            cancelInteraction()
         }
     }
 
@@ -464,7 +500,9 @@ final class MouseMonitor {
             scrollSpeed: scrollSpeed,
             deadZoneRadius: deadZoneRadius,
             acceleration: acceleration,
-            reversesDirection: reverseScrollDirection
+            reversesDirection: reverseScrollDirection,
+            allowsHorizontal: horizontalScrollingEnabled,
+            invertsHorizontal: invertHorizontalScroll
         )
 
         guard deltas.horizontal != 0 || deltas.vertical != 0 else { return }

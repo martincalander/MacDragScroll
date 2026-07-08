@@ -2,87 +2,169 @@
   Localizable.strings (Dutch)
   macdragscroll
 
-  Created by Martin Calander on 2026-01-17.
+  Generated for the current app UI strings.
 */
 
-// App Name
 "app_name" = "Mac Drag Scroll";
-
-// Footer
-"made_by" = "Gemaakt door Martin Calander";
-"quit" = "Stop";
-
-// Permission Required View
-"accessibility_permissions_required" = "Toegankelijkheidsrechten Vereist";
-"app_needs_permission" = "Mac Drag Scroll heeft deze rechten nodig om te werken.";
-"open_system_settings" = "Open Systeeminstellingen";
-
-// Permission Dialogs
-"permission_required_title" = "Toegankelijkheidsrechten Vereist";
-"permission_required_message" = "Mac Drag Scroll heeft toegankelijkheidsrechten nodig om middelste muisknop-gebeurtenissen te detecteren en sleep-scrollen in te schakelen.\n\nVerleen de rechten in Systeeminstellingen.";
-"permission_lost_title" = "Toegankelijkheidsrechten Verloren";
-"permission_lost_message" = "Mac Drag Scroll heeft geen toegankelijkheidsrechten meer. Sleep-scrollen is uitgeschakeld.\n\nVerleen de rechten opnieuw in Systeeminstellingen om de app te blijven gebruiken.";
-"later" = "Later";
-"ok" = "OK";
-
-// Settings Labels
+"enabled" = "Ingeschakeld";
+"trigger_button" = "Triggerknop";
+"launch_at_login" = "Start bij Inloggen";
+"language" = "Taal";
+"appearance" = "Uiterlijk";
+"system_default" = "Systeemstandaard";
+"appearance_light" = "Licht";
+"appearance_dark" = "Donker";
 "speed" = "Snelheid";
-"acceleration" = "Versnelling";
+"acceleration" = "Acceleratie";
 "dead_zone" = "Dode zone";
-"opacity" = "Dekking";
-"show_indicator" = "Toon indicator & animaties";
-"launch_at_login" = "Open bij inloggen";
-"excluded_apps" = "Uitgesloten apps";
-
-// Acceleration Levels
+"reverse_direction" = "Omgekeerde richting";
+"horizontal_scrolling" = "Horizontaal scrollen";
+"invert_horizontal" = "Horizontaal omkeren";
 "acceleration_low" = "Laag";
-"acceleration_med" = "Gem.";
+"acceleration_med" = "Med";
 "acceleration_high" = "Hoog";
 "acceleration_max" = "Max";
-
-// App Picker
+"show_indicator" = "Toon indicator";
+"visualizer_size" = "Grootte";
+"liquid_glass" = "Liquid Glass";
+"opacity" = "Dekking";
+"visualizer_tint" = "Tint";
+"visualizer_tint_clear" = "Duidelijk";
+"visualizer_tint_graphite" = "Grafiet";
+"visualizer_tint_accent" = "Accent";
+"visualizer_tint_aqua" = "Aqua";
+"visualizer_tint_warm" = "Warm";
+"live_preview" = "Live voorbeeld";
+"drag_preview_hint" = "Sleep in het voorbeeld";
+"excluded_apps" = "Genegeerde apps";
+"excluded_apps_detail" = "Slepen-scrollen blijft in deze apps uitgeschakeld. Voeg een actieve app, geïnstalleerde app of handmatige bundel-ID toe.";
+"ignored_apps_list" = "Genegeerde apps";
+"add_ignored_app" = "Genegeerde app toevoegen";
+"hide_picker" = "Verberg kiezer";
+"show_picker" = "Toon kiezer";
+"no_excluded_apps" = "Nog geen genegeerde apps.";
 "search" = "Zoeken";
 "no_apps_found" = "Geen apps gevonden";
-"done" = "Gereed";
+"custom_bundle_id" = "Aangepaste bundel-ID";
+"add" = "Toevoegen";
+"remove" = "Verwijderen";
 "current" = "Huidig";
-
-// Trigger Button
-"trigger_button" = "Activeringsknop";
-"trigger_middle_click" = "Middelklik";
-"trigger_right_click" = "Rechtsklik";
-"trigger_left_click" = "Linksklik";
+"accessibility_permissions_required" = "Toegankelijkheidstoestemming vereist";
+"app_needs_permission" = "Mac Drag Scroll heeft toestemming nodig om muisinvoer wereldwijd te monitoren.";
+"permission_accessibility" = "Toegankelijkheidstoestemming";
+"permission_accessibility_granted_detail" = "Mac Drag Scroll kan de geconfigureerde muistrigger monitoren en scrollgebeurtenissen verzenden.";
+"permission_accessibility_missing_detail" = "Verleen toestemming voor toegankelijkheid zodat de app muisbewegingen wereldwijd kan detecteren.";
+"permission_granted" = "Toegegeven";
+"permission_needed" = "Nodig";
+"permission_required_title" = "Toegankelijkheidstoestemming vereist";
+"permission_required_message" = "Mac Drag Scroll heeft toegankelijkheidstoestemming nodig om muisgebeurtenissen wereldwijd te monitoren.";
+"permission_lost_title" = "Toegankelijkheidstoestemming verloren";
+"permission_lost_message" = "Mac Drag Scroll kan muisgebeurtenissen niet langer volgen. Schakel de toegankelijkheidsmachtiging opnieuw in om slepen-scrollen te blijven gebruiken.";
+"open_system_settings" = "Open Systeeminstellingen";
+"refresh" = "Vernieuwen";
+"later" = "Later";
+"ok" = "Oké";
+"event_monitoring" = "Gebeurtenisbewaking";
+"app_state" = "App-status";
+"status_active" = "Actief";
+"status_enabled" = "Actief";
+"status_disabled" = "Uitgeschakeld";
+"status_waiting" = "Wachten";
+"auto_update" = "Automatische update";
+"current_version" = "Huidige versie";
+"last_checked" = "Laatst gecontroleerd";
+"never" = "Nooit";
+"checking" = "Controleren";
+"check_for_update" = "Controleer op updates";
+"open_release" = "Vrijgave openen";
+"update_history" = "Geschiedenis bijwerken";
+"update_menu_checking" = "Controleren op updates...";
+"update_menu_up_to_date" = "Up-to-date";
+"update_menu_available" = "Update beschikbaar: %@";
+"update_menu_unavailable" = "Updatecontrole niet beschikbaar";
+"update_status_checking" = "Controleren...";
+"update_status_up_to_date" = "Up-to-date";
+"update_status_available" = "Update beschikbaar: %@";
+"update_status_unable" = "Kan niet controleren";
+"update_detail_checking" = "Neem contact op met GitHub Releases.";
+"update_detail_up_to_date" = "U gebruikt de laatst bekende versie.";
+"update_detail_available" = "Versie %@ is beschikbaar via GitHub Releases.";
+"about_slogan" = "Slepen-scrollen in Windows-stijl, gebouwd voor macOS.";
+"about_author" = "Gemaakt door Martin Calander";
+"about_runtime_note" = "Ontworpen als een stil menubalkhulpprogramma met native macOS-bedieningselementen en een Liquid Glass-sleepindicator.";
+"app_logo" = "App-logo";
+"version" = "Versie";
+"github_repository" = "GitHub Repository";
+"website" = "Website";
+"support_email" = "Supportmail";
+"show_welcome" = "Welkom tonen";
+"open" = "Openen";
+"welcome_window_title" = "Welkom bij Mac Drag Scroll";
+"welcome_title" = "Welkom bij Mac Drag Scroll";
+"welcome_subtitle" = "Slepen-scrollen in Windows-stijl, gevormd voor macOS.";
+"welcome_author" = "Gemaakt door Martin Calander";
+"welcome_permission_title" = "Toegankelijkheidstoestemming";
+"welcome_permission_granted" = "Klaar om uw geconfigureerde muistrigger te controleren.";
+"welcome_permission_needed" = "Vereist zodat slepen en scrollen wereldwijd naar muisinvoer kan luisteren.";
+"welcome_star_title" = "Geef Mac Drag Scroll een ster op GitHub";
+"welcome_star_detail" = "Het helpt het project en maakt het gemakkelijker om later terug te vinden.";
+"star_on_github" = "Ster";
+"welcome_get_started" = "Aan de slag";
+"menu_disable" = "Mac Drag Scroll uitschakelen";
+"menu_enable" = "Schakel Mac Drag Scroll in";
+"menu_settings" = "Instellingen...";
+"menu_ignore_current_app" = "Negeer de huidige app";
+"menu_ignore_app" = "Negeer %@";
+"menu_ignored_app" = "%@ Genegeerd";
+"current_app" = "Huidige app";
+"quit" = "Stoppen";
+"trigger_middle_click" = "Middelste klik";
+"trigger_right_click" = "Klik met de rechtermuisknop";
+"trigger_left_click" = "Links klikken";
 "trigger_button_n" = "Knop %d";
-"trigger_command_click" = "Command + Klik";
-"trigger_option_click" = "Option + Klik";
-"trigger_control_click" = "Control + Klik";
-"trigger_shift_click" = "Shift + Klik";
-"trigger_middle_short" = "Midden";
-"trigger_right_short" = "Rechts";
 "recording" = "Opnemen...";
-
-// Reset
-"reset_to_defaults" = "Standaard herstellen";
-"reset_confirm_title" = "Instellingen herstellen?";
-"reset_confirm_message" = "Dit zal alle instellingen terugzetten naar de standaardwaarden. Deze actie kan niet ongedaan worden gemaakt.";
-"reset" = "Herstellen";
-"cancel" = "Annuleren";
-
-// Tooltips
-"tooltip_speed" = "Hoe snel het scrollen gaat. Hogere waarden = sneller scrollen.";
-"tooltip_acceleration" = "Hoeveel het scrollen versnelt naarmate je verder sleept vanaf het startpunt.";
-"tooltip_dead_zone" = "Het gebied rond het klikpunt waar geen scrollen plaatsvindt. Helpt bij precisie.";
-"tooltip_opacity" = "Transparantie van de scroll-indicator.";
-"tooltip_trigger" = "Klik om een nieuwe muisknop + modifier-combinatie op te nemen om scrollen te activeren.";
-"tooltip_show_indicator" = "Toon visuele feedback wanneer sleep-scrollen actief is.";
-"tooltip_launch_at_login" = "Start Mac Drag Scroll automatisch bij inloggen.";
-"tooltip_excluded_apps" = "Apps waar sleep-scrollen wordt uitgeschakeld.";
-"tooltip_reset" = "Herstel alle instellingen naar standaardwaarden.";
-
-// Crash Handler
-"crash_detected_title" = "Mac Drag Scroll is gecrasht";
-"crash_detected_message" = "De app is onverwacht gecrasht tijdens de laatste sessie. Je kunt het crashrapport kopiëren om het probleem te helpen diagnosticeren.";
-"copy_report" = "Kopieer Rapport";
+"reset_to_defaults" = "Terugzetten naar standaardwaarden";
+"reset_confirm_title" = "Instellingen resetten?";
+"reset_confirm_message" = "Hiermee worden de standaardinstellingen voor slepen en scrollen hersteld.";
+"reset" = "Opnieuw instellen";
+"cancel" = "Annuleer";
+"tooltip_enabled" = "Schakel slepend scrollen in of uit.";
+"tooltip_trigger" = "Klik om een nieuwe muistrigger vast te leggen.";
+"tooltip_launch_at_login" = "Start Mac Drag Scroll automatisch wanneer u inlogt.";
+"tooltip_language" = "Kies de app-taal of volg uw systeemstandaard.";
+"tooltip_appearance" = "Kies Licht, Donker of volg het uiterlijk van het systeem.";
+"tooltip_speed" = "Regelt de scrollsnelheid.";
+"tooltip_acceleration" = "Bepaalt hoe snel scrollen toeneemt.";
+"tooltip_dead_zone" = "Muisbeweging voordat het scrollen begint.";
+"tooltip_reverse_direction" = "Keer de sleeprichting om als deze verkeerd aanvoelt.";
+"tooltip_horizontal_scrolling" = "Sta zijwaartse sleepbewegingen toe om horizontale schuifgebeurtenissen te verzenden.";
+"tooltip_invert_horizontal" = "Draai alleen de horizontale schuifrichting om.";
+"tooltip_show_indicator" = "Toon de visuele indicator tijdens het slepen en scrollen.";
+"tooltip_visualizer_size" = "Bepaalt de grootte van de drag-visualizer.";
+"tooltip_liquid_glass" = "Regelt glasbreking, glans en weerstandsreactieve beweging.";
+"tooltip_opacity" = "Regelt de dekking van de visualisatie.";
+"tooltip_visualizer_tint" = "Regelt de subtiele tint van de glazen visualisator.";
+"tooltip_auto_update" = "Controleer GitHub Releases automatisch op nieuwere versies.";
+"tooltip_show_welcome" = "Open de welkomstpagina opnieuw.";
+"tooltip_custom_bundle_id" = "Gebruik dit wanneer een app niet in de kiezer wordt gevonden. Voorbeeld: com.bedrijf.AppNaam";
+"settings_general" = "Algemeen";
+"settings_visualizer" = "Visualisator";
+"settings_scrolling" = "Scrollen";
+"settings_apps" = "Genegeerde apps";
+"settings_permissions" = "Machtigingen";
+"settings_updates" = "Updates";
+"settings_about" = "Over";
+"settings_general_subtitle" = "Activerings-, trigger- en opstartgedrag.";
+"settings_visualizer_subtitle" = "Stem de drag-visualisator af en bekijk er direct een voorbeeld van.";
+"settings_scrolling_subtitle" = "Pas de snelheid, acceleratie en dode zone aan.";
+"settings_apps_subtitle" = "Schakel slepen-scrollen uit in geselecteerde apps.";
+"settings_permissions_subtitle" = "Controleer de vereiste macOS-machtigingen en runtime-status.";
+"settings_updates_subtitle" = "Controleer releases, automatische updatestatus en updategeschiedenis.";
+"settings_about_subtitle" = "Productidentiteit, links en credits.";
+"crash_detected_title" = "Mac Drag Scroll Gecrasht";
+"crash_detected_message" = "De app crashte onverwachts tijdens de laatste sessie. U kunt het crashrapport kopiëren om het probleem te diagnosticeren.";
+"copy_report" = "Kopieer rapport";
 "dismiss" = "Negeren";
 "error_occurred_title" = "Er is een fout opgetreden";
-"error_occurred_message" = "Er is een fout opgetreden tijdens %@:\n\n%@";
+"error_occurred_message" = "Er is een fout opgetreden tijdens het formatteren van %@:\n\n%@";
 "fatal_error_title" = "Fatale fout";

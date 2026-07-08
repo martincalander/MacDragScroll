@@ -2,87 +2,169 @@
   Localizable.strings (Japanese)
   macdragscroll
 
-  Created by Martin Calander on 2026-01-17.
+  Generated for the current app UI strings.
 */
 
-// App Name
 "app_name" = "Mac Drag Scroll";
-
-// Footer
-"made_by" = "作成者: Martin Calander";
-"quit" = "終了";
-
-// Permission Required View
-"accessibility_permissions_required" = "アクセシビリティの許可が必要です";
-"app_needs_permission" = "Mac Drag Scrollを使用するには、この許可が必要です。";
-"open_system_settings" = "システム設定を開く";
-
-// Permission Dialogs
-"permission_required_title" = "アクセシビリティの許可が必要です";
-"permission_required_message" = "Mac Drag Scrollは、マウスの中ボタンを検出してドラッグスクロールを有効にするために、アクセシビリティの許可が必要です。\n\nシステム設定で許可を与えてください。";
-"permission_lost_title" = "アクセシビリティの許可が失われました";
-"permission_lost_message" = "Mac Drag Scrollのアクセシビリティ許可が無効になりました。ドラッグスクロールが無効になっています。\n\nアプリを引き続き使用するには、システム設定で許可を再度与えてください。";
-"later" = "後で";
-"ok" = "OK";
-
-// Settings Labels
-"speed" = "速度";
-"acceleration" = "加速";
-"dead_zone" = "デッドゾーン";
-"opacity" = "不透明度";
-"show_indicator" = "インジケーターとアニメーションを表示";
-"launch_at_login" = "ログイン時に起動";
-"excluded_apps" = "除外アプリ";
-
-// Acceleration Levels
-"acceleration_low" = "低";
-"acceleration_med" = "中";
-"acceleration_high" = "高";
-"acceleration_max" = "最大";
-
-// App Picker
-"search" = "検索";
-"no_apps_found" = "アプリが見つかりません";
-"done" = "完了";
-"current" = "現在";
-
-// Trigger Button
+"enabled" = "有効";
 "trigger_button" = "トリガーボタン";
+"launch_at_login" = "ログイン時に起動";
+"language" = "言語";
+"appearance" = "外観";
+"system_default" = "システムのデフォルト";
+"appearance_light" = "ライト";
+"appearance_dark" = "暗い";
+"speed" = "スピード";
+"acceleration" = "加速度";
+"dead_zone" = "デッドゾーン";
+"reverse_direction" = "逆方向";
+"horizontal_scrolling" = "横スクロール";
+"invert_horizontal" = "水平方向を反転";
+"acceleration_low" = "低い";
+"acceleration_med" = "メッド";
+"acceleration_high" = "高い";
+"acceleration_max" = "マックス";
+"show_indicator" = "インジケーターを表示";
+"visualizer_size" = "サイズ";
+"liquid_glass" = "液体ガラストークン";
+"opacity" = "不透明度";
+"visualizer_tint" = "色合い";
+"visualizer_tint_clear" = "クリア";
+"visualizer_tint_graphite" = "黒鉛";
+"visualizer_tint_accent" = "アクセント";
+"visualizer_tint_aqua" = "アクア";
+"visualizer_tint_warm" = "暖かい";
+"live_preview" = "ライブプレビュー";
+"drag_preview_hint" = "プレビュー内でドラッグする";
+"excluded_apps" = "無視されたアプリ";
+"excluded_apps_detail" = "これらのアプリでは、ドラッグ スクロールはオフのままです。実行中のアプリ、インストールされているアプリ、または手動バンドル識別子を追加します。";
+"ignored_apps_list" = "無視されたアプリ";
+"add_ignored_app" = "無視されたアプリを追加";
+"hide_picker" = "ピッカーを非表示にする";
+"show_picker" = "ショーピッカー";
+"no_excluded_apps" = "無視されたアプリはまだありません。";
+"search" = "検索";
+"no_apps_found" = "アプリが見つかりませんでした";
+"custom_bundle_id" = "カスタムバンドルID";
+"add" = "追加";
+"remove" = "取り除く";
+"current" = "現在";
+"accessibility_permissions_required" = "アクセシビリティ許可が必要です";
+"app_needs_permission" = "Mac Drag Scroll には、マウス入力をグローバルに監視する権限が必要です。";
+"permission_accessibility" = "アクセシビリティ許可";
+"permission_accessibility_granted_detail" = "Mac Drag Scroll は、設定されたマウス トリガーを監視し、スクロール イベントを送信できます。";
+"permission_accessibility_missing_detail" = "アプリがマウスのドラッグをグローバルに検出できるように、アクセシビリティ権限を付与します。";
+"permission_granted" = "付与された";
+"permission_needed" = "必要です";
+"permission_required_title" = "アクセシビリティ許可が必要です";
+"permission_required_message" = "Mac Drag Scroll には、マウス イベントをグローバルに監視するためのアクセシビリティ権限が必要です。";
+"permission_lost_title" = "アクセシビリティ許可が失われました";
+"permission_lost_message" = "Mac Drag Scroll はマウス イベントを監視できなくなりました。ドラッグ スクロールを引き続き使用するには、アクセシビリティ権限を再度有効にします。";
+"open_system_settings" = "システム設定を開く";
+"refresh" = "リフレッシュ";
+"later" = "後で";
+"ok" = "わかりました";
+"event_monitoring" = "イベント監視";
+"app_state" = "アプリの状態";
+"status_active" = "アクティブ";
+"status_enabled" = "アクティブ";
+"status_disabled" = "無効";
+"status_waiting" = "待っている";
+"auto_update" = "自動更新";
+"current_version" = "現在のバージョン";
+"last_checked" = "最終チェック日";
+"never" = "一度もない";
+"checking" = "チェック中";
+"check_for_update" = "アップデートの確認";
+"open_release" = "オープンリリース";
+"update_history" = "更新履歴";
+"update_menu_checking" = "アップデートをチェックしています...";
+"update_menu_up_to_date" = "最新の";
+"update_menu_available" = "利用可能なアップデート: %@";
+"update_menu_unavailable" = "更新チェックが利用できません";
+"update_status_checking" = "チェック中...";
+"update_status_up_to_date" = "最新の";
+"update_status_available" = "利用可能なアップデート: %@";
+"update_status_unable" = "確認できません";
+"update_detail_checking" = "GitHub Releases にお問い合わせください。";
+"update_detail_up_to_date" = "最新の既知のバージョンを実行しています。";
+"update_detail_available" = "バージョン %@ は GitHub Releases から入手できます。";
+"about_slogan" = "macOS 用に構築された、Windows スタイルのドラッグ スクロール。";
+"about_author" = "マーティン・カランダー作";
+"about_runtime_note" = "ネイティブ macOS コントロールと Liquid Glass ドラッグ インジケーターを備えた静かなメニュー バー ユーティリティとして設計されています。";
+"app_logo" = "アプリのロゴ";
+"version" = "バージョン";
+"github_repository" = "GitHub Repository";
+"website" = "Webサイト";
+"support_email" = "サポートメール";
+"show_welcome" = "ようこそを表示";
+"open" = "開ける";
+"welcome_window_title" = "Mac Drag Scroll へようこそ";
+"welcome_title" = "Mac Drag Scroll へようこそ";
+"welcome_subtitle" = "macOS 向けに形作られた、Windows スタイルのドラッグ スクロール。";
+"welcome_author" = "マーティン・カランダー作";
+"welcome_permission_title" = "アクセシビリティ許可";
+"welcome_permission_granted" = "設定されたマウス トリガーを監視する準備ができました。";
+"welcome_permission_needed" = "ドラッグ スクロールがマウス入力をグローバルにリッスンできるようにするために必要です。";
+"welcome_star_title" = "GitHub の Mac Drag Scroll にスターを付ける";
+"welcome_star_detail" = "プロジェクトに役立ち、後で見つけやすくなります。";
+"star_on_github" = "星";
+"welcome_get_started" = "始めましょう";
+"menu_disable" = "Mac Drag Scroll を無効にする";
+"menu_enable" = "Mac Drag Scroll を有効にする";
+"menu_settings" = "設定...";
+"menu_ignore_current_app" = "現在のアプリを無視する";
+"menu_ignore_app" = "%@ を無視する";
+"menu_ignored_app" = "%@ は無視されました";
+"current_app" = "現在のアプリ";
+"quit" = "やめる";
 "trigger_middle_click" = "中クリック";
 "trigger_right_click" = "右クリック";
 "trigger_left_click" = "左クリック";
 "trigger_button_n" = "ボタン %d";
-"trigger_command_click" = "Command + クリック";
-"trigger_option_click" = "Option + クリック";
-"trigger_control_click" = "Control + クリック";
-"trigger_shift_click" = "Shift + クリック";
-"trigger_middle_short" = "中央";
-"trigger_right_short" = "右";
-"recording" = "記録中...";
-
-// Reset
-"reset_to_defaults" = "デフォルトに戻す";
-"reset_confirm_title" = "設定をリセットしますか？";
-"reset_confirm_message" = "すべての設定がデフォルト値にリセットされます。この操作は元に戻せません。";
+"recording" = "録音中...";
+"reset_to_defaults" = "デフォルトにリセット";
+"reset_confirm_title" = "設定をリセットしますか?";
+"reset_confirm_message" = "これにより、デフォルトのドラッグ スクロール設定が復元されます。";
 "reset" = "リセット";
 "cancel" = "キャンセル";
-
-// Tooltips
-"tooltip_speed" = "スクロールの速度。値が高いほど速くスクロールします。";
-"tooltip_acceleration" = "開始点から離れるほどスクロールが加速する度合い。";
-"tooltip_dead_zone" = "クリック点周辺でスクロールが発生しない領域。精度向上に役立ちます。";
-"tooltip_opacity" = "スクロールインジケーターの透明度。";
-"tooltip_trigger" = "クリックして、スクロールを開始する新しいマウスボタン+修飾キーの組み合わせを記録します。";
-"tooltip_show_indicator" = "ドラッグスクロールがアクティブな時に視覚的フィードバックを表示します。";
-"tooltip_launch_at_login" = "ログイン時にMac Drag Scrollを自動的に起動します。";
-"tooltip_excluded_apps" = "ドラッグスクロールが無効になるアプリ。";
-"tooltip_reset" = "すべての設定をデフォルト値にリセットします。";
-
-// Crash Handler
-"crash_detected_title" = "Mac Drag Scrollがクラッシュしました";
-"crash_detected_message" = "前回のセッション中にアプリが予期せずクラッシュしました。問題の診断に役立てるため、クラッシュレポートをコピーできます。";
-"copy_report" = "レポートをコピー";
-"dismiss" = "閉じる";
+"tooltip_enabled" = "ドラッグスクロールをオンまたはオフにします。";
+"tooltip_trigger" = "クリックして新しいマウス トリガーをキャプチャします。";
+"tooltip_launch_at_login" = "ログイン時に Mac Drag Scroll を自動的に開始します。";
+"tooltip_language" = "アプリの言語を選択するか、システムのデフォルトに従います。";
+"tooltip_appearance" = "ライト、ダークを選択するか、システムの外観に従います。";
+"tooltip_speed" = "スクロール速度を制御します。";
+"tooltip_acceleration" = "スクロールの速度を制御します。";
+"tooltip_dead_zone" = "スクロールが始まる前のマウスの動き。";
+"tooltip_reverse_direction" = "方向が逆に感じられる場合は、ドラッグしてスクロールを反転してください。";
+"tooltip_horizontal_scrolling" = "横方向のドラッグ移動で水平スクロール イベントを送信できるようにします。";
+"tooltip_invert_horizontal" = "水平スクロール方向のみを反転します。";
+"tooltip_show_indicator" = "ドラッグスクロール中に視覚的なインジケーターを表示します。";
+"tooltip_visualizer_size" = "ドラッグ ビジュアライザのサイズを制御します。";
+"tooltip_liquid_glass" = "ガラスの屈折、光沢、ドラッグに反応する動きを制御します。";
+"tooltip_opacity" = "ビジュアライザの不透明度を制御します。";
+"tooltip_visualizer_tint" = "ガラス ビジュアライザの微妙な色合いを制御します。";
+"tooltip_auto_update" = "新しいバージョンについては、GitHub Releases を自動的にチェックします。";
+"tooltip_show_welcome" = "もう一度ようこそページを開きます。";
+"tooltip_custom_bundle_id" = "ピッカーでアプリが見つからない場合にこれを使用します。例: com.company.AppName";
+"settings_general" = "一般的な";
+"settings_visualizer" = "ビジュアライザー";
+"settings_scrolling" = "スクロール";
+"settings_apps" = "無視されたアプリ";
+"settings_permissions" = "権限";
+"settings_updates" = "アップデート";
+"settings_about" = "について";
+"settings_general_subtitle" = "アクティベーション、トリガー、および起動動作。";
+"settings_visualizer_subtitle" = "ドラッグ ビジュアライザを調整して、すぐにプレビューします。";
+"settings_scrolling_subtitle" = "速度、加速度、デッドゾーンを調整します。";
+"settings_apps_subtitle" = "選択したアプリでドラッグ スクロールを無効にします。";
+"settings_permissions_subtitle" = "必要な macOS 権限と実行時のステータスを確認します。";
+"settings_updates_subtitle" = "リリース、自動アップデートの状況、アップデート履歴を確認します。";
+"settings_about_subtitle" = "製品のアイデンティティ、リンク、クレジット。";
+"crash_detected_title" = "Mac Drag Scroll がクラッシュしました";
+"crash_detected_message" = "最後のセッション中にアプリが予期せずクラッシュしました。クラッシュ レポートをコピーすると、問題の診断に役立ちます。";
+"copy_report" = "レポートのコピー";
+"dismiss" = "却下する";
 "error_occurred_title" = "エラーが発生しました";
-"error_occurred_message" = "%@中にエラーが発生しました:\n\n%@";
+"error_occurred_message" = "%@ 中にエラーが発生しました:\n\n%@";
 "fatal_error_title" = "致命的なエラー";

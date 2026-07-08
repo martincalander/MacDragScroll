@@ -2,87 +2,169 @@
   Localizable.strings (German)
   macdragscroll
 
-  Created by Martin Calander on 2026-01-17.
+  Generated for the current app UI strings.
 */
 
-// App Name
 "app_name" = "Mac Drag Scroll";
-
-// Footer
-"made_by" = "Erstellt von Martin Calander";
-"quit" = "Beenden";
-
-// Permission Required View
-"accessibility_permissions_required" = "Bedienungshilfen-Berechtigung erforderlich";
-"app_needs_permission" = "Mac Drag Scroll benötigt diese Berechtigung, um zu funktionieren.";
-"open_system_settings" = "Systemeinstellungen öffnen";
-
-// Permission Dialogs
-"permission_required_title" = "Bedienungshilfen-Berechtigung erforderlich";
-"permission_required_message" = "Mac Drag Scroll benötigt die Bedienungshilfen-Berechtigung, um mittlere Maustastenereignisse zu erkennen und das Zieh-Scrollen zu aktivieren.\n\nBitte erteilen Sie die Berechtigung in den Systemeinstellungen.";
-"permission_lost_title" = "Bedienungshilfen-Berechtigung verloren";
-"permission_lost_message" = "Mac Drag Scroll hat keine Bedienungshilfen-Berechtigung mehr. Das Zieh-Scrollen wurde deaktiviert.\n\nBitte erteilen Sie die Berechtigung erneut in den Systemeinstellungen, um die App weiter zu verwenden.";
-"later" = "Später";
-"ok" = "OK";
-
-// Settings Labels
+"enabled" = "Aktiviert";
+"trigger_button" = "Auslöseknopf";
+"launch_at_login" = "Beim Anmelden starten";
+"language" = "Sprache";
+"appearance" = "Aussehen";
+"system_default" = "Systemstandard";
+"appearance_light" = "Licht";
+"appearance_dark" = "Dunkel";
 "speed" = "Geschwindigkeit";
 "acceleration" = "Beschleunigung";
-"dead_zone" = "Totzone";
-"opacity" = "Deckkraft";
-"show_indicator" = "Anzeige & Animationen";
-"launch_at_login" = "Bei Anmeldung starten";
-"excluded_apps" = "Ausgeschlossene Apps";
-
-// Acceleration Levels
+"dead_zone" = "Tote Zone";
+"reverse_direction" = "Richtung umkehren";
+"horizontal_scrolling" = "Horizontales Scrollen";
+"invert_horizontal" = "Horizontal umkehren";
 "acceleration_low" = "Niedrig";
-"acceleration_med" = "Mittel";
+"acceleration_med" = "Med";
 "acceleration_high" = "Hoch";
 "acceleration_max" = "Max";
-
-// App Picker
+"show_indicator" = "Indikator anzeigen";
+"visualizer_size" = "Größe";
+"liquid_glass" = "Liquid Glass";
+"opacity" = "Opazität";
+"visualizer_tint" = "Tönung";
+"visualizer_tint_clear" = "Klar";
+"visualizer_tint_graphite" = "Graphit";
+"visualizer_tint_accent" = "Akzent";
+"visualizer_tint_aqua" = "Aqua";
+"visualizer_tint_warm" = "Warm";
+"live_preview" = "Live-Vorschau";
+"drag_preview_hint" = "Ziehen Sie die Vorschau hinein";
+"excluded_apps" = "Ignorierte Apps";
+"excluded_apps_detail" = "Drag-Scrolling bleibt in diesen Apps deaktiviert. Fügen Sie eine laufende App, eine installierte App oder eine manuelle Bundle-ID hinzu.";
+"ignored_apps_list" = "Ignorierte Apps";
+"add_ignored_app" = "Ignorierte App hinzufügen";
+"hide_picker" = "Picker ausblenden";
+"show_picker" = "Auswahl anzeigen";
+"no_excluded_apps" = "Noch keine ignorierten Apps.";
 "search" = "Suchen";
 "no_apps_found" = "Keine Apps gefunden";
-"done" = "Fertig";
+"custom_bundle_id" = "Benutzerdefinierte Bundle-ID";
+"add" = "Hinzufügen";
+"remove" = "Entfernen";
 "current" = "Aktuell";
-
-// Trigger Button
-"trigger_button" = "Auslösetaste";
-"trigger_middle_click" = "Mittelklick";
+"accessibility_permissions_required" = "Barrierefreiheitsgenehmigung erforderlich";
+"app_needs_permission" = "Mac Drag Scroll benötigt die Berechtigung, Mauseingaben global zu überwachen.";
+"permission_accessibility" = "Barrierefreiheitserlaubnis";
+"permission_accessibility_granted_detail" = "Mac Drag Scroll kann den konfigurierten Mausauslöser überwachen und Scroll-Ereignisse senden.";
+"permission_accessibility_missing_detail" = "Erteilen Sie die Berechtigung „Barrierefreiheit“, damit die App das Ziehen mit der Maus weltweit erkennen kann.";
+"permission_granted" = "Zugegeben";
+"permission_needed" = "Benötigt";
+"permission_required_title" = "Barrierefreiheitsgenehmigung erforderlich";
+"permission_required_message" = "Mac Drag Scroll benötigt die Berechtigung „Barrierefreiheit“, um Mausereignisse global zu überwachen.";
+"permission_lost_title" = "Zugriffsberechtigung verloren";
+"permission_lost_message" = "Mac Drag Scroll kann Mausereignisse nicht mehr überwachen. Aktivieren Sie die Barrierefreiheitsberechtigung erneut, um weiterhin Drag-Scrolling zu verwenden.";
+"open_system_settings" = "Öffnen Sie die Systemeinstellungen";
+"refresh" = "Aktualisieren";
+"later" = "Später";
+"ok" = "Okay";
+"event_monitoring" = "Ereignisüberwachung";
+"app_state" = "App-Status";
+"status_active" = "Aktiv";
+"status_enabled" = "Aktiv";
+"status_disabled" = "Deaktiviert";
+"status_waiting" = "Warten";
+"auto_update" = "Automatische Aktualisierung";
+"current_version" = "Aktuelle Version";
+"last_checked" = "Zuletzt überprüft";
+"never" = "Niemals";
+"checking" = "Überprüfen";
+"check_for_update" = "Suchen Sie nach Updates";
+"open_release" = "Veröffentlichung öffnen";
+"update_history" = "Update-Verlauf";
+"update_menu_checking" = "Suche nach Updates...";
+"update_menu_up_to_date" = "Auf dem neuesten Stand";
+"update_menu_available" = "Update verfügbar: %@";
+"update_menu_unavailable" = "Aktualisierungsprüfung nicht verfügbar";
+"update_status_checking" = "Überprüfen...";
+"update_status_up_to_date" = "Auf dem neuesten Stand";
+"update_status_available" = "Update verfügbar: %@";
+"update_status_unable" = "Überprüfung nicht möglich";
+"update_detail_checking" = "Kontaktaufnahme mit GitHub Releases.";
+"update_detail_up_to_date" = "Sie verwenden die neueste bekannte Version.";
+"update_detail_available" = "Die Version %@ ist bei GitHub Releases erhältlich.";
+"about_slogan" = "Drag-Scrolling im Windows-Stil, entwickelt für macOS.";
+"about_author" = "Hergestellt von Martin Calander";
+"about_runtime_note" = "Konzipiert als leises Menüleisten-Dienstprogramm mit nativen macOS-Steuerelementen und einem Liquid Glass-Schleppzeiger.";
+"app_logo" = "App-Logo";
+"version" = "Version";
+"github_repository" = "GitHub Repository";
+"website" = "Website";
+"support_email" = "Support-E-Mail";
+"show_welcome" = "Willkommen anzeigen";
+"open" = "Offen";
+"welcome_window_title" = "Willkommen bei Mac Drag Scroll";
+"welcome_title" = "Willkommen bei Mac Drag Scroll";
+"welcome_subtitle" = "Drag-Scrolling im Windows-Stil, angepasst an macOS.";
+"welcome_author" = "Hergestellt von Martin Calander";
+"welcome_permission_title" = "Barrierefreiheitsberechtigung";
+"welcome_permission_granted" = "Bereit zur Überwachung Ihres konfigurierten Mausauslösers.";
+"welcome_permission_needed" = "Erforderlich, damit Drag-Scrolling global auf Mauseingaben warten kann.";
+"welcome_star_title" = "Stern Mac Drag Scroll auf GitHub";
+"welcome_star_detail" = "Es hilft dem Projekt und erleichtert das spätere Auffinden.";
+"star_on_github" = "Stern";
+"welcome_get_started" = "Legen Sie los";
+"menu_disable" = "Deaktivieren Sie Mac Drag Scroll";
+"menu_enable" = "Aktivieren Sie Mac Drag Scroll";
+"menu_settings" = "Einstellungen...";
+"menu_ignore_current_app" = "Aktuelle App ignorieren";
+"menu_ignore_app" = "%@ ignorieren";
+"menu_ignored_app" = "%@ wird ignoriert";
+"current_app" = "Aktuelle App";
+"quit" = "Hör auf";
+"trigger_middle_click" = "Mittlerer Klick";
 "trigger_right_click" = "Rechtsklick";
 "trigger_left_click" = "Linksklick";
-"trigger_button_n" = "Taste %d";
-"trigger_command_click" = "Befehl + Klick";
-"trigger_option_click" = "Option + Klick";
-"trigger_control_click" = "Strg + Klick";
-"trigger_shift_click" = "Umschalt + Klick";
-"trigger_middle_short" = "Mitte";
-"trigger_right_short" = "Rechts";
+"trigger_button_n" = "Schaltfläche %d";
 "recording" = "Aufnahme...";
-
-// Reset
-"reset_to_defaults" = "Auf Standard zurücksetzen";
+"reset_to_defaults" = "Auf Standardeinstellungen zurücksetzen";
 "reset_confirm_title" = "Einstellungen zurücksetzen?";
-"reset_confirm_message" = "Alle Einstellungen werden auf die Standardwerte zurückgesetzt. Diese Aktion kann nicht rückgängig gemacht werden.";
+"reset_confirm_message" = "Dadurch werden die standardmäßigen Drag-Scroll-Einstellungen wiederhergestellt.";
 "reset" = "Zurücksetzen";
 "cancel" = "Abbrechen";
-
-// Tooltips
-"tooltip_speed" = "Wie schnell das Scrollen erfolgt. Höhere Werte = schnelleres Scrollen.";
-"tooltip_acceleration" = "Wie stark das Scrollen beschleunigt, je weiter Sie vom Startpunkt ziehen.";
-"tooltip_dead_zone" = "Der Bereich um den Klickpunkt, in dem kein Scrollen erfolgt. Hilft bei der Präzision.";
-"tooltip_opacity" = "Transparenz der Scroll-Anzeige.";
-"tooltip_trigger" = "Klicken Sie, um eine neue Maustaste + Modifikator-Kombination zum Auslösen des Scrollens aufzuzeichnen.";
-"tooltip_show_indicator" = "Zeigt visuelles Feedback an, wenn das Zieh-Scrollen aktiv ist.";
-"tooltip_launch_at_login" = "Mac Drag Scroll automatisch bei der Anmeldung starten.";
-"tooltip_excluded_apps" = "Apps, in denen das Zieh-Scrollen deaktiviert wird.";
-"tooltip_reset" = "Alle Einstellungen auf Standardwerte zurücksetzen.";
-
-// Crash Handler
+"tooltip_enabled" = "Schalten Sie das Drag-Scrolling ein oder aus.";
+"tooltip_trigger" = "Klicken Sie, um einen neuen Mausauslöser zu erfassen.";
+"tooltip_launch_at_login" = "Starten Sie Mac Drag Scroll automatisch, wenn Sie sich anmelden.";
+"tooltip_language" = "Wählen Sie die App-Sprache oder befolgen Sie die Standardeinstellungen Ihres Systems.";
+"tooltip_appearance" = "Wählen Sie „Hell“, „Dunkel“ oder folgen Sie dem Erscheinungsbild des Systems.";
+"tooltip_speed" = "Steuert die Scrollgeschwindigkeit.";
+"tooltip_acceleration" = "Steuert, wie schnell das Scrollen beschleunigt wird.";
+"tooltip_dead_zone" = "Mausbewegung vor Beginn des Scrollens.";
+"tooltip_reverse_direction" = "Kehrt die Scrollrichtung um, wenn sie sich falsch herum anfühlt.";
+"tooltip_horizontal_scrolling" = "Lassen Sie eine seitliche Ziehbewegung zu, um horizontale Bildlaufereignisse zu senden.";
+"tooltip_invert_horizontal" = "Kehrt nur die horizontale Bildlaufrichtung um.";
+"tooltip_show_indicator" = "Zeigt beim Scrollen per Drag-and-Drop die visuelle Anzeige an.";
+"tooltip_visualizer_size" = "Steuert die Größe des Drag-Visualizers.";
+"tooltip_liquid_glass" = "Steuert Glasbrechung, Glanz und widerstandsreaktive Bewegung.";
+"tooltip_opacity" = "Steuert die Deckkraft des Visualizers.";
+"tooltip_visualizer_tint" = "Steuert den subtilen Farbton des Glasvisualisierers.";
+"tooltip_auto_update" = "Überprüfen Sie GitHub Releases automatisch auf neuere Versionen.";
+"tooltip_show_welcome" = "Öffnen Sie die Willkommensseite erneut.";
+"tooltip_custom_bundle_id" = "Verwenden Sie dies, wenn eine App nicht in der Auswahl gefunden wird. Beispiel: com.company.AppName";
+"settings_general" = "Allgemein";
+"settings_visualizer" = "Visualisierer";
+"settings_scrolling" = "Scrollen";
+"settings_apps" = "Ignorierte Apps";
+"settings_permissions" = "Berechtigungen";
+"settings_updates" = "Aktualisierungen";
+"settings_about" = "Über";
+"settings_general_subtitle" = "Aktivierung, Auslöser und Startverhalten.";
+"settings_visualizer_subtitle" = "Optimieren Sie den Drag-Visualizer und zeigen Sie ihn sofort in der Vorschau an.";
+"settings_scrolling_subtitle" = "Passen Sie Geschwindigkeit, Beschleunigung und Totzone an.";
+"settings_apps_subtitle" = "Deaktivieren Sie Drag-Scrolling in ausgewählten Apps.";
+"settings_permissions_subtitle" = "Überprüfen Sie die erforderlichen macOS-Berechtigungen und den Laufzeitstatus.";
+"settings_updates_subtitle" = "Überprüfen Sie Veröffentlichungen, den Status der automatischen Updates und den Update-Verlauf.";
+"settings_about_subtitle" = "Produktidentität, Links und Credits.";
 "crash_detected_title" = "Mac Drag Scroll ist abgestürzt";
-"crash_detected_message" = "Die App ist während der letzten Sitzung unerwartet abgestürzt. Sie können den Absturzbericht kopieren, um bei der Diagnose zu helfen.";
+"crash_detected_message" = "Die App ist während der letzten Sitzung unerwartet abgestürzt. Sie können den Absturzbericht kopieren, um bei der Diagnose des Problems zu helfen.";
 "copy_report" = "Bericht kopieren";
-"dismiss" = "Verwerfen";
-"error_occurred_title" = "Ein Fehler ist aufgetreten";
+"dismiss" = "Entlassen";
+"error_occurred_title" = "Es ist ein Fehler aufgetreten";
 "error_occurred_message" = "Beim %@ ist ein Fehler aufgetreten:\n\n%@";
-"fatal_error_title" = "Schwerwiegender Fehler";
+"fatal_error_title" = "Fataler Fehler";

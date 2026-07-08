@@ -2,87 +2,169 @@
   Localizable.strings (Simplified Chinese)
   macdragscroll
 
-  Created by Martin Calander on 2026-01-16.
+  Generated for the current app UI strings.
 */
 
-// App Name
-"app_name" = "Mac 拖拽滚动";
-
-// Footer
-"made_by" = "由 Martin Calander 开发";
-"quit" = "退出";
-
-// Permission Required View
-"accessibility_permissions_required" = "需要辅助功能权限";
-"app_needs_permission" = "Mac 拖拽滚动需要此权限才能正常工作。";
-"open_system_settings" = "打开系统设置";
-
-// Permission Dialogs
-"permission_required_title" = "需要辅助功能权限";
-"permission_required_message" = "Mac 拖拽滚动需要辅助功能权限来检测鼠标中键事件并启用拖拽滚动功能。\n\n请在系统设置中授予权限。";
-"permission_lost_title" = "辅助功能权限已失效";
-"permission_lost_message" = "Mac 拖拽滚动已失去辅助功能权限。拖拽滚动功能已被禁用。\n\n请在系统设置中重新授予权限以继续使用此应用。";
-"later" = "稍后";
-"ok" = "好";
-
-// Settings Labels
-"speed" = "速度";
-"acceleration" = "加速度";
-"dead_zone" = "死区";
-"opacity" = "不透明度";
-"show_indicator" = "显示指示器和动画";
-"launch_at_login" = "登录时启动";
-"excluded_apps" = "排除的应用";
-
-// Acceleration Levels
-"acceleration_low" = "低";
-"acceleration_med" = "中";
-"acceleration_high" = "高";
-"acceleration_max" = "最大";
-
-// App Picker
-"search" = "搜索";
-"no_apps_found" = "未找到应用";
-"done" = "完成";
-"current" = "当前";
-
-// Trigger Button
+"app_name" = "Mac Drag Scroll";
+"enabled" = "启用";
 "trigger_button" = "触发按钮";
-"trigger_middle_click" = "中键点击";
-"trigger_right_click" = "右键点击";
-"trigger_left_click" = "左键点击";
+"launch_at_login" = "登录时启动";
+"language" = "语言";
+"appearance" = "外观";
+"system_default" = "系统默认值";
+"appearance_light" = "光";
+"appearance_dark" = "黑暗的";
+"speed" = "速度";
+"acceleration" = "加速";
+"dead_zone" = "死区";
+"reverse_direction" = "反向";
+"horizontal_scrolling" = "水平滚动";
+"invert_horizontal" = "水平反转";
+"acceleration_low" = "低的";
+"acceleration_med" = "医学";
+"acceleration_high" = "高的";
+"acceleration_max" = "最大限度";
+"show_indicator" = "显示指标";
+"visualizer_size" = "尺寸";
+"liquid_glass" = "液体玻璃斯托肯";
+"opacity" = "不透明度";
+"visualizer_tint" = "着色";
+"visualizer_tint_clear" = "清除";
+"visualizer_tint_graphite" = "石墨";
+"visualizer_tint_accent" = "口音";
+"visualizer_tint_aqua" = "阿夸";
+"visualizer_tint_warm" = "温暖的";
+"live_preview" = "实时预览";
+"drag_preview_hint" = "拖入预览";
+"excluded_apps" = "被忽略的应用程序";
+"excluded_apps_detail" = "这些应用中会停用拖动滚动。添加正在运行的应用、已安装的应用或手动输入包标识符。";
+"ignored_apps_list" = "被忽略的应用程序";
+"add_ignored_app" = "添加忽略的应用程序";
+"hide_picker" = "隐藏选择器";
+"show_picker" = "显示选择器";
+"no_excluded_apps" = "还没有被忽略的应用程序。";
+"search" = "搜索";
+"no_apps_found" = "没有找到应用程序";
+"custom_bundle_id" = "自定义捆绑包 ID";
+"add" = "添加";
+"remove" = "消除";
+"current" = "当前的";
+"accessibility_permissions_required" = "需要无障碍许可";
+"app_needs_permission" = "Mac Drag Scroll 需要获得全局监控鼠标输入的权限。";
+"permission_accessibility" = "无障碍许可";
+"permission_accessibility_granted_detail" = "Mac Drag Scroll 可以监控配置的鼠标触发并发送滚动事件。";
+"permission_accessibility_missing_detail" = "授予辅助功能权限，以便应用程序可以全局检测鼠标拖动。";
+"permission_granted" = "的确";
+"permission_needed" = "需要";
+"permission_required_title" = "需要无障碍许可";
+"permission_required_message" = "Mac Drag Scroll 需要辅助权限才能全局监控鼠标事件。";
+"permission_lost_title" = "辅助功能权限丢失";
+"permission_lost_message" = "Mac Drag Scroll 无法再监视鼠标事件。重新启用辅助功能权限以继续使用拖动滚动。";
+"open_system_settings" = "打开系统设置";
+"refresh" = "刷新";
+"later" = "之后";
+"ok" = "好的";
+"event_monitoring" = "事件监控";
+"app_state" = "应用程序状态";
+"status_active" = "积极的";
+"status_enabled" = "积极的";
+"status_disabled" = "残疾人";
+"status_waiting" = "等待";
+"auto_update" = "自动更新";
+"current_version" = "当前版本";
+"last_checked" = "最后检查";
+"never" = "绝不";
+"checking" = "检查";
+"check_for_update" = "检查更新";
+"open_release" = "开放发布";
+"update_history" = "更新历史";
+"update_menu_checking" = "正在检查更新...";
+"update_menu_up_to_date" = "最新";
+"update_menu_available" = "可用更新：%@";
+"update_menu_unavailable" = "更新检查不可用";
+"update_status_checking" = "检查...";
+"update_status_up_to_date" = "最新";
+"update_status_available" = "可用更新：%@";
+"update_status_unable" = "无法检查";
+"update_detail_checking" = "联系 GitHub Releases。";
+"update_detail_up_to_date" = "您正在运行最新的已知版本。";
+"update_detail_available" = "版本 %@ 可从 GitHub Releases 获得。";
+"about_slogan" = "Windows 风格的拖动滚动，专为 macOS 构建。";
+"about_author" = "马丁·卡兰德制作";
+"about_runtime_note" = "设计为一个安静的菜单栏实用程序，具有本机 macOS 控件和 Liquid Glass 拖动指示器。";
+"app_logo" = "应用程序标志";
+"version" = "版本";
+"github_repository" = "GitHub 存储库令牌";
+"website" = "网站";
+"support_email" = "支持电子邮件";
+"show_welcome" = "显示欢迎";
+"open" = "打开";
+"welcome_window_title" = "欢迎使用Mac Drag Scroll";
+"welcome_title" = "欢迎使用Mac Drag Scroll";
+"welcome_subtitle" = "Windows 风格的拖动滚动，专为 macOS 设计。";
+"welcome_author" = "马丁·卡兰德制作";
+"welcome_permission_title" = "无障碍权限";
+"welcome_permission_granted" = "准备好监视您配置的鼠标触发器。";
+"welcome_permission_needed" = "必需的，以便拖动滚动可以全局监听鼠标输入。";
+"welcome_star_title" = "在 GitHub 上星标 Mac Drag Scroll";
+"welcome_star_detail" = "它对项目有帮助，并且让以后更容易找到。";
+"star_on_github" = "星星";
+"welcome_get_started" = "开始使用";
+"menu_disable" = "禁用 Mac Drag Scroll";
+"menu_enable" = "启用应用程序令牌";
+"menu_settings" = "设置...";
+"menu_ignore_current_app" = "忽略当前应用程序";
+"menu_ignore_app" = "忽略 %@";
+"menu_ignored_app" = "忽略 %@";
+"current_app" = "当前应用程序";
+"quit" = "辞职";
+"trigger_middle_click" = "中键单击";
+"trigger_right_click" = "右键单击";
+"trigger_left_click" = "左键单击";
 "trigger_button_n" = "按钮 %d";
-"trigger_command_click" = "Command + 点击";
-"trigger_option_click" = "Option + 点击";
-"trigger_control_click" = "Control + 点击";
-"trigger_shift_click" = "Shift + 点击";
-"trigger_middle_short" = "中键";
-"trigger_right_short" = "右键";
-"recording" = "录制中...";
-
-// Reset
-"reset_to_defaults" = "恢复默认设置";
+"recording" = "记录...";
+"reset_to_defaults" = "重置为默认值";
 "reset_confirm_title" = "重置设置？";
-"reset_confirm_message" = "这将把所有设置恢复为默认值。此操作无法撤销。";
+"reset_confirm_message" = "这将恢复默认的拖动滚动设置。";
 "reset" = "重置";
 "cancel" = "取消";
-
-// Tooltips
-"tooltip_speed" = "滚动速度。数值越高，滚动越快。";
-"tooltip_acceleration" = "拖动距离越远，滚动加速越多。";
-"tooltip_dead_zone" = "点击位置周围不会滚动的区域。有助于精确控制。";
-"tooltip_opacity" = "滚动指示器的透明度。";
-"tooltip_trigger" = "点击以录制新的鼠标按钮+修饰键组合来触发滚动。";
-"tooltip_show_indicator" = "拖拽滚动激活时显示视觉反馈。";
+"tooltip_enabled" = "打开或关闭拖动滚动。";
+"tooltip_trigger" = "单击以捕获新的鼠标触发器。";
 "tooltip_launch_at_login" = "登录时自动启动 Mac Drag Scroll。";
-"tooltip_excluded_apps" = "将禁用拖拽滚动的应用程序。";
-"tooltip_reset" = "将所有设置重置为默认值。";
-
-// Crash Handler
-"crash_detected_title" = "Mac Drag Scroll 崩溃了";
-"crash_detected_message" = "应用在上次会话中意外崩溃。您可以复制崩溃报告以帮助诊断问题。";
+"tooltip_language" = "选择应用程序语言，或遵循系统默认语言。";
+"tooltip_appearance" = "选择浅色、深色或遵循系统外观。";
+"tooltip_speed" = "控制滚动速度。";
+"tooltip_acceleration" = "控制滚动的速度。";
+"tooltip_dead_zone" = "滚动开始前的鼠标移动。";
+"tooltip_reverse_direction" = "如果方向感觉相反，则反转拖动滚动方向。";
+"tooltip_horizontal_scrolling" = "允许侧向拖动移动以发送水平滚动事件。";
+"tooltip_invert_horizontal" = "仅翻转水平滚动方向。";
+"tooltip_show_indicator" = "拖动滚动时显示视觉指示器。";
+"tooltip_visualizer_size" = "控制拖动可视化工具的大小。";
+"tooltip_liquid_glass" = "控制玻璃折射、光泽和拖动反应运动。";
+"tooltip_opacity" = "控制可视化工具的不透明度。";
+"tooltip_visualizer_tint" = "控制玻璃观察器的微妙色调。";
+"tooltip_auto_update" = "自动检查 GitHub Releases 是否有较新版本。";
+"tooltip_show_welcome" = "再次打开欢迎页面。";
+"tooltip_custom_bundle_id" = "当选择器中找不到应用程序时使用此选项。示例：com.company.AppName";
+"settings_general" = "一般的";
+"settings_visualizer" = "展示台";
+"settings_scrolling" = "滚动";
+"settings_apps" = "被忽略的应用程序";
+"settings_permissions" = "权限";
+"settings_updates" = "更新";
+"settings_about" = "关于";
+"settings_general_subtitle" = "激活、触发和启动行为。";
+"settings_visualizer_subtitle" = "调整拖动可视化工具并立即预览。";
+"settings_scrolling_subtitle" = "调整速度、加速度和死区。";
+"settings_apps_subtitle" = "在选定的应用程序中禁用拖动滚动。";
+"settings_permissions_subtitle" = "检查所需的 macOS 权限和运行时状态。";
+"settings_updates_subtitle" = "检查版本、自动更新状态和更新历史记录。";
+"settings_about_subtitle" = "产品标识、链接和信用。";
+"crash_detected_title" = "Mac Drag Scroll 崩溃";
+"crash_detected_message" = "该应用程序在上次会话期间意外崩溃。您可以复制崩溃报告来帮助诊断问题。";
 "copy_report" = "复制报告";
-"dismiss" = "关闭";
+"dismiss" = "解雇";
 "error_occurred_title" = "发生错误";
-"error_occurred_message" = "在 %@ 时发生错误:\n\n%@";
+"error_occurred_message" = "%@ 时发生错误：\n\n%@";
 "fatal_error_title" = "致命错误";

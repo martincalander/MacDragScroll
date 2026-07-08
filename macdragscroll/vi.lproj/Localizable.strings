@@ -2,87 +2,169 @@
   Localizable.strings (Vietnamese)
   macdragscroll
 
-  Created by Martin Calander on 2026-01-17.
+  Generated for the current app UI strings.
 */
 
-// App Name
 "app_name" = "Mac Drag Scroll";
-
-// Footer
-"made_by" = "Tạo bởi Martin Calander";
-"quit" = "Thoát";
-
-// Permission Required View
-"accessibility_permissions_required" = "Yêu cầu Quyền Trợ năng";
-"app_needs_permission" = "Mac Drag Scroll cần quyền này để hoạt động.";
-"open_system_settings" = "Mở Cài đặt Hệ thống";
-
-// Permission Dialogs
-"permission_required_title" = "Yêu cầu Quyền Trợ năng";
-"permission_required_message" = "Mac Drag Scroll cần quyền Trợ năng để phát hiện sự kiện nút chuột giữa và bật tính năng cuộn bằng kéo.\n\nVui lòng cấp quyền trong Cài đặt Hệ thống.";
-"permission_lost_title" = "Đã mất Quyền Trợ năng";
-"permission_lost_message" = "Mac Drag Scroll không còn quyền Trợ năng. Tính năng cuộn bằng kéo đã bị tắt.\n\nVui lòng cấp lại quyền trong Cài đặt Hệ thống để tiếp tục sử dụng ứng dụng.";
-"later" = "Để sau";
-"ok" = "OK";
-
-// Settings Labels
+"enabled" = "Đã bật";
+"trigger_button" = "Nút kích hoạt";
+"launch_at_login" = "Khởi chạy lúc đăng nhập";
+"language" = "Ngôn ngữ";
+"appearance" = "Giao diện";
+"system_default" = "Mặc định hệ thống";
+"appearance_light" = "Ánh sáng";
+"appearance_dark" = "Tối";
 "speed" = "Tốc độ";
-"acceleration" = "Gia tốc";
+"acceleration" = "Tăng tốc";
 "dead_zone" = "Vùng chết";
-"opacity" = "Độ mờ";
-"show_indicator" = "Hiển thị chỉ báo & hiệu ứng";
-"launch_at_login" = "Mở khi đăng nhập";
-"excluded_apps" = "Ứng dụng loại trừ";
-
-// Acceleration Levels
+"reverse_direction" = "Hướng ngược lại";
+"horizontal_scrolling" = "Cuộn ngang";
+"invert_horizontal" = "Đảo ngược theo chiều ngang";
 "acceleration_low" = "Thấp";
-"acceleration_med" = "TB";
+"acceleration_med" = "Địa Trung Hải";
 "acceleration_high" = "Cao";
 "acceleration_max" = "Tối đa";
-
-// App Picker
+"show_indicator" = "Hiển thị chỉ báo";
+"visualizer_size" = "Kích thước";
+"liquid_glass" = "Liquid Glass";
+"opacity" = "Độ mờ";
+"visualizer_tint" = "Pha màu";
+"visualizer_tint_clear" = "Xóa";
+"visualizer_tint_graphite" = "than chì";
+"visualizer_tint_accent" = "Giọng";
+"visualizer_tint_aqua" = "Thủy";
+"visualizer_tint_warm" = "Ấm áp";
+"live_preview" = "Xem trước trực tiếp";
+"drag_preview_hint" = "Kéo vào bản xem trước";
+"excluded_apps" = "Ứng dụng bị bỏ qua";
+"excluded_apps_detail" = "Kéo cuộn vẫn tắt trong các ứng dụng này. Thêm ứng dụng đang chạy, ứng dụng đã cài đặt hoặc mã nhận dạng gói thủ công.";
+"ignored_apps_list" = "Ứng dụng bị bỏ qua";
+"add_ignored_app" = "Thêm ứng dụng bị bỏ qua";
+"hide_picker" = "Ẩn bộ chọn";
+"show_picker" = "Hiển thị bộ chọn";
+"no_excluded_apps" = "Chưa có ứng dụng nào bị bỏ qua.";
 "search" = "Tìm kiếm";
-"no_apps_found" = "Không tìm thấy ứng dụng";
-"done" = "Xong";
-"current" = "Hiện tại";
-
-// Trigger Button
-"trigger_button" = "Nút kích hoạt";
+"no_apps_found" = "Không tìm thấy ứng dụng nào";
+"custom_bundle_id" = "ID gói tùy chỉnh";
+"add" = "Thêm";
+"remove" = "Xóa";
+"current" = "hiện tại";
+"accessibility_permissions_required" = "Cần có quyền truy cập";
+"app_needs_permission" = "Mac Drag Scroll cần có quyền giám sát hoạt động nhập chuột trên toàn cầu.";
+"permission_accessibility" = "Quyền truy cập";
+"permission_accessibility_granted_detail" = "Mac Drag Scroll có thể giám sát trình kích hoạt chuột được định cấu hình và gửi các sự kiện cuộn.";
+"permission_accessibility_missing_detail" = "Cấp quyền Trợ năng để ứng dụng có thể phát hiện thao tác kéo chuột trên toàn cầu.";
+"permission_granted" = "Đã được cấp";
+"permission_needed" = "Cần thiết";
+"permission_required_title" = "Cần có quyền truy cập";
+"permission_required_message" = "Mac Drag Scroll cần có quyền Trợ năng để theo dõi các sự kiện chuột trên toàn cầu.";
+"permission_lost_title" = "Mất quyền truy cập";
+"permission_lost_message" = "Mac Drag Scroll không thể theo dõi các sự kiện chuột nữa. Bật lại quyền Trợ năng để tiếp tục sử dụng thao tác kéo cuộn.";
+"open_system_settings" = "Mở cài đặt hệ thống";
+"refresh" = "Làm mới";
+"later" = "sau này";
+"ok" = "được rồi";
+"event_monitoring" = "Giám sát sự kiện";
+"app_state" = "Trạng thái ứng dụng";
+"status_active" = "Đang hoạt động";
+"status_enabled" = "Đang hoạt động";
+"status_disabled" = "Đã tắt";
+"status_waiting" = "Đang chờ";
+"auto_update" = "Tự động cập nhật";
+"current_version" = "Phiên bản hiện tại";
+"last_checked" = "Kiểm tra lần cuối";
+"never" = "không bao giờ";
+"checking" = "Kiểm tra";
+"check_for_update" = "Kiểm tra cập nhật";
+"open_release" = "Bản phát hành mở";
+"update_history" = "Cập nhật lịch sử";
+"update_menu_checking" = "Đang kiểm tra cập nhật...";
+"update_menu_up_to_date" = "Cập nhật";
+"update_menu_available" = "Đã có bản cập nhật: %@";
+"update_menu_unavailable" = "Kiểm tra cập nhật không có sẵn";
+"update_status_checking" = "Đang kiểm tra...";
+"update_status_up_to_date" = "Cập nhật";
+"update_status_available" = "Đã có bản cập nhật: %@";
+"update_status_unable" = "Không thể kiểm tra";
+"update_detail_checking" = "Liên hệ GitHub Releases.";
+"update_detail_up_to_date" = "Bạn đang chạy phiên bản mới nhất được biết đến.";
+"update_detail_available" = "Phiên bản %@ có sẵn từ GitHub Releases.";
+"about_slogan" = "Cuộn kéo theo phong cách Windows, được xây dựng cho macOS.";
+"about_author" = "Được thực hiện bởi Martin Calander";
+"about_runtime_note" = "Được thiết kế như một tiện ích thanh menu yên tĩnh với các điều khiển macOS gốc và chỉ báo kéo Liquid Glass.";
+"app_logo" = "Biểu tượng ứng dụng";
+"version" = "Phiên bản";
+"github_repository" = "GitHub Repository";
+"website" = "Trang web";
+"support_email" = "Email hỗ trợ";
+"show_welcome" = "Hiển thị Chào mừng";
+"open" = "Mở";
+"welcome_window_title" = "Chào mừng đến với Mac Drag Scroll";
+"welcome_title" = "Chào mừng đến với Mac Drag Scroll";
+"welcome_subtitle" = "Cuộn kéo theo phong cách Windows, được định hình cho macOS.";
+"welcome_author" = "Được thực hiện bởi Martin Calander";
+"welcome_permission_title" = "Quyền truy cập";
+"welcome_permission_granted" = "Sẵn sàng theo dõi trình kích hoạt chuột được định cấu hình của bạn.";
+"welcome_permission_needed" = "Cần thiết để thao tác kéo có thể lắng nghe đầu vào của chuột trên toàn cầu.";
+"welcome_star_title" = "Sao Mac Drag Scroll trên GitHub";
+"welcome_star_detail" = "Nó giúp ích cho dự án và làm cho việc tìm kiếm sau này dễ dàng hơn.";
+"star_on_github" = "Ngôi sao";
+"welcome_get_started" = "Bắt đầu";
+"menu_disable" = "Tắt Mac Drag Scroll";
+"menu_enable" = "Kích hoạt Mac Drag Scroll";
+"menu_settings" = "Cài đặt...";
+"menu_ignore_current_app" = "Bỏ qua ứng dụng hiện tại";
+"menu_ignore_app" = "Bỏ qua %@";
+"menu_ignored_app" = "%@ Đã bỏ qua";
+"current_app" = "Ứng dụng hiện tại";
+"quit" = "Thoát";
 "trigger_middle_click" = "Nhấp chuột giữa";
 "trigger_right_click" = "Nhấp chuột phải";
 "trigger_left_click" = "Nhấp chuột trái";
 "trigger_button_n" = "Nút %d";
-"trigger_command_click" = "Command + Nhấp";
-"trigger_option_click" = "Option + Nhấp";
-"trigger_control_click" = "Control + Nhấp";
-"trigger_shift_click" = "Shift + Nhấp";
-"trigger_middle_short" = "Giữa";
-"trigger_right_short" = "Phải";
 "recording" = "Đang ghi...";
-
-// Reset
-"reset_to_defaults" = "Đặt lại mặc định";
-"reset_confirm_title" = "Đặt lại Cài đặt?";
-"reset_confirm_message" = "Thao tác này sẽ đặt lại tất cả cài đặt về giá trị mặc định. Không thể hoàn tác hành động này.";
+"reset_to_defaults" = "Đặt lại về mặc định";
+"reset_confirm_title" = "Đặt lại cài đặt?";
+"reset_confirm_message" = "Điều này sẽ khôi phục cài đặt cuộn kéo mặc định.";
 "reset" = "Đặt lại";
-"cancel" = "Hủy";
-
-// Tooltips
-"tooltip_speed" = "Tốc độ cuộn. Giá trị cao hơn = cuộn nhanh hơn.";
-"tooltip_acceleration" = "Cuộn tăng tốc bao nhiêu khi bạn kéo xa hơn điểm bắt đầu.";
-"tooltip_dead_zone" = "Vùng xung quanh điểm nhấp không xảy ra cuộn. Giúp tăng độ chính xác.";
-"tooltip_opacity" = "Độ trong suốt của chỉ báo cuộn.";
-"tooltip_trigger" = "Nhấp để ghi lại tổ hợp nút chuột + phím bổ trợ mới để kích hoạt cuộn.";
-"tooltip_show_indicator" = "Hiển thị phản hồi trực quan khi cuộn kéo đang hoạt động.";
-"tooltip_launch_at_login" = "Tự động khởi động Mac Drag Scroll khi đăng nhập.";
-"tooltip_excluded_apps" = "Các ứng dụng sẽ tắt tính năng cuộn kéo.";
-"tooltip_reset" = "Đặt lại tất cả cài đặt về giá trị mặc định.";
-
-// Crash Handler
+"cancel" = "Hủy bỏ";
+"tooltip_enabled" = "Bật hoặc tắt tính năng kéo cuộn.";
+"tooltip_trigger" = "Bấm để chụp một kích hoạt chuột mới.";
+"tooltip_launch_at_login" = "Tự động khởi động Mac Drag Scroll khi bạn đăng nhập.";
+"tooltip_language" = "Chọn ngôn ngữ ứng dụng hoặc làm theo mặc định hệ thống của bạn.";
+"tooltip_appearance" = "Chọn Sáng, Tối hoặc theo dõi giao diện của hệ thống.";
+"tooltip_speed" = "Kiểm soát tốc độ cuộn.";
+"tooltip_acceleration" = "Kiểm soát tốc độ cuộn tăng lên.";
+"tooltip_dead_zone" = "Chuyển động của chuột trước khi bắt đầu cuộn.";
+"tooltip_reverse_direction" = "Đảo hướng cuộn kéo nếu hướng bị ngược.";
+"tooltip_horizontal_scrolling" = "Cho phép chuyển động kéo sang một bên để gửi các sự kiện cuộn ngang.";
+"tooltip_invert_horizontal" = "Chỉ lật theo hướng cuộn ngang.";
+"tooltip_show_indicator" = "Hiển thị chỉ báo trực quan trong khi kéo cuộn.";
+"tooltip_visualizer_size" = "Kiểm soát kích thước của trình hiển thị kéo.";
+"tooltip_liquid_glass" = "Kiểm soát khúc xạ, độ bóng và chuyển động phản ứng kéo của kính.";
+"tooltip_opacity" = "Kiểm soát độ mờ của trình hiển thị.";
+"tooltip_visualizer_tint" = "Kiểm soát sắc thái tinh tế của thiết bị hiển thị kính.";
+"tooltip_auto_update" = "Tự động kiểm tra GitHub Releases để biết các phiên bản mới hơn.";
+"tooltip_show_welcome" = "Mở lại trang chào mừng.";
+"tooltip_custom_bundle_id" = "Sử dụng tùy chọn này khi không tìm thấy ứng dụng trong bộ chọn. Ví dụ: com.company.AppName";
+"settings_general" = "chung";
+"settings_visualizer" = "Trình hiển thị";
+"settings_scrolling" = "Cuộn";
+"settings_apps" = "Ứng dụng bị bỏ qua";
+"settings_permissions" = "Quyền";
+"settings_updates" = "Cập nhật";
+"settings_about" = "Giới thiệu";
+"settings_general_subtitle" = "Hành vi kích hoạt, kích hoạt và khởi động.";
+"settings_visualizer_subtitle" = "Điều chỉnh trình hiển thị kéo và xem trước nó ngay lập tức.";
+"settings_scrolling_subtitle" = "Điều chỉnh tốc độ, khả năng tăng tốc và vùng chết.";
+"settings_apps_subtitle" = "Tắt tính năng kéo cuộn trong các ứng dụng đã chọn.";
+"settings_permissions_subtitle" = "Kiểm tra các quyền macOS cần thiết và trạng thái thời gian chạy.";
+"settings_updates_subtitle" = "Kiểm tra các bản phát hành, trạng thái cập nhật tự động và lịch sử cập nhật.";
+"settings_about_subtitle" = "Nhận dạng sản phẩm, liên kết và tín dụng.";
 "crash_detected_title" = "Mac Drag Scroll bị lỗi";
-"crash_detected_message" = "Ứng dụng đã bị lỗi bất ngờ trong phiên trước. Bạn có thể sao chép báo cáo lỗi để giúp chẩn đoán vấn đề.";
-"copy_report" = "Sao chép Báo cáo";
-"dismiss" = "Bỏ qua";
+"crash_detected_message" = "Ứng dụng bị lỗi bất ngờ trong phiên cuối cùng. Bạn có thể sao chép báo cáo sự cố để giúp chẩn đoán sự cố.";
+"copy_report" = "Sao chép báo cáo";
+"dismiss" = "Loại bỏ";
 "error_occurred_title" = "Đã xảy ra lỗi";
 "error_occurred_message" = "Đã xảy ra lỗi khi %@:\n\n%@";
 "fatal_error_title" = "Lỗi nghiêm trọng";

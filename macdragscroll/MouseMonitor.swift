@@ -7,648 +7,746 @@
 
 import AppKit
 import CoreGraphics
-import ApplicationServices
 
-class MouseMonitor {
-    private var globalMonitor: Any?
-    private var localMonitor: Any?
+struct ScrollDeltas: Equatable {
+    let horizontal: Int32
+    let vertical: Int32
+}
+
+enum ScrollPhysics {
+    private static let minimumAxisDirection = 0.12
+
+    static func distance(from origin: CGPoint, to current: CGPoint) -> Double {
+        let deltaX = current.x - origin.x
+        let deltaY = current.y - origin.y
+        return sqrt(deltaX * deltaX + deltaY * deltaY)
+    }
+
+    static func isInDeadZone(from origin: CGPoint, to current: CGPoint, deadZoneRadius: Double) -> Bool {
+        distance(from: origin, to: current) <= deadZoneRadius
+    }
+
+    static func intensity(distance: Double, deadZoneRadius: Double, acceleration: Double, scrollSpeed: Double) -> Double {
+        guard distance > deadZoneRadius else { return 0 }
+
+        let effectiveDistance = distance - deadZoneRadius
+        let acceleratedDistance = pow(effectiveDistance / 30.0, acceleration)
+        return min(acceleratedDistance, 50.0) * scrollSpeed
+    }
+
+    static func direction(from origin: CGPoint, to current: CGPoint) -> (x: Double, y: Double) {
+        let deltaX = current.x - origin.x
+        let deltaY = current.y - origin.y
+        let distance = distance(from: origin, to: current)
+
+        guard distance > 0 else { return (0, 0) }
+        return (deltaX / distance, deltaY / distance)
+    }
+
+    static func deltas(
+        from origin: CGPoint,
+        to current: CGPoint,
+        scrollSpeed: Double,
+        deadZoneRadius: Double,
+        acceleration: Double,
+        reversesDirection: Bool
+    ) -> ScrollDeltas {
+        let distance = distance(from: origin, to: current)
+        guard distance > deadZoneRadius else {
+            return ScrollDeltas(horizontal: 0, vertical: 0)
+        }
+
+        let direction = direction(from: origin, to: current)
+        let intensity = intensity(
+            distance: distance,
+            deadZoneRadius: deadZoneRadius,
+            acceleration: acceleration,
+            scrollSpeed: scrollSpeed
+        )
+
+        return ScrollDeltas(
+            horizontal: wheelDelta(directionComponent: direction.x, intensity: intensity, reversesDirection: reversesDirection),
+            vertical: wheelDelta(directionComponent: direction.y, intensity: intensity, reversesDirection: reversesDirection)
+        )
+    }
+
+    private static func wheelDelta(directionComponent: Double, intensity: Double, reversesDirection: Bool) -> Int32 {
+        guard abs(directionComponent) >= minimumAxisDirection else { return 0 }
+
+        let directionMultiplier = reversesDirection ? -1.0 : 1.0
+        let rawDelta = directionComponent * intensity * directionMultiplier
+        let roundedDelta = Int32(round(rawDelta))
+
+        if roundedDelta == 0 {
+            return rawDelta > 0 ? 1 : -1
+        }
+
+        return roundedDelta
+    }
+}
+
+enum ScrollEventFactory {
+    static let syntheticEventMarker: Int64 = 0x4D445343524F4C4C
+
+    static func makeScrollEvent(deltas: ScrollDeltas, location: CGPoint) -> CGEvent? {
+        guard let event = CGEvent(
+            scrollWheelEvent2Source: CGEventSource(stateID: .combinedSessionState),
+            units: .pixel,
+            wheelCount: 2,
+            wheel1: deltas.vertical,
+            wheel2: deltas.horizontal,
+            wheel3: 0
+        ) else {
+            return nil
+        }
+
+        event.location = location
+        event.setIntegerValueField(.eventSourceUserData, value: syntheticEventMarker)
+        return event
+    }
+}
+
+final class MouseMonitor {
+    private struct Constants {
+        static let overlayShowDelay: TimeInterval = 0.12
+        static let quickClickReplayLimit: CFTimeInterval = 0.22
+        static let windowValidationInterval: TimeInterval = 0.15
+    }
+
+    private struct WindowIdentity: Equatable {
+        let number: Int
+        let ownerPID: pid_t
+    }
+
+    private struct WindowSnapshot: Equatable {
+        let identity: WindowIdentity
+        let bounds: CGRect
+    }
+
+    private struct PendingClick {
+        let button: Int
+        let modifiers: NSEvent.ModifierFlags
+        let quartzPoint: CGPoint
+        let startedAt: CFTimeInterval
+    }
+
+    private var eventTap: CFMachPort?
+    private var eventTapRunLoopSource: CFRunLoopSource?
     private var scrollTimer: Timer?
+    private var overlayShowTimer: Timer?
     private var overlayWindow: ScrollOverlayWindow?
-    private var overlayShowTimer: Timer?  // Delay before showing overlay
 
     private var isTriggerActive = false
+    private var isActivated = false
+    private var isOverlayVisible = false
+    private var hasMovedOutsideDeadZone = false
+
     private var originPoint: CGPoint = .zero
     private var currentPoint: CGPoint = .zero
-    private var isActivated = false
-    private var isOverlayVisible = false  // Track if overlay is actually shown
-    private var hasMovedOutsideDeadZone = false  // Track if moved outside dead zone
+    private var originQuartzPoint: CGPoint = .zero
+    private var currentQuartzPoint: CGPoint = .zero
+    private var originWindow: WindowSnapshot?
+    private var activeTriggerConfig: TriggerConfig?
+    private var pendingClick: PendingClick?
+    private var isOriginWindowAvailable = false
+    private var lastWindowValidation = Date.distantPast
 
-    // Window tracking - pause scroll when cursor leaves original window
-    private var originWindowNumber: Int?  // The window where drag started
-    private var isCursorInOriginWindow = true  // Track if cursor is in original window
-
-    // UI Element tracking - pause scroll when cursor leaves original element
-    private var originElement: AXUIElement?  // The UI element where drag started
-    private var originElementBounds: CGRect?  // Cached bounds of the origin element
-    private var isCursorInOriginElement = true  // Track if cursor is in original element
-    
-    // Track current modifier state
-    private var currentModifiers: NSEvent.ModifierFlags = []
-    
-    // Quick click threshold - if released before this, don't show overlay
-    private let overlayShowDelay: TimeInterval = 0.15  // 150ms
-    
-    // Get settings from SettingsManager
     private var scrollSpeed: Double { SettingsManager.shared.scrollSpeed }
     private var deadZoneRadius: Double { SettingsManager.shared.deadZoneRadius }
     private var acceleration: Double { SettingsManager.shared.acceleration }
+    private var reverseScrollDirection: Bool { SettingsManager.shared.reverseScrollDirection }
     private var triggerConfig: TriggerConfig { SettingsManager.shared.triggerConfig }
-    
-    func start() {
-        // Monitor all mouse events we might need
-        let eventMask: NSEvent.EventTypeMask = [
-            .otherMouseDown, .otherMouseUp, .otherMouseDragged,  // Middle/other buttons
-            .rightMouseDown, .rightMouseUp, .rightMouseDragged,  // Right button
-            .leftMouseDown, .leftMouseUp, .leftMouseDragged,     // Left button (with modifiers)
+
+    @discardableResult
+    func start() -> Bool {
+        guard eventTap == nil else { return true }
+
+        let eventMask = Self.eventMask(for: [
+            .leftMouseDown, .leftMouseUp, .leftMouseDragged,
+            .rightMouseDown, .rightMouseUp, .rightMouseDragged,
+            .otherMouseDown, .otherMouseUp, .otherMouseDragged,
             .mouseMoved,
-            .flagsChanged  // For tracking modifier keys
-        ]
-        
-        globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: eventMask) { [weak self] event in
-            self?.handleMouseEvent(event)
-        }
-        
-        localMonitor = NSEvent.addLocalMonitorForEvents(matching: eventMask) { [weak self] event in
-            self?.handleMouseEvent(event)
-            return event
-        }
-    }
-    
-    func stop() {
-        if let monitor = globalMonitor {
-            NSEvent.removeMonitor(monitor)
-            globalMonitor = nil
-        }
-        if let monitor = localMonitor {
-            NSEvent.removeMonitor(monitor)
-            localMonitor = nil
-        }
-        stopScrolling()
-    }
-    
-    private func handleMouseEvent(_ event: NSEvent) {
-        guard SettingsManager.shared.isEnabled else { return }
-        
-        // Check if current app is excluded
-        if isCurrentAppExcluded() { return }
-        
-        // Track modifier changes
-        if event.type == .flagsChanged {
-            currentModifiers = event.modifierFlags
-            // If trigger is active and required modifiers are no longer held, stop
-            if isTriggerActive && triggerConfig.hasModifiers {
-                if !triggerConfig.modifiersStillHeld(currentModifiers) {
-                    handleTriggerRelease()
-                }
-            }
-            return
-        }
-        
-        let config = triggerConfig
-        
-        // Handle mouse down events
-        switch event.type {
-        case .leftMouseDown:
-            if config.mouseButton == 0 && config.matches(button: 0, modifiers: event.modifierFlags) {
-                handleTriggerPress(at: NSEvent.mouseLocation)
-            }
-        case .rightMouseDown:
-            if config.mouseButton == 1 && config.matches(button: 1, modifiers: event.modifierFlags) {
-                handleTriggerPress(at: NSEvent.mouseLocation)
-            }
-        case .otherMouseDown:
-            if event.buttonNumber == config.mouseButton && config.matches(button: event.buttonNumber, modifiers: event.modifierFlags) {
-                handleTriggerPress(at: NSEvent.mouseLocation)
-            }
-            
-        // Handle mouse up events
-        case .leftMouseUp:
-            if isTriggerActive && config.mouseButton == 0 {
-                handleTriggerRelease()
-            }
-        case .rightMouseUp:
-            if isTriggerActive && config.mouseButton == 1 {
-                handleTriggerRelease()
-            }
-        case .otherMouseUp:
-            if isTriggerActive && event.buttonNumber == config.mouseButton {
-                handleTriggerRelease()
-            }
-            
-        // Handle mouse drag/move events
-        case .leftMouseDragged, .rightMouseDragged, .otherMouseDragged, .mouseMoved:
-            if isTriggerActive {
-                handleMouseMoved(at: NSEvent.mouseLocation)
-            }
-            
-        default:
-            break
-        }
-    }
-    
-    private func isCurrentAppExcluded() -> Bool {
-        guard let frontmostApp = NSWorkspace.shared.frontmostApplication,
-              let bundleId = frontmostApp.bundleIdentifier else {
+            .flagsChanged
+        ])
+
+        let refcon = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
+        guard let tap = CGEvent.tapCreate(
+            tap: .cgSessionEventTap,
+            place: .headInsertEventTap,
+            options: .defaultTap,
+            eventsOfInterest: eventMask,
+            callback: Self.eventTapCallback,
+            userInfo: refcon
+        ) else {
+            NSLog("[MacDragScroll] Failed to create mouse event tap.")
             return false
         }
-        return SettingsManager.shared.isAppExcluded(bundleIdentifier: bundleId)
+
+        eventTap = tap
+        eventTapRunLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0)
+
+        if let source = eventTapRunLoopSource {
+            CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
+        }
+
+        CGEvent.tapEnable(tap: tap, enable: true)
+        return true
     }
-    
-    // MARK: - Core Logic
-    
-    private func handleTriggerPress(at point: CGPoint) {
-        isTriggerActive = true
-        hasMovedOutsideDeadZone = false
-        isOverlayVisible = false
-        originPoint = point
-        currentPoint = point
 
-        // Capture the window under the cursor when drag starts
-        originWindowNumber = getWindowNumberAtPoint(point)
-        isCursorInOriginWindow = true
+    func stop() {
+        cancelInteraction()
 
-        // Capture the UI element under the cursor for element-bound scrolling
-        captureOriginElement(at: point)
-        isCursorInOriginElement = true
+        if let tap = eventTap {
+            CGEvent.tapEnable(tap: tap, enable: false)
+            CFMachPortInvalidate(tap)
+            eventTap = nil
+        }
 
-        // Activate scroll mode immediately (logic runs), but delay showing the overlay
-        activateScrollMode()
-
-        // Schedule overlay to appear after a short delay
-        overlayShowTimer = Timer.scheduledTimer(withTimeInterval: overlayShowDelay, repeats: false) { [weak self] _ in
-            guard let self = self, self.isTriggerActive, self.isActivated else { return }
-            self.showOverlay()
+        if let source = eventTapRunLoopSource {
+            CFRunLoopRemoveSource(CFRunLoopGetMain(), source, .commonModes)
+            eventTapRunLoopSource = nil
         }
     }
-    
-    private func handleTriggerRelease() {
-        isTriggerActive = false
-        
-        // Cancel the overlay show timer if it hasn't fired yet
-        overlayShowTimer?.invalidate()
-        overlayShowTimer = nil
-        
-        stopScrolling()
+
+    private static let eventTapCallback: CGEventTapCallBack = { _, type, event, refcon in
+        guard let refcon else {
+            return Unmanaged.passUnretained(event)
+        }
+
+        let monitor = Unmanaged<MouseMonitor>.fromOpaque(refcon).takeUnretainedValue()
+        return monitor.handleEventTap(type: type, event: event)
     }
-    
-    private func handleMouseMoved(at point: CGPoint) {
-        currentPoint = point
 
-        // Check if cursor is still in the original window
-        let wasInOriginWindow = isCursorInOriginWindow
-        isCursorInOriginWindow = isCursorOverOriginWindow(at: point)
-
-        // Check if cursor is still in the original UI element
-        let wasInOriginElement = isCursorInOriginElement
-        isCursorInOriginElement = isCursorOverOriginElement(at: point)
-
-        // Determine if scrolling should be active (must be in both window AND element)
-        let wasScrollActive = wasInOriginWindow && wasInOriginElement
-        let isScrollActive = isCursorInOriginWindow && isCursorInOriginElement
-
-        // Update overlay opacity when entering/leaving scroll-active region
-        if wasScrollActive != isScrollActive && isOverlayVisible {
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
-                self.overlayWindow?.setPaused(!isScrollActive)
+    private func handleEventTap(type: CGEventType, event: CGEvent) -> Unmanaged<CGEvent>? {
+        if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
+            if let eventTap {
+                CGEvent.tapEnable(tap: eventTap, enable: true)
             }
+            return pass(event)
         }
 
-        let deltaX = currentPoint.x - originPoint.x
-        let deltaY = currentPoint.y - originPoint.y
-        let distance = sqrt(deltaX * deltaX + deltaY * deltaY)
+        if event.getIntegerValueField(.eventSourceUserData) == ScrollEventFactory.syntheticEventMarker {
+            return pass(event)
+        }
 
-        // Track if moved outside dead zone
-        if !hasMovedOutsideDeadZone && distance > deadZoneRadius {
-            hasMovedOutsideDeadZone = true
+        if SettingsManager.shared.isCapturingTrigger {
+            return pass(event)
+        }
 
-            // Trigger click bounce when starting to scroll (if overlay is visible)
-            if isOverlayVisible && isScrollActive {
-                DispatchQueue.main.async { [weak self] in
-                    self?.overlayWindow?.animateClickBounce()
-                }
+        if !SettingsManager.shared.isEnabled {
+            if isTriggerActive {
+                cancelInteraction()
             }
+            return pass(event)
         }
 
-        // Only update overlay if activated and visible
-        guard isActivated, isOverlayVisible else { return }
+        let quartzPoint = event.location
+        let point = appKitPoint(fromQuartzPoint: quartzPoint)
+        let modifiers = Self.modifierFlags(from: event.flags)
 
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.overlayWindow?.updateArrow(to: self.currentPoint)
+        if type == .flagsChanged {
+            handleFlagsChanged(modifiers)
+            return pass(event)
         }
-    }
-    
-    // MARK: - Window Tracking
-    
-    private func getWindowNumberAtPoint(_ point: CGPoint) -> Int? {
-        let windowListOptions: CGWindowListOption = [.optionOnScreenOnly, .excludeDesktopElements]
-        guard let windowInfoList = CGWindowListCopyWindowInfo(windowListOptions, kCGNullWindowID) as? [[String: Any]] else {
+
+        if type == .mouseMoved {
+            if isTriggerActive {
+                handlePointerMoved(to: point, quartzPoint: quartzPoint)
+            }
+            return pass(event)
+        }
+
+        guard let buttonNumber = Self.buttonNumber(for: type, event: event) else {
+            return pass(event)
+        }
+
+        if Self.isMouseDown(type) {
+            let config = triggerConfig
+            guard config.matches(button: buttonNumber, modifiers: modifiers),
+                  let targetWindow = windowAtPoint(point),
+                  !isAppExcluded(processIdentifier: targetWindow.identity.ownerPID) else {
+                return pass(event)
+            }
+
+            handleTriggerPress(
+                at: point,
+                quartzPoint: quartzPoint,
+                button: buttonNumber,
+                modifiers: modifiers,
+                targetWindow: targetWindow,
+                config: config
+            )
             return nil
         }
-        
-        for windowInfo in windowInfoList {
-            guard let bounds = windowInfo[kCGWindowBounds as String] as? [String: CGFloat],
-                  let windowNumber = windowInfo[kCGWindowNumber as String] as? Int,
-                  let ownerPID = windowInfo[kCGWindowOwnerPID as String] as? Int32 else {
-                continue
-            }
-            
-            // Skip our own app's windows
-            if ownerPID == ProcessInfo.processInfo.processIdentifier {
-                continue
-            }
-            
-            let windowFrame = CGRect(
-                x: bounds["X"] ?? 0,
-                y: bounds["Y"] ?? 0,
-                width: bounds["Width"] ?? 0,
-                height: bounds["Height"] ?? 0
-            )
-            
-            // CGWindowListCopyWindowInfo uses top-left origin, NSEvent uses bottom-left
-            let screenHeight = NSScreen.main?.frame.height ?? 0
-            let flippedY = screenHeight - point.y
-            let checkPoint = CGPoint(x: point.x, y: flippedY)
-            
-            if windowFrame.contains(checkPoint) {
-                return windowNumber
-            }
+
+        guard isTriggerActive, let activeConfig = activeTriggerConfig else {
+            return pass(event)
         }
-        
-        return nil
+
+        guard buttonNumber == activeConfig.mouseButton else {
+            return pass(event)
+        }
+
+        if Self.isMouseUp(type) {
+            handleTriggerRelease(shouldReplayClick: true)
+            return nil
+        }
+
+        if Self.isMouseDragged(type) {
+            handlePointerMoved(to: point, quartzPoint: quartzPoint)
+            return nil
+        }
+
+        return pass(event)
     }
-    
-    private func isCursorOverOriginWindow(at point: CGPoint) -> Bool {
-        guard let originWindow = originWindowNumber else { return true }
-        let currentWindow = getWindowNumberAtPoint(point)
-        return currentWindow == originWindow
-    }
 
-    // MARK: - UI Element Tracking
-
-    /// Captures the scrollable UI element at the given point for element-bound scrolling
-    private func captureOriginElement(at point: CGPoint) {
-        // Convert from bottom-left (NSEvent) to top-left (Accessibility) coordinate system
-        let screenHeight = NSScreen.main?.frame.height ?? 0
-        let accessibilityPoint = CGPoint(x: point.x, y: screenHeight - point.y)
-
-        // Get the system-wide accessibility element
-        let systemWideElement = AXUIElementCreateSystemWide()
-
-        // Get the element at the cursor position
-        var elementRef: AXUIElement?
-        let result = AXUIElementCopyElementAtPosition(systemWideElement, Float(accessibilityPoint.x), Float(accessibilityPoint.y), &elementRef)
-
-        guard result == .success, let element = elementRef else {
-            print("[DragScroll] Failed to get element at position: \(result.rawValue)")
-            originElement = nil
-            originElementBounds = nil
+    private func handleFlagsChanged(_ modifiers: NSEvent.ModifierFlags) {
+        guard isTriggerActive, let activeConfig = activeTriggerConfig, activeConfig.hasModifiers else {
             return
         }
 
-        // Debug: print the element we found
-        debugPrintElement(element, label: "Element at cursor")
-
-        // Find the best container element for scroll bounds
-        let containerElement = findBestContainerElement(from: element, at: point)
-        originElement = containerElement
-
-        // Cache the bounds of the container element
-        originElementBounds = getElementBounds(containerElement)
-
-        // Debug: print what we're using
-        debugPrintElement(containerElement, label: "Using container")
-        print("[DragScroll] Container bounds: \(originElementBounds?.debugDescription ?? "nil")")
+        if !activeConfig.modifiersStillHeld(modifiers) {
+            handleTriggerRelease(shouldReplayClick: false)
+        }
     }
 
-    /// Debug helper to print element info
-    private func debugPrintElement(_ element: AXUIElement, label: String) {
-        var roleRef: CFTypeRef?
-        var titleRef: CFTypeRef?
-        var identifierRef: CFTypeRef?
+    private func handleTriggerPress(
+        at point: CGPoint,
+        quartzPoint: CGPoint,
+        button: Int,
+        modifiers: NSEvent.ModifierFlags,
+        targetWindow: WindowSnapshot,
+        config: TriggerConfig
+    ) {
+        guard !isTriggerActive else { return }
 
-        let role: String
-        if AXUIElementCopyAttributeValue(element, kAXRoleAttribute as CFString, &roleRef) == .success {
-            role = roleRef as? String ?? "unknown"
-        } else {
-            role = "unknown"
-        }
+        isTriggerActive = true
+        isActivated = true
+        isOverlayVisible = false
+        hasMovedOutsideDeadZone = false
+        activeTriggerConfig = config
+        pendingClick = PendingClick(
+            button: button,
+            modifiers: modifiers,
+            quartzPoint: quartzPoint,
+            startedAt: CACurrentMediaTime()
+        )
+        originPoint = point
+        currentPoint = point
+        originQuartzPoint = quartzPoint
+        currentQuartzPoint = quartzPoint
+        originWindow = targetWindow
+        isOriginWindowAvailable = true
+        lastWindowValidation = .distantPast
 
-        let title: String
-        if AXUIElementCopyAttributeValue(element, kAXTitleAttribute as CFString, &titleRef) == .success {
-            title = titleRef as? String ?? ""
-        } else {
-            title = ""
-        }
-
-        let identifier: String
-        if AXUIElementCopyAttributeValue(element, kAXIdentifierAttribute as CFString, &identifierRef) == .success {
-            identifier = identifierRef as? String ?? ""
-        } else {
-            identifier = ""
-        }
-
-        let bounds = getElementBounds(element)
-        print("[DragScroll] \(label): role=\(role), title='\(title)', id='\(identifier)', bounds=\(bounds?.debugDescription ?? "nil")")
+        updateOriginWindowAvailability(force: true)
+        startScrollTimer()
+        scheduleOverlay()
     }
 
-    /// Finds the best container element for scroll bounds - looks for panels, split groups, scroll areas, etc.
-    private func findBestContainerElement(from element: AXUIElement, at point: CGPoint) -> AXUIElement {
-        var current: AXUIElement? = element
-        var bestContainer: AXUIElement = element
-        var bestContainerBounds: CGRect? = getElementBounds(element)
+    private func handleTriggerRelease(shouldReplayClick: Bool) {
+        let clickToReplay = shouldReplayClick ? pendingClickForReplay() : nil
 
-        // Get window bounds to avoid selecting the entire window
-        let windowBounds = getWindowBoundsAtPoint(point)
-        let minContainerSize: CGFloat = 50  // Minimum reasonable container size
+        isTriggerActive = false
+        activeTriggerConfig = nil
+        pendingClick = nil
+        overlayShowTimer?.invalidate()
+        overlayShowTimer = nil
+        stopScrolling()
 
-        while let elem = current {
-            guard let bounds = getElementBounds(elem) else {
-                // Move to parent
-                current = getParentElement(elem)
-                continue
-            }
-
-            // Skip if this is basically the whole window (within 20px margin)
-            if let winBounds = windowBounds {
-                let isFullWindow = abs(bounds.width - winBounds.width) < 40 &&
-                                   abs(bounds.height - winBounds.height) < 40
-                if isFullWindow {
-                    // Stop here, don't go further up
-                    break
-                }
-            }
-
-            // Check the role
-            var roleRef: CFTypeRef?
-            let role: String
-            if AXUIElementCopyAttributeValue(elem, kAXRoleAttribute as CFString, &roleRef) == .success {
-                role = roleRef as? String ?? ""
-            } else {
-                role = ""
-            }
-
-            // Good container roles - these typically represent panels/sections
-            let isGoodContainer = role == kAXScrollAreaRole as String ||
-                                  role == kAXGroupRole as String ||
-                                  role == kAXSplitGroupRole as String ||
-                                  role == kAXTableRole as String ||
-                                  role == kAXListRole as String ||
-                                  role == kAXOutlineRole as String ||
-                                  role == kAXTextAreaRole as String ||
-                                  role == "AXTabGroup" ||
-                                  role == "AXLayoutArea"
-
-            // Skip window and application roles
-            let skipRoles = [kAXWindowRole as String, kAXApplicationRole as String]
-            if skipRoles.contains(role) {
-                break
-            }
-
-            // If this is a good container with reasonable size, use it
-            if isGoodContainer && bounds.width >= minContainerSize && bounds.height >= minContainerSize {
-                // Prefer this container if it's larger than current best but still reasonable
-                if bestContainerBounds == nil ||
-                   (bounds.width >= bestContainerBounds!.width && bounds.height >= bestContainerBounds!.height) {
-                    bestContainer = elem
-                    bestContainerBounds = bounds
-
-                    // If it's a scroll area, that's usually ideal - stop here
-                    if role == kAXScrollAreaRole as String {
-                        print("[DragScroll] Found scroll area, using it")
-                        return elem
-                    }
-                }
-            }
-
-            // Move to parent
-            current = getParentElement(elem)
+        if let clickToReplay {
+            self.replayClick(clickToReplay)
         }
-
-        return bestContainer
     }
 
-    /// Gets the parent element
-    private func getParentElement(_ element: AXUIElement) -> AXUIElement? {
-        var parentRef: CFTypeRef?
-        if AXUIElementCopyAttributeValue(element, kAXParentAttribute as CFString, &parentRef) == .success,
-           let parent = parentRef {
-            return (parent as! AXUIElement)
-        }
-        return nil
+    private func cancelInteraction() {
+        isTriggerActive = false
+        activeTriggerConfig = nil
+        pendingClick = nil
+        overlayShowTimer?.invalidate()
+        overlayShowTimer = nil
+        stopScrolling()
     }
 
-    /// Gets window bounds at the given point
-    private func getWindowBoundsAtPoint(_ point: CGPoint) -> CGRect? {
-        let windowListOptions: CGWindowListOption = [.optionOnScreenOnly, .excludeDesktopElements]
-        guard let windowInfoList = CGWindowListCopyWindowInfo(windowListOptions, kCGNullWindowID) as? [[String: Any]] else {
-            return nil
-        }
+    private func pendingClickForReplay() -> PendingClick? {
+        guard let pendingClick, !hasMovedOutsideDeadZone else { return nil }
 
-        let screenHeight = NSScreen.main?.frame.height ?? 0
-        let flippedY = screenHeight - point.y
+        let elapsed = CACurrentMediaTime() - pendingClick.startedAt
+        guard elapsed <= Constants.quickClickReplayLimit else { return nil }
 
-        for windowInfo in windowInfoList {
-            guard let bounds = windowInfo[kCGWindowBounds as String] as? [String: CGFloat],
-                  let ownerPID = windowInfo[kCGWindowOwnerPID as String] as? Int32 else {
-                continue
-            }
-
-            if ownerPID == ProcessInfo.processInfo.processIdentifier {
-                continue
-            }
-
-            let windowFrame = CGRect(
-                x: bounds["X"] ?? 0,
-                y: bounds["Y"] ?? 0,
-                width: bounds["Width"] ?? 0,
-                height: bounds["Height"] ?? 0
-            )
-
-            let checkPoint = CGPoint(x: point.x, y: flippedY)
-            if windowFrame.contains(checkPoint) {
-                // Convert to NSEvent coordinate system
-                let bottomLeftY = screenHeight - windowFrame.origin.y - windowFrame.height
-                return CGRect(x: windowFrame.origin.x, y: bottomLeftY,
-                              width: windowFrame.width, height: windowFrame.height)
-            }
-        }
-
-        return nil
+        return pendingClick
     }
 
-    // Keep for reference but not actively used
-    private func findScrollableAncestor(from element: AXUIElement) -> AXUIElement? {
-        var current: AXUIElement? = element
-        var bestScrollable: AXUIElement? = nil
+    private func handlePointerMoved(to point: CGPoint, quartzPoint: CGPoint) {
+        currentPoint = point
+        currentQuartzPoint = quartzPoint
+        updateOriginWindowAvailability()
 
-        while let elem = current {
-            if isElementScrollable(elem) {
-                bestScrollable = elem
+        let distance = ScrollPhysics.distance(from: originPoint, to: currentPoint)
 
-                var roleRef: CFTypeRef?
-                if AXUIElementCopyAttributeValue(elem, kAXRoleAttribute as CFString, &roleRef) == .success,
-                   let role = roleRef as? String {
-                    if role == kAXScrollAreaRole as String ||
-                       role == kAXTableRole as String ||
-                       role == kAXListRole as String ||
-                       role == kAXOutlineRole as String {
-                        return elem
-                    }
-                }
-            }
-
-            var parentRef: CFTypeRef?
-            if AXUIElementCopyAttributeValue(elem, kAXParentAttribute as CFString, &parentRef) == .success,
-               let parent = parentRef {
-                current = (parent as! AXUIElement)
-            } else {
-                break
+        if !hasMovedOutsideDeadZone && distance > deadZoneRadius {
+            hasMovedOutsideDeadZone = true
+            if isOverlayVisible && isOriginWindowAvailable {
+                overlayWindow?.animateClickBounce()
             }
         }
 
-        return bestScrollable
+        guard isActivated, isOverlayVisible else { return }
+        overlayWindow?.updateDragPoint(to: currentPoint)
     }
 
-    /// Checks if an element is scrollable (has scroll bars or is a scroll area)
-    private func isElementScrollable(_ element: AXUIElement) -> Bool {
-        // Check role
-        var roleRef: CFTypeRef?
-        if AXUIElementCopyAttributeValue(element, kAXRoleAttribute as CFString, &roleRef) == .success,
-           let role = roleRef as? String {
-            // These roles are inherently scrollable
-            if role == kAXScrollAreaRole as String ||
-               role == kAXTableRole as String ||
-               role == kAXListRole as String ||
-               role == kAXOutlineRole as String ||
-               role == kAXTextAreaRole as String {
-                return true
-            }
+    private func scheduleOverlay() {
+        overlayShowTimer?.invalidate()
+        overlayShowTimer = Timer.scheduledTimer(withTimeInterval: Constants.overlayShowDelay, repeats: false) { [weak self] _ in
+            guard let self, self.isTriggerActive, self.isActivated else { return }
+            self.showOverlay()
         }
-
-        // Check for scroll bar children
-        var childrenRef: CFTypeRef?
-        if AXUIElementCopyAttributeValue(element, kAXChildrenAttribute as CFString, &childrenRef) == .success,
-           let children = childrenRef as? [AXUIElement] {
-            for child in children {
-                var childRoleRef: CFTypeRef?
-                if AXUIElementCopyAttributeValue(child, kAXRoleAttribute as CFString, &childRoleRef) == .success,
-                   let childRole = childRoleRef as? String,
-                   childRole == kAXScrollBarRole as String {
-                    return true
-                }
-            }
+        if let overlayShowTimer {
+            RunLoop.main.add(overlayShowTimer, forMode: .common)
         }
-
-        return false
     }
 
-    /// Gets the bounds of a UI element in screen coordinates (bottom-left origin for comparison with NSEvent)
-    private func getElementBounds(_ element: AXUIElement) -> CGRect? {
-        var positionRef: CFTypeRef?
-        var sizeRef: CFTypeRef?
-
-        guard AXUIElementCopyAttributeValue(element, kAXPositionAttribute as CFString, &positionRef) == .success,
-              AXUIElementCopyAttributeValue(element, kAXSizeAttribute as CFString, &sizeRef) == .success else {
-            return nil
-        }
-
-        var position = CGPoint.zero
-        var size = CGSize.zero
-
-        guard AXValueGetValue(positionRef as! AXValue, .cgPoint, &position),
-              AXValueGetValue(sizeRef as! AXValue, .cgSize, &size) else {
-            return nil
-        }
-
-        // Convert from top-left (Accessibility) to bottom-left (NSEvent) coordinate system
-        let screenHeight = NSScreen.main?.frame.height ?? 0
-        let bottomLeftY = screenHeight - position.y - size.height
-
-        return CGRect(x: position.x, y: bottomLeftY, width: size.width, height: size.height)
-    }
-
-    /// Checks if the cursor is within the bounds of the original element
-    private func isCursorOverOriginElement(at point: CGPoint) -> Bool {
-        // If we don't have element bounds, don't restrict (fall back to window-only tracking)
-        guard let bounds = originElementBounds else { return true }
-
-        // Add a small tolerance to prevent jitter at edges
-        let tolerance: CGFloat = 2.0
-        let expandedBounds = bounds.insetBy(dx: -tolerance, dy: -tolerance)
-
-        return expandedBounds.contains(point)
-    }
-
-    // MARK: - Overlay & Scrolling
-    
     private func showOverlay() {
         guard SettingsManager.shared.animationsEnabled else { return }
         guard isActivated, !isOverlayVisible else { return }
+
         isOverlayVisible = true
-        
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.overlayWindow = ScrollOverlayWindow(origin: self.originPoint)
-            self.overlayWindow?.show()
-        }
+        overlayWindow = ScrollOverlayWindow(origin: originPoint)
+        overlayWindow?.show()
     }
-    
-    private func activateScrollMode() {
-        guard isTriggerActive else { return }
-        isActivated = true
-        
+
+    private func startScrollTimer() {
+        guard scrollTimer == nil else { return }
+
         scrollTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
             self?.performScroll()
         }
-        RunLoop.main.add(scrollTimer!, forMode: .common)
+
+        if let scrollTimer {
+            RunLoop.main.add(scrollTimer, forMode: .common)
+        }
     }
-    
+
     private func stopScrolling() {
         isActivated = false
         isOverlayVisible = false
+        hasMovedOutsideDeadZone = false
+        originWindow = nil
+        originQuartzPoint = .zero
+        currentQuartzPoint = .zero
+        isOriginWindowAvailable = false
+        lastWindowValidation = .distantPast
+
         scrollTimer?.invalidate()
         scrollTimer = nil
 
-        // Reset window tracking
-        originWindowNumber = nil
-        isCursorInOriginWindow = true
-
-        // Reset element tracking
-        originElement = nil
-        originElementBounds = nil
-        isCursorInOriginElement = true
-
-        DispatchQueue.main.async { [weak self] in
-            self?.overlayWindow?.hide()
-            self?.overlayWindow = nil
-        }
+        overlayWindow?.hide()
+        overlayWindow = nil
     }
-    
+
     private func performScroll() {
-        // Only scroll if cursor is in both the original window AND the original element
-        guard isActivated, isCursorInOriginWindow, isCursorInOriginElement else { return }
+        guard isActivated else { return }
 
-        let deltaX = currentPoint.x - originPoint.x
-        let deltaY = currentPoint.y - originPoint.y
-        
-        let distance = sqrt(deltaX * deltaX + deltaY * deltaY)
-        
-        guard distance > deadZoneRadius else { return }
-        
-        let effectiveDistance = distance - deadZoneRadius
-        let acceleratedDistance = pow(effectiveDistance / 30.0, acceleration)
-        let intensity = min(acceleratedDistance, 50.0) * scrollSpeed
-        
-        let normalizedX = deltaX / distance
-        let normalizedY = deltaY / distance
-        
-        let scrollDeltaY = Int32(round(normalizedY * intensity))
-        let scrollDeltaX = Int32(round(normalizedX * intensity))
-        
-        guard scrollDeltaX != 0 || scrollDeltaY != 0 else { return }
-
-        guard let event = CGEvent(scrollWheelEvent2Source: nil,
-                                  units: .pixel,
-                                  wheelCount: 2,
-                                  wheel1: scrollDeltaY,
-                                  wheel2: scrollDeltaX,
-                                  wheel3: 0) else {
-            // CGEvent creation failed - this can happen in rare system conditions
+        if !SettingsManager.shared.isEnabled || isOriginAppExcluded() {
+            cancelInteraction()
             return
         }
 
-        event.post(tap: .cghidEventTap)
+        updateOriginWindowAvailability()
+        guard isOriginWindowAvailable else {
+            cancelInteraction()
+            return
+        }
+
+        let deltas = ScrollPhysics.deltas(
+            from: originPoint,
+            to: currentPoint,
+            scrollSpeed: scrollSpeed,
+            deadZoneRadius: deadZoneRadius,
+            acceleration: acceleration,
+            reversesDirection: reverseScrollDirection
+        )
+
+        guard deltas.horizontal != 0 || deltas.vertical != 0 else { return }
+
+        guard let scrollLocation = scrollDeliveryQuartzPoint(),
+              let scrollEvent = ScrollEventFactory.makeScrollEvent(
+            deltas: deltas,
+            location: scrollLocation
+        ) else {
+            return
+        }
+
+        scrollEvent.post(tap: .cghidEventTap)
+    }
+
+    private func updateOriginWindowAvailability(force: Bool = false) {
+        guard let originWindow else {
+            setOriginWindowAvailable(false)
+            return
+        }
+
+        let now = Date()
+        guard force || now.timeIntervalSince(lastWindowValidation) >= Constants.windowValidationInterval else {
+            return
+        }
+
+        lastWindowValidation = now
+
+        if let refreshedWindow = windowSnapshot(matching: originWindow.identity) {
+            self.originWindow = refreshedWindow
+            setOriginWindowAvailable(true)
+        } else {
+            setOriginWindowAvailable(false)
+        }
+    }
+
+    private func setOriginWindowAvailable(_ available: Bool) {
+        guard available != isOriginWindowAvailable else { return }
+
+        isOriginWindowAvailable = available
+    }
+
+    private func scrollDeliveryQuartzPoint() -> CGPoint? {
+        guard let originWindow else { return nil }
+
+        if originWindow.bounds.contains(currentQuartzPoint) {
+            return currentQuartzPoint
+        }
+
+        if originWindow.bounds.contains(originQuartzPoint) {
+            return originQuartzPoint
+        }
+
+        return CGPoint(x: originWindow.bounds.midX, y: originWindow.bounds.midY)
+    }
+
+    private func windowAtPoint(_ point: CGPoint) -> WindowSnapshot? {
+        let quartzPoint = quartzPoint(fromAppKitPoint: point)
+        return windowSnapshots().first { $0.bounds.contains(quartzPoint) }
+    }
+
+    private func windowSnapshot(matching identity: WindowIdentity) -> WindowSnapshot? {
+        windowSnapshots().first { $0.identity == identity }
+    }
+
+    private func windowSnapshots() -> [WindowSnapshot] {
+        let options: CGWindowListOption = [.optionOnScreenOnly, .excludeDesktopElements]
+
+        guard let windowInfoList = CGWindowListCopyWindowInfo(options, kCGNullWindowID) as? [[String: Any]] else {
+            return []
+        }
+
+        return windowInfoList.compactMap { windowInfo -> WindowSnapshot? in
+            guard let ownerPID = int32Value(windowInfo[kCGWindowOwnerPID as String]),
+                  ownerPID != ProcessInfo.processInfo.processIdentifier,
+                  let windowNumber = intValue(windowInfo[kCGWindowNumber as String]),
+                  let layer = intValue(windowInfo[kCGWindowLayer as String]),
+                  layer == 0,
+                  let bounds = rectValue(windowInfo[kCGWindowBounds as String]),
+                  bounds.width > 1,
+                  bounds.height > 1 else {
+                return nil
+            }
+
+            let alpha = doubleValue(windowInfo[kCGWindowAlpha as String]) ?? 1.0
+            guard alpha > 0.01 else { return nil }
+
+            return WindowSnapshot(
+                identity: WindowIdentity(number: windowNumber, ownerPID: ownerPID),
+                bounds: bounds
+            )
+        }
+    }
+
+    private func isOriginAppExcluded() -> Bool {
+        guard let originWindow else { return false }
+        return isAppExcluded(processIdentifier: originWindow.identity.ownerPID)
+    }
+
+    private func isAppExcluded(processIdentifier: pid_t) -> Bool {
+        let app = NSRunningApplication(processIdentifier: processIdentifier)
+        return SettingsManager.shared.isAppExcluded(bundleIdentifier: app?.bundleIdentifier)
+    }
+
+    private func replayClick(_ pendingClick: PendingClick) {
+        guard
+            let source = CGEventSource(stateID: .combinedSessionState),
+            let mouseButton = CGMouseButton(rawValue: UInt32(pendingClick.button)),
+            let downEvent = CGEvent(
+                mouseEventSource: source,
+                mouseType: cgEventType(for: pendingClick.button, isDown: true),
+                mouseCursorPosition: pendingClick.quartzPoint,
+                mouseButton: mouseButton
+            ),
+            let upEvent = CGEvent(
+                mouseEventSource: source,
+                mouseType: cgEventType(for: pendingClick.button, isDown: false),
+                mouseCursorPosition: pendingClick.quartzPoint,
+                mouseButton: mouseButton
+            )
+        else {
+            return
+        }
+
+        let flags = cgEventFlags(from: pendingClick.modifiers)
+        [downEvent, upEvent].forEach { event in
+            event.flags = flags
+            event.setIntegerValueField(.mouseEventButtonNumber, value: Int64(pendingClick.button))
+            event.setIntegerValueField(.eventSourceUserData, value: ScrollEventFactory.syntheticEventMarker)
+        }
+
+        downEvent.post(tap: .cghidEventTap)
+        upEvent.post(tap: .cghidEventTap)
+    }
+
+    private func cgEventType(for button: Int, isDown: Bool) -> CGEventType {
+        switch (button, isDown) {
+        case (0, true):
+            return .leftMouseDown
+        case (0, false):
+            return .leftMouseUp
+        case (1, true):
+            return .rightMouseDown
+        case (1, false):
+            return .rightMouseUp
+        default:
+            return isDown ? .otherMouseDown : .otherMouseUp
+        }
+    }
+
+    private func cgEventFlags(from modifiers: NSEvent.ModifierFlags) -> CGEventFlags {
+        var flags: CGEventFlags = []
+
+        if modifiers.contains(.command) { flags.insert(.maskCommand) }
+        if modifiers.contains(.option) { flags.insert(.maskAlternate) }
+        if modifiers.contains(.control) { flags.insert(.maskControl) }
+        if modifiers.contains(.shift) { flags.insert(.maskShift) }
+
+        return flags
+    }
+
+    private func quartzPoint(fromAppKitPoint point: CGPoint) -> CGPoint {
+        let screen = NSScreen.screens.first { NSMouseInRect(point, $0.frame, false) } ?? NSScreen.main
+
+        guard let screen,
+              let screenNumber = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber else {
+            let screenHeight = NSScreen.main?.frame.height ?? 0
+            return CGPoint(x: point.x, y: screenHeight - point.y)
+        }
+
+        let displayBounds = CGDisplayBounds(CGDirectDisplayID(screenNumber.uint32Value))
+        let xInScreen = point.x - screen.frame.minX
+        let yFromTop = screen.frame.maxY - point.y
+
+        return CGPoint(
+            x: displayBounds.minX + xInScreen,
+            y: displayBounds.minY + yFromTop
+        )
+    }
+
+    private func appKitPoint(fromQuartzPoint point: CGPoint) -> CGPoint {
+        for screen in NSScreen.screens {
+            guard let screenNumber = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber else {
+                continue
+            }
+
+            let displayBounds = CGDisplayBounds(CGDirectDisplayID(screenNumber.uint32Value))
+            guard displayBounds.contains(point) else { continue }
+
+            let xInScreen = point.x - displayBounds.minX
+            let yInScreenFromTop = point.y - displayBounds.minY
+            return CGPoint(
+                x: screen.frame.minX + xInScreen,
+                y: screen.frame.maxY - yInScreenFromTop
+            )
+        }
+
+        let screenHeight = NSScreen.main?.frame.height ?? 0
+        return CGPoint(x: point.x, y: screenHeight - point.y)
+    }
+
+    private static func eventMask(for types: [CGEventType]) -> CGEventMask {
+        types.reduce(CGEventMask(0)) { mask, type in
+            mask | (CGEventMask(1) << CGEventMask(type.rawValue))
+        }
+    }
+
+    private static func modifierFlags(from flags: CGEventFlags) -> NSEvent.ModifierFlags {
+        var modifiers: NSEvent.ModifierFlags = []
+
+        if flags.contains(.maskCommand) { modifiers.insert(.command) }
+        if flags.contains(.maskAlternate) { modifiers.insert(.option) }
+        if flags.contains(.maskControl) { modifiers.insert(.control) }
+        if flags.contains(.maskShift) { modifiers.insert(.shift) }
+
+        return modifiers
+    }
+
+    private static func buttonNumber(for type: CGEventType, event: CGEvent) -> Int? {
+        switch type {
+        case .leftMouseDown, .leftMouseUp, .leftMouseDragged:
+            return 0
+        case .rightMouseDown, .rightMouseUp, .rightMouseDragged:
+            return 1
+        case .otherMouseDown, .otherMouseUp, .otherMouseDragged:
+            return Int(event.getIntegerValueField(.mouseEventButtonNumber))
+        default:
+            return nil
+        }
+    }
+
+    private static func isMouseDown(_ type: CGEventType) -> Bool {
+        type == .leftMouseDown || type == .rightMouseDown || type == .otherMouseDown
+    }
+
+    private static func isMouseUp(_ type: CGEventType) -> Bool {
+        type == .leftMouseUp || type == .rightMouseUp || type == .otherMouseUp
+    }
+
+    private static func isMouseDragged(_ type: CGEventType) -> Bool {
+        type == .leftMouseDragged || type == .rightMouseDragged || type == .otherMouseDragged
+    }
+
+    private func pass(_ event: CGEvent) -> Unmanaged<CGEvent>? {
+        Unmanaged.passUnretained(event)
+    }
+
+    private func rectValue(_ value: Any?) -> CGRect? {
+        guard let dictionary = value as? [String: Any],
+              let x = cgFloatValue(dictionary["X"]),
+              let y = cgFloatValue(dictionary["Y"]),
+              let width = cgFloatValue(dictionary["Width"]),
+              let height = cgFloatValue(dictionary["Height"]) else {
+            return nil
+        }
+
+        return CGRect(x: x, y: y, width: width, height: height)
+    }
+
+    private func cgFloatValue(_ value: Any?) -> CGFloat? {
+        if let value = value as? CGFloat { return value }
+        if let value = value as? NSNumber { return CGFloat(truncating: value) }
+        if let value = value as? Double { return CGFloat(value) }
+        if let value = value as? Int { return CGFloat(value) }
+        return nil
+    }
+
+    private func intValue(_ value: Any?) -> Int? {
+        if let value = value as? Int { return value }
+        if let value = value as? NSNumber { return value.intValue }
+        return nil
+    }
+
+    private func int32Value(_ value: Any?) -> pid_t? {
+        if let value = value as? pid_t { return value }
+        if let value = value as? NSNumber { return value.int32Value }
+        return nil
+    }
+
+    private func doubleValue(_ value: Any?) -> Double? {
+        if let value = value as? Double { return value }
+        if let value = value as? NSNumber { return value.doubleValue }
+        return nil
     }
 }

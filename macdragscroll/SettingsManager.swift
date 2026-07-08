@@ -10,6 +10,98 @@ import Combine
 import AppKit
 import ServiceManagement
 
+// MARK: - App Language
+
+enum AppLanguage: String, CaseIterable, Identifiable, Codable {
+    case system
+    case english
+    case swedish
+    case chineseSimplified
+    case chineseTraditional
+    case japanese
+    case german
+    case french
+    case spanish
+    case portugueseBrazil
+    case korean
+    case italian
+    case dutch
+    case russian
+    case vietnamese
+
+    var id: String { rawValue }
+
+    var lprojCode: String? {
+        switch self {
+        case .system:
+            return nil
+        case .english:
+            return "en"
+        case .swedish:
+            return "sv"
+        case .chineseSimplified:
+            return "zh-Hans"
+        case .chineseTraditional:
+            return "zh-Hant"
+        case .japanese:
+            return "ja"
+        case .german:
+            return "de"
+        case .french:
+            return "fr"
+        case .spanish:
+            return "es"
+        case .portugueseBrazil:
+            return "pt-BR"
+        case .korean:
+            return "ko"
+        case .italian:
+            return "it"
+        case .dutch:
+            return "nl"
+        case .russian:
+            return "ru"
+        case .vietnamese:
+            return "vi"
+        }
+    }
+
+    var displayName: String {
+        switch self {
+        case .system:
+            return "System Default"
+        case .english:
+            return "English"
+        case .swedish:
+            return "Svenska"
+        case .chineseSimplified:
+            return "简体中文"
+        case .chineseTraditional:
+            return "繁體中文"
+        case .japanese:
+            return "日本語"
+        case .german:
+            return "Deutsch"
+        case .french:
+            return "Français"
+        case .spanish:
+            return "Español"
+        case .portugueseBrazil:
+            return "Português (Brasil)"
+        case .korean:
+            return "한국어"
+        case .italian:
+            return "Italiano"
+        case .dutch:
+            return "Nederlands"
+        case .russian:
+            return "Русский"
+        case .vietnamese:
+            return "Tiếng Việt"
+        }
+    }
+}
+
 // MARK: - Scroll Trigger Configuration
 
 struct TriggerConfig: Codable, Equatable {
@@ -54,13 +146,14 @@ struct TriggerConfig: Codable, Equatable {
         let buttonName: String
         switch mouseButton {
         case 0:
-            buttonName = NSLocalizedString("trigger_left_click", comment: "Left Click")
+            buttonName = AppLocalization.shared.localizedString("trigger_left_click", value: "Left Click", comment: "Left Click")
         case 1:
-            buttonName = NSLocalizedString("trigger_right_click", comment: "Right Click")
+            buttonName = AppLocalization.shared.localizedString("trigger_right_click", value: "Right Click", comment: "Right Click")
         case 2:
-            buttonName = NSLocalizedString("trigger_middle_click", comment: "Middle Click")
+            buttonName = AppLocalization.shared.localizedString("trigger_middle_click", value: "Middle Click", comment: "Middle Click")
         default:
-            buttonName = String(format: NSLocalizedString("trigger_button_n", comment: "Button %d"), mouseButton)
+            let format = AppLocalization.shared.localizedString("trigger_button_n", value: "Button %d", comment: "Button %d")
+            buttonName = String(format: format, mouseButton)
         }
         
         if parts.isEmpty {
@@ -100,10 +193,65 @@ struct TriggerConfig: Codable, Equatable {
     }
 }
 
+// MARK: - Visualizer Appearance
+
+enum VisualizerTintStyle: String, CaseIterable, Identifiable, Codable {
+    case clear
+    case graphite
+    case accent
+    case aqua
+    case warm
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .clear:
+            return localized("visualizer_tint_clear", value: "Clear", comment: "Clear visualizer tint")
+        case .graphite:
+            return localized("visualizer_tint_graphite", value: "Graphite", comment: "Graphite visualizer tint")
+        case .accent:
+            return localized("visualizer_tint_accent", value: "Accent", comment: "Accent visualizer tint")
+        case .aqua:
+            return localized("visualizer_tint_aqua", value: "Aqua", comment: "Aqua visualizer tint")
+        case .warm:
+            return localized("visualizer_tint_warm", value: "Warm", comment: "Warm visualizer tint")
+        }
+    }
+
+    var glassTintColor: NSColor? {
+        glassTintColor(intensity: 1.0)
+    }
+
+    func glassTintColor(intensity: Double) -> NSColor? {
+        let multiplier = min(max(intensity, 0.7), 2.0)
+        switch self {
+        case .clear:
+            return nil
+        case .graphite:
+            return NSColor.labelColor.withAlphaComponent(0.08 + 0.035 * multiplier)
+        case .accent:
+            return NSColor.controlAccentColor.withAlphaComponent(0.10 + 0.035 * multiplier)
+        case .aqua:
+            return NSColor.systemCyan.withAlphaComponent(0.10 + 0.035 * multiplier)
+        case .warm:
+            return NSColor.systemOrange.withAlphaComponent(0.08 + 0.035 * multiplier)
+        }
+    }
+
+    private func localized(_ key: String, value: String, comment: String) -> String {
+        AppLocalization.shared.localizedString(key, value: value, comment: comment)
+    }
+}
+
 class SettingsManager: ObservableObject {
     static let shared = SettingsManager()
+    static let visualizerSizeRange: ClosedRange<Double> = 0.45...1.5
+    static let liquidGlassIntensityRange: ClosedRange<Double> = 0.7...2.0
     
     private let defaults = UserDefaults.standard
+
+    @Published var isCapturingTrigger = false
     
     // Keys
     private let isEnabledKey = "isEnabled"
@@ -113,7 +261,13 @@ class SettingsManager: ObservableObject {
     private let deadZoneRadiusKey = "deadZoneRadius"
     private let accelerationKey = "acceleration"
     private let overlayOpacityKey = "overlayOpacity"
+    private let visualizerSizeKey = "visualizerSize"
+    private let visualizerTintStyleKey = "visualizerTintStyle"
+    private let liquidGlassIntensityKey = "liquidGlassIntensity"
+    private let reverseScrollDirectionKey = "reverseScrollDirection"
     private let triggerConfigKey = "triggerConfig"
+    private let hasCompletedWelcomeKey = "hasCompletedWelcome"
+    private let appLanguageKey = "appLanguage"
     
     // Launch at Login using SMAppService (macOS 13+)
     @Published var launchAtLogin: Bool {
@@ -128,6 +282,10 @@ class SettingsManager: ObservableObject {
     
     @Published var animationsEnabled: Bool {
         didSet { defaults.set(animationsEnabled, forKey: animationsEnabledKey) }
+    }
+
+    @Published var reverseScrollDirection: Bool {
+        didSet { defaults.set(reverseScrollDirection, forKey: reverseScrollDirectionKey) }
     }
     
     @Published var excludedApps: [String] {
@@ -165,6 +323,34 @@ class SettingsManager: ObservableObject {
             defaults.set(overlayOpacity, forKey: overlayOpacityKey)
         }
     }
+
+    @Published var visualizerSize: Double {
+        didSet {
+            let clamped = min(max(visualizerSize, Self.visualizerSizeRange.lowerBound), Self.visualizerSizeRange.upperBound)
+            if clamped != visualizerSize { visualizerSize = clamped }
+            defaults.set(visualizerSize, forKey: visualizerSizeKey)
+        }
+    }
+
+    @Published var visualizerTintStyle: VisualizerTintStyle {
+        didSet { defaults.set(visualizerTintStyle.rawValue, forKey: visualizerTintStyleKey) }
+    }
+
+    @Published var liquidGlassIntensity: Double {
+        didSet {
+            let clamped = min(max(liquidGlassIntensity, Self.liquidGlassIntensityRange.lowerBound), Self.liquidGlassIntensityRange.upperBound)
+            if clamped != liquidGlassIntensity { liquidGlassIntensity = clamped }
+            defaults.set(liquidGlassIntensity, forKey: liquidGlassIntensityKey)
+        }
+    }
+
+    @Published var hasCompletedWelcome: Bool {
+        didSet { defaults.set(hasCompletedWelcome, forKey: hasCompletedWelcomeKey) }
+    }
+
+    @Published var appLanguage: AppLanguage {
+        didSet { defaults.set(appLanguage.rawValue, forKey: appLanguageKey) }
+    }
     
     @Published var triggerConfig: TriggerConfig {
         didSet { saveTriggerConfig() }
@@ -178,11 +364,21 @@ class SettingsManager: ObservableObject {
             scrollSpeedKey: 2.0,
             deadZoneRadiusKey: 20.0,
             accelerationKey: 1.8,
-            overlayOpacityKey: 1.0
+            overlayOpacityKey: 1.0,
+            visualizerSizeKey: 1.0,
+            visualizerTintStyleKey: VisualizerTintStyle.clear.rawValue,
+            liquidGlassIntensityKey: 1.35,
+            reverseScrollDirectionKey: false,
+            hasCompletedWelcomeKey: false,
+            appLanguageKey: AppLanguage.system.rawValue
         ])
         
         self.isEnabled = defaults.bool(forKey: isEnabledKey)
         self.animationsEnabled = defaults.bool(forKey: animationsEnabledKey)
+        self.reverseScrollDirection = defaults.bool(forKey: reverseScrollDirectionKey)
+        self.hasCompletedWelcome = defaults.bool(forKey: hasCompletedWelcomeKey)
+        let appLanguageRawValue = defaults.string(forKey: appLanguageKey) ?? AppLanguage.system.rawValue
+        self.appLanguage = AppLanguage(rawValue: appLanguageRawValue) ?? .system
         self.excludedApps = defaults.stringArray(forKey: excludedAppsKey) ?? []
 
         // Load and clamp values to valid ranges (protects against corrupted UserDefaults)
@@ -197,6 +393,18 @@ class SettingsManager: ObservableObject {
 
         let loadedOpacity = defaults.object(forKey: overlayOpacityKey) as? Double ?? 1.0
         self.overlayOpacity = min(max(loadedOpacity, 0.2), 1.0)
+
+        let loadedVisualizerSize = defaults.object(forKey: visualizerSizeKey) as? Double ?? 1.0
+        self.visualizerSize = min(max(loadedVisualizerSize, Self.visualizerSizeRange.lowerBound), Self.visualizerSizeRange.upperBound)
+
+        let tintRawValue = defaults.string(forKey: visualizerTintStyleKey) ?? VisualizerTintStyle.clear.rawValue
+        self.visualizerTintStyle = VisualizerTintStyle(rawValue: tintRawValue) ?? .clear
+
+        let loadedLiquidGlassIntensity = defaults.object(forKey: liquidGlassIntensityKey) as? Double ?? 1.35
+        self.liquidGlassIntensity = min(
+            max(loadedLiquidGlassIntensity, Self.liquidGlassIntensityRange.lowerBound),
+            Self.liquidGlassIntensityRange.upperBound
+        )
 
         self.triggerConfig = Self.loadTriggerConfig(from: defaults)
         
@@ -218,6 +426,12 @@ class SettingsManager: ObservableObject {
         if let data = try? JSONEncoder().encode(triggerConfig) {
             defaults.set(data, forKey: triggerConfigKey)
         }
+    }
+
+    func completeWelcome() {
+        hasCompletedWelcome = true
+        defaults.set(true, forKey: hasCompletedWelcomeKey)
+        defaults.synchronize()
     }
     
     // Check if app is excluded by bundle identifier
@@ -326,10 +540,15 @@ class SettingsManager: ObservableObject {
     func resetToDefaults() {
         isEnabled = true
         animationsEnabled = true
+        reverseScrollDirection = false
         scrollSpeed = 2.0
         deadZoneRadius = 20.0
         acceleration = 1.8
         overlayOpacity = 1.0
+        visualizerSize = 1.0
+        visualizerTintStyle = .clear
+        liquidGlassIntensity = 1.35
+        appLanguage = .system
         triggerConfig = .default
         excludedApps = []
         // Note: launchAtLogin is not reset as it's a system preference
@@ -357,4 +576,3 @@ class SettingsManager: ObservableObject {
         }
     }
 }
-

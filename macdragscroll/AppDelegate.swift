@@ -10,18 +10,29 @@ import SwiftUI
 import Combine
 import ApplicationServices
 
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDelegate {
     static let appVersion = "1.18.0"
+    private static let showWelcomeNotification = Notification.Name("MacDragScrollShowWelcomeWindow")
+
     static var appName: String {
-        NSLocalizedString("app_name", comment: "App name")
+        AppLocalization.shared.localizedString("app_name", value: "Mac Drag Scroll", comment: "App name")
+    }
+
+    static func requestWelcomeWindow() {
+        NotificationCenter.default.post(name: showWelcomeNotification, object: nil)
     }
     
     private var statusItem: NSStatusItem!
     private var mouseMonitor: MouseMonitor!
-    private var popover: NSPopover!
+    private var settingsWindow: NSWindow?
+    private var welcomeWindow: NSWindow?
+    private weak var activeMenuItem: NSMenuItem?
+    private weak var updateMenuItem: NSMenuItem?
+    private weak var ignoreCurrentAppMenuItem: NSMenuItem?
     private var permissionCheckTimer: Timer?
-    private var eventMonitor: Any?
     private var hadPermissionPreviously = false
+    private var hasPresentedWelcomeThisLaunch = false
+    private var cancellables = Set<AnyCancellable>()
     
     // Observable permission state for SwiftUI
     static let permissionState = PermissionState()
@@ -40,12 +51,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         CrashHandler.shared.setup()
         
         setupMenuBar()
-        setupPopover()
+        observeSettings()
+        observeSystemAppearance()
+        updateDockIcon()
         
         NSApp.setActivationPolicy(.accessory)
         
         // Check accessibility permissions
         checkAccessibilityPermissions()
+        UpdateManager.shared.checkForUpdatesIfNeeded()
+
+        DispatchQueue.main.async { [weak self] in
+            self?.presentWelcomeIfNeeded()
+        }
     }
     
     private func checkAccessibilityPermissions() {
@@ -55,7 +73,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         if !hasPermission {
             // Show permission dialog on first launch without permission
-            showPermissionDialog()
+            if SettingsManager.shared.hasCompletedWelcome {
+                showPermissionDialog()
+            }
             startPermissionMonitoring()
         } else {
             hadPermissionPreviously = true
@@ -89,11 +109,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     private func showPermissionDialog() {
         let alert = NSAlert()
-        alert.messageText = NSLocalizedString("permission_required_title", comment: "Permission required alert title")
-        alert.informativeText = NSLocalizedString("permission_required_message", comment: "Permission required alert message")
-        alert.alertStyle = .warning
-        alert.addButton(withTitle: NSLocalizedString("open_system_settings", comment: "Open System Settings button"))
-        alert.addButton(withTitle: NSLocalizedString("later", comment: "Later button"))
+            alert.messageText = localized("permission_required_title", value: "Accessibility Permission Required", comment: "Permission required alert title")
+            alert.informativeText = localized("permission_required_message", value: "Mac Drag Scroll needs Accessibility permission to monitor mouse events globally.", comment: "Permission required alert message")
+            alert.alertStyle = .warning
+            alert.addButton(withTitle: localized("open_system_settings", value: "Open System Settings", comment: "Open System Settings button"))
+            alert.addButton(withTitle: localized("later", value: "Later", comment: "Later button"))
         
         let response = alert.runModal()
         if response == .alertFirstButtonReturn {
@@ -103,11 +123,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     private func showPermissionRevokedDialog() {
         let alert = NSAlert()
-        alert.messageText = NSLocalizedString("permission_lost_title", comment: "Permission lost alert title")
-        alert.informativeText = NSLocalizedString("permission_lost_message", comment: "Permission lost alert message")
+        alert.messageText = localized("permission_lost_title", value: "Accessibility Permission Lost", comment: "Permission lost alert title")
+        alert.informativeText = localized("permission_lost_message", value: "Mac Drag Scroll can no longer monitor mouse events. Re-enable Accessibility permission to keep using drag scrolling.", comment: "Permission lost alert message")
         alert.alertStyle = .warning
-        alert.addButton(withTitle: NSLocalizedString("open_system_settings", comment: "Open System Settings button"))
-        alert.addButton(withTitle: NSLocalizedString("ok", comment: "OK button"))
+        alert.addButton(withTitle: localized("open_system_settings", value: "Open System Settings", comment: "Open System Settings button"))
+        alert.addButton(withTitle: localized("ok", value: "OK", comment: "OK button"))
         
         let response = alert.runModal()
         if response == .alertFirstButtonReturn {
@@ -132,44 +152,397 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "arrow.up.and.down.and.arrow.left.and.right", accessibilityDescription: AppDelegate.appName)
-            button.action = #selector(togglePopover(_:))
-            button.target = self
-            // Enable right-click to also open the popover
-            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+            button.toolTip = AppDelegate.appName
+            button.setAccessibilityLabel(AppDelegate.appName)
+            button.image = statusBarImage(isEnabled: SettingsManager.shared.isEnabled)
+        }
+
+        let menu = NSMenu()
+        menu.delegate = self
+        menu.autoenablesItems = false
+
+        let activeItem = NSMenuItem(
+            title: localized("menu_disable", value: "Disable Mac Drag Scroll", comment: "Disable menu item"),
+            action: #selector(toggleActiveState(_:)),
+            keyEquivalent: ""
+        )
+        activeItem.target = self
+        menu.addItem(activeItem)
+        activeMenuItem = activeItem
+
+        menu.addItem(NSMenuItem.separator())
+
+        let settingsItem = NSMenuItem(
+            title: localized("menu_settings", value: "Settings...", comment: "Settings menu item"),
+            action: #selector(openSettings(_:)),
+            keyEquivalent: ","
+        )
+        settingsItem.target = self
+        menu.addItem(settingsItem)
+
+        let updateItem = NSMenuItem(
+            title: UpdateManager.shared.status.menuTitle,
+            action: #selector(openUpdates(_:)),
+            keyEquivalent: ""
+        )
+        updateItem.target = self
+        menu.addItem(updateItem)
+        updateMenuItem = updateItem
+        refreshUpdateMenuItem()
+
+        let ignoreItem = NSMenuItem(
+            title: localized("menu_ignore_current_app", value: "Ignore Current App", comment: "Ignore current app menu item"),
+            action: #selector(ignoreCurrentApp(_:)),
+            keyEquivalent: ""
+        )
+        ignoreItem.target = self
+        menu.addItem(ignoreItem)
+        ignoreCurrentAppMenuItem = ignoreItem
+
+        menu.addItem(NSMenuItem.separator())
+
+        let quitItem = NSMenuItem(
+            title: localized("quit", value: "Quit", comment: "Quit menu item"),
+            action: #selector(quit(_:)),
+            keyEquivalent: "q"
+        )
+        quitItem.target = self
+        menu.addItem(quitItem)
+
+        statusItem.menu = menu
+        refreshStatusItem()
+    }
+
+    private func observeSettings() {
+        SettingsManager.shared.$isEnabled
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.refreshStatusItem() }
+            .store(in: &cancellables)
+
+        UpdateManager.shared.$status
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.refreshUpdateMenuItem() }
+            .store(in: &cancellables)
+
+        SettingsManager.shared.$appLanguage
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.refreshLocalizedChrome() }
+            .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: Self.showWelcomeNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.showWelcomeWindow() }
+            .store(in: &cancellables)
+    }
+
+    func menuNeedsUpdate(_ menu: NSMenu) {
+        refreshStatusItem()
+        refreshUpdateMenuItem()
+        refreshIgnoreCurrentAppMenuItem()
+    }
+
+    @objc private func toggleActiveState(_ sender: Any?) {
+        SettingsManager.shared.isEnabled.toggle()
+    }
+
+    @objc private func openSettings(_ sender: Any?) {
+        showSettingsWindow(selectedTab: .visualizer)
+    }
+
+    @objc private func openUpdates(_ sender: Any?) {
+        guard UpdateManager.shared.status.isMenuActionEnabled else { return }
+        showSettingsWindow(selectedTab: .updates)
+    }
+
+    @objc private func ignoreCurrentApp(_ sender: Any?) {
+        guard let bundleId = SettingsManager.shared.getFrontmostAppBundleId(),
+              !SettingsManager.shared.isAppExcluded(bundleIdentifier: bundleId) else {
+            return
+        }
+
+        SettingsManager.shared.addExcludedApp(bundleId)
+        refreshIgnoreCurrentAppMenuItem()
+    }
+
+    @objc private func quit(_ sender: Any?) {
+        NSApplication.shared.terminate(nil)
+    }
+
+    private func showSettingsWindow(selectedTab: SettingsTab = .visualizer) {
+        SettingsWindowNavigation.shared.selectedTab = selectedTab
+
+        if settingsWindow == nil {
+            let hostingController = NSHostingController(rootView: SettingsWindowView())
+            let window = NSWindow(contentViewController: hostingController)
+            window.title = AppDelegate.appName
+            window.setContentSize(NSSize(width: 820, height: 620))
+            window.minSize = NSSize(width: 760, height: 560)
+            window.styleMask = [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView]
+            window.titlebarAppearsTransparent = true
+            window.isReleasedWhenClosed = false
+            window.delegate = self
+            window.center()
+            settingsWindow = window
+        }
+
+        NSApp.setActivationPolicy(.regular)
+        updateDockIcon()
+        NSApp.activate(ignoringOtherApps: true)
+        settingsWindow?.makeKeyAndOrderFront(nil)
+    }
+
+    private func presentWelcomeIfNeeded() {
+        guard !SettingsManager.shared.hasCompletedWelcome, !hasPresentedWelcomeThisLaunch else { return }
+        hasPresentedWelcomeThisLaunch = true
+        showWelcomeWindow()
+    }
+
+    private func showWelcomeWindow() {
+        if welcomeWindow == nil {
+            let hostingController = NSHostingController(
+                rootView: WelcomeWindowView(
+                    onGetStarted: { [weak self] in
+                        self?.finishWelcome(openSettings: true)
+                    }
+                )
+            )
+            let window = NSWindow(contentViewController: hostingController)
+            window.title = localized("welcome_window_title", value: "Welcome to Mac Drag Scroll", comment: "Welcome window title")
+            window.setContentSize(NSSize(width: 700, height: 570))
+            window.minSize = NSSize(width: 660, height: 520)
+            window.styleMask = [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView]
+            window.titlebarAppearsTransparent = true
+            window.isReleasedWhenClosed = false
+            window.delegate = self
+            window.center()
+            welcomeWindow = window
+        }
+
+        NSApp.setActivationPolicy(.regular)
+        updateDockIcon()
+        NSApp.activate(ignoringOtherApps: true)
+        welcomeWindow?.makeKeyAndOrderFront(nil)
+    }
+
+    private func finishWelcome(openSettings: Bool) {
+        SettingsManager.shared.completeWelcome()
+        welcomeWindow?.close()
+
+        if openSettings {
+            showSettingsWindow(selectedTab: .visualizer)
         }
     }
-    
-    private func setupPopover() {
-        popover = NSPopover()
-        // Popover size is controlled by the SwiftUI view's .frame() modifier
-        // See kPopoverWidth/kPopoverHeight constants in SettingsWindow.swift
-        popover.contentSize = NSSize(width: 380, height: 440)
-        popover.behavior = .transient
-        popover.animates = true
-        popover.contentViewController = NSHostingController(rootView: MenuBarSettingsView())
-    }
-    
-    @objc private func togglePopover(_ sender: Any?) {
-        if let button = statusItem.button {
-            if popover.isShown {
-                popover.performClose(nil)
-            } else {
-                popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
-                
-                // Start monitoring for clicks outside the popover
-                eventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
-                    self?.closePopover()
-                }
-            }
+
+    func windowWillClose(_ notification: Notification) {
+        guard let window = notification.object as? NSWindow else { return }
+
+        if window === settingsWindow {
+            settingsWindow = nil
+        } else if window === welcomeWindow {
+            welcomeWindow = nil
+        } else {
+            return
+        }
+
+        DispatchQueue.main.async {
+            self.hideDockIconIfNoWindowsAreVisible()
         }
     }
-    
-    private func closePopover() {
-        popover.performClose(nil)
-        if let monitor = eventMonitor {
-            NSEvent.removeMonitor(monitor)
-            eventMonitor = nil
+
+    private func hideDockIconIfNoWindowsAreVisible() {
+        if NSApp.windows.allSatisfy({ !$0.isVisible }) {
+            NSApp.setActivationPolicy(.accessory)
         }
+    }
+
+    private func refreshStatusItem() {
+        let isEnabled = SettingsManager.shared.isEnabled
+        activeMenuItem?.title = isEnabled
+            ? localized("menu_disable", value: "Disable Mac Drag Scroll", comment: "Disable menu item")
+            : localized("menu_enable", value: "Enable Mac Drag Scroll", comment: "Enable menu item")
+        activeMenuItem?.state = isEnabled ? .on : .off
+        statusItem.button?.image = statusBarImage(isEnabled: isEnabled)
+    }
+
+    private func observeSystemAppearance() {
+        DistributedNotificationCenter.default().addObserver(
+            self,
+            selector: #selector(systemAppearanceDidChange(_:)),
+            name: Notification.Name("AppleInterfaceThemeChangedNotification"),
+            object: nil
+        )
+    }
+
+    @objc private func systemAppearanceDidChange(_ notification: Notification) {
+        updateDockIcon()
+        refreshStatusItem()
+    }
+
+    private func updateDockIcon() {
+        let iconName = usesDarkAppearance ? "DockIconDark" : "DockIconLight"
+        if let image = NSImage(named: iconName) {
+            NSApp.applicationIconImage = image
+        }
+    }
+
+    private var usesDarkAppearance: Bool {
+        NSApp.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+    }
+
+    private func refreshUpdateMenuItem() {
+        let status = UpdateManager.shared.status
+        updateMenuItem?.title = status.menuTitle
+        updateMenuItem?.isEnabled = status.isMenuActionEnabled
+        updateMenuItem?.action = status.isMenuActionEnabled ? #selector(openUpdates(_:)) : nil
+    }
+
+    private func refreshIgnoreCurrentAppMenuItem() {
+        guard let item = ignoreCurrentAppMenuItem else { return }
+        guard let bundleId = SettingsManager.shared.getFrontmostAppBundleId() else {
+            item.title = localized("menu_ignore_current_app", value: "Ignore Current App", comment: "Ignore current app menu item")
+            item.isEnabled = false
+            return
+        }
+
+        let appName = displayName(forBundleIdentifier: bundleId) ?? localized("current_app", value: "Current App", comment: "Current app fallback")
+        if SettingsManager.shared.isAppExcluded(bundleIdentifier: bundleId) {
+            item.title = String(format: localized("menu_ignored_app", value: "%@ Ignored", comment: "Ignored app menu item"), appName)
+            item.isEnabled = false
+        } else {
+            item.title = String(format: localized("menu_ignore_app", value: "Ignore %@", comment: "Ignore app menu item"), appName)
+            item.isEnabled = true
+        }
+    }
+
+    private func displayName(forBundleIdentifier bundleId: String) -> String? {
+        guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleId) else {
+            return nil
+        }
+
+        return (url.lastPathComponent as NSString).deletingPathExtension
+    }
+
+    private func localized(_ key: String, value: String, comment: String) -> String {
+        AppLocalization.shared.localizedString(key, value: value, comment: comment)
+    }
+
+    private func refreshLocalizedChrome() {
+        statusItem.button?.toolTip = AppDelegate.appName
+        statusItem.button?.setAccessibilityLabel(AppDelegate.appName)
+        settingsWindow?.title = AppDelegate.appName
+        welcomeWindow?.title = localized("welcome_window_title", value: "Welcome to Mac Drag Scroll", comment: "Welcome window title")
+        refreshStatusItem()
+        refreshUpdateMenuItem()
+        refreshIgnoreCurrentAppMenuItem()
+    }
+
+    private func statusBarImage(isEnabled: Bool) -> NSImage {
+        let size = NSSize(width: 18, height: 18)
+        let image = NSImage(size: size)
+
+        image.lockFocus()
+        defer {
+            image.unlockFocus()
+            image.isTemplate = true
+        }
+
+        NSColor.clear.setFill()
+        NSRect(origin: .zero, size: size).fill()
+
+        func drawTrail(y: CGFloat, alpha: CGFloat, width: CGFloat, endX: CGFloat) {
+            let path = NSBezierPath()
+            path.lineWidth = width
+            path.lineCapStyle = .round
+            path.move(to: NSPoint(x: 2.0, y: y))
+            path.curve(
+                to: NSPoint(x: endX, y: y - 0.2),
+                controlPoint1: NSPoint(x: 4.2, y: y + 1.0),
+                controlPoint2: NSPoint(x: endX - 2.0, y: y - 1.0)
+            )
+            NSColor.black.withAlphaComponent(alpha).setStroke()
+            path.stroke()
+        }
+
+        drawTrail(y: 12.2, alpha: 0.72, width: 1.28, endX: 10.4)
+        drawTrail(y: 9.0, alpha: 0.56, width: 1.12, endX: 10.0)
+        drawTrail(y: 5.9, alpha: 0.40, width: 1.0, endX: 9.6)
+
+        let mouseTop = NSBezierPath()
+        mouseTop.move(to: NSPoint(x: 13.0, y: 15.0))
+        mouseTop.curve(
+            to: NSPoint(x: 16.0, y: 12.7),
+            controlPoint1: NSPoint(x: 14.5, y: 15.0),
+            controlPoint2: NSPoint(x: 15.6, y: 14.2)
+        )
+        mouseTop.curve(
+            to: NSPoint(x: 16.2, y: 6.2),
+            controlPoint1: NSPoint(x: 16.3, y: 10.4),
+            controlPoint2: NSPoint(x: 16.4, y: 8.1)
+        )
+        mouseTop.curve(
+            to: NSPoint(x: 13.0, y: 3.2),
+            controlPoint1: NSPoint(x: 16.0, y: 4.1),
+            controlPoint2: NSPoint(x: 14.8, y: 3.2)
+        )
+        mouseTop.curve(
+            to: NSPoint(x: 9.8, y: 6.2),
+            controlPoint1: NSPoint(x: 11.2, y: 3.2),
+            controlPoint2: NSPoint(x: 10.0, y: 4.1)
+        )
+        mouseTop.curve(
+            to: NSPoint(x: 10.0, y: 12.7),
+            controlPoint1: NSPoint(x: 9.6, y: 8.1),
+            controlPoint2: NSPoint(x: 9.7, y: 10.4)
+        )
+        mouseTop.curve(
+            to: NSPoint(x: 13.0, y: 15.0),
+            controlPoint1: NSPoint(x: 10.4, y: 14.2),
+            controlPoint2: NSPoint(x: 11.5, y: 15.0)
+        )
+        mouseTop.close()
+        NSColor.black.withAlphaComponent(0.78).setFill()
+        mouseTop.fill()
+
+        NSColor.black.withAlphaComponent(0.22).setStroke()
+        mouseTop.lineWidth = 0.65
+        mouseTop.stroke()
+
+        let split = NSBezierPath()
+        split.lineWidth = 0.55
+        split.lineCapStyle = .round
+        split.move(to: NSPoint(x: 13.0, y: 14.0))
+        split.line(to: NSPoint(x: 13.0, y: 11.5))
+        split.move(to: NSPoint(x: 13.0, y: 8.8))
+        split.line(to: NSPoint(x: 13.0, y: 7.2))
+        NSColor.black.withAlphaComponent(0.32).setStroke()
+        split.stroke()
+
+        let wheel = NSBezierPath(roundedRect: NSRect(x: 12.35, y: 8.7, width: 1.3, height: 2.8), xRadius: 0.65, yRadius: 0.65)
+        NSColor.black.withAlphaComponent(0.34).setFill()
+        wheel.fill()
+
+        let buttonCurve = NSBezierPath()
+        buttonCurve.lineWidth = 0.55
+        buttonCurve.lineCapStyle = .round
+        buttonCurve.move(to: NSPoint(x: 10.8, y: 8.0))
+        buttonCurve.curve(
+            to: NSPoint(x: 15.2, y: 8.0),
+            controlPoint1: NSPoint(x: 11.8, y: 8.8),
+            controlPoint2: NSPoint(x: 14.2, y: 8.8)
+        )
+        NSColor.black.withAlphaComponent(0.24).setStroke()
+        buttonCurve.stroke()
+
+        if !isEnabled {
+            let slash = NSBezierPath()
+            slash.lineWidth = 2.0
+            slash.lineCapStyle = .round
+            slash.move(to: NSPoint(x: 3.0, y: 15.0))
+            slash.line(to: NSPoint(x: 15.0, y: 3.0))
+            NSColor.black.withAlphaComponent(0.88).setStroke()
+            slash.stroke()
+        }
+
+        return image
     }
 }

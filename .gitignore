@@ -2,8 +2,13 @@
 #
 # gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
 
+## macOS
+.DS_Store
+
 ## User settings
 xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
 
 ## Obj-C/Swift specific
 *.hmap
@@ -12,6 +17,9 @@ xcuserdata/
 *.ipa
 *.dSYM.zip
 *.dSYM
+*.xcarchive
+*.xcresult
+DerivedData/
 
 ## Playgrounds
 timeline.xctimeline
@@ -60,3 +68,6 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+# Local assistant/tooling state
+.claude/

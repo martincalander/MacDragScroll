@@ -1,0 +1,63 @@
+name: Bug report
+description: Report something that is not working in Mac Drag Scroll.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for reporting a problem. Please include enough detail to reproduce it.
+  - type: input
+    id: app-version
+    attributes:
+      label: Mac Drag Scroll version
+      placeholder: "Example: 1.18.0"
+    validations:
+      required: true
+  - type: input
+    id: macos-version
+    attributes:
+      label: macOS version
+      placeholder: "Example: macOS 26.2"
+    validations:
+      required: true
+  - type: input
+    id: mouse
+    attributes:
+      label: Mouse model
+      placeholder: "Example: Logitech MX Master 3S"
+  - type: input
+    id: affected-app
+    attributes:
+      label: App where it happens
+      placeholder: "Example: Safari, Finder, Xcode"
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open ...
+        2. Hold middle mouse button ...
+        3. Drag ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Quick checks
+      options:
+        - label: Mac Drag Scroll is enabled in the menu bar.
+        - label: Accessibility permission is enabled in System Settings.
+        - label: The affected app is not in Excluded Apps.

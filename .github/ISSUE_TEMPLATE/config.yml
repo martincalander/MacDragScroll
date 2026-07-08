@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Support checklist
+    url: https://github.com/martincalander/MacDragScroll/blob/main/SUPPORT.md
+    about: Check setup and common fixes before opening an issue.

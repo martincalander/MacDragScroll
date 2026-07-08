@@ -1,103 +1,108 @@
-# Mac Drag Scroll
+<p align="center">
+  <img src="docs/assets/mac-drag-scroll-icon.png" width="128" alt="Mac Drag Scroll app icon">
+</p>
 
-A lightweight macOS menu bar app that enables Windows-style middle mouse button scrolling.
+<h1 align="center">Mac Drag Scroll</h1>
 
-Hold the middle mouse button and move your mouse to scroll in any direction — just like on Windows.
+<p align="center">
+  <strong>Windows-style drag scrolling for external mice on macOS.</strong>
+</p>
 
-## Features
+<p align="center">
+  Hold the middle mouse button, move the mouse, and scroll in any direction without touching the wheel.
+</p>
 
-- **Middle-click drag scrolling** — Hold middle mouse button and drag to scroll in any direction
-- **Window locking** — Scroll stays locked to the original window even if your cursor moves elsewhere
-- **Visual indicator** — Shows a dot at the origin point with an arrow indicating scroll direction
-- **Configurable settings**:
-  - **Speed** — Adjust scroll speed (0.5x - 5.0x)
-  - **Acceleration** — Control how quickly scrolling ramps up (Low/Med/High/Max)
-  - **Dead zone** — Set the radius where no scrolling occurs (5-50px)
-  - **Opacity** — Adjust indicator transparency
-- **Show/Hide indicator** — Toggle the visual overlay on or off
-- **Launch at Login** — Optionally start the app when you log in
-- **Per-app exclusions** — Disable scrolling for specific applications
-- **Quick-click detection** — Brief clicks don't show the indicator overlay
-- **Menu bar app** — Lives quietly in your menu bar, no dock icon
-- **Multi-language support** — English, Swedish, and Simplified Chinese
+<p align="center">
+  <a href="https://github.com/martincalander/MacDragScroll/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/martincalander/MacDragScroll/actions/workflows/ci.yml/badge.svg?branch=main"></a>
+  <a href="https://github.com/martincalander/MacDragScroll/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/martincalander/MacDragScroll?display_name=tag&sort=semver"></a>
+  <img alt="macOS 26.2+" src="https://img.shields.io/badge/macOS-26.2%2B-111111?logo=apple&logoColor=white">
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-2f80ed.svg"></a>
+</p>
 
-## Requirements
+<p align="center">
+  <img src="docs/assets/mac-drag-scroll-hero.png" alt="Mac Drag Scroll Liquid Glass drag indicator preview">
+</p>
 
-- macOS 13.0 or later
-- Accessibility permissions (required for global mouse event monitoring)
+<p align="center">
+  <a href="https://github.com/martincalander/MacDragScroll/releases/latest"><strong>Download the latest release</strong></a>
+</p>
 
-## Installation
+## What It Does
 
-1. Download the latest release or build from source
-2. Move `Mac Drag Scroll.app` to your Applications folder
-3. Launch the app
-4. Grant Accessibility permissions when prompted:
-   - Go to **System Settings → Privacy & Security → Accessibility**
-   - Enable **Mac Drag Scroll** in the list
+Mac Drag Scroll brings the familiar Windows middle-click drag scroll gesture to macOS. It is built for people who use an external mouse and want fast, comfortable scrolling in long pages, code editors, spreadsheets, design canvases, and chat apps.
 
-## Usage
+- **Hold and drag to scroll**: press the middle mouse button and move in the direction you want to scroll.
+- **Works in any direction**: vertical, horizontal, or diagonal scrolling from the same gesture.
+- **Keeps the original window active**: scrolling stays targeted at the window where the drag started.
+- **Small Liquid Glass indicator**: a subtle origin marker shows where the drag began and how far you are pulling.
+- **Lives in the menu bar**: no dock clutter while the app is running in the background.
+- **Built for safety**: it avoids trackpad gestures and only listens for the configured mouse trigger.
 
-1. Click the middle mouse button and hold
-2. Move your mouse in the direction you want to scroll
-3. Release the middle mouse button to stop scrolling
+## Install
 
-The further you move from the starting point, the faster it scrolls. The scroll will continue affecting the original window even if you move your cursor to a different window.
+1. Open the [latest release](https://github.com/martincalander/MacDragScroll/releases/latest).
+2. Download `Mac Drag Scroll.app` or the release archive.
+3. Move **Mac Drag Scroll** to your Applications folder.
+4. Open the app and approve Accessibility access when macOS asks.
+
+If macOS blocks the first launch, right-click **Mac Drag Scroll** in Finder, choose **Open**, then confirm. You only need to do that once for unsigned or locally built copies.
+
+## Grant Permission
+
+Mac Drag Scroll needs Accessibility permission so it can detect the middle mouse button and send scroll events.
+
+1. Open **System Settings**.
+2. Go to **Privacy & Security**.
+3. Open **Accessibility**.
+4. Enable **Mac Drag Scroll**.
+
+The app shows permission status in Settings, and it disables drag scrolling if permission is removed.
+
+## Use
+
+1. Press and hold the middle mouse button.
+2. Move the mouse away from the starting point.
+3. Release the middle mouse button to stop.
+
+The farther you drag from the origin, the faster the scroll becomes. A small glass indicator appears while dragging unless you turn it off in Settings.
 
 ## Settings
 
-Click (left or right) the menu bar icon to open the settings popover:
+Open Settings from the menu bar icon.
 
-| Setting | Description |
-|---------|-------------|
-| **Enable toggle** | Turn middle-click scrolling on/off |
-| **Speed** | Scroll speed multiplier (0.5x - 5.0x) |
-| **Acceleration** | How quickly scroll speed increases with distance |
-| **Dead Zone** | Radius around origin where scrolling doesn't activate |
-| **Opacity** | Transparency of the visual indicator |
-| **Show Indicator & Animations** | Toggle the visual overlay |
-| **Launch at Login** | Start app automatically on login |
-| **Excluded Apps** | Apps where scrolling is disabled |
+| Setting | What it changes |
+| --- | --- |
+| Enable | Turns Mac Drag Scroll on or off. |
+| Speed | Adjusts the scroll speed. |
+| Acceleration | Changes how quickly speed ramps up as you drag farther. |
+| Dead zone | Sets the small area around the origin where scrolling has not started yet. |
+| Visualizer size | Makes the drag indicator larger or smaller. |
+| Liquid Glass | Controls the glass-style drag visual. |
+| Launch at Login | Starts Mac Drag Scroll automatically when you sign in. |
+| Excluded Apps | Keeps drag scrolling disabled in chosen apps. |
 
-## Building from Source
+## Privacy
 
-1. Open `macdragscroll.xcodeproj` in Xcode
-2. Select your development team in Signing & Capabilities
-3. Build and run (⌘R)
+Mac Drag Scroll is designed as a local utility. It needs Accessibility access for the drag-scroll gesture, but it does not record what you type, inspect document contents, or track your browsing.
 
-## Permissions
+Read the full [privacy note](PRIVACY.md).
 
-Mac Drag Scroll requires **Accessibility** permissions to:
-- Detect middle mouse button events globally
-- Simulate scroll wheel events
+## Updates
 
-The app will prompt you to grant permissions on first launch. If permissions are revoked while the app is running, it will notify you and disable scrolling until permissions are restored.
+Use **Settings -> Updates** to check for new versions. The app checks GitHub releases when update checking is enabled.
 
-## Localization
+## Support
 
-The app supports the following languages:
-- English (default)
-- Swedish (Svenska)
-- Simplified Chinese (简体中文)
+Need help? Start with [Support](SUPPORT.md), then open an issue if the problem is reproducible.
 
-To change the language, go to **System Settings → General → Language & Region → Applications** and add Mac Drag Scroll with your preferred language.
+## Requirements
 
-## Version History
+- macOS 26.2 or later
+- External mouse with a middle button or scroll-wheel click
+- Accessibility permission
 
-- **1.18.0** — Added multi-language support (English, Swedish, Chinese), window-locked scrolling
-- **1.17.0** — Added permission dialogs, right-click menu bar support, improved app picker
-- **1.16.0** — Added Launch at Login option
-- **1.15.0** — Added opacity setting, permission state monitoring
-- **1.14.0** — Renamed to Mac Drag Scroll, improved UI
-- **1.4.0** — Fixed Y-axis scroll direction
-- **1.3.0** — Added accessibility permission detection and setup prompt
-- **1.2.0** — Added version display in menu bar, improved scroll functionality
-- **1.1.0** — Fixed overlay positioning, simplified UI
-- **1.0.0** — Initial release
+## Made By
 
-## Author
+Mac Drag Scroll is made by [Martin Calander](https://martincalander.com).
 
-Made by Martin Calander
-
-## License
-
-MIT License — feel free to use, modify, and distribute.
+Developers and contributors can read [Contributing](CONTRIBUTING.md).

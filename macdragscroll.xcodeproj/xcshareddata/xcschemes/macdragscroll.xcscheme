@@ -16,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "5B5EA2472F1AB49400A09C9E"
-               BuildableName = "macdragscroll.app"
+               BuildableName = "Mac Drag Scroll.app"
                BlueprintName = "macdragscroll"
                ReferencedContainer = "container:macdragscroll.xcodeproj">
             </BuildableReference>
@@ -58,7 +58,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "5B5EA2472F1AB49400A09C9E"
-            BuildableName = "macdragscroll.app"
+            BuildableName = "Mac Drag Scroll.app"
             BlueprintName = "macdragscroll"
             ReferencedContainer = "container:macdragscroll.xcodeproj">
          </BuildableReference>
@@ -75,7 +75,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "5B5EA2472F1AB49400A09C9E"
-            BuildableName = "macdragscroll.app"
+            BuildableName = "Mac Drag Scroll.app"
             BlueprintName = "macdragscroll"
             ReferencedContainer = "container:macdragscroll.xcodeproj">
          </BuildableReference>

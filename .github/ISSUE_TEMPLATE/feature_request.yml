@@ -1,0 +1,25 @@
+name: Feature request
+description: Suggest an improvement for Mac Drag Scroll.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem should this solve?
+      description: Describe the user experience you want improved.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Preferred solution
+      description: Describe the behavior you would like to see.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Optional, but useful if you have tried other mouse tools or settings.

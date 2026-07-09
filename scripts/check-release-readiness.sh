@@ -11,11 +11,6 @@ fi
 
 version="${version#v}"
 required_secrets=(
-  APPLE_ID
-  APPLE_APP_SPECIFIC_PASSWORD
-  APPLE_TEAM_ID
-  MACOS_CERTIFICATE_P12
-  MACOS_CERTIFICATE_PASSWORD
   SPARKLE_PRIVATE_KEY
 )
 
@@ -93,10 +88,6 @@ if [[ -f packaging/homebrew/Casks/mac-drag-scroll.rb ]]; then
   scripts/validate-homebrew-cask.sh
 fi
 
-if ! security find-identity -v -p codesigning | grep -q "Developer ID Application"; then
-  echo "Warning: no local Developer ID Application signing identity found."
-fi
-
 existing_secrets="$(gh secret list --repo "$repo" | awk '{ print $1 }')"
 missing=()
 for secret in "${required_secrets[@]}"; do
@@ -112,4 +103,5 @@ if (( ${#missing[@]} > 0 )); then
 fi
 
 echo "GitHub release secrets: ok"
+echo "Apple Developer ID signing is not required for the current unsigned release flow."
 echo "Ready to tag v${version}"

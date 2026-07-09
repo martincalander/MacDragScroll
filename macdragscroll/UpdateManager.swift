@@ -52,11 +52,11 @@ enum UpdateStatus: Equatable {
     var statusDetail: String {
         switch self {
         case .checking:
-            return localized("update_detail_checking", value: "Contacting the signed update feed.")
+            return localized("update_detail_checking", value: "Contacting the Sparkle update feed.")
         case .upToDate:
             return localized("update_detail_up_to_date", value: "You are running the newest known version.")
         case let .available(version, _):
-            let format = localized("update_detail_available", value: "Version %@ is available as a signed app update.")
+            let format = localized("update_detail_available", value: "Version %@ is available as a verified app update.")
             return String(format: format, version)
         case let .failed(message):
             return message

@@ -28,7 +28,7 @@ env:
 
 jobs:
   release:
-    name: Build, notarize, and publish
+    name: Build and publish unsigned release
     runs-on: macos-26
     timeout-minutes: 45
 
@@ -86,17 +86,12 @@ jobs:
 
       - name: Verify release secrets
         env:
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          MACOS_CERTIFICATE_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
-          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
           SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
         run: |
           set -euo pipefail
 
           missing=()
-          for secret in APPLE_ID APPLE_APP_SPECIFIC_PASSWORD APPLE_TEAM_ID MACOS_CERTIFICATE_P12 MACOS_CERTIFICATE_PASSWORD SPARKLE_PRIVATE_KEY; do
+          for secret in SPARKLE_PRIVATE_KEY; do
             if [ -z "${!secret}" ]; then
               missing+=("$secret")
             fi
@@ -114,115 +109,51 @@ jobs:
             -project macdragscroll.xcodeproj \
             -scheme macdragscroll \
             -destination 'platform=macOS' \
-            -derivedDataPath "$RUNNER_TEMP/MacDragScrollTestDerivedData" \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO
+              -derivedDataPath "$RUNNER_TEMP/MacDragScrollTestDerivedData" \
+              CODE_SIGNING_ALLOWED=NO \
+              CODE_SIGNING_REQUIRED=NO
 
-      - name: Import Developer ID certificate
-        env:
-          MACOS_CERTIFICATE_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
-          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+      - name: Build unsigned app
         run: |
           set -euo pipefail
 
-          if [ -z "$MACOS_CERTIFICATE_P12" ] || [ -z "$MACOS_CERTIFICATE_PASSWORD" ]; then
-            echo "Missing MACOS_CERTIFICATE_P12 or MACOS_CERTIFICATE_PASSWORD secret" >&2
-            exit 67
-          fi
+          derived_data="$RUNNER_TEMP/MacDragScrollReleaseDerivedData"
 
-          certificate_path="$RUNNER_TEMP/developer-id.p12"
-          keychain_path="$RUNNER_TEMP/app-signing.keychain-db"
-          keychain_password="$(uuidgen)"
-
-          echo "$MACOS_CERTIFICATE_P12" | base64 -D > "$certificate_path"
-
-          security create-keychain -p "$keychain_password" "$keychain_path"
-          security set-keychain-settings -lut 21600 "$keychain_path"
-          security unlock-keychain -p "$keychain_password" "$keychain_path"
-          security import "$certificate_path" -k "$keychain_path" -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$keychain_password" "$keychain_path"
-          security list-keychains -d user -s "$keychain_path" login.keychain-db
-
-      - name: Archive and export Developer ID app
-        env:
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: |
-          set -euo pipefail
-
-          if [ -z "$APPLE_TEAM_ID" ]; then
-            echo "Missing APPLE_TEAM_ID secret" >&2
-            exit 67
-          fi
-
-          archive_path="$RUNNER_TEMP/MacDragScroll.xcarchive"
-          export_path="$RUNNER_TEMP/export"
-          export_options="$RUNNER_TEMP/ExportOptions.plist"
-
-          plutil -create xml1 "$export_options"
-          plutil -insert method -string developer-id "$export_options"
-          plutil -insert signingStyle -string manual "$export_options"
-          plutil -insert teamID -string "$APPLE_TEAM_ID" "$export_options"
-          plutil -insert stripSwiftSymbols -bool true "$export_options"
-          plutil -lint "$export_options"
-
-          xcodebuild archive \
+          xcodebuild build \
             -project macdragscroll.xcodeproj \
             -scheme macdragscroll \
             -configuration Release \
-            -archivePath "$archive_path" \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="Developer ID Application" \
-            DEVELOPMENT_TEAM="$APPLE_TEAM_ID"
+            -destination 'platform=macOS' \
+            -derivedDataPath "$derived_data" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO
 
-          xcodebuild -exportArchive \
-            -archivePath "$archive_path" \
-            -exportPath "$export_path" \
-            -exportOptionsPlist "$export_options"
-
-          app_path="$export_path/$APP_BUNDLE"
+          app_path="$derived_data/Build/Products/Release/$APP_BUNDLE"
           if [ ! -d "$app_path" ]; then
-            echo "Exported app not found at $app_path" >&2
+            echo "Built app not found at $app_path" >&2
             exit 66
           fi
+
+          codesign --force --deep --sign - "$app_path"
+          codesign --verify --deep --strict --verbose=2 "$app_path"
 
           actual_version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app_path/Contents/Info.plist")"
           actual_build="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$app_path/Contents/Info.plist")"
           if [ "$actual_version" != "$RELEASE_VERSION" ] || [ "$actual_build" != "$BUILD_NUMBER" ]; then
-            echo "Exported app version/build mismatch: $actual_version ($actual_build)" >&2
+            echo "Built app version/build mismatch: $actual_version ($actual_build)" >&2
             exit 65
           fi
 
           echo "APP_PATH=$app_path" >> "$GITHUB_ENV"
 
-      - name: Notarize and package app
-        env:
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      - name: Package app
         run: |
           set -euo pipefail
 
-          for secret in APPLE_ID APPLE_APP_SPECIFIC_PASSWORD APPLE_TEAM_ID; do
-            if [ -z "${!secret}" ]; then
-              echo "Missing $secret secret" >&2
-              exit 67
-            fi
-          done
-
           artifacts="$RUNNER_TEMP/release-artifacts"
           dmg_root="$RUNNER_TEMP/dmg-root"
-          unsigned_zip="$RUNNER_TEMP/notary-upload.zip"
           mkdir -p "$artifacts" "$dmg_root"
 
-          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$unsigned_zip"
-          xcrun notarytool submit "$unsigned_zip" \
-            --apple-id "$APPLE_ID" \
-            --password "$APPLE_APP_SPECIFIC_PASSWORD" \
-            --team-id "$APPLE_TEAM_ID" \
-            --wait
-
-          xcrun stapler staple "$APP_PATH"
-          spctl --assess --type execute --verbose "$APP_PATH"
           ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$artifacts/$APP_ZIP"
 
           ditto "$APP_PATH" "$dmg_root/$APP_BUNDLE"
@@ -233,15 +164,6 @@ jobs:
             -fs APFS \
             -format UDZO \
             "$artifacts/$APP_DMG"
-
-          codesign --force --sign "Developer ID Application" --timestamp "$artifacts/$APP_DMG"
-          xcrun notarytool submit "$artifacts/$APP_DMG" \
-            --apple-id "$APPLE_ID" \
-            --password "$APPLE_APP_SPECIFIC_PASSWORD" \
-            --team-id "$APPLE_TEAM_ID" \
-            --wait
-          xcrun stapler staple "$artifacts/$APP_DMG"
-          spctl --assess --type open --context context:primary-signature --verbose "$artifacts/$APP_DMG"
 
           {
             echo "ARTIFACTS_DIR=$artifacts"

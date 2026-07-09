@@ -169,6 +169,16 @@
 "settings_about_subtitle" = "Nhận dạng sản phẩm, liên kết và tín dụng.";
 "crash_detected_title" = "Mac Drag Scroll bị lỗi";
 "crash_detected_message" = "Ứng dụng bị lỗi bất ngờ trong phiên cuối cùng. Bạn có thể sao chép báo cáo sự cố để giúp chẩn đoán sự cố.";
+"crash_reports" = "Crash Reports";
+"crash_reports_available_format" = "%d saved, latest %@";
+"crash_reports_help" = "Crash reports are stored locally and can be shared when diagnosing issues.";
+"open_crash_reports_folder" = "Open Folder";
+"copy_latest_crash_report" = "Copy Latest";
+"reveal_latest_crash_report" = "Reveal Latest";
+"clear_crash_reports" = "Clear";
+"clear_crash_reports_title" = "Clear Crash Reports?";
+"clear_crash_reports_message" = "This removes saved crash reports from this Mac.";
+"unknown" = "Unknown";
 "copy_report" = "Sao chép báo cáo";
 "dismiss" = "Loại bỏ";
 "error_occurred_title" = "Đã xảy ra lỗi";

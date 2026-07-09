@@ -105,6 +105,8 @@ final class ScrollOverlayWindow: NSWindow {
         glassView.cornerRadius = min(visualFrame.width, visualFrame.height) / 2
         glassView.tintColor = SettingsManager.shared.visualizerTintStyle.glassTintColor(
             intensity: SettingsManager.shared.liquidGlassIntensity
+        ) ?? NSColor.white.withAlphaComponent(
+            min(0.090 + SettingsManager.shared.liquidGlassIntensity * 0.018, 0.14)
         )
         glassView.contentView = overlayView
         containerView.addSubview(glassView)
@@ -254,7 +256,7 @@ final class ScrollOverlayView: NSView {
     private var currentScreenPoint: CGPoint
 
     private struct Style {
-        static let reflectionInset: CGFloat = 2
+        static let reflectionInset: CGFloat = 1.5
     }
 
     private var deadZoneRadius: CGFloat {
@@ -316,19 +318,37 @@ final class ScrollOverlayView: NSView {
             height: radius * 2
         )
 
+        drawFrostedFill(in: context, rect: rect, center: center, radius: radius, lightVector: lightVector, opacity: opacity, activation: activation, intensity: intensity)
         drawGlassSheen(in: context, rect: rect, center: center, radius: radius, lightVector: lightVector, opacity: opacity, activation: activation, intensity: intensity)
 
         context.saveGState()
-        context.setLineWidth(1.0)
-        context.setStrokeColor(glassShadow(alpha: min((0.10 + activation * 0.04) * opacity * (0.85 + intensity * 0.18), 0.22)).cgColor)
-        context.addEllipse(in: rect)
+        context.setLineWidth(1.2)
+        context.setStrokeColor(glassHighlight(alpha: min((0.28 + activation * 0.06) * opacity * (0.92 + intensity * 0.10), 0.48)).cgColor)
+        context.addEllipse(in: rect.insetBy(dx: 0.4, dy: 0.4))
         context.strokePath()
         context.restoreGState()
 
         context.saveGState()
         context.setLineCap(.round)
-        context.setLineWidth(1.1)
-        context.setStrokeColor(glassShadow(alpha: min((0.06 + activation * 0.03) * opacity * (0.85 + intensity * 0.16), 0.18)).cgColor)
+        context.setLineWidth(1.4)
+        context.setStrokeColor(glassHighlight(alpha: min((0.20 + activation * 0.08) * opacity * (0.92 + intensity * 0.12), 0.42)).cgColor)
+        context.addArc(
+            center: CGPoint(
+                x: center.x + lightVector.x * reflectionTravel * 0.26,
+                y: center.y + lightVector.y * reflectionTravel * 0.26
+            ),
+            radius: radius - 1.2,
+            startAngle: highlightAngle - .pi * 0.22,
+            endAngle: highlightAngle + .pi * 0.22,
+            clockwise: false
+        )
+        context.strokePath()
+        context.restoreGState()
+
+        context.saveGState()
+        context.setLineCap(.round)
+        context.setLineWidth(0.9)
+        context.setStrokeColor(glassShadow(alpha: min((0.026 + activation * 0.018) * opacity * (0.78 + intensity * 0.12), 0.075)).cgColor)
         context.addArc(
             center: CGPoint(
                 x: center.x - lightVector.x * reflectionTravel * 0.45,
@@ -343,12 +363,43 @@ final class ScrollOverlayView: NSView {
         context.restoreGState()
     }
 
+    private func drawFrostedFill(in context: CGContext, rect: CGRect, center: CGPoint, radius: CGFloat, lightVector: CGPoint, opacity: CGFloat, activation: CGFloat, intensity: CGFloat) {
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let colors = [
+            glassHighlight(alpha: min((0.16 + activation * 0.040) * opacity * (0.92 + intensity * 0.12), 0.31)).cgColor,
+            glassHighlight(alpha: min((0.070 + activation * 0.018) * opacity * (0.90 + intensity * 0.10), 0.16)).cgColor,
+            aeroRefraction(alpha: min((0.018 + activation * 0.014) * opacity * (0.80 + intensity * 0.16), 0.055)).cgColor
+        ] as CFArray
+        let locations: [CGFloat] = [0, 0.58, 1]
+
+        guard let gradient = CGGradient(colorsSpace: colorSpace, colors: colors, locations: locations) else {
+            return
+        }
+
+        context.saveGState()
+        context.addEllipse(in: rect.insetBy(dx: 1.5, dy: 1.5))
+        context.clip()
+        context.drawLinearGradient(
+            gradient,
+            start: CGPoint(
+                x: center.x + lightVector.x * radius,
+                y: center.y + lightVector.y * radius
+            ),
+            end: CGPoint(
+                x: center.x - lightVector.x * radius * 0.80,
+                y: center.y - lightVector.y * radius * 0.80
+            ),
+            options: []
+        )
+        context.restoreGState()
+    }
+
     private func drawGlassSheen(in context: CGContext, rect: CGRect, center: CGPoint, radius: CGFloat, lightVector: CGPoint, opacity: CGFloat, activation: CGFloat, intensity: CGFloat) {
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         let colors = [
-            glassHighlight(alpha: min((0.14 + activation * 0.07) * opacity * (0.80 + intensity * 0.22), 0.34)).cgColor,
-            glassHighlight(alpha: min((0.040 + activation * 0.030) * opacity * (0.82 + intensity * 0.18), 0.16)).cgColor,
-            glassShadow(alpha: min((0.014 + activation * 0.016) * opacity * (0.85 + intensity * 0.14), 0.08)).cgColor
+            glassHighlight(alpha: min((0.24 + activation * 0.08) * opacity * (0.86 + intensity * 0.18), 0.52)).cgColor,
+            glassHighlight(alpha: min((0.080 + activation * 0.035) * opacity * (0.86 + intensity * 0.16), 0.24)).cgColor,
+            aeroRefraction(alpha: min((0.018 + activation * 0.018) * opacity * (0.75 + intensity * 0.14), 0.070)).cgColor
         ] as CFArray
         let locations: [CGFloat] = [0, 0.46, 1]
 
@@ -393,10 +444,45 @@ final class ScrollOverlayView: NSView {
         )
 
         context.saveGState()
-        context.setShadow(offset: CGSize(width: 0, height: -1.5), blur: 7 + intensity * 2, color: glassShadow(alpha: min(0.16 * opacity * (0.9 + intensity * 0.16), 0.30)).cgColor)
-        context.setFillColor(glassFill(alpha: min(0.52 * opacity * (0.92 + intensity * 0.08), 0.72)).cgColor)
+        context.setShadow(offset: CGSize(width: 0, height: -1.2), blur: 6 + intensity * 1.6, color: glassShadow(alpha: min(0.090 * opacity * (0.85 + intensity * 0.12), 0.17)).cgColor)
+        context.setFillColor(glassFill(alpha: min(0.18 * opacity * (0.88 + intensity * 0.10), 0.30)).cgColor)
         context.addEllipse(in: dotRect)
         context.fillPath()
+        context.restoreGState()
+
+        context.saveGState()
+        context.addEllipse(in: dotRect)
+        context.clip()
+
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let colors = [
+            glassFill(alpha: min(0.82 * opacity * (0.96 + intensity * 0.06), 0.92)).cgColor,
+            glassFill(alpha: min(0.54 * opacity * (0.92 + intensity * 0.08), 0.76)).cgColor,
+            aeroRefraction(alpha: min(0.18 * opacity * (0.80 + intensity * 0.12), 0.28)).cgColor
+        ] as CFArray
+        let locations: [CGFloat] = [0, 0.62, 1]
+
+        if let gradient = CGGradient(colorsSpace: colorSpace, colors: colors, locations: locations) {
+            context.drawRadialGradient(
+                gradient,
+                startCenter: CGPoint(x: dot.x - dotRadius * 0.28, y: dot.y + dotRadius * 0.32),
+                startRadius: 0,
+                endCenter: dot,
+                endRadius: dotRadius * 1.18,
+                options: []
+            )
+        }
+        context.restoreGState()
+
+        context.saveGState()
+        context.setLineWidth(0.85)
+        context.setStrokeColor(glassHighlight(alpha: min(0.45 * opacity * (0.90 + intensity * 0.08), 0.58)).cgColor)
+        context.addEllipse(in: dotRect.insetBy(dx: 0.35, dy: 0.35))
+        context.strokePath()
+        context.setLineWidth(0.55)
+        context.setStrokeColor(glassShadow(alpha: min(0.035 * opacity * (0.85 + intensity * 0.10), 0.070)).cgColor)
+        context.addEllipse(in: dotRect.insetBy(dx: 0.15, dy: 0.15))
+        context.strokePath()
         context.restoreGState()
     }
 
@@ -419,6 +505,10 @@ final class ScrollOverlayView: NSView {
 
     private func glassHighlight(alpha: CGFloat) -> NSColor {
         NSColor.white.withAlphaComponent(alpha)
+    }
+
+    private func aeroRefraction(alpha: CGFloat) -> NSColor {
+        NSColor(calibratedRed: 0.70, green: 0.92, blue: 1.0, alpha: alpha)
     }
 
     private func glassShadow(alpha: CGFloat) -> NSColor {

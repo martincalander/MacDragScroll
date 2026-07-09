@@ -94,7 +94,7 @@
 "update_detail_up_to_date" = "您正在运行最新的已知版本。";
 "update_detail_available" = "版本 %@ 可从 GitHub Releases 获得。";
 "about_slogan" = "Windows 风格的拖动滚动，专为 macOS 构建。";
-"about_author" = "马丁·卡兰德制作";
+"about_author" = "Martin Calander (马丁) 制作";
 "about_runtime_note" = "设计为一个安静的菜单栏实用程序，具有本机 macOS 控件和 Liquid Glass 拖动指示器。";
 "app_logo" = "应用程序标志";
 "version" = "版本";
@@ -106,7 +106,7 @@
 "welcome_window_title" = "欢迎使用Mac Drag Scroll";
 "welcome_title" = "欢迎使用Mac Drag Scroll";
 "welcome_subtitle" = "Windows 风格的拖动滚动，专为 macOS 设计。";
-"welcome_author" = "马丁·卡兰德制作";
+"welcome_author" = "Martin Calander (马丁) 制作";
 "welcome_permission_title" = "无障碍权限";
 "welcome_permission_granted" = "准备好监视您配置的鼠标触发器。";
 "welcome_permission_needed" = "必需的，以便拖动滚动可以全局监听鼠标输入。";
@@ -169,6 +169,16 @@
 "settings_about_subtitle" = "产品标识、链接和信用。";
 "crash_detected_title" = "Mac Drag Scroll 崩溃";
 "crash_detected_message" = "该应用程序在上次会话期间意外崩溃。您可以复制崩溃报告来帮助诊断问题。";
+"crash_reports" = "Crash Reports";
+"crash_reports_available_format" = "%d saved, latest %@";
+"crash_reports_help" = "Crash reports are stored locally and can be shared when diagnosing issues.";
+"open_crash_reports_folder" = "Open Folder";
+"copy_latest_crash_report" = "Copy Latest";
+"reveal_latest_crash_report" = "Reveal Latest";
+"clear_crash_reports" = "Clear";
+"clear_crash_reports_title" = "Clear Crash Reports?";
+"clear_crash_reports_message" = "This removes saved crash reports from this Mac.";
+"unknown" = "Unknown";
 "copy_report" = "复制报告";
 "dismiss" = "解雇";
 "error_occurred_title" = "发生错误";

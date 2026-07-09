@@ -20,9 +20,11 @@ struct SettingsWindowView: View {
     @ObservedObject private var updateManager = UpdateManager.shared
     @ObservedObject private var navigation = SettingsWindowNavigation.shared
     @ObservedObject private var instanceMonitor = AppInstanceMonitor.shared
+    @ObservedObject private var crashHandler = CrashHandler.shared
 
     @State private var capturedFrontmostBundleId: String?
     @State private var showingResetConfirmation = false
+    @State private var showingClearCrashReportsConfirmation = false
     @State private var logoPop = false
     @State private var settingsIntroVisible = false
     @FocusState private var focusedSidebarTab: SettingsTab?
@@ -216,7 +218,101 @@ struct SettingsWindowView: View {
 
                 AppearancePickerRow(selection: $settings.appAppearance)
             }
+
+            if crashHandler.hasCrashReports {
+                crashReportsSection
+            }
         }
+        .onAppear {
+            crashHandler.refreshCrashReports()
+        }
+    }
+
+    private var crashReportsSection: some View {
+        GlassSection {
+            HStack(alignment: .top, spacing: 9) {
+                Image(systemName: "waveform.path.ecg.rectangle")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(.orange)
+                    .frame(width: 18)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 8) {
+                        Text(localized("crash_reports", value: "Crash Reports", comment: "Crash reports setting title"))
+                            .font(.system(size: 12, weight: .semibold))
+
+                        Text(crashReportSummary)
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 2)
+                            .background(Color.orange.opacity(0.14), in: Capsule())
+                    }
+
+                    Text(localized("crash_reports_help", value: "Crash reports are stored locally and can be shared when diagnosing issues.", comment: "Crash reports help text"))
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer(minLength: 8)
+            }
+
+            Divider()
+
+            HStack(spacing: 8) {
+                Button {
+                    crashHandler.openCrashReportsFolder()
+                } label: {
+                    Label(localized("open_crash_reports_folder", value: "Open Folder", comment: "Open crash reports folder button"), systemImage: "folder")
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
+
+                Button {
+                    crashHandler.copyLatestCrashReportToClipboard()
+                } label: {
+                    Label(localized("copy_latest_crash_report", value: "Copy Latest", comment: "Copy latest crash report button"), systemImage: "doc.on.doc")
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+
+                Button {
+                    crashHandler.revealLatestCrashReport()
+                } label: {
+                    Label(localized("reveal_latest_crash_report", value: "Reveal Latest", comment: "Reveal latest crash report button"), systemImage: "magnifyingglass")
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+
+                Spacer()
+
+                Button(role: .destructive) {
+                    showingClearCrashReportsConfirmation = true
+                } label: {
+                    Label(localized("clear_crash_reports", value: "Clear", comment: "Clear crash reports button"), systemImage: "trash")
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+            }
+        }
+        .alert(localized("clear_crash_reports_title", value: "Clear Crash Reports?", comment: "Clear crash reports confirmation title"), isPresented: $showingClearCrashReportsConfirmation) {
+            Button(localized("cancel", value: "Cancel", comment: "Cancel button"), role: .cancel) { }
+            Button(localized("clear_crash_reports", value: "Clear", comment: "Clear crash reports button"), role: .destructive) {
+                crashHandler.clearCrashReports()
+            }
+        } message: {
+            Text(localized("clear_crash_reports_message", value: "This removes saved crash reports from this Mac.", comment: "Clear crash reports confirmation message"))
+        }
+    }
+
+    private var crashReportSummary: String {
+        let format = localized("crash_reports_available_format", value: "%d saved, latest %@", comment: "Crash reports count and latest date")
+        let latestDate = crashHandler.latestCrashReport.map {
+            DateFormatter.localizedString(from: $0.createdAt, dateStyle: .medium, timeStyle: .short)
+        } ?? localized("unknown", value: "Unknown", comment: "Unknown value")
+
+        return String(format: format, crashHandler.crashReportCount, latestDate)
     }
 
     private var visualizerSettings: some View {
@@ -341,41 +437,39 @@ struct SettingsWindowView: View {
     }
 
     private var appSettings: some View {
-        VStack(spacing: 14) {
-            GlassSection {
-                Label(localized("ignored_apps_list", value: "Ignored Apps", comment: "Ignored apps list title"), systemImage: "hand.raised.slash")
-                    .font(.system(size: 12, weight: .semibold))
-                    .frame(maxWidth: .infinity, alignment: .leading)
+        GlassSection {
+            Label(localized("ignored_apps_list", value: "Ignored Apps", comment: "Ignored apps list title"), systemImage: "hand.raised.slash")
+                .font(.system(size: 12, weight: .semibold))
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-                if !settings.excludedApps.isEmpty {
-                    VStack(spacing: 4) {
-                        ForEach(settings.excludedApps, id: \.self) { bundleId in
-                            CompactAppRow(bundleId: bundleId) {
-                                withAnimation(.easeOut(duration: 0.15)) {
-                                    settings.removeExcludedApp(bundleId)
-                                }
+            if !settings.excludedApps.isEmpty {
+                VStack(spacing: 4) {
+                    ForEach(settings.excludedApps, id: \.self) { bundleId in
+                        CompactAppRow(bundleId: bundleId) {
+                            withAnimation(.easeOut(duration: 0.15)) {
+                                settings.removeExcludedApp(bundleId)
                             }
                         }
                     }
-                } else {
-                    Text(localized("no_excluded_apps", value: "No ignored apps yet.", comment: "No excluded apps message"))
-                        .font(.system(size: 11))
-                        .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
+            } else {
+                Text(localized("no_excluded_apps", value: "No ignored apps yet.", comment: "No excluded apps message"))
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
 
-            GlassSection {
-                InlineAppPickerView(
-                    excludedApps: settings.excludedApps,
-                    frontmostBundleId: capturedFrontmostBundleId,
-                    onAdd: { bundleId in
-                        withAnimation(.easeOut(duration: 0.15)) {
-                            settings.addExcludedApp(bundleId)
-                        }
+            Divider()
+
+            InlineAppPickerView(
+                excludedApps: settings.excludedApps,
+                frontmostBundleId: capturedFrontmostBundleId,
+                onAdd: { bundleId in
+                    withAnimation(.easeOut(duration: 0.15)) {
+                        settings.addExcludedApp(bundleId)
                     }
-                )
-            }
+                }
+            )
         }
         .onAppear {
             capturedFrontmostBundleId = SettingsManager.shared.getFrontmostAppBundleId()
@@ -463,7 +557,7 @@ struct SettingsWindowView: View {
                     icon: "arrow.triangle.2.circlepath",
                     title: localized("auto_update", value: "Auto Update", comment: "Auto update toggle"),
                     isOn: $updateManager.autoUpdateEnabled,
-                    tooltip: localized("tooltip_auto_update", value: "Automatically check for signed app updates.", comment: "Auto update tooltip")
+                    tooltip: localized("tooltip_auto_update", value: "Automatically check for verified app updates.", comment: "Auto update tooltip")
                 )
 
                 Divider()
@@ -816,8 +910,8 @@ struct SettingsWindowView: View {
         switch updateManager.status {
         case .checking:
             return .blue
-	        case .upToDate:
-	            return .secondary
+        case .upToDate:
+            return .secondary
         case .available:
             return .orange
         case .failed:
@@ -928,7 +1022,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         case .permissions:
             return localized("settings_permissions_subtitle", value: "Check required macOS permissions and runtime status.", comment: "Permissions settings subtitle")
         case .updates:
-            return localized("settings_updates_subtitle", value: "Check signed updates, automatic update status, and update history.", comment: "Updates settings subtitle")
+            return localized("settings_updates_subtitle", value: "Check verified updates, automatic update status, and update history.", comment: "Updates settings subtitle")
         case .about:
             return localized("settings_about_subtitle", value: "Product identity, links, and credits.", comment: "About settings subtitle")
         }
@@ -1159,20 +1253,24 @@ private struct VisualizerPreviewCard: View {
         let effectiveDistance = max(distance - settings.deadZoneRadius, 0)
         let travel = min(effectiveDistance * (0.55 + glassIntensity * 0.07), side * 0.25)
         let dotRadius = min(max(side * 0.074, 4.0), 10.0)
-        let tint = settings.visualizerTintStyle.glassTintColor(intensity: settings.liquidGlassIntensity).map(Color.init(nsColor:)) ?? .clear
+        let tintColor = settings.visualizerTintStyle.glassTintColor(intensity: settings.liquidGlassIntensity)
+            ?? NSColor.white.withAlphaComponent(min(0.090 + glassIntensity * 0.018, 0.14))
+        let tint = Color(nsColor: tintColor)
+        let activation = min(effectiveDistance / 42, 1)
+        let aeroBlue = Color(red: 0.70, green: 0.92, blue: 1.0)
 
         return ZStack {
             Circle()
-                .fill(Color.white.opacity(0.01))
+                .fill(Color.white.opacity(min(0.060 * opacity * (0.90 + glassIntensity * 0.12), 0.16)))
                 .glassEffect(.regular.tint(tint), in: Circle())
                 .overlay {
                     Circle()
                         .fill(
                             LinearGradient(
                                 colors: [
-                                    .white.opacity(min((0.14 + min(effectiveDistance / 42, 1) * 0.07) * opacity * (0.80 + glassIntensity * 0.22), 0.34)),
-                                    .white.opacity(min(0.030 * opacity * (0.9 + glassIntensity * 0.18), 0.12)),
-                                    .black.opacity(min(0.020 * opacity * (0.9 + glassIntensity * 0.10), 0.08))
+                                    .white.opacity(min((0.24 + activation * 0.08) * opacity * (0.86 + glassIntensity * 0.18), 0.52)),
+                                    .white.opacity(min(0.085 * opacity * (0.88 + glassIntensity * 0.16), 0.24)),
+                                    aeroBlue.opacity(min((0.018 + activation * 0.018) * opacity * (0.75 + glassIntensity * 0.14), 0.070))
                                 ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
@@ -1182,13 +1280,39 @@ private struct VisualizerPreviewCard: View {
                 }
                 .overlay {
                     Circle()
-                        .stroke(.black.opacity(0.12 * opacity), lineWidth: 1)
+                        .stroke(.white.opacity(min((0.30 + activation * 0.06) * opacity * (0.92 + glassIntensity * 0.10), 0.48)), lineWidth: 1.1)
                 }
+                .overlay {
+                    Circle()
+                        .stroke(.black.opacity(min(0.040 * opacity * (0.80 + glassIntensity * 0.08), 0.075)), lineWidth: 0.6)
+                }
+                .shadow(color: .white.opacity(min(0.13 * opacity * (0.85 + glassIntensity * 0.10), 0.24)), radius: 7 + glassIntensity * 1.4, x: -1.5, y: -1.5)
+                .shadow(color: .black.opacity(min(0.085 * opacity * (0.80 + glassIntensity * 0.12), 0.16)), radius: 9 + glassIntensity * 1.8, x: 0, y: 2.5)
 
             Circle()
-                .fill(.white.opacity(min(0.52 * opacity * (0.92 + glassIntensity * 0.08), 0.72)))
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            .white.opacity(min(0.82 * opacity * (0.96 + glassIntensity * 0.06), 0.92)),
+                            .white.opacity(min(0.54 * opacity * (0.92 + glassIntensity * 0.08), 0.76)),
+                            aeroBlue.opacity(min(0.18 * opacity * (0.80 + glassIntensity * 0.12), 0.28))
+                        ],
+                        center: .topLeading,
+                        startRadius: 0,
+                        endRadius: dotRadius * 1.6
+                    )
+                )
+                .overlay {
+                    Circle()
+                        .stroke(.white.opacity(min(0.45 * opacity * (0.90 + glassIntensity * 0.08), 0.58)), lineWidth: 0.85)
+                }
+                .overlay {
+                    Circle()
+                        .stroke(.black.opacity(min(0.035 * opacity * (0.85 + glassIntensity * 0.10), 0.070)), lineWidth: 0.45)
+                }
                 .frame(width: dotRadius * 2, height: dotRadius * 2)
-                .shadow(color: .black.opacity(min(0.16 * opacity * (0.9 + glassIntensity * 0.16), 0.30)), radius: 7 + glassIntensity * 2, x: 0, y: 1.5)
+                .shadow(color: .white.opacity(min(0.20 * opacity * (0.86 + glassIntensity * 0.10), 0.32)), radius: 3.5 + glassIntensity * 0.8, x: -0.8, y: -0.8)
+                .shadow(color: .black.opacity(min(0.090 * opacity * (0.85 + glassIntensity * 0.12), 0.17)), radius: 6 + glassIntensity * 1.6, x: 0, y: 1.2)
                 .offset(x: unitX * travel, y: unitY * travel)
         }
         .frame(width: side, height: side)
@@ -1327,6 +1451,12 @@ private struct NormalPreviewScene: View {
     }
 }
 
+private enum SettingsLayout {
+    static let rowIconWidth: CGFloat = 18
+    static let trailingControlWidth: CGFloat = 176
+    static let compactControlHeight: CGFloat = 28
+}
+
 private struct TintStyleRow: View {
     @Binding var selection: VisualizerTintStyle
 
@@ -1336,14 +1466,11 @@ private struct TintStyleRow: View {
             title: localized("visualizer_tint", value: "Tint", comment: "Visualizer tint setting"),
             tooltip: localized("tooltip_visualizer_tint", value: "Controls the subtle tint of the glass visualizer.", comment: "Visualizer tint tooltip")
         ) {
-            Picker("", selection: $selection) {
-                ForEach(VisualizerTintStyle.allCases) { style in
-                    Text(style.displayName).tag(style)
-                }
-            }
-            .pickerStyle(.menu)
-            .controlSize(.small)
-            .frame(width: 126)
+            SettingsOptionMenu(
+                selection: $selection,
+                options: VisualizerTintStyle.allCases,
+                title: \.displayName
+            )
         }
     }
 }
@@ -1364,6 +1491,7 @@ private struct SettingRow<Trailing: View>: View {
     let icon: String
     let title: String
     let tooltip: String
+    var trailingWidth: CGFloat? = SettingsLayout.trailingControlWidth
     @ViewBuilder let trailing: Trailing
 
     var body: some View {
@@ -1371,7 +1499,7 @@ private struct SettingRow<Trailing: View>: View {
             Image(systemName: icon)
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(.secondary)
-                .frame(width: 18)
+                .frame(width: SettingsLayout.rowIconWidth)
 
             Text(title)
                 .font(.system(size: 12))
@@ -1379,7 +1507,15 @@ private struct SettingRow<Trailing: View>: View {
                 .minimumScaleFactor(0.85)
 
             Spacer(minLength: 8)
-            trailing
+
+            Group {
+                if let trailingWidth {
+                    trailing
+                        .frame(width: trailingWidth, alignment: .trailing)
+                } else {
+                    trailing
+                }
+            }
         }
         .help(tooltip)
     }
@@ -1410,14 +1546,11 @@ private struct LanguagePickerRow: View {
             title: localized("language", value: "Language", comment: "Language setting"),
             tooltip: localized("tooltip_language", value: "Choose the app language, or follow your system default.", comment: "Language tooltip")
         ) {
-            Picker("", selection: $selection) {
-                ForEach(AppLanguage.allCases) { language in
-                    Text(displayName(for: language)).tag(language)
-                }
-            }
-            .pickerStyle(.menu)
-            .controlSize(.small)
-            .frame(width: 176)
+            SettingsOptionMenu(
+                selection: $selection,
+                options: AppLanguage.allCases,
+                title: displayName(for:)
+            )
         }
     }
 
@@ -1437,15 +1570,61 @@ private struct AppearancePickerRow: View {
             title: localized("appearance", value: "Appearance", comment: "Appearance setting"),
             tooltip: localized("tooltip_appearance", value: "Choose Light, Dark, or follow the system appearance.", comment: "Appearance tooltip")
         ) {
-            Picker("", selection: $selection) {
-                ForEach(AppAppearance.allCases) { appearance in
-                    Text(appearance.displayName).tag(appearance)
+            SettingsOptionMenu(
+                selection: $selection,
+                options: AppAppearance.allCases,
+                title: \.displayName
+            )
+        }
+    }
+}
+
+private struct SettingsOptionMenu<Option: Identifiable & Hashable>: View {
+    @Binding var selection: Option
+    let options: [Option]
+    let title: (Option) -> String
+    var width: CGFloat = SettingsLayout.trailingControlWidth
+
+    var body: some View {
+        Menu {
+            ForEach(options) { option in
+                Button {
+                    selection = option
+                } label: {
+                    if option == selection {
+                        Label(title(option), systemImage: "checkmark")
+                    } else {
+                        Text(title(option))
+                    }
                 }
             }
-            .pickerStyle(.menu)
-            .controlSize(.small)
-            .frame(width: 176)
+        } label: {
+            HStack(spacing: 8) {
+                Text(title(selection))
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.78)
+
+                Spacer(minLength: 8)
+
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 10)
+            .frame(width: width, height: SettingsLayout.compactControlHeight, alignment: .leading)
+            .background(
+                Color(nsColor: .controlBackgroundColor).opacity(0.70),
+                in: RoundedRectangle(cornerRadius: 7, style: .continuous)
+            )
+            .overlay {
+                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                    .stroke(Color(nsColor: .separatorColor).opacity(0.34), lineWidth: 0.5)
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
         }
+        .buttonStyle(.plain)
     }
 }
 
@@ -1459,7 +1638,7 @@ private struct InfoRow: View {
             Image(systemName: icon)
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(.secondary)
-                .frame(width: 18)
+                .frame(width: SettingsLayout.rowIconWidth)
 
             Text(title)
                 .font(.system(size: 12))
@@ -1486,7 +1665,7 @@ private struct LinkRow: View {
             Image(systemName: icon)
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(.secondary)
-                .frame(width: 18)
+                .frame(width: SettingsLayout.rowIconWidth)
 
             Text(title)
                 .font(.system(size: 12))
@@ -1514,7 +1693,7 @@ private struct AssetLinkRow: View {
                 .renderingMode(.template)
                 .foregroundStyle(.secondary)
                 .frame(width: 15, height: 15)
-                .frame(width: 18)
+                .frame(width: SettingsLayout.rowIconWidth)
 
             Text(title)
                 .font(.system(size: 12))
@@ -1601,7 +1780,7 @@ private struct SliderRow: View {
             Image(systemName: icon)
                 .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(.secondary)
-                .frame(width: 18)
+                .frame(width: SettingsLayout.rowIconWidth)
 
             Text(title)
                 .font(.system(size: 11))

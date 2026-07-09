@@ -117,6 +117,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
 
         // Setup crash handling first
         CrashHandler.appVersion = AppDelegate.appVersion
+        CrashHandler.appBuild = AppDelegate.appBuild
         CrashHandler.shared.setup()
         
         setupMenuBar()

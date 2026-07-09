@@ -374,6 +374,41 @@ final class SettingsManagerTests: XCTestCase {
         XCTAssertEqual(SettingsTab.previous(before: .visualizer), .general)
         XCTAssertEqual(SettingsTab.next(after: .visualizer), .scrolling)
     }
+
+    func testCrashReportFileNameIsStableAndSanitized() {
+        let date = Date(timeIntervalSince1970: 1_767_817_200)
+
+        let fileName = CrashHandler.crashReportFileName(kind: "SIG/SEGV:Bad Value", date: date, processID: 42)
+
+        XCTAssertTrue(fileName.hasPrefix("MacDragScroll-Crash-"))
+        XCTAssertTrue(fileName.hasSuffix("-SIG-SEGV-Bad-Value-42.log"))
+        XCTAssertFalse(fileName.contains("/"))
+        XCTAssertFalse(fileName.contains(":"))
+    }
+
+    func testCrashReportDiscoveryReturnsNewestLogFilesFirst() throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let older = directory.appendingPathComponent("older.log")
+        let newer = directory.appendingPathComponent("newer.log")
+        let ignored = directory.appendingPathComponent("ignored.txt")
+
+        try "older".write(to: older, atomically: true, encoding: .utf8)
+        try "newer".write(to: newer, atomically: true, encoding: .utf8)
+        try "ignored".write(to: ignored, atomically: true, encoding: .utf8)
+
+        let olderDate = Date(timeIntervalSince1970: 100)
+        let newerDate = Date(timeIntervalSince1970: 200)
+        try FileManager.default.setAttributes([.creationDate: olderDate, .modificationDate: olderDate], ofItemAtPath: older.path)
+        try FileManager.default.setAttributes([.creationDate: newerDate, .modificationDate: newerDate], ofItemAtPath: newer.path)
+
+        let reports = CrashHandler.crashReports(in: directory)
+
+        XCTAssertEqual(reports.map(\.fileName), ["newer.log", "older.log"])
+    }
     
     // MARK: - Settings Persistence Tests
     

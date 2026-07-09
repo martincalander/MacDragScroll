@@ -169,6 +169,16 @@
 "settings_about_subtitle" = "Productidentiteit, links en credits.";
 "crash_detected_title" = "Mac Drag Scroll Gecrasht";
 "crash_detected_message" = "De app crashte onverwachts tijdens de laatste sessie. U kunt het crashrapport kopiëren om het probleem te diagnosticeren.";
+"crash_reports" = "Crash Reports";
+"crash_reports_available_format" = "%d saved, latest %@";
+"crash_reports_help" = "Crash reports are stored locally and can be shared when diagnosing issues.";
+"open_crash_reports_folder" = "Open Folder";
+"copy_latest_crash_report" = "Copy Latest";
+"reveal_latest_crash_report" = "Reveal Latest";
+"clear_crash_reports" = "Clear";
+"clear_crash_reports_title" = "Clear Crash Reports?";
+"clear_crash_reports_message" = "This removes saved crash reports from this Mac.";
+"unknown" = "Unknown";
 "copy_report" = "Kopieer rapport";
 "dismiss" = "Negeren";
 "error_occurred_title" = "Er is een fout opgetreden";

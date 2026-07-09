@@ -43,13 +43,18 @@ Mac Drag Scroll brings the familiar Windows middle-click drag scroll gesture to 
 1. Open the [latest release](https://github.com/martincalander/MacDragScroll/releases/latest).
 2. Download `MacDragScroll.dmg`.
 3. Open the disk image and move **Mac Drag Scroll** to your Applications folder.
-4. Open the app and approve Accessibility access when macOS asks.
+4. First launch only: right-click **Mac Drag Scroll** in Finder, choose **Open**, then confirm.
+5. Approve Accessibility access when macOS asks.
 
 <p align="center">
   <img src="docs/assets/mac-drag-scroll-install-demo.gif" width="760" alt="Mac Drag Scroll installation demo">
 </p>
 
-If macOS blocks the first launch, right-click **Mac Drag Scroll** in Finder, choose **Open**, then confirm. You only need to do that once for unsigned or locally built copies.
+Current releases are unsigned and not Apple-notarized, so macOS may block the first launch. This is expected for the free release flow. You only need to use the right-click **Open** bypass once per downloaded build.
+
+<p align="center">
+  <img src="docs/assets/mac-drag-scroll-gatekeeper-bypass.gif" width="760" alt="How to open an unsigned Mac Drag Scroll build">
+</p>
 
 CLI install:
 
@@ -111,7 +116,7 @@ Read the full [privacy note](PRIVACY.md).
 
 ## Updates
 
-Use **Settings -> Updates** or the menu bar **Check For Update** command to check for new versions. Updates are installed through Sparkle using signed release archives from GitHub Releases.
+Use **Settings -> Updates** or the menu bar **Check For Update** command to check for new versions. Updates are verified by Sparkle and hosted on GitHub Releases. The app is not Apple-notarized unless a future release says otherwise.
 
 ## Support
 

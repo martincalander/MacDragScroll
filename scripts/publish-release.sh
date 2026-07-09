@@ -10,8 +10,8 @@ Example:
   scripts/publish-release.sh 1.0.0
 
 This command verifies release readiness, creates tag v<version>, and pushes main
-plus the tag. The GitHub Release workflow builds, signs, notarizes, and publishes
-the release artifacts from that tag.
+plus the tag. The GitHub Release workflow builds an unsigned app, packages it,
+generates the Sparkle appcast, and publishes release artifacts from that tag.
 USAGE
 }
 

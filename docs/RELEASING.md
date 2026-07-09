@@ -1,10 +1,12 @@
 # Releasing Mac Drag Scroll
 
-Mac Drag Scroll ships as a signed, notarized macOS app with Sparkle updates.
+Mac Drag Scroll currently ships as an unsigned macOS app with Sparkle-verified updates.
+
+This release flow does not require a paid Apple Developer Program account. Because the app is not Developer ID signed or notarized, macOS will block the first launch for most users. The install instructions document the standard Finder bypass: right-click the app, choose **Open**, then confirm.
 
 ## Strategy
 
-- **In-app updates:** Sparkle 2 installs signed update archives from the GitHub release appcast.
+- **In-app updates:** Sparkle 2 verifies and installs update archives from the GitHub release appcast.
 - **Manual installer:** each release publishes `MacDragScroll.dmg` with the app and an Applications shortcut.
 - **CLI install:** `scripts/install.sh` downloads the latest `MacDragScroll.zip` release asset and installs it into `/Applications`.
 - **Homebrew:** publish `packaging/homebrew/Casks/mac-drag-scroll.rb` to a separate `martincalander/homebrew-tap` repo after the first release exists. The cask downloads the same `MacDragScroll.zip` asset and sets `auto_updates true`.
@@ -68,29 +70,12 @@ Before tagging a release:
 4. Update `packaging/homebrew/Casks/mac-drag-scroll.rb` to the same version.
 5. Run `scripts/extract-release-notes.sh 1.0.1` and confirm it prints useful notes.
 
-## Required GitHub Secrets
+## Required GitHub Secret
 
-The release workflow needs these repository secrets:
+The release workflow only needs the Sparkle EdDSA private key:
 
 ```text
-APPLE_ID
-APPLE_APP_SPECIFIC_PASSWORD
-APPLE_TEAM_ID
-MACOS_CERTIFICATE_P12
-MACOS_CERTIFICATE_PASSWORD
 SPARKLE_PRIVATE_KEY
-```
-
-`MACOS_CERTIFICATE_P12` is a base64-encoded Developer ID Application certificate export:
-
-```sh
-base64 -i DeveloperIDApplication.p12 | pbcopy
-```
-
-To set the Apple secrets from an exported `.p12` file:
-
-```sh
-scripts/set-apple-release-secrets.sh ~/Desktop/DeveloperIDApplication.p12 "$P12_PASSWORD" "you@example.com" "$APP_SPECIFIC_PASSWORD"
 ```
 
 `SPARKLE_PRIVATE_KEY` is the exported Sparkle EdDSA private key. The public key embedded in the app is:
@@ -108,6 +93,8 @@ rm sparkle_private_key.txt
 ```
 
 Use Sparkle `2.9.4` for that command, matching the vendored framework.
+
+Apple Developer ID signing and notarization can be added later, but they are intentionally not required by the current workflow.
 
 ## Release
 
@@ -131,11 +118,11 @@ scripts/publish-release.sh 1.0.0
 
 - verify the tag matches `MARKETING_VERSION`;
 - run tests;
-- archive and export a Developer ID app;
-- notarize and staple the app;
+- build the Release app;
+- apply an ad-hoc local code signature for bundle consistency;
 - create `MacDragScroll.zip`;
 - create `MacDragScroll.dmg`;
-- generate signed `appcast.xml`;
+- generate the Sparkle appcast;
 - publish/update the GitHub release.
 
 ## Verify A Release
@@ -177,4 +164,4 @@ brew tap martincalander/tap
 brew install --cask mac-drag-scroll
 ```
 
-For future releases, update `version` in the cask and commit it to the tap. The cask uses `sha256 :no_check` because the Sparkle-signed app archive is the trust boundary and the app auto-updates itself.
+For future releases, update `version` in the cask and commit it to the tap. The cask uses `sha256 :no_check` because the GitHub release asset is checked by the release workflow and the app updates itself through Sparkle.

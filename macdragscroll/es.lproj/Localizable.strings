@@ -169,6 +169,16 @@
 "settings_about_subtitle" = "Identidad del producto, enlaces y créditos.";
 "crash_detected_title" = "Mac Drag Scroll se estrelló";
 "crash_detected_message" = "La aplicación falló inesperadamente durante la última sesión. Puede copiar el informe de fallos para ayudar a diagnosticar el problema.";
+"crash_reports" = "Crash Reports";
+"crash_reports_available_format" = "%d saved, latest %@";
+"crash_reports_help" = "Crash reports are stored locally and can be shared when diagnosing issues.";
+"open_crash_reports_folder" = "Open Folder";
+"copy_latest_crash_report" = "Copy Latest";
+"reveal_latest_crash_report" = "Reveal Latest";
+"clear_crash_reports" = "Clear";
+"clear_crash_reports_title" = "Clear Crash Reports?";
+"clear_crash_reports_message" = "This removes saved crash reports from this Mac.";
+"unknown" = "Unknown";
 "copy_report" = "Copiar informe";
 "dismiss" = "Descartar";
 "error_occurred_title" = "Se produjo un error";

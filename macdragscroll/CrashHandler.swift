@@ -7,26 +7,50 @@
 
 import Foundation
 import AppKit
+import Combine
 
 // MARK: - Crash Handler
 
-final class CrashHandler {
+final class CrashHandler: ObservableObject {
+    struct CrashReport: Identifiable, Equatable {
+        let url: URL
+        let createdAt: Date
+
+        var id: String { url.path }
+        var fileName: String { url.lastPathComponent }
+    }
+
     static let shared = CrashHandler()
     
     // Cache version at init time so it's available during crash
     static var appVersion: String = "Unknown"
+    static var appBuild: String = "Unknown"
     
-    private let crashLogPath: URL
+    @Published private(set) var crashReports: [CrashReport] = []
+
+    let crashReportDirectory: URL
+
+    private let legacyCrashLogPath: URL
     
     private init() {
-        // Store crash logs in Application Support
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         let appFolder = appSupport.appendingPathComponent("MacDragScroll")
+        crashReportDirectory = appFolder.appendingPathComponent("Crash Reports", isDirectory: true)
+        legacyCrashLogPath = appFolder.appendingPathComponent("crash.log")
         
-        // Create directory if needed
-        try? FileManager.default.createDirectory(at: appFolder, withIntermediateDirectories: true)
-        
-        crashLogPath = appFolder.appendingPathComponent("crash.log")
+        ensureCrashReportDirectory()
+    }
+
+    var hasCrashReports: Bool {
+        !crashReports.isEmpty
+    }
+
+    var crashReportCount: Int {
+        crashReports.count
+    }
+
+    var latestCrashReport: CrashReport? {
+        crashReports.first
     }
     
     // MARK: - Setup
@@ -34,7 +58,8 @@ final class CrashHandler {
     func setup() {
         setupSignalHandlers()
         setupExceptionHandler()
-        checkForPreviousCrash()
+        migrateLegacyCrashLogIfNeeded()
+        refreshCrashReports()
     }
     
     // MARK: - Signal Handlers
@@ -67,6 +92,9 @@ final class CrashHandler {
         ============================
         Date: \(Date())
         Version: \(CrashHandler.appVersion)
+        Build: \(CrashHandler.appBuild)
+        macOS: \(ProcessInfo.processInfo.operatingSystemVersionString)
+        Process: \(ProcessInfo.processInfo.processName) (\(ProcessInfo.processInfo.processIdentifier))
         Signal: \(name) (\(signal))
         
         Stack Trace:
@@ -74,7 +102,7 @@ final class CrashHandler {
         """
         
         // Write crash log synchronously (we're about to crash)
-        try? crashInfo.write(to: crashLogPath, atomically: true, encoding: String.Encoding.utf8)
+        writeCrashReport(crashInfo, kind: name)
         
         // Re-raise the signal to get default behavior
         Darwin.signal(signal, SIG_DFL)
@@ -95,6 +123,9 @@ final class CrashHandler {
         ============================
         Date: \(Date())
         Version: \(CrashHandler.appVersion)
+        Build: \(CrashHandler.appBuild)
+        macOS: \(ProcessInfo.processInfo.operatingSystemVersionString)
+        Process: \(ProcessInfo.processInfo.processName) (\(ProcessInfo.processInfo.processIdentifier))
         Exception: \(exception.name.rawValue)
         Reason: \(exception.reason ?? "Unknown")
         
@@ -106,45 +137,150 @@ final class CrashHandler {
         """
         
         // Write crash log
-        try? crashInfo.write(to: crashLogPath, atomically: true, encoding: String.Encoding.utf8)
+        writeCrashReport(crashInfo, kind: exception.name.rawValue)
+        refreshCrashReports()
     }
     
-    // MARK: - Previous Crash Check
-    
-    private func checkForPreviousCrash() {
-        guard FileManager.default.fileExists(atPath: crashLogPath.path) else { return }
-        
-        // Read crash log
-        guard let crashLog = try? String(contentsOf: crashLogPath, encoding: .utf8) else {
-            // Clean up unreadable file
-            try? FileManager.default.removeItem(at: crashLogPath)
+    // MARK: - Crash Reports
+
+    @discardableResult
+    func refreshCrashReports() -> [CrashReport] {
+        let reports = Self.crashReports(in: crashReportDirectory)
+
+        if Thread.isMainThread {
+            crashReports = reports
+        } else {
+            DispatchQueue.main.async { [weak self] in
+                self?.crashReports = reports
+            }
+        }
+
+        return reports
+    }
+
+    func openCrashReportsFolder() {
+        ensureCrashReportDirectory()
+        NSWorkspace.shared.open(crashReportDirectory)
+    }
+
+    func revealLatestCrashReport() {
+        guard let latestCrashReport = refreshCrashReports().first else {
+            openCrashReportsFolder()
             return
         }
-        
-        // Delete the crash log file
-        try? FileManager.default.removeItem(at: crashLogPath)
-        
-        // Show alert on main thread after a short delay to ensure app is ready
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.showCrashAlert(crashLog: crashLog)
+
+        NSWorkspace.shared.activateFileViewerSelecting([latestCrashReport.url])
+    }
+
+    @discardableResult
+    func copyLatestCrashReportToClipboard() -> Bool {
+        guard let latestCrashReport = refreshCrashReports().first,
+              let report = try? String(contentsOf: latestCrashReport.url, encoding: .utf8) else {
+            return false
+        }
+
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(report, forType: .string)
+        return true
+    }
+
+    func clearCrashReports() {
+        Self.crashReports(in: crashReportDirectory).forEach { report in
+            try? FileManager.default.removeItem(at: report.url)
+        }
+        refreshCrashReports()
+    }
+
+    static func crashReports(in directory: URL, fileManager: FileManager = .default) -> [CrashReport] {
+        guard let urls = try? fileManager.contentsOfDirectory(
+            at: directory,
+            includingPropertiesForKeys: [.creationDateKey, .contentModificationDateKey, .isRegularFileKey],
+            options: [.skipsHiddenFiles]
+        ) else {
+            return []
+        }
+
+        return urls
+            .filter { $0.pathExtension.lowercased() == "log" }
+            .compactMap { url -> CrashReport? in
+                guard isRegularFile(url: url, fileManager: fileManager) else { return nil }
+                return CrashReport(url: url, createdAt: fileDate(url: url, fileManager: fileManager))
+            }
+            .sorted { lhs, rhs in
+                if lhs.createdAt == rhs.createdAt {
+                    return lhs.fileName > rhs.fileName
+                }
+                return lhs.createdAt > rhs.createdAt
+            }
+    }
+
+    static func crashReportFileName(kind: String, date: Date, processID: Int32 = ProcessInfo.processInfo.processIdentifier) -> String {
+        let timestamp = ISO8601DateFormatter()
+            .string(from: date)
+            .replacingOccurrences(of: ":", with: "-")
+        let safeKind = sanitizedCrashReportKind(kind)
+
+        return "MacDragScroll-Crash-\(timestamp)-\(safeKind)-\(processID).log"
+    }
+
+    private func writeCrashReport(_ crashInfo: String, kind: String) {
+        ensureCrashReportDirectory()
+
+        let url = crashReportDirectory.appendingPathComponent(Self.crashReportFileName(kind: kind, date: Date()))
+        try? crashInfo.write(to: url, atomically: true, encoding: .utf8)
+    }
+
+    private func migrateLegacyCrashLogIfNeeded() {
+        guard FileManager.default.fileExists(atPath: legacyCrashLogPath.path) else { return }
+
+        ensureCrashReportDirectory()
+        let migratedURL = crashReportDirectory.appendingPathComponent(Self.crashReportFileName(kind: "Migrated", date: Date()))
+
+        do {
+            try FileManager.default.moveItem(at: legacyCrashLogPath, to: migratedURL)
+        } catch {
+            if let legacyLog = try? String(contentsOf: legacyCrashLogPath, encoding: .utf8) {
+                try? legacyLog.write(to: migratedURL, atomically: true, encoding: .utf8)
+            }
+            try? FileManager.default.removeItem(at: legacyCrashLogPath)
         }
     }
-    
-    private func showCrashAlert(crashLog: String) {
-        let alert = NSAlert()
-        alert.messageText = Self.localized("crash_detected_title", value: "Mac Drag Scroll Crashed", comment: "Crash detected alert title")
-        alert.informativeText = Self.localized("crash_detected_message", value: "The app crashed unexpectedly during the last session. You can copy the crash report to help diagnose the issue.", comment: "Crash detected alert message")
-        alert.alertStyle = .warning
-        alert.addButton(withTitle: Self.localized("copy_report", value: "Copy Report", comment: "Copy crash report button"))
-        alert.addButton(withTitle: Self.localized("dismiss", value: "Dismiss", comment: "Dismiss button"))
-        
-        let response = alert.runModal()
-        if response == .alertFirstButtonReturn {
-            // Copy crash report to clipboard
-            let pasteboard = NSPasteboard.general
-            pasteboard.clearContents()
-            pasteboard.setString(crashLog, forType: .string)
+
+    private func ensureCrashReportDirectory() {
+        try? FileManager.default.createDirectory(at: crashReportDirectory, withIntermediateDirectories: true)
+    }
+
+    private static func sanitizedCrashReportKind(_ kind: String) -> String {
+        let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_"))
+        let scalars = kind.unicodeScalars.map { scalar in
+            allowed.contains(scalar) ? Character(scalar) : "-"
         }
+        let sanitized = String(scalars)
+            .split(separator: "-", omittingEmptySubsequences: true)
+            .joined(separator: "-")
+
+        return sanitized.isEmpty ? "Unknown" : sanitized
+    }
+
+    private static func isRegularFile(url: URL, fileManager: FileManager) -> Bool {
+        guard let values = try? url.resourceValues(forKeys: [.isRegularFileKey]) else {
+            var isDirectory: ObjCBool = false
+            return fileManager.fileExists(atPath: url.path, isDirectory: &isDirectory) && !isDirectory.boolValue
+        }
+
+        return values.isRegularFile == true
+    }
+
+    private static func fileDate(url: URL, fileManager: FileManager) -> Date {
+        if let values = try? url.resourceValues(forKeys: [.creationDateKey, .contentModificationDateKey]) {
+            return values.creationDate ?? values.contentModificationDate ?? .distantPast
+        }
+
+        let attributes = try? fileManager.attributesOfItem(atPath: url.path)
+        return attributes?[.creationDate] as? Date
+            ?? attributes?[.modificationDate] as? Date
+            ?? .distantPast
     }
     
     // MARK: - Safe Execution

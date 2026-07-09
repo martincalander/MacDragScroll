@@ -169,6 +169,16 @@
 "settings_about_subtitle" = "Identidade do produto, links e créditos.";
 "crash_detected_title" = "Mac Drag Scroll travou";
 "crash_detected_message" = "O aplicativo travou inesperadamente durante a última sessão. Você pode copiar o relatório de falha para ajudar a diagnosticar o problema.";
+"crash_reports" = "Crash Reports";
+"crash_reports_available_format" = "%d saved, latest %@";
+"crash_reports_help" = "Crash reports are stored locally and can be shared when diagnosing issues.";
+"open_crash_reports_folder" = "Open Folder";
+"copy_latest_crash_report" = "Copy Latest";
+"reveal_latest_crash_report" = "Reveal Latest";
+"clear_crash_reports" = "Clear";
+"clear_crash_reports_title" = "Clear Crash Reports?";
+"clear_crash_reports_message" = "This removes saved crash reports from this Mac.";
+"unknown" = "Unknown";
 "copy_report" = "Copiar relatório";
 "dismiss" = "Dispensar";
 "error_occurred_title" = "Ocorreu um erro";

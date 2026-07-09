@@ -185,10 +185,7 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
     }
 
     func updaterDidNotFindUpdate(_ updater: SPUUpdater, error: Error) {
-        lastChecked = Date()
-        defaults.set(lastChecked, forKey: lastCheckedKey)
-        status = .upToDate
-        appendHistory("Checked for updates. \(currentVersionDisplay) is up to date.")
+        markUpToDate()
     }
 
     func updater(_ updater: SPUUpdater, willInstallUpdate item: SUAppcastItem) {
@@ -196,9 +193,26 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
     }
 
     func updater(_ updater: SPUUpdater, didAbortWithError error: Error) {
+        if Self.isNoUpdateError(error) {
+            markUpToDate()
+            return
+        }
+
         let message = "Update failed: \(error.localizedDescription)"
         status = .failed(message: message)
         appendHistory(message)
+    }
+
+    static func isNoUpdateError(_ error: Error) -> Bool {
+        let nsError = error as NSError
+        return nsError.domain == SUSparkleErrorDomain && nsError.code == Int(SUError.noUpdateError.rawValue)
+    }
+
+    private func markUpToDate() {
+        lastChecked = Date()
+        defaults.set(lastChecked, forKey: lastCheckedKey)
+        status = .upToDate
+        appendHistory("Checked for updates. \(currentVersionDisplay) is up to date.")
     }
 
     private func syncPreferencesFromSparkle() {

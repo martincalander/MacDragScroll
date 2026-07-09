@@ -42,7 +42,7 @@ struct SettingsWindowView: View {
 
                     ScrollView {
                         VStack(alignment: .leading, spacing: 16) {
-                            if !permissionState.hasAccessibilityPermission {
+                            if !permissionState.hasRequiredPermissions {
                                 permissionBanner
                             }
 
@@ -197,6 +197,15 @@ struct SettingsWindowView: View {
                     title: localized("enabled", value: "Enabled", comment: "Enabled toggle"),
                     isOn: $settings.isEnabled,
                     tooltip: localized("tooltip_enabled", value: "Turn drag scrolling on or off.", comment: "Enabled tooltip")
+                )
+
+                Divider()
+
+                ToggleRow(
+                    icon: "menubar.rectangle",
+                    title: localized("keep_running_in_menu_bar", value: "Keep Running in Menu Bar", comment: "Keep running in menu bar toggle"),
+                    isOn: $settings.keepRunningInMenuBar,
+                    tooltip: localized("tooltip_keep_running_in_menu_bar", value: "When Settings is closed with Command-Q, keep Mac Drag Scroll active in the menu bar.", comment: "Keep running in menu bar tooltip")
                 )
 
                 Divider()
@@ -487,33 +496,29 @@ struct SettingsWindowView: View {
     private var permissionsSettings: some View {
         VStack(spacing: 14) {
             GlassSection {
-                HStack(spacing: 12) {
-                    Image(systemName: permissionState.hasAccessibilityPermission ? "checkmark.shield.fill" : "hand.raised.circle.fill")
-                        .font(.system(size: 26, weight: .semibold))
-                        .symbolRenderingMode(.hierarchical)
-                        .foregroundStyle(permissionState.hasAccessibilityPermission ? .green : .orange)
-                        .frame(width: 34)
+                permissionOverview
 
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(localized("permission_accessibility", value: "Accessibility Permission", comment: "Accessibility permission title"))
-                            .font(.system(size: 13, weight: .semibold))
-                        Text(permissionState.hasAccessibilityPermission
-                             ? localized("permission_accessibility_granted_detail", value: "Mac Drag Scroll can monitor the configured mouse trigger and send scroll events.", comment: "Accessibility granted detail")
-                             : localized("permission_accessibility_missing_detail", value: "Grant Accessibility permission so the app can detect mouse drags globally.", comment: "Accessibility missing detail"))
-                            .font(.system(size: 11))
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
+                Divider()
 
-                    Spacer()
+                permissionChecklistRow(
+                    icon: "figure.arms.open",
+                    title: localized("permission_accessibility", value: "Accessibility Permission", comment: "Accessibility permission title"),
+                    detail: permissionState.hasAccessibilityPermission
+                        ? localized("permission_accessibility_granted_detail", value: "Mac Drag Scroll can monitor the configured mouse trigger and send scroll events.", comment: "Accessibility granted detail")
+                        : localized("permission_accessibility_missing_detail", value: "Grant Accessibility permission so the app can detect mouse drags globally.", comment: "Accessibility missing detail"),
+                    isGranted: permissionState.hasAccessibilityPermission
+                )
 
-                    StatusBadge(
-                        title: permissionState.hasAccessibilityPermission
-                            ? localized("permission_granted", value: "Granted", comment: "Permission granted")
-                            : localized("permission_needed", value: "Needed", comment: "Permission needed"),
-                        color: permissionState.hasAccessibilityPermission ? .green : .orange
-                    )
-                }
+                Divider()
+
+                permissionChecklistRow(
+                    icon: "cursorarrow.motionlines",
+                    title: localized("permission_input_monitoring", value: "Input Monitoring", comment: "Input Monitoring permission title"),
+                    detail: permissionState.hasInputMonitoringPermission
+                        ? localized("permission_input_monitoring_granted_detail", value: "Mac Drag Scroll can listen for the configured mouse trigger.", comment: "Input Monitoring granted detail")
+                        : localized("permission_input_monitoring_missing_detail", value: "Allow Input Monitoring so the mouse trigger can be detected reliably.", comment: "Input Monitoring missing detail"),
+                    isGranted: permissionState.hasInputMonitoringPermission
+                )
 
                 Divider()
 
@@ -521,7 +526,7 @@ struct SettingsWindowView: View {
                     Button {
                         AppDelegate.requestAccessibilityPermission()
                     } label: {
-                        Label(localized("open_system_settings", value: "Open System Settings", comment: "Open System Settings button"), systemImage: "gearshape")
+                        Label(localized("grant_permissions", value: "Grant Permissions", comment: "Grant permissions button"), systemImage: "lock.open")
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.small)
@@ -529,7 +534,15 @@ struct SettingsWindowView: View {
                     Button {
                         AppDelegate.refreshAccessibilityPermission()
                     } label: {
-                        Label(localized("refresh", value: "Refresh", comment: "Refresh button"), systemImage: "arrow.clockwise")
+                        Label(localized("check_again", value: "Check Again", comment: "Check permission again button"), systemImage: "arrow.clockwise")
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+
+                    Button {
+                        AppDelegate.revealApplication()
+                    } label: {
+                        Label(localized("reveal_this_app", value: "Reveal This App", comment: "Reveal current app copy button"), systemImage: "scope")
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.small)
@@ -539,6 +552,14 @@ struct SettingsWindowView: View {
             }
 
             GlassSection {
+                InfoRow(
+                    icon: "app.dashed",
+                    title: localized("this_app_copy", value: "This App Copy", comment: "Current app copy label"),
+                    value: AppDelegate.applicationBundlePath
+                )
+
+                Divider()
+
                 InfoRow(
                     icon: "cursorarrow.motionlines",
                     title: localized("event_monitoring", value: "Event Monitoring", comment: "Event monitoring label"),
@@ -554,7 +575,98 @@ struct SettingsWindowView: View {
                         ? localized("status_enabled", value: "Enabled", comment: "Enabled state")
                         : localized("status_disabled", value: "Disabled", comment: "Disabled state")
                 )
+
+                if permissionState.hasRequiredPermissions && permissionState.eventMonitoringState != .active {
+                    Divider()
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(localized("permission_repair_title", value: "Permission Granted, Monitoring Not Started", comment: "Permission repair title"))
+                            .font(.system(size: 12, weight: .semibold))
+                        Text(localized("permission_repair_detail", value: "macOS sometimes needs the app restarted after permission changes. Start monitoring again or restart Mac Drag Scroll.", comment: "Permission repair detail"))
+                            .font(.system(size: 11))
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        HStack(spacing: 8) {
+                            Button {
+                                AppDelegate.refreshAccessibilityPermission()
+                            } label: {
+                                Label(localized("start_monitoring", value: "Start Monitoring", comment: "Start monitoring button"), systemImage: "play.circle")
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .controlSize(.small)
+
+                            Button {
+                                AppDelegate.restartApplication()
+                            } label: {
+                                Label(localized("restart_app", value: "Restart App", comment: "Restart app button"), systemImage: "arrow.triangle.2.circlepath")
+                            }
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
             }
+        }
+    }
+
+    private var permissionOverview: some View {
+        HStack(spacing: 12) {
+            Image(systemName: permissionState.hasRequiredPermissions ? "checkmark.shield.fill" : "hand.raised.circle.fill")
+                .font(.system(size: 26, weight: .semibold))
+                .symbolRenderingMode(.hierarchical)
+                .foregroundStyle(permissionState.hasRequiredPermissions ? .green : .orange)
+                .frame(width: 34)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(permissionState.hasRequiredPermissions
+                     ? localized("permission_ready_title", value: "Permissions Ready", comment: "Permissions ready title")
+                     : localized("permission_setup_title", value: "Finish Permission Setup", comment: "Permission setup title"))
+                    .font(.system(size: 13, weight: .semibold))
+                Text(permissionState.hasRequiredPermissions
+                     ? localized("permission_ready_detail", value: "Mac Drag Scroll can listen for the mouse trigger and send scroll events.", comment: "Permissions ready detail")
+                     : localized("permission_setup_detail", value: "Grant both permissions to this exact app copy. Mac Drag Scroll checks automatically after you switch them on.", comment: "Permission setup detail"))
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer()
+
+            StatusBadge(
+                title: permissionState.hasRequiredPermissions
+                    ? localized("permission_granted", value: "Granted", comment: "Permission granted")
+                    : localized("permission_needed", value: "Needed", comment: "Permission needed"),
+                color: permissionState.hasRequiredPermissions ? .green : .orange
+            )
+        }
+    }
+
+    private func permissionChecklistRow(icon: String, title: String, detail: String, isGranted: Bool) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: icon)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(.secondary)
+                .frame(width: SettingsLayout.rowIconWidth)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.system(size: 12, weight: .medium))
+                Text(detail)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer(minLength: 8)
+
+            StatusBadge(
+                title: isGranted
+                    ? localized("permission_granted", value: "Granted", comment: "Permission granted")
+                    : localized("permission_needed", value: "Needed", comment: "Permission needed"),
+                color: isGranted ? .green : .orange
+            )
         }
     }
 
@@ -803,16 +915,16 @@ struct SettingsWindowView: View {
                 .foregroundStyle(.orange)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(localized("accessibility_permissions_required", value: "Accessibility Permission Required", comment: "Permission required title"))
+                Text(localized("permissions_required_title", value: "Permissions Required", comment: "Permissions required title"))
                     .font(.system(size: 12, weight: .semibold))
-                Text(localized("app_needs_permission", value: "Mac Drag Scroll needs permission to monitor mouse input globally.", comment: "App needs permission message"))
+                Text(localized("permissions_required_message", value: "Mac Drag Scroll needs Accessibility and Input Monitoring to listen for the mouse trigger.", comment: "Permissions required message"))
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
             }
 
             Spacer()
 
-            Button(localized("open_system_settings", value: "Open System Settings", comment: "Open System Settings button")) {
+            Button(localized("grant_permissions", value: "Grant Permissions", comment: "Grant permissions button")) {
                 AppDelegate.requestAccessibilityPermission()
             }
             .buttonStyle(.borderedProminent)

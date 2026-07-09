@@ -112,18 +112,20 @@ struct WelcomeWindowView: View {
     private var permissionCard: some View {
         LiquidGlassSurface(cornerRadius: 16, tintOpacity: 0.12, strokeOpacity: 0.32, shadowOpacity: 0.06) {
             HStack(spacing: 12) {
-                Image(systemName: permissionState.hasAccessibilityPermission ? "checkmark.shield.fill" : "hand.raised.circle.fill")
+                Image(systemName: permissionState.hasRequiredPermissions ? "checkmark.shield.fill" : "hand.raised.circle.fill")
                     .font(.system(size: 24, weight: .semibold))
                     .symbolRenderingMode(.hierarchical)
-                    .foregroundStyle(permissionState.hasAccessibilityPermission ? Color.primary : Color.orange)
+                    .foregroundStyle(permissionState.hasRequiredPermissions ? Color.primary : Color.orange)
                     .frame(width: 28)
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(localized("welcome_permission_title", value: "Accessibility permission", comment: "Welcome permission title"))
+                    Text(permissionState.hasRequiredPermissions
+                         ? localized("permission_ready_title", value: "Permissions Ready", comment: "Permissions ready title")
+                         : localized("permission_setup_title", value: "Finish Permission Setup", comment: "Permission setup title"))
                         .font(.system(size: 13, weight: .semibold))
-                    Text(permissionState.hasAccessibilityPermission
-                         ? localized("welcome_permission_granted", value: "Ready to monitor your configured mouse trigger.", comment: "Welcome permission granted detail")
-                         : localized("welcome_permission_needed", value: "Required so drag scrolling can listen for mouse input globally.", comment: "Welcome permission needed detail"))
+                    Text(permissionState.hasRequiredPermissions
+                         ? localized("permission_ready_detail", value: "Mac Drag Scroll can listen for the mouse trigger and send scroll events.", comment: "Permissions ready detail")
+                         : localized("permission_setup_detail", value: "Grant both permissions to this exact app copy. Mac Drag Scroll checks automatically after you switch them on.", comment: "Permission setup detail"))
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -131,7 +133,7 @@ struct WelcomeWindowView: View {
 
                 Spacer()
 
-                if permissionState.hasAccessibilityPermission {
+                if permissionState.hasRequiredPermissions {
                     WelcomeStatusPill(
                         title: localized("permission_granted", value: "Granted", comment: "Permission granted"),
                         systemImage: "checkmark",
@@ -141,7 +143,7 @@ struct WelcomeWindowView: View {
                     Button {
                         AppDelegate.requestAccessibilityPermission()
                     } label: {
-                        Label(localized("open_system_settings", value: "Open System Settings", comment: "Open System Settings button"), systemImage: "gearshape")
+                        Label(localized("grant_permissions", value: "Grant Permissions", comment: "Grant permissions button"), systemImage: "lock.open")
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.small)

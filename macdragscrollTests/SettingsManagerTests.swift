@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import Sparkle
 @testable import macdragscroll
 
 final class SettingsManagerTests: XCTestCase {
@@ -16,6 +17,7 @@ final class SettingsManagerTests: XCTestCase {
     private var originalAppAppearance: AppAppearance = .system
     private var originalShowIndicator = true
     private var originalVisualizerAnimationsEnabled = true
+    private var originalKeepRunningInMenuBar = true
     
     override func setUp() {
         super.setUp()
@@ -25,6 +27,7 @@ final class SettingsManagerTests: XCTestCase {
         originalAppAppearance = settings.appAppearance
         originalShowIndicator = settings.showIndicator
         originalVisualizerAnimationsEnabled = settings.visualizerAnimationsEnabled
+        originalKeepRunningInMenuBar = settings.keepRunningInMenuBar
     }
     
     override func tearDown() {
@@ -41,6 +44,7 @@ final class SettingsManagerTests: XCTestCase {
         settings.appAppearance = originalAppAppearance
         settings.showIndicator = originalShowIndicator
         settings.visualizerAnimationsEnabled = originalVisualizerAnimationsEnabled
+        settings.keepRunningInMenuBar = originalKeepRunningInMenuBar
         super.tearDown()
     }
     
@@ -197,6 +201,22 @@ final class SettingsManagerTests: XCTestCase {
         XCTAssertTrue(settings.visualizerAnimationsEnabled)
     }
 
+    func testDefaultKeepsAppRunningInMenuBar() {
+        settings.keepRunningInMenuBar = false
+
+        settings.resetToDefaults()
+
+        XCTAssertTrue(settings.keepRunningInMenuBar)
+    }
+
+    func testKeepRunningInMenuBarCanBePersisted() {
+        settings.keepRunningInMenuBar = false
+        XCTAssertFalse(settings.keepRunningInMenuBar)
+
+        settings.keepRunningInMenuBar = true
+        XCTAssertTrue(settings.keepRunningInMenuBar)
+    }
+
     func testLanguageSelectionCanBePersisted() {
         settings.appLanguage = .swedish
         XCTAssertEqual(settings.appLanguage, .swedish)
@@ -252,10 +272,10 @@ final class SettingsManagerTests: XCTestCase {
     func testAppBundleVersionMetadataUsesStableReleaseValues() {
         let appBundle = Bundle(for: AppDelegate.self)
 
-        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "1.0.0")
-        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String, "100")
-        XCTAssertEqual(AppDelegate.appVersion, "1.0.0")
-        XCTAssertEqual(AppDelegate.appBuild, "100")
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "1.0.1")
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String, "101")
+        XCTAssertEqual(AppDelegate.appVersion, "1.0.1")
+        XCTAssertEqual(AppDelegate.appBuild, "101")
     }
 
     func testSparkleUpdateConfigurationIsPresent() {
@@ -272,26 +292,75 @@ final class SettingsManagerTests: XCTestCase {
         XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "SUEnableAutomaticChecks") as? Bool, true)
     }
 
+    func testSparkleNoUpdateErrorIsTreatedAsUpToDate() {
+        settings.appLanguage = .english
+
+        let noUpdateError = NSError(
+            domain: SUSparkleErrorDomain,
+            code: Int(SUError.noUpdateError.rawValue)
+        )
+
+        XCTAssertTrue(UpdateManager.isNoUpdateError(noUpdateError))
+        XCTAssertEqual(UpdateStatus.upToDate.statusTitle, "Up to Date")
+        XCTAssertEqual(UpdateStatus.upToDate.statusDetail, "You are running the newest known version.")
+    }
+
+    func testSparkleRealFailureIsNotTreatedAsUpToDate() {
+        let downloadError = NSError(
+            domain: SUSparkleErrorDomain,
+            code: Int(SUError.downloadError.rawValue)
+        )
+
+        XCTAssertFalse(UpdateManager.isNoUpdateError(downloadError))
+    }
+
     func testPermissionStateResetsMonitoringWhenAccessibilityIsMissing() {
         let isTrusted = false
         let state = AppDelegate.PermissionState(
-            permissionChecker: { isTrusted },
-            permissionRequester: { _ in isTrusted }
+            accessibilityPermissionChecker: { isTrusted },
+            accessibilityPermissionRequester: { _ in isTrusted },
+            inputMonitoringPermissionChecker: { true },
+            inputMonitoringPermissionRequester: { true }
         )
 
         state.setEventMonitoringState(.active)
         state.refresh()
 
         XCTAssertFalse(state.hasAccessibilityPermission)
+        XCTAssertTrue(state.hasInputMonitoringPermission)
+        XCTAssertFalse(state.hasRequiredPermissions)
+        XCTAssertEqual(state.eventMonitoringState, .waiting)
+    }
+
+    func testPermissionStateResetsMonitoringWhenInputMonitoringIsMissing() {
+        let state = AppDelegate.PermissionState(
+            accessibilityPermissionChecker: { true },
+            accessibilityPermissionRequester: { _ in true },
+            inputMonitoringPermissionChecker: { false },
+            inputMonitoringPermissionRequester: { false }
+        )
+
+        state.setEventMonitoringState(.active)
+        state.refresh()
+
+        XCTAssertTrue(state.hasAccessibilityPermission)
+        XCTAssertFalse(state.hasInputMonitoringPermission)
+        XCTAssertFalse(state.hasRequiredPermissions)
         XCTAssertEqual(state.eventMonitoringState, .waiting)
     }
 
     func testPermissionStateCanRequestAccessibilityPermission() {
         var promptWasRequested = false
+        var inputMonitoringWasRequested = false
         let state = AppDelegate.PermissionState(
-            permissionChecker: { false },
-            permissionRequester: { shouldPrompt in
+            accessibilityPermissionChecker: { false },
+            accessibilityPermissionRequester: { shouldPrompt in
                 promptWasRequested = shouldPrompt
+                return true
+            },
+            inputMonitoringPermissionChecker: { false },
+            inputMonitoringPermissionRequester: {
+                inputMonitoringWasRequested = true
                 return true
             }
         )
@@ -299,13 +368,18 @@ final class SettingsManagerTests: XCTestCase {
         XCTAssertTrue(state.request())
 
         XCTAssertTrue(promptWasRequested)
+        XCTAssertTrue(inputMonitoringWasRequested)
         XCTAssertTrue(state.hasAccessibilityPermission)
+        XCTAssertTrue(state.hasInputMonitoringPermission)
+        XCTAssertTrue(state.hasRequiredPermissions)
     }
 
     func testPermissionStatePreservesFailedMonitoringStateWhileTrusted() {
         let state = AppDelegate.PermissionState(
-            permissionChecker: { true },
-            permissionRequester: { _ in true }
+            accessibilityPermissionChecker: { true },
+            accessibilityPermissionRequester: { _ in true },
+            inputMonitoringPermissionChecker: { true },
+            inputMonitoringPermissionRequester: { true }
         )
 
         state.setEventMonitoringState(.failed)
@@ -343,6 +417,7 @@ final class SettingsManagerTests: XCTestCase {
         settings.appAppearance = .dark
         settings.showIndicator = false
         settings.visualizerAnimationsEnabled = false
+        settings.keepRunningInMenuBar = false
 
         settings.resetToDefaults()
 
@@ -355,6 +430,7 @@ final class SettingsManagerTests: XCTestCase {
         XCTAssertEqual(settings.appAppearance, .system)
         XCTAssertTrue(settings.showIndicator)
         XCTAssertTrue(settings.visualizerAnimationsEnabled)
+        XCTAssertTrue(settings.keepRunningInMenuBar)
     }
 
     func testSettingsTabKeyboardShortcutsMatchSidebarOrder() {

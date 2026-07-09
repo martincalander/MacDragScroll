@@ -14,6 +14,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     private static let showWelcomeNotification = Notification.Name("MacDragScrollShowWelcomeWindow")
     private static let requestAccessibilityPermissionNotification = Notification.Name("MacDragScrollRequestAccessibilityPermission")
     private static let refreshAccessibilityPermissionNotification = Notification.Name("MacDragScrollRefreshAccessibilityPermission")
+    private static let revealApplicationNotification = Notification.Name("MacDragScrollRevealApplication")
+    private static let restartApplicationNotification = Notification.Name("MacDragScrollRestartApplication")
 
     static var appVersion: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0.0"
@@ -39,6 +41,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         NotificationCenter.default.post(name: refreshAccessibilityPermissionNotification, object: nil)
     }
 
+    static var applicationBundlePath: String {
+        Bundle.main.bundleURL.path
+    }
+
+    static func revealApplication() {
+        NotificationCenter.default.post(name: revealApplicationNotification, object: nil)
+    }
+
+    static func restartApplication() {
+        NotificationCenter.default.post(name: restartApplicationNotification, object: nil)
+    }
+
     private var statusItem: NSStatusItem!
     private var mouseMonitor: MouseMonitor!
     private var settingsWindow: NSWindow?
@@ -50,6 +64,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     private var permissionCheckTimer: Timer?
     private var hadPermissionPreviously = false
     private var hasPresentedWelcomeThisLaunch = false
+    private var allowsImmediateTermination = false
     private var cancellables = Set<AnyCancellable>()
 
     // Observable permission state for SwiftUI
@@ -67,39 +82,51 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     }
 
     class PermissionState: ObservableObject {
-        private let permissionChecker: () -> Bool
-        private let permissionRequester: (Bool) -> Bool
+        private let accessibilityPermissionChecker: () -> Bool
+        private let accessibilityPermissionRequester: (Bool) -> Bool
+        private let inputMonitoringPermissionChecker: () -> Bool
+        private let inputMonitoringPermissionRequester: () -> Bool
 
         @Published private(set) var hasAccessibilityPermission: Bool
+        @Published private(set) var hasInputMonitoringPermission: Bool
         @Published private(set) var eventMonitoringState: EventMonitoringState = .waiting
 
+        var hasRequiredPermissions: Bool {
+            hasAccessibilityPermission && hasInputMonitoringPermission
+        }
+
         init(
-            permissionChecker: @escaping () -> Bool = AXIsProcessTrusted,
-            permissionRequester: @escaping (Bool) -> Bool = AppDelegate.checkAccessibilityPermission(prompt:)
+            accessibilityPermissionChecker: @escaping () -> Bool = AXIsProcessTrusted,
+            accessibilityPermissionRequester: @escaping (Bool) -> Bool = AppDelegate.checkAccessibilityPermission(prompt:),
+            inputMonitoringPermissionChecker: @escaping () -> Bool = AppDelegate.checkInputMonitoringPermission,
+            inputMonitoringPermissionRequester: @escaping () -> Bool = AppDelegate.requestInputMonitoringPermission
         ) {
-            self.permissionChecker = permissionChecker
-            self.permissionRequester = permissionRequester
-            self.hasAccessibilityPermission = permissionChecker()
+            self.accessibilityPermissionChecker = accessibilityPermissionChecker
+            self.accessibilityPermissionRequester = accessibilityPermissionRequester
+            self.inputMonitoringPermissionChecker = inputMonitoringPermissionChecker
+            self.inputMonitoringPermissionRequester = inputMonitoringPermissionRequester
+            self.hasAccessibilityPermission = accessibilityPermissionChecker()
+            self.hasInputMonitoringPermission = inputMonitoringPermissionChecker()
         }
         
         @discardableResult
         func refresh() -> Bool {
-            let hasPermission = permissionChecker()
-            hasAccessibilityPermission = hasPermission
-            if !hasPermission {
+            hasAccessibilityPermission = accessibilityPermissionChecker()
+            hasInputMonitoringPermission = inputMonitoringPermissionChecker()
+            if !hasRequiredPermissions {
                 eventMonitoringState = .waiting
             }
-            return hasPermission
+            return hasRequiredPermissions
         }
 
         @discardableResult
         func request() -> Bool {
-            let hasPermission = permissionRequester(true)
-            hasAccessibilityPermission = hasPermission
-            if !hasPermission {
+            hasAccessibilityPermission = hasAccessibilityPermission || accessibilityPermissionRequester(true)
+            hasInputMonitoringPermission = hasInputMonitoringPermission || inputMonitoringPermissionRequester()
+            if !hasRequiredPermissions {
                 eventMonitoringState = .waiting
             }
-            return hasPermission
+            return hasRequiredPermissions
         }
 
         func setEventMonitoringState(_ state: EventMonitoringState) {
@@ -111,6 +138,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         ProcessInfo.processInfo.processName = Self.appName
 
         guard AppInstanceMonitor.shared.claimPrimaryInstance() else {
+            allowsImmediateTermination = true
             NSApp.terminate(nil)
             return
         }
@@ -146,6 +174,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
 
         let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
         return AXIsProcessTrustedWithOptions(options)
+    }
+
+    private nonisolated static func checkInputMonitoringPermission() -> Bool {
+        CGPreflightListenEventAccess()
+    }
+
+    private nonisolated static func requestInputMonitoringPermission() -> Bool {
+        CGRequestListenEventAccess()
     }
 
     private func synchronizeAccessibilityState(showMissingPermissionDialog: Bool = true) {
@@ -196,10 +232,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     
     private func showPermissionDialog() {
         let alert = NSAlert()
-            alert.messageText = localized("permission_required_title", value: "Accessibility Permission Required", comment: "Permission required alert title")
-            alert.informativeText = localized("permission_required_message", value: "Mac Drag Scroll needs Accessibility permission to monitor mouse events globally.", comment: "Permission required alert message")
+            alert.messageText = localized("permissions_required_title", value: "Permissions Required", comment: "Permission required alert title")
+            alert.informativeText = localized("permissions_required_message", value: "Mac Drag Scroll needs Accessibility and Input Monitoring to listen for the mouse trigger.", comment: "Permission required alert message")
             alert.alertStyle = .warning
-            alert.addButton(withTitle: localized("open_system_settings", value: "Open System Settings", comment: "Open System Settings button"))
+            alert.addButton(withTitle: localized("grant_permissions", value: "Grant Permissions", comment: "Grant permissions button"))
             alert.addButton(withTitle: localized("later", value: "Later", comment: "Later button"))
         
         let response = alert.runModal()
@@ -257,20 +293,57 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             startMouseMonitor()
         } else {
             stopMouseMonitor(eventMonitoringState: .waiting)
-            AppDelegate.openAccessibilitySettings()
+            AppDelegate.openPrivacySettingsForMissingPermission()
         }
+    }
+
+    private func revealApplicationInFinder() {
+        NSWorkspace.shared.activateFileViewerSelecting([Bundle.main.bundleURL])
+    }
+
+    private func restartRunningApplication() {
+        allowsImmediateTermination = true
+        let appPath = Bundle.main.bundleURL.path
+        let escapedPath = appPath.replacingOccurrences(of: "'", with: "'\\''")
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/bin/sh")
+        process.arguments = ["-c", "sleep 0.35; /usr/bin/open '\(escapedPath)'"]
+
+        do {
+            try process.run()
+        } catch {
+            NSLog("[MacDragScroll] Failed to schedule application restart: \(error.localizedDescription)")
+        }
+
+        NSApplication.shared.terminate(nil)
     }
     
     static func openAccessibilitySettings() {
+        openPrivacySettings(anchor: "Privacy_Accessibility")
+    }
+
+    static func openInputMonitoringSettings() {
+        openPrivacySettings(anchor: "Privacy_ListenEvent")
+    }
+
+    static func openPrivacySettingsForMissingPermission() {
+        if !permissionState.hasAccessibilityPermission {
+            openAccessibilitySettings()
+        } else {
+            openInputMonitoringSettings()
+        }
+    }
+
+    private static func openPrivacySettings(anchor: String) {
         let settingsURLStrings: [String]
         if #available(macOS 13.0, *) {
             settingsURLStrings = [
-                "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility",
-                "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?Privacy_Accessibility"
+                "x-apple.systempreferences:com.apple.preference.security?\(anchor)",
+                "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?\(anchor)"
             ]
         } else {
             settingsURLStrings = [
-                "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
+                "x-apple.systempreferences:com.apple.preference.security?\(anchor)"
             ]
         }
 
@@ -388,6 +461,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.synchronizeAccessibilityState(showMissingPermissionDialog: false) }
             .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: Self.revealApplicationNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.revealApplicationInFinder() }
+            .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: Self.restartApplicationNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.restartRunningApplication() }
+            .store(in: &cancellables)
     }
 
     private func observePrimaryInstanceActivationRequests() {
@@ -417,7 +500,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     }
 
     @objc private func openSettings(_ sender: Any?) {
-        showSettingsWindow(selectedTab: .visualizer)
+        showSettingsWindow(selectedTab: .general)
     }
 
     @objc private func openUpdates(_ sender: Any?) {
@@ -435,7 +518,38 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     }
 
     @objc private func quit(_ sender: Any?) {
+        allowsImmediateTermination = true
         NSApplication.shared.terminate(nil)
+    }
+
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        guard !allowsImmediateTermination else {
+            return .terminateNow
+        }
+
+        guard settingsWindow?.isVisible == true || welcomeWindow?.isVisible == true else {
+            return .terminateNow
+        }
+
+        if SettingsManager.shared.keepRunningInMenuBar {
+            keepRunningInMenuBar()
+            return .terminateCancel
+        }
+
+        switch confirmQuitOrKeepRunning() {
+        case .keepRunning:
+            SettingsManager.shared.keepRunningInMenuBar = true
+            keepRunningInMenuBar()
+            return .terminateCancel
+        case .quit:
+            return .terminateNow
+        case .cancel:
+            return .terminateCancel
+        }
+    }
+
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        false
     }
 
     private func showSettingsWindow(selectedTab: SettingsTab = .visualizer) {
@@ -522,6 +636,44 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     private func hideDockIconIfNoWindowsAreVisible() {
         if NSApp.windows.allSatisfy({ !$0.isVisible }) {
             NSApp.setActivationPolicy(.accessory)
+        }
+    }
+
+    private enum QuitConfirmationChoice {
+        case keepRunning
+        case quit
+        case cancel
+    }
+
+    private func keepRunningInMenuBar() {
+        settingsWindow?.close()
+        welcomeWindow?.close()
+
+        DispatchQueue.main.async {
+            self.hideDockIconIfNoWindowsAreVisible()
+        }
+    }
+
+    private func confirmQuitOrKeepRunning() -> QuitConfirmationChoice {
+        let alert = NSAlert()
+        alert.messageText = localized("quit_keep_running_title", value: "Keep Mac Drag Scroll running?", comment: "Quit confirmation title")
+        alert.informativeText = localized(
+            "quit_keep_running_message",
+            value: "Mac Drag Scroll can stay active in the menu bar after Settings closes. Use Quit from the menu bar icon when you want to stop it completely.",
+            comment: "Quit confirmation message"
+        )
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: localized("keep_running", value: "Keep Running", comment: "Keep running button"))
+        alert.addButton(withTitle: localized("quit_app", value: "Quit Mac Drag Scroll", comment: "Quit app button"))
+        alert.addButton(withTitle: localized("cancel", value: "Cancel", comment: "Cancel button"))
+
+        switch alert.runModal() {
+        case .alertFirstButtonReturn:
+            return .keepRunning
+        case .alertSecondButtonReturn:
+            return .quit
+        default:
+            return .cancel
         }
     }
 

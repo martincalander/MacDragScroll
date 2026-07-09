@@ -12,6 +12,24 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 
 ### Fixed
 
+## [1.0.1] - 2026-07-09
+
+### Added
+
+- Added a General setting to keep Mac Drag Scroll running in the menu bar after closing Settings.
+- Added clearer permission setup for Accessibility and Input Monitoring, including app-copy reveal and restart repair actions.
+
+### Changed
+
+- Settings now opens to General from the menu bar, with keep-running behavior surfaced near the top.
+- Permission and welcome screens now show both required macOS permissions instead of only Accessibility.
+
+### Fixed
+
+- Fixed cases where granted Accessibility access still left drag scrolling blocked by missing Input Monitoring.
+- Fixed up-to-date Sparkle checks being shown as update failures.
+- Fixed last-window-close behavior so the app stays alive unless Quit is chosen from the menu bar.
+
 ## [1.0.0] - 2026-07-09
 
 ### Added

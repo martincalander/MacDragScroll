@@ -177,6 +177,10 @@ final class MouseMonitor {
             NSLog("[MacDragScroll] Accessibility permission is required before creating the mouse event tap.")
             return false
         }
+        guard CGPreflightListenEventAccess() else {
+            NSLog("[MacDragScroll] Input Monitoring permission is required before creating the mouse event tap.")
+            return false
+        }
 
         let eventMask = Self.eventMask(for: [
             .leftMouseDown, .leftMouseUp, .leftMouseDragged,

@@ -285,6 +285,7 @@ class SettingsManager: ObservableObject {
     
     // Keys
     private let isEnabledKey = "isEnabled"
+    private let keepRunningInMenuBarKey = "keepRunningInMenuBar"
     private let showIndicatorKey = "animationsEnabled" // Legacy key name, kept to preserve existing preferences.
     private let visualizerAnimationsEnabledKey = "visualizerAnimationsEnabled"
     private let excludedAppsKey = "excludedApps"
@@ -312,6 +313,10 @@ class SettingsManager: ObservableObject {
     
     @Published var isEnabled: Bool {
         didSet { defaults.set(isEnabled, forKey: isEnabledKey) }
+    }
+
+    @Published var keepRunningInMenuBar: Bool {
+        didSet { defaults.set(keepRunningInMenuBar, forKey: keepRunningInMenuBarKey) }
     }
     
     @Published var showIndicator: Bool {
@@ -409,6 +414,7 @@ class SettingsManager: ObservableObject {
     private init() {
         defaults.register(defaults: [
             isEnabledKey: true,
+            keepRunningInMenuBarKey: true,
             showIndicatorKey: true,
             visualizerAnimationsEnabledKey: true,
             excludedAppsKey: [String](),
@@ -428,6 +434,7 @@ class SettingsManager: ObservableObject {
         ])
         
         self.isEnabled = defaults.bool(forKey: isEnabledKey)
+        self.keepRunningInMenuBar = defaults.bool(forKey: keepRunningInMenuBarKey)
         self.showIndicator = defaults.bool(forKey: showIndicatorKey)
         self.visualizerAnimationsEnabled = defaults.bool(forKey: visualizerAnimationsEnabledKey)
         self.reverseScrollDirection = defaults.bool(forKey: reverseScrollDirectionKey)
@@ -605,6 +612,7 @@ class SettingsManager: ObservableObject {
     
     func resetToDefaults() {
         isEnabled = true
+        keepRunningInMenuBar = true
         showIndicator = true
         visualizerAnimationsEnabled = true
         reverseScrollDirection = false

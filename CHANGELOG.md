@@ -13,6 +13,7 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 - Added dedicated development and test preference domains so local debug builds and test runs do not overwrite production user settings.
 - Added OpenSSF Scorecard and Gitleaks security scans with README badges.
 - Added CodeQL Swift static analysis and pinned GitHub Action dependencies for supply-chain hardening.
+- Added a Swift fuzz harness for preference-input parsing and normalization paths.
 
 ### Changed
 

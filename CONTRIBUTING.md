@@ -49,6 +49,12 @@ xcodebuild analyze \
 
 Use separate `-derivedDataPath` values when running multiple `xcodebuild` commands at the same time.
 
+Swift fuzz harnesses live in `Fuzzers/`. To verify they still compile:
+
+```sh
+scripts/check-fuzz-harnesses.sh
+```
+
 ## Local Settings
 
 Release builds use:

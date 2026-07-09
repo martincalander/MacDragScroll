@@ -104,7 +104,7 @@ pbcopy < sparkle_private_key.txt
 rm sparkle_private_key.txt
 ```
 
-Use Sparkle `2.9.4` for that command, matching the vendored framework.
+Use Sparkle `2.9.4` for that command, matching the app package dependency and release workflow.
 
 Never commit the private key, exported key files, or workflow logs containing the private key.
 

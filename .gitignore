@@ -22,11 +22,6 @@ xcuserdata/
 DerivedData/
 .derivedData/
 
-# Sparkle's vendored XCFramework declares this path in its Info.plist.
-!Vendor/Sparkle/Sparkle.xcframework/**/dSYMs/
-!Vendor/Sparkle/Sparkle.xcframework/**/dSYMs/**
-!Vendor/Sparkle/Sparkle.xcframework/**/*.dSYM/
-!Vendor/Sparkle/Sparkle.xcframework/**/*.dSYM/**
 
 ## Playgrounds
 timeline.xctimeline

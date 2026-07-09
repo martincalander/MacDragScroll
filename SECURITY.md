@@ -11,6 +11,7 @@ Current public releases are Sparkle-verified but not Apple Developer ID signed o
 The repository runs these free security checks:
 
 - **OpenSSF Scorecard:** checks open-source security posture and publishes the public Scorecard badge.
+- **CodeQL:** runs static analysis for Swift security issues.
 - **Gitleaks:** scans pushes, pull requests, and weekly scheduled runs for committed secrets.
 - **Quality Gate:** builds, tests, and validates release metadata on macOS.
 

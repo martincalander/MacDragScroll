@@ -182,7 +182,7 @@
 			mainGroup = 5B5EA23F2F1AB49400A09C9E;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				62625967DA4995EF4039194A /* XCLocalSwiftPackageReference "Sparkle" */,
+				62625967DA4995EF4039194A /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 5B5EA2492F1AB49400A09C9E /* Products */;
@@ -504,17 +504,21 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCLocalSwiftPackageReference section */
-		62625967DA4995EF4039194A /* XCLocalSwiftPackageReference "Sparkle" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Vendor/Sparkle;
+/* Begin XCRemoteSwiftPackageReference section */
+		62625967DA4995EF4039194A /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = exactVersion;
+				version = 2.9.4;
+			};
 		};
-/* End XCLocalSwiftPackageReference section */
+/* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		48BCE060DC55820969946713 /* Sparkle */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 62625967DA4995EF4039194A /* XCLocalSwiftPackageReference "Sparkle" */;
+			package = 62625967DA4995EF4039194A /* XCRemoteSwiftPackageReference "Sparkle" */;
 			productName = Sparkle;
 		};
 /* End XCSwiftPackageProductDependency section */

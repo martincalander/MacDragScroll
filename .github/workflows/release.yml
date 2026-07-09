@@ -15,8 +15,7 @@ concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
-permissions:
-  contents: write
+permissions: read-all
 
 env:
   APP_NAME: "Mac Drag Scroll"
@@ -31,10 +30,17 @@ jobs:
     name: Build and publish unsigned release
     runs-on: macos-latest
     timeout-minutes: 45
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        # actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          persist-credentials: false
 
       - name: Select Xcode
         run: |
@@ -210,6 +216,16 @@ jobs:
             cd "$ARTIFACTS_DIR"
             shasum -a 256 "$APP_ZIP" "$APP_DMG" appcast.xml > SHA256SUMS.txt
           )
+
+      - name: Attest release artifacts
+        # actions/attest-build-provenance@v4.1.1
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373
+        with:
+          subject-path: |
+            ${{ env.ZIP_PATH }}
+            ${{ env.DMG_PATH }}
+            ${{ env.ARTIFACTS_DIR }}/appcast.xml
+            ${{ env.ARTIFACTS_DIR }}/SHA256SUMS.txt
 
       - name: Publish GitHub release
         env:

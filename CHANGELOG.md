@@ -12,11 +12,13 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 - Added local crash-report import for macOS `.crash` and `.ips` DiagnosticReports, alongside the existing in-app crash report tools.
 - Added dedicated development and test preference domains so local debug builds and test runs do not overwrite production user settings.
 - Added OpenSSF Scorecard and Gitleaks security scans with README badges.
+- Added CodeQL Swift static analysis and pinned GitHub Action dependencies for supply-chain hardening.
 
 ### Changed
 
 - The CLI installer now stages the new app bundle before replacing the installed copy, with rollback if the replacement fails.
 - Settings and update preferences now persist through a shared preference layer instead of direct scattered writes.
+- Sparkle is now resolved as an exact Swift Package dependency instead of storing the binary framework in the source repository.
 
 ### Fixed
 

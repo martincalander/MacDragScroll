@@ -14,6 +14,7 @@ The repository runs these free security checks:
 - **CodeQL:** runs static analysis for Swift security issues.
 - **Gitleaks:** scans pushes, pull requests, and weekly scheduled runs for committed secrets.
 - **Quality Gate:** builds, tests, and validates release metadata on macOS.
+- **Swift fuzz harnesses:** exercise preference-style parsers and normalization paths.
 
 Scan results are advisory and do not replace manual review, but they help catch common repository, workflow, and secret-handling risks before release.
 

@@ -62,5 +62,6 @@ jobs:
         run: |
           version="$(xcodebuild -showBuildSettings -project macdragscroll.xcodeproj -scheme macdragscroll -configuration Release | awk -F'= ' '/MARKETING_VERSION =/ { print $2; exit }')"
           bash -n scripts/*.sh
+          scripts/check-fuzz-harnesses.sh
           scripts/extract-release-notes.sh "$version" >/dev/null
           scripts/validate-homebrew-cask.sh

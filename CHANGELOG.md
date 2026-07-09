@@ -11,6 +11,7 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 - Added resilient preference backup storage so user settings can be restored from `~/Library/Application Support/Mac Drag Scroll/Preferences.plist` if the primary preferences domain is missing.
 - Added local crash-report import for macOS `.crash` and `.ips` DiagnosticReports, alongside the existing in-app crash report tools.
 - Added dedicated development and test preference domains so local debug builds and test runs do not overwrite production user settings.
+- Added OpenSSF Scorecard and Gitleaks security scans with README badges.
 
 ### Changed
 

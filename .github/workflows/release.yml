@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Release version without v prefix, for example 1.0.0"
+        description: "Existing release tag version without v prefix, for example 1.0.0"
         required: true
         type: string
 
@@ -42,6 +42,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/v{0}', inputs.version) || github.ref }}
 
       - name: Select Xcode
         run: |
@@ -228,20 +229,23 @@ jobs:
             ${{ env.ARTIFACTS_DIR }}/appcast.xml
             ${{ env.ARTIFACTS_DIR }}/SHA256SUMS.txt
 
-      - name: Ensure local release tag
-        if: ${{ github.ref_type != 'tag' }}
+      - name: Verify release tag
         run: |
           set -euo pipefail
 
-          if git rev-parse --verify --quiet "refs/tags/$RELEASE_TAG" >/dev/null; then
-            tagged_commit="$(git rev-list -n 1 "$RELEASE_TAG")"
-            if [ "$tagged_commit" != "$GITHUB_SHA" ]; then
-              echo "$RELEASE_TAG points to $tagged_commit, expected $GITHUB_SHA" >&2
-              exit 65
-            fi
-          else
-            git tag "$RELEASE_TAG" "$GITHUB_SHA"
+          tagged_commit="$(git rev-list -n 1 "$RELEASE_TAG")"
+          checkout_commit="$(git rev-parse HEAD)"
+          if [ "$tagged_commit" != "$checkout_commit" ]; then
+            echo "$RELEASE_TAG points to $tagged_commit, but checkout is $checkout_commit" >&2
+            exit 65
           fi
+
+      - name: Set up Go for GoReleaser
+        # actions/setup-go@v6.5.0
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16
+        with:
+          go-version: "1.25.5"
+          cache: false
 
       - name: Publish GitHub release with GoReleaser
         # goreleaser/goreleaser-action@v7.2.3

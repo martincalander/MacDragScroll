@@ -553,7 +553,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     }
 
     private func showSettingsWindow(selectedTab: SettingsTab = .visualizer) {
-        SettingsWindowNavigation.shared.selectedTab = selectedTab
+        SettingsWindowNavigation.shared.select(selectedTab)
 
         if settingsWindow == nil {
             let hostingController = NSHostingController(rootView: SettingsWindowView())
@@ -629,13 +629,31 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         }
 
         DispatchQueue.main.async {
-            self.hideDockIconIfNoWindowsAreVisible()
+            self.hideDockIconIfNoAppWindowsAreVisible()
         }
     }
 
-    private func hideDockIconIfNoWindowsAreVisible() {
-        if NSApp.windows.allSatisfy({ !$0.isVisible }) {
+    private func hideDockIconIfNoAppWindowsAreVisible() {
+        guard hasVisibleWindowThatShouldKeepDockIcon else {
             NSApp.setActivationPolicy(.accessory)
+            return
+        }
+    }
+
+    private var hasVisibleWindowThatShouldKeepDockIcon: Bool {
+        if settingsWindow?.isVisible == true || welcomeWindow?.isVisible == true {
+            return true
+        }
+
+        return NSApp.windows.contains { window in
+            guard window.isVisible,
+                  !window.isMiniaturized,
+                  !window.ignoresMouseEvents,
+                  window.level != .statusBar else {
+                return false
+            }
+
+            return window.canBecomeKey || window.canBecomeMain
         }
     }
 
@@ -650,7 +668,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         welcomeWindow?.close()
 
         DispatchQueue.main.async {
-            self.hideDockIconIfNoWindowsAreVisible()
+            self.hideDockIconIfNoAppWindowsAreVisible()
         }
     }
 

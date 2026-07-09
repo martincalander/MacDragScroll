@@ -8,13 +8,14 @@
 import SwiftUI
 import AppKit
 import Combine
-import UniformTypeIdentifiers
 
 private func localized(_ key: String, value: String, comment: String) -> String {
     AppLocalization.shared.localizedString(key, value: value, comment: comment)
 }
 
 struct SettingsWindowView: View {
+    private static let tabTransitionHorizontalOffset: CGFloat = 32
+
     @ObservedObject private var settings = SettingsManager.shared
     @ObservedObject private var permissionState = AppDelegate.permissionState
     @ObservedObject private var updateManager = UpdateManager.shared
@@ -26,6 +27,7 @@ struct SettingsWindowView: View {
     @State private var showingResetConfirmation = false
     @State private var showingClearCrashReportsConfirmation = false
     @State private var logoPop = false
+    @State private var logoDragOffset: CGSize = .zero
     @State private var settingsIntroVisible = false
     @State private var showsUpdateLog = false
     @FocusState private var focusedSidebarTab: SettingsTab?
@@ -50,7 +52,7 @@ struct SettingsWindowView: View {
 	                            contentHeader
 	                            selectedContent
 	                                .id(navigation.selectedTab)
-	                                .transition(.opacity.combined(with: .move(edge: .trailing)))
+                                    .transition(selectedContentTransition)
 	                        }
 	                        .padding(22)
 	                        .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -146,8 +148,16 @@ struct SettingsWindowView: View {
     private func selectTab(_ tab: SettingsTab) {
         focusedSidebarTab = tab
         withAnimation(.smooth(duration: 0.22)) {
-            navigation.selectedTab = tab
+            navigation.select(tab)
         }
+    }
+
+    private var selectedContentTransition: AnyTransition {
+        let verticalOffset = Self.tabTransitionHorizontalOffset * 0.25 * CGFloat(navigation.transitionVerticalDirection)
+        return .asymmetric(
+            insertion: .opacity.combined(with: .offset(x: Self.tabTransitionHorizontalOffset, y: verticalOffset)),
+            removal: .opacity.combined(with: .offset(x: -Self.tabTransitionHorizontalOffset, y: -verticalOffset))
+        )
     }
 
     private var contentHeader: some View {
@@ -880,33 +890,92 @@ struct SettingsWindowView: View {
         }
     }
 
+    private var aboutLogo: some View {
+        let popScale = logoPop ? 1.08 : 1.0
+
+        return Image("BrandMark")
+            .resizable()
+            .interpolation(.high)
+            .frame(width: 92, height: 92)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .shadow(color: .black.opacity(0.18), radius: 14, x: 0, y: 6)
+            .scaleEffect(
+                x: popScale * aboutLogoSquashX,
+                y: popScale * aboutLogoSquashY,
+                anchor: .center
+            )
+            .rotationEffect(.degrees(aboutLogoRotationDegrees))
+            .offset(logoDragOffset)
+            .contentShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .gesture(aboutLogoDragGesture)
+            .accessibilityAddTraits(.isButton)
+            .accessibilityAction {
+                triggerAboutLogoBounce()
+            }
+            .animation(.interactiveSpring(response: 0.18, dampingFraction: 0.62), value: logoDragOffset)
+            .animation(.spring(response: 0.22, dampingFraction: 0.46), value: logoPop)
+    }
+
+    private var aboutLogoDragGesture: some Gesture {
+        DragGesture(minimumDistance: 0)
+            .onChanged { value in
+                logoDragOffset = boundedAboutLogoOffset(value.translation)
+            }
+            .onEnded { value in
+                let distance = hypot(value.translation.width, value.translation.height)
+                if distance < 4 {
+                    triggerAboutLogoBounce()
+                }
+
+                withAnimation(.spring(response: 0.34, dampingFraction: 0.48)) {
+                    logoDragOffset = .zero
+                }
+            }
+    }
+
+    private var aboutLogoSquashX: CGFloat {
+        let horizontal = min(abs(logoDragOffset.width) / 24, 1)
+        let vertical = min(abs(logoDragOffset.height) / 24, 1)
+        return 1 + horizontal * 0.075 - vertical * 0.035
+    }
+
+    private var aboutLogoSquashY: CGFloat {
+        let horizontal = min(abs(logoDragOffset.width) / 24, 1)
+        let vertical = min(abs(logoDragOffset.height) / 24, 1)
+        return 1 + vertical * 0.075 - horizontal * 0.035
+    }
+
+    private var aboutLogoRotationDegrees: Double {
+        Double(logoDragOffset.width / 24 * 5) + (logoPop ? -2.5 : 0)
+    }
+
+    private func triggerAboutLogoBounce() {
+        withAnimation(.spring(response: 0.22, dampingFraction: 0.46)) {
+            logoPop = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
+            withAnimation(.spring(response: 0.28, dampingFraction: 0.72)) {
+                logoPop = false
+            }
+        }
+    }
+
+    private func boundedAboutLogoOffset(_ translation: CGSize) -> CGSize {
+        let maxLength: CGFloat = 24
+        let length = hypot(translation.width, translation.height)
+        guard length > maxLength, length > 0 else {
+            return translation
+        }
+
+        let scale = maxLength / length
+        return CGSize(width: translation.width * scale, height: translation.height * scale)
+    }
+
     private var aboutSettings: some View {
         VStack(spacing: 14) {
             GlassSection {
                 HStack(spacing: 16) {
-                    Button {
-                        withAnimation(.spring(response: 0.22, dampingFraction: 0.46)) {
-                            logoPop = true
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
-                            withAnimation(.spring(response: 0.28, dampingFraction: 0.72)) {
-                                logoPop = false
-                            }
-                        }
-                    } label: {
-                        Image("BrandMark")
-                            .resizable()
-                            .interpolation(.high)
-                            .frame(width: 92, height: 92)
-                            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                            .shadow(color: .black.opacity(0.18), radius: 14, x: 0, y: 6)
-                    }
-                    .buttonStyle(.plain)
-                    .scaleEffect(logoPop ? 1.08 : 1.0)
-                    .rotationEffect(.degrees(logoPop ? -2.5 : 0))
-                    .onDrag {
-                        brandMarkDragProvider()
-                    }
+                    aboutLogo
                     .accessibilityLabel(localized("app_logo", value: "App logo", comment: "App logo accessibility label"))
 
                     VStack(alignment: .leading, spacing: 6) {
@@ -993,25 +1062,6 @@ struct SettingsWindowView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
-    }
-
-    private func brandMarkDragProvider() -> NSItemProvider {
-        let provider = NSItemProvider()
-        provider.suggestedName = "Mac Drag Scroll Logo.png"
-
-        if let image = NSImage(named: "BrandMark"),
-           let tiffData = image.tiffRepresentation,
-           let bitmap = NSBitmapImageRep(data: tiffData),
-           let pngData = bitmap.representation(using: .png, properties: [:]) {
-            provider.registerDataRepresentation(forTypeIdentifier: UTType.png.identifier, visibility: .all) { completion in
-                completion(pngData, nil)
-                return nil
-            }
-        } else {
-            provider.registerObject(AppDelegate.appName as NSString, visibility: .all)
-        }
-
-        return provider
     }
 
     private var permissionBanner: some View {
@@ -1221,6 +1271,18 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         return nextIndex == allCases.endIndex ? allCases[allCases.startIndex] : allCases[nextIndex]
     }
 
+    static func transitionVerticalDirection(from previousTab: SettingsTab, to selectedTab: SettingsTab) -> Int {
+        guard
+            previousTab != selectedTab,
+            let previousIndex = allCases.firstIndex(of: previousTab),
+            let selectedIndex = allCases.firstIndex(of: selectedTab)
+        else {
+            return 0
+        }
+
+        return previousIndex < selectedIndex ? -1 : 1
+    }
+
     var title: String {
         switch self {
         case .general:
@@ -1282,9 +1344,16 @@ enum SettingsTab: String, CaseIterable, Identifiable {
 final class SettingsWindowNavigation: ObservableObject {
     static let shared = SettingsWindowNavigation()
 
-    @Published var selectedTab: SettingsTab = .visualizer
+    @Published private(set) var selectedTab: SettingsTab = .visualizer
+    @Published private(set) var transitionVerticalDirection: Int = 0
 
     private init() {}
+
+    func select(_ tab: SettingsTab) {
+        guard tab != selectedTab else { return }
+        transitionVerticalDirection = SettingsTab.transitionVerticalDirection(from: selectedTab, to: tab)
+        selectedTab = tab
+    }
 }
 
 #if DEBUG

@@ -16,6 +16,7 @@
   <a href="https://github.com/martincalander/MacDragScroll/actions/workflows/ci.yml"><img alt="Quality Gate" src="https://github.com/martincalander/MacDragScroll/actions/workflows/ci.yml/badge.svg?branch=main"></a>
   <a href="https://github.com/martincalander/MacDragScroll/actions/workflows/codeql.yml"><img alt="CodeQL" src="https://github.com/martincalander/MacDragScroll/actions/workflows/codeql.yml/badge.svg?branch=main"></a>
   <a href="https://scorecard.dev/viewer/?uri=github.com/martincalander/MacDragScroll"><img alt="OpenSSF Scorecard" src="https://api.scorecard.dev/projects/github.com/martincalander/MacDragScroll/badge"></a>
+  <a href="https://www.bestpractices.dev/projects/13546"><img alt="OpenSSF Best Practices" src="https://www.bestpractices.dev/projects/13546/badge"></a>
   <a href="https://github.com/martincalander/MacDragScroll/actions/workflows/secret-scan.yml"><img alt="Secret Scan" src="https://github.com/martincalander/MacDragScroll/actions/workflows/secret-scan.yml/badge.svg?branch=main"></a>
   <a href="https://github.com/martincalander/MacDragScroll/releases/latest"><img alt="最新リリース" src="https://img.shields.io/github/v/release/martincalander/MacDragScroll?display_name=tag&sort=semver"></a>
   <img alt="macOS 26.2以降" src="https://img.shields.io/badge/macOS-26.2%2B-111111?logo=apple&logoColor=white">

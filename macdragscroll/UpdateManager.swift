@@ -104,6 +104,16 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
     static let websiteURL = URL(string: "https://martincalander.com")!
     static let versionHistory: [VersionHistoryEntry] = [
         VersionHistoryEntry(
+            version: "1.0.3",
+            build: "103",
+            releaseDate: "2026-07-09",
+            changes: [
+                "Added directional Settings tab transitions with subtle vertical movement.",
+                "Changed the About logo into an in-place squishy interaction instead of a draggable export item.",
+                "Fixed closing Settings with the red window button leaving Mac Drag Scroll visible in the Dock."
+            ]
+        ),
+        VersionHistoryEntry(
             version: "1.0.2",
             build: "102",
             releaseDate: "2026-07-09",

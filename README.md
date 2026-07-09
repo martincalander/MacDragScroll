@@ -27,6 +27,10 @@
   <a href="https://github.com/martincalander/MacDragScroll/releases/latest"><strong>Download the latest release</strong></a>
 </p>
 
+<p align="center">
+  English | <a href="README.ja.md">日本語</a> | <a href="README.zh-Hans.md">简体中文</a>
+</p>
+
 ## What It Does
 
 Mac Drag Scroll brings the familiar Windows middle-click drag scroll gesture to macOS. It is built for people who use an external mouse and want fast, comfortable scrolling in long pages, code editors, spreadsheets, design canvases, and chat apps.

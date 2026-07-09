@@ -25,6 +25,7 @@
 "acceleration_high" = "높은";
 "acceleration_max" = "맥스";
 "show_indicator" = "표시기 표시";
+"visualizer_animation" = "애니메이션";
 "visualizer_size" = "크기";
 "liquid_glass" = "액체유리토큰";
 "opacity" = "불투명";
@@ -70,6 +71,9 @@
 "status_enabled" = "활동적인";
 "status_disabled" = "장애가 있는";
 "status_waiting" = "대기 중";
+"status_failed" = "실패";
+"multiple_instances_warning" = "여러 복사본 실행 중";
+"multiple_instances_warning_detail" = "Mac Drag Scroll 모니터가 하나만 활성화되도록 추가 복사본을 종료하세요.";
 "auto_update" = "자동 업데이트";
 "current_version" = "현재 버전";
 "last_checked" = "마지막 확인";
@@ -113,6 +117,7 @@
 "menu_disable" = "Mac Drag Scroll 비활성화";
 "menu_enable" = "Mac Drag Scroll 활성화";
 "menu_settings" = "설정...";
+"menu_multiple_instances_warning" = "여러 복사본 실행 중";
 "menu_ignore_current_app" = "현재 앱 무시";
 "menu_ignore_app" = "%@ 무시";
 "menu_ignored_app" = "%@이 무시되었습니다.";
@@ -140,6 +145,7 @@
 "tooltip_horizontal_scrolling" = "가로 스크롤 이벤트를 보내려면 옆으로 드래그 이동을 허용하세요.";
 "tooltip_invert_horizontal" = "가로 스크롤 방향만 뒤집습니다.";
 "tooltip_show_indicator" = "드래그 스크롤하는 동안 시각적 표시기를 표시합니다.";
+"tooltip_visualizer_animation" = "시각화 장치가 나타나고 사라지고 드래그 방향에 반응할 때 애니메이션을 적용합니다.";
 "tooltip_visualizer_size" = "드래그 시각화 도우미의 크기를 제어합니다.";
 "tooltip_liquid_glass" = "유리 굴절, 광택 및 드래그 반응 움직임을 제어합니다.";
 "tooltip_opacity" = "시각화 장치 불투명도를 제어합니다.";

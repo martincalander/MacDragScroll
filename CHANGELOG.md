@@ -2,64 +2,37 @@
 
 All notable user-facing changes to Mac Drag Scroll are tracked here.
 
-## Unreleased
+This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for public releases. `CFBundleShortVersionString` is the public app version, and `CFBundleVersion` is the monotonically increasing build number used by Sparkle.
 
-- Added reliability controls for horizontal scrolling, horizontal inversion, and safer trackpad behavior.
-- Added Settings appearance mode for System Default, Light, and Dark.
-- Improved ignored-app management with an expanded picker and manual bundle ID entry.
-- Completed current UI localization coverage across all bundled languages.
-- Cancel active drag sessions when macOS screen configuration changes.
-- Added a first-run welcome window.
-- Added Permissions, Updates, and About sections in Settings.
-- Added a Liquid Glass visual style for the drag indicator and settings surface.
-- Added a real app icon, brand mark, and menu bar icon.
-- Added keyboard navigation for Settings.
-- Added GitHub Actions CI checks.
-- Reworked the GitHub project documentation for users.
+## [Unreleased]
 
-## 1.18.0
+### Added
 
-- Added broader language support.
-- Added window-locked scrolling so scroll events stay targeted at the drag origin window.
+### Changed
 
-## 1.17.0
+### Fixed
 
-- Added permission dialogs.
-- Added right-click menu bar support.
-- Improved app exclusion picking.
+## [1.0.0] - 2026-07-09
 
-## 1.16.0
+### Added
 
-- Added Launch at Login.
+- Added Windows-style middle-mouse drag scrolling for external mice on macOS.
+- Added menu bar app controls for enabling, disabling, settings, updates, and quitting.
+- Added a Liquid Glass drag visualizer with size, intensity, tint, visibility, and animation controls.
+- Added Launch at Login, ignored apps, trigger safety, scroll speed, acceleration, dead-zone, horizontal scrolling, and horizontal inversion settings.
+- Added first-run welcome flow, Permissions, Updates, and About settings sections.
+- Added Sparkle-based in-app updates backed by signed update archives.
+- Added localized settings UI across the bundled languages.
+- Added branded app icon, dock icon, menu bar icon, and About logo.
+- Added duplicate-instance monitoring and warnings.
+- Added GitHub Actions quality checks and user documentation.
 
-## 1.15.0
+### Changed
 
-- Added visualizer opacity control.
-- Added permission state monitoring.
+- Treat this polished product state as the first stable public release.
+- Standardized update/version reporting around `1.0.0` plus an internal build number.
 
-## 1.14.0
+### Fixed
 
-- Renamed the app to Mac Drag Scroll.
-- Improved the app UI.
-
-## 1.4.0
-
-- Fixed Y-axis scroll direction.
-
-## 1.3.0
-
-- Added Accessibility permission detection and setup prompt.
-
-## 1.2.0
-
-- Added version display in the menu bar.
-- Improved scroll behavior.
-
-## 1.1.0
-
-- Fixed overlay positioning.
-- Simplified the UI.
-
-## 1.0.0
-
-- Initial release.
+- Improved scroll reliability around trackpads, screen changes, permission changes, and ignored apps.
+- Fixed visualizer origin centering and reduced visual clutter in the drag indicator.

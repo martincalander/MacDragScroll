@@ -116,7 +116,7 @@ final class ScrollOverlayWindow: NSWindow {
     func show() {
         orderFrontRegardless()
 
-        guard SettingsManager.shared.animationsEnabled else {
+        guard SettingsManager.shared.visualizerAnimationsEnabled else {
             alphaValue = SettingsManager.shared.overlayOpacity
             return
         }
@@ -143,7 +143,7 @@ final class ScrollOverlayWindow: NSWindow {
     }
 
     func hide() {
-        guard SettingsManager.shared.animationsEnabled else {
+        guard SettingsManager.shared.visualizerAnimationsEnabled else {
             orderOut(nil)
             return
         }
@@ -170,7 +170,7 @@ final class ScrollOverlayWindow: NSWindow {
     }
 
     func animateClickBounce() {
-        guard SettingsManager.shared.animationsEnabled else { return }
+        guard SettingsManager.shared.visualizerAnimationsEnabled else { return }
 
         let animation = CAKeyframeAnimation(keyPath: "transform.scale")
         animation.values = [1.0, 0.94, 1.04, 1.0]
@@ -195,7 +195,7 @@ final class ScrollOverlayWindow: NSWindow {
 
         guard activation > 0, distance > 0 else {
             currentTilt = .zero
-            applyGlassTransform(animated: SettingsManager.shared.animationsEnabled)
+            applyGlassTransform(animated: SettingsManager.shared.visualizerAnimationsEnabled)
             return
         }
 
@@ -203,7 +203,7 @@ final class ScrollOverlayWindow: NSWindow {
             x: (deltaX / distance) * activation,
             y: (deltaY / distance) * activation
         )
-        applyGlassTransform(animated: SettingsManager.shared.animationsEnabled)
+        applyGlassTransform(animated: SettingsManager.shared.visualizerAnimationsEnabled)
     }
 
     private func applyGlassTransform(animated: Bool) {

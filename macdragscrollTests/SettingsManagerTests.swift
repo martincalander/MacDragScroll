@@ -14,6 +14,8 @@ final class SettingsManagerTests: XCTestCase {
     private var originalHasCompletedWelcome = false
     private var originalAppLanguage: AppLanguage = .system
     private var originalAppAppearance: AppAppearance = .system
+    private var originalShowIndicator = true
+    private var originalVisualizerAnimationsEnabled = true
     
     override func setUp() {
         super.setUp()
@@ -21,6 +23,8 @@ final class SettingsManagerTests: XCTestCase {
         originalHasCompletedWelcome = settings.hasCompletedWelcome
         originalAppLanguage = settings.appLanguage
         originalAppAppearance = settings.appAppearance
+        originalShowIndicator = settings.showIndicator
+        originalVisualizerAnimationsEnabled = settings.visualizerAnimationsEnabled
     }
     
     override func tearDown() {
@@ -35,6 +39,8 @@ final class SettingsManagerTests: XCTestCase {
         settings.hasCompletedWelcome = originalHasCompletedWelcome
         settings.appLanguage = originalAppLanguage
         settings.appAppearance = originalAppAppearance
+        settings.showIndicator = originalShowIndicator
+        settings.visualizerAnimationsEnabled = originalVisualizerAnimationsEnabled
         super.tearDown()
     }
     
@@ -99,6 +105,29 @@ final class SettingsManagerTests: XCTestCase {
     }
     
     // MARK: - Default Settings Tests
+
+    func testPreferencesUseStableUserDefaultsDomain() {
+        XCTAssertEqual(PersistentPreferences.domainIdentifier, "com.martincalander.macdragscroll")
+        XCTAssertEqual(
+            PersistentPreferences.preferencesFilePath,
+            FileManager.default.homeDirectoryForCurrentUser
+                .appendingPathComponent("Library/Preferences/com.martincalander.macdragscroll.plist")
+                .path
+        )
+        let probeKey = "persistentPreferencesTestProbe"
+        defer {
+            PersistentPreferences.userDefaults.removeObject(forKey: probeKey)
+            PersistentPreferences.userDefaults.synchronize()
+        }
+
+        PersistentPreferences.userDefaults.set("ok", forKey: probeKey)
+        PersistentPreferences.userDefaults.synchronize()
+
+        XCTAssertEqual(
+            PersistentPreferences.userDefaults.persistentDomain(forName: PersistentPreferences.domainIdentifier)?[probeKey] as? String,
+            "ok"
+        )
+    }
     
     func testDefaultScrollSpeedRange() {
         XCTAssertGreaterThanOrEqual(settings.scrollSpeed, 0.5, "Scroll speed should be >= 0.5")
@@ -161,6 +190,13 @@ final class SettingsManagerTests: XCTestCase {
         XCTAssertEqual(settings.appAppearance, .system)
     }
 
+    func testDefaultVisualizerControlsShowAndAnimateIndicator() {
+        settings.resetToDefaults()
+
+        XCTAssertTrue(settings.showIndicator)
+        XCTAssertTrue(settings.visualizerAnimationsEnabled)
+    }
+
     func testLanguageSelectionCanBePersisted() {
         settings.appLanguage = .swedish
         XCTAssertEqual(settings.appLanguage, .swedish)
@@ -205,6 +241,93 @@ final class SettingsManagerTests: XCTestCase {
         XCTAssertNil(AppLanguage.system.lprojCode)
         XCTAssertNil(AppAppearance.system.nsAppearance)
     }
+
+    func testAppBundleTitleMetadataUsesDisplayName() {
+        let appBundle = Bundle(for: AppDelegate.self)
+
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleName") as? String, "Mac Drag Scroll")
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String, "Mac Drag Scroll")
+    }
+
+    func testAppBundleVersionMetadataUsesStableReleaseValues() {
+        let appBundle = Bundle(for: AppDelegate.self)
+
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "1.0.0")
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String, "100")
+        XCTAssertEqual(AppDelegate.appVersion, "1.0.0")
+        XCTAssertEqual(AppDelegate.appBuild, "100")
+    }
+
+    func testSparkleUpdateConfigurationIsPresent() {
+        let appBundle = Bundle(for: AppDelegate.self)
+
+        XCTAssertEqual(
+            appBundle.object(forInfoDictionaryKey: "SUFeedURL") as? String,
+            "https://github.com/martincalander/MacDragScroll/releases/latest/download/appcast.xml"
+        )
+        XCTAssertEqual(
+            appBundle.object(forInfoDictionaryKey: "SUPublicEDKey") as? String,
+            "IRTPmGbPo3tpWiuGZIjzn99mFwiCjaCCPw6Kz62hkvQ="
+        )
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "SUEnableAutomaticChecks") as? Bool, true)
+    }
+
+    func testPermissionStateResetsMonitoringWhenAccessibilityIsMissing() {
+        let isTrusted = false
+        let state = AppDelegate.PermissionState(
+            permissionChecker: { isTrusted },
+            permissionRequester: { _ in isTrusted }
+        )
+
+        state.setEventMonitoringState(.active)
+        state.refresh()
+
+        XCTAssertFalse(state.hasAccessibilityPermission)
+        XCTAssertEqual(state.eventMonitoringState, .waiting)
+    }
+
+    func testPermissionStateCanRequestAccessibilityPermission() {
+        var promptWasRequested = false
+        let state = AppDelegate.PermissionState(
+            permissionChecker: { false },
+            permissionRequester: { shouldPrompt in
+                promptWasRequested = shouldPrompt
+                return true
+            }
+        )
+
+        XCTAssertTrue(state.request())
+
+        XCTAssertTrue(promptWasRequested)
+        XCTAssertTrue(state.hasAccessibilityPermission)
+    }
+
+    func testPermissionStatePreservesFailedMonitoringStateWhileTrusted() {
+        let state = AppDelegate.PermissionState(
+            permissionChecker: { true },
+            permissionRequester: { _ in true }
+        )
+
+        state.setEventMonitoringState(.failed)
+        state.refresh()
+
+        XCTAssertTrue(state.hasAccessibilityPermission)
+        XCTAssertEqual(state.eventMonitoringState, .failed)
+    }
+
+    func testVisualizerVisibilityAndAnimationCanBeConfiguredIndependently() {
+        settings.showIndicator = false
+        settings.visualizerAnimationsEnabled = true
+
+        XCTAssertFalse(settings.showIndicator)
+        XCTAssertTrue(settings.visualizerAnimationsEnabled)
+
+        settings.showIndicator = true
+        settings.visualizerAnimationsEnabled = false
+
+        XCTAssertTrue(settings.showIndicator)
+        XCTAssertFalse(settings.visualizerAnimationsEnabled)
+    }
     
     func testDefaultAccelerationPositive() {
         XCTAssertGreaterThan(settings.acceleration, 0, "Acceleration should be positive")
@@ -218,6 +341,8 @@ final class SettingsManagerTests: XCTestCase {
         settings.visualizerTintStyle = .aqua
         settings.liquidGlassIntensity = 1.9
         settings.appAppearance = .dark
+        settings.showIndicator = false
+        settings.visualizerAnimationsEnabled = false
 
         settings.resetToDefaults()
 
@@ -228,6 +353,8 @@ final class SettingsManagerTests: XCTestCase {
         XCTAssertEqual(settings.visualizerTintStyle, .clear)
         XCTAssertEqual(settings.liquidGlassIntensity, 1.35, accuracy: 0.001)
         XCTAssertEqual(settings.appAppearance, .system)
+        XCTAssertTrue(settings.showIndicator)
+        XCTAssertTrue(settings.visualizerAnimationsEnabled)
     }
 
     func testSettingsTabKeyboardShortcutsMatchSidebarOrder() {

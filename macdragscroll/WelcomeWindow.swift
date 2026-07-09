@@ -17,6 +17,8 @@ struct WelcomeWindowView: View {
     @ObservedObject private var permissionState = AppDelegate.permissionState
     @State private var introVisible = false
     @State private var logoFloat = false
+    @State private var logoBreathe = false
+    @State private var isLeaving = false
 
     var body: some View {
         ZStack {
@@ -26,34 +28,45 @@ struct WelcomeWindowView: View {
             VStack(spacing: 14) {
                 hero
                     .opacity(introVisible ? 1 : 0)
-                    .offset(y: introVisible ? 0 : 18)
-                    .scaleEffect(introVisible ? 1 : 0.965, anchor: .center)
-                    .animation(.smooth(duration: 0.72).delay(0.08), value: introVisible)
+                    .offset(y: introVisible ? 0 : 24)
+                    .scaleEffect(introVisible ? 1 : 0.94, anchor: .center)
+                    .animation(.spring(response: 1.02, dampingFraction: 0.78).delay(0.10), value: introVisible)
 
                 permissionCard
                     .opacity(introVisible ? 1 : 0)
-                    .offset(y: introVisible ? 0 : 16)
-                    .animation(.smooth(duration: 0.62).delay(0.30), value: introVisible)
+                    .offset(y: introVisible ? 0 : 20)
+                    .scaleEffect(introVisible ? 1 : 0.975, anchor: .center)
+                    .animation(.spring(response: 0.90, dampingFraction: 0.84).delay(0.42), value: introVisible)
 
                 githubStarAsk
                     .opacity(introVisible ? 1 : 0)
-                    .offset(y: introVisible ? 0 : 14)
-                    .animation(.smooth(duration: 0.58).delay(0.46), value: introVisible)
+                    .offset(y: introVisible ? 0 : 18)
+                    .scaleEffect(introVisible ? 1 : 0.98, anchor: .center)
+                    .animation(.spring(response: 0.86, dampingFraction: 0.86).delay(0.62), value: introVisible)
 
                 bottomActions
                     .opacity(introVisible ? 1 : 0)
-                    .offset(y: introVisible ? 0 : 10)
-                    .animation(.smooth(duration: 0.50).delay(0.62), value: introVisible)
+                    .offset(y: introVisible ? 0 : 14)
+                    .animation(.smooth(duration: 0.64).delay(0.88), value: introVisible)
             }
             .padding(28)
             .frame(maxWidth: 660)
+            .opacity(isLeaving ? 0 : 1)
+            .scaleEffect(isLeaving ? 0.972 : 1, anchor: .center)
+            .offset(y: isLeaving ? -18 : 0)
+            .blur(radius: isLeaving ? 1.8 : 0)
+            .allowsHitTesting(!isLeaving)
+            .animation(.smooth(duration: 0.34), value: isLeaving)
         }
         .frame(minWidth: 660, minHeight: 520)
         .onAppear {
-            permissionState.refresh()
-            introVisible = true
-            withAnimation(.easeInOut(duration: 2.4).repeatForever(autoreverses: true)) {
+            AppDelegate.refreshAccessibilityPermission()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+                introVisible = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.82) {
                 logoFloat = true
+                logoBreathe = true
             }
         }
     }
@@ -66,10 +79,13 @@ struct WelcomeWindowView: View {
                     .interpolation(.high)
                     .frame(width: 92, height: 92)
                     .clipShape(RoundedRectangle(cornerRadius: 21, style: .continuous))
-                    .shadow(color: .black.opacity(0.14), radius: 16, x: 0, y: 7)
-                    .scaleEffect(introVisible ? 1 : 0.86)
-                    .offset(y: logoFloat ? -3 : 2)
-                    .animation(.spring(response: 0.72, dampingFraction: 0.76).delay(0.12), value: introVisible)
+                    .shadow(color: .black.opacity(logoBreathe ? 0.19 : 0.12), radius: logoBreathe ? 18 : 12, x: 0, y: logoBreathe ? 8 : 5)
+                    .scaleEffect(introVisible ? (logoBreathe ? 1.026 : 0.995) : 0.80)
+                    .offset(y: introVisible ? (logoFloat ? -4 : 2) : 12)
+                    .rotationEffect(.degrees(introVisible ? (logoFloat ? -1.1 : 1.2) : -5.0))
+                    .animation(.spring(response: 0.92, dampingFraction: 0.62).delay(0.16), value: introVisible)
+                    .animation(.easeInOut(duration: 2.7).repeatForever(autoreverses: true), value: logoFloat)
+                    .animation(.easeInOut(duration: 3.4).repeatForever(autoreverses: true), value: logoBreathe)
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text(localized("welcome_title", value: "Welcome to Mac Drag Scroll", comment: "Welcome title"))
@@ -123,7 +139,7 @@ struct WelcomeWindowView: View {
                     )
                 } else {
                     Button {
-                        AppDelegate.openAccessibilitySettings()
+                        AppDelegate.requestAccessibilityPermission()
                     } label: {
                         Label(localized("open_system_settings", value: "Open System Settings", comment: "Open System Settings button"), systemImage: "gearshape")
                     }
@@ -132,7 +148,7 @@ struct WelcomeWindowView: View {
                 }
 
                 Button {
-                    permissionState.refresh()
+                    AppDelegate.refreshAccessibilityPermission()
                 } label: {
                     Image(systemName: "arrow.clockwise")
                 }
@@ -178,13 +194,26 @@ struct WelcomeWindowView: View {
             Spacer()
 
             Button {
-                onGetStarted()
+                startOutro()
             } label: {
                 Label(localized("welcome_get_started", value: "Get Started", comment: "Get started button"), systemImage: "arrow.right.circle.fill")
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
             .keyboardShortcut(.defaultAction)
+            .disabled(isLeaving)
+        }
+    }
+
+    private func startOutro() {
+        guard !isLeaving else { return }
+
+        withAnimation(.smooth(duration: 0.34)) {
+            isLeaving = true
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.34) {
+            onGetStarted()
         }
     }
 }

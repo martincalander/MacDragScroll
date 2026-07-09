@@ -25,6 +25,7 @@
 "acceleration_high" = "高い";
 "acceleration_max" = "マックス";
 "show_indicator" = "インジケーターを表示";
+"visualizer_animation" = "アニメーション";
 "visualizer_size" = "サイズ";
 "liquid_glass" = "液体ガラストークン";
 "opacity" = "不透明度";
@@ -70,6 +71,9 @@
 "status_enabled" = "アクティブ";
 "status_disabled" = "無効";
 "status_waiting" = "待っている";
+"status_failed" = "失敗";
+"multiple_instances_warning" = "複数のコピーが実行中";
+"multiple_instances_warning_detail" = "追加のコピーを終了して、Mac Drag Scroll の監視を 1 つだけ有効にしてください。";
 "auto_update" = "自動更新";
 "current_version" = "現在のバージョン";
 "last_checked" = "最終チェック日";
@@ -113,6 +117,7 @@
 "menu_disable" = "Mac Drag Scroll を無効にする";
 "menu_enable" = "Mac Drag Scroll を有効にする";
 "menu_settings" = "設定...";
+"menu_multiple_instances_warning" = "複数のコピーが実行中";
 "menu_ignore_current_app" = "現在のアプリを無視する";
 "menu_ignore_app" = "%@ を無視する";
 "menu_ignored_app" = "%@ は無視されました";
@@ -140,6 +145,7 @@
 "tooltip_horizontal_scrolling" = "横方向のドラッグ移動で水平スクロール イベントを送信できるようにします。";
 "tooltip_invert_horizontal" = "水平スクロール方向のみを反転します。";
 "tooltip_show_indicator" = "ドラッグスクロール中に視覚的なインジケーターを表示します。";
+"tooltip_visualizer_animation" = "ビジュアライザーの表示、非表示、ドラッグ方向への反応をアニメーションします。";
 "tooltip_visualizer_size" = "ドラッグ ビジュアライザのサイズを制御します。";
 "tooltip_liquid_glass" = "ガラスの屈折、光沢、ドラッグに反応する動きを制御します。";
 "tooltip_opacity" = "ビジュアライザの不透明度を制御します。";

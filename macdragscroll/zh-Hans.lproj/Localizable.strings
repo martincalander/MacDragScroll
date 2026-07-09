@@ -25,6 +25,7 @@
 "acceleration_high" = "高的";
 "acceleration_max" = "最大限度";
 "show_indicator" = "显示指标";
+"visualizer_animation" = "动画";
 "visualizer_size" = "尺寸";
 "liquid_glass" = "液体玻璃斯托肯";
 "opacity" = "不透明度";
@@ -70,6 +71,9 @@
 "status_enabled" = "积极的";
 "status_disabled" = "残疾人";
 "status_waiting" = "等待";
+"status_failed" = "失败";
+"multiple_instances_warning" = "多个副本正在运行";
+"multiple_instances_warning_detail" = "退出额外副本，确保只有一个 Mac Drag Scroll 监视器处于活动状态。";
 "auto_update" = "自动更新";
 "current_version" = "当前版本";
 "last_checked" = "最后检查";
@@ -113,6 +117,7 @@
 "menu_disable" = "禁用 Mac Drag Scroll";
 "menu_enable" = "启用应用程序令牌";
 "menu_settings" = "设置...";
+"menu_multiple_instances_warning" = "多个副本正在运行";
 "menu_ignore_current_app" = "忽略当前应用程序";
 "menu_ignore_app" = "忽略 %@";
 "menu_ignored_app" = "忽略 %@";
@@ -140,6 +145,7 @@
 "tooltip_horizontal_scrolling" = "允许侧向拖动移动以发送水平滚动事件。";
 "tooltip_invert_horizontal" = "仅翻转水平滚动方向。";
 "tooltip_show_indicator" = "拖动滚动时显示视觉指示器。";
+"tooltip_visualizer_animation" = "在可视化工具出现、消失并响应拖动方向时启用动画。";
 "tooltip_visualizer_size" = "控制拖动可视化工具的大小。";
 "tooltip_liquid_glass" = "控制玻璃折射、光泽和拖动反应运动。";
 "tooltip_opacity" = "控制可视化工具的不透明度。";

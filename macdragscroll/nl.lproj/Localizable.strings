@@ -25,6 +25,7 @@
 "acceleration_high" = "Hoog";
 "acceleration_max" = "Max";
 "show_indicator" = "Toon indicator";
+"visualizer_animation" = "Animatie";
 "visualizer_size" = "Grootte";
 "liquid_glass" = "Liquid Glass";
 "opacity" = "Dekking";
@@ -70,6 +71,9 @@
 "status_enabled" = "Actief";
 "status_disabled" = "Uitgeschakeld";
 "status_waiting" = "Wachten";
+"status_failed" = "Mislukt";
+"multiple_instances_warning" = "Meerdere kopieën actief";
+"multiple_instances_warning_detail" = "Sluit de extra kopie zodat er maar één Mac Drag Scroll-monitor actief is.";
 "auto_update" = "Automatische update";
 "current_version" = "Huidige versie";
 "last_checked" = "Laatst gecontroleerd";
@@ -113,6 +117,7 @@
 "menu_disable" = "Mac Drag Scroll uitschakelen";
 "menu_enable" = "Schakel Mac Drag Scroll in";
 "menu_settings" = "Instellingen...";
+"menu_multiple_instances_warning" = "Meerdere kopieën actief";
 "menu_ignore_current_app" = "Negeer de huidige app";
 "menu_ignore_app" = "Negeer %@";
 "menu_ignored_app" = "%@ Genegeerd";
@@ -140,6 +145,7 @@
 "tooltip_horizontal_scrolling" = "Sta zijwaartse sleepbewegingen toe om horizontale schuifgebeurtenissen te verzenden.";
 "tooltip_invert_horizontal" = "Draai alleen de horizontale schuifrichting om.";
 "tooltip_show_indicator" = "Toon de visuele indicator tijdens het slepen en scrollen.";
+"tooltip_visualizer_animation" = "Animeert de visualisator wanneer deze verschijnt, verdwijnt en reageert op de sleeprichting.";
 "tooltip_visualizer_size" = "Bepaalt de grootte van de drag-visualizer.";
 "tooltip_liquid_glass" = "Regelt glasbreking, glans en weerstandsreactieve beweging.";
 "tooltip_opacity" = "Regelt de dekking van de visualisatie.";

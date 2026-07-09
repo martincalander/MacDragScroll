@@ -7,6 +7,7 @@
 
 import AppKit
 import CoreGraphics
+import ApplicationServices
 
 struct ScrollDeltas: Equatable {
     let horizontal: Int32
@@ -165,9 +166,17 @@ final class MouseMonitor {
     private var triggerConfig: TriggerConfig { SettingsManager.shared.triggerConfig }
     private var screenParametersObserver: NSObjectProtocol?
 
+    var isRunning: Bool {
+        eventTap != nil
+    }
+
     @discardableResult
     func start() -> Bool {
         guard eventTap == nil else { return true }
+        guard AXIsProcessTrusted() else {
+            NSLog("[MacDragScroll] Accessibility permission is required before creating the mouse event tap.")
+            return false
+        }
 
         let eventMask = Self.eventMask(for: [
             .leftMouseDown, .leftMouseUp, .leftMouseDragged,
@@ -443,7 +452,7 @@ final class MouseMonitor {
     }
 
     private func showOverlay() {
-        guard SettingsManager.shared.animationsEnabled else { return }
+        guard SettingsManager.shared.showIndicator else { return }
         guard isActivated, !isOverlayVisible else { return }
 
         isOverlayVisible = true

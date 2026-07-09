@@ -11,8 +11,17 @@ import Combine
 import ApplicationServices
 
 class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDelegate {
-    static let appVersion = "1.18.0"
     private static let showWelcomeNotification = Notification.Name("MacDragScrollShowWelcomeWindow")
+    private static let requestAccessibilityPermissionNotification = Notification.Name("MacDragScrollRequestAccessibilityPermission")
+    private static let refreshAccessibilityPermissionNotification = Notification.Name("MacDragScrollRefreshAccessibilityPermission")
+
+    static var appVersion: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0.0"
+    }
+
+    static var appBuild: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "100"
+    }
 
     static var appName: String {
         AppLocalization.shared.localizedString("app_name", value: "Mac Drag Scroll", comment: "App name")
@@ -21,7 +30,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     static func requestWelcomeWindow() {
         NotificationCenter.default.post(name: showWelcomeNotification, object: nil)
     }
-    
+
+    static func requestAccessibilityPermission() {
+        NotificationCenter.default.post(name: requestAccessibilityPermissionNotification, object: nil)
+    }
+
+    static func refreshAccessibilityPermission() {
+        NotificationCenter.default.post(name: refreshAccessibilityPermissionNotification, object: nil)
+    }
+
     private var statusItem: NSStatusItem!
     private var mouseMonitor: MouseMonitor!
     private var settingsWindow: NSWindow?
@@ -29,29 +46,83 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     private weak var activeMenuItem: NSMenuItem?
     private weak var updateMenuItem: NSMenuItem?
     private weak var ignoreCurrentAppMenuItem: NSMenuItem?
+    private var duplicateInstanceMenuItem: NSMenuItem?
     private var permissionCheckTimer: Timer?
     private var hadPermissionPreviously = false
     private var hasPresentedWelcomeThisLaunch = false
     private var cancellables = Set<AnyCancellable>()
-    
+
     // Observable permission state for SwiftUI
     static let permissionState = PermissionState()
+
+    deinit {
+        DistributedNotificationCenter.default().removeObserver(self)
+        permissionCheckTimer?.invalidate()
+    }
     
+    enum EventMonitoringState: Equatable {
+        case waiting
+        case active
+        case failed
+    }
+
     class PermissionState: ObservableObject {
-        @Published var hasAccessibilityPermission: Bool = AXIsProcessTrusted()
+        private let permissionChecker: () -> Bool
+        private let permissionRequester: (Bool) -> Bool
+
+        @Published private(set) var hasAccessibilityPermission: Bool
+        @Published private(set) var eventMonitoringState: EventMonitoringState = .waiting
+
+        init(
+            permissionChecker: @escaping () -> Bool = AXIsProcessTrusted,
+            permissionRequester: @escaping (Bool) -> Bool = AppDelegate.checkAccessibilityPermission(prompt:)
+        ) {
+            self.permissionChecker = permissionChecker
+            self.permissionRequester = permissionRequester
+            self.hasAccessibilityPermission = permissionChecker()
+        }
         
-        func refresh() {
-            hasAccessibilityPermission = AXIsProcessTrusted()
+        @discardableResult
+        func refresh() -> Bool {
+            let hasPermission = permissionChecker()
+            hasAccessibilityPermission = hasPermission
+            if !hasPermission {
+                eventMonitoringState = .waiting
+            }
+            return hasPermission
+        }
+
+        @discardableResult
+        func request() -> Bool {
+            let hasPermission = permissionRequester(true)
+            hasAccessibilityPermission = hasPermission
+            if !hasPermission {
+                eventMonitoringState = .waiting
+            }
+            return hasPermission
+        }
+
+        func setEventMonitoringState(_ state: EventMonitoringState) {
+            eventMonitoringState = state
         }
     }
     
     func applicationDidFinishLaunching(_ notification: Notification) {
+        ProcessInfo.processInfo.processName = Self.appName
+
+        guard AppInstanceMonitor.shared.claimPrimaryInstance() else {
+            NSApp.terminate(nil)
+            return
+        }
+
         // Setup crash handling first
         CrashHandler.appVersion = AppDelegate.appVersion
         CrashHandler.shared.setup()
         
         setupMenuBar()
         observeSettings()
+        observePrimaryInstanceActivationRequests()
+        AppInstanceMonitor.shared.startMonitoring()
         observeSystemAppearance()
         applyAppearanceMode()
         updateDockIcon()
@@ -59,7 +130,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         NSApp.setActivationPolicy(.accessory)
         
         // Check accessibility permissions
-        checkAccessibilityPermissions()
+        synchronizeAccessibilityState()
         UpdateManager.shared.checkForUpdatesIfNeeded()
 
         DispatchQueue.main.async { [weak self] in
@@ -67,33 +138,41 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         }
     }
     
-    private func checkAccessibilityPermissions() {
-        // Initial check
-        AppDelegate.permissionState.refresh()
-        let hasPermission = AXIsProcessTrusted()
-        
-        if !hasPermission {
-            // Show permission dialog on first launch without permission
-            if SettingsManager.shared.hasCompletedWelcome {
-                showPermissionDialog()
-            }
-            startPermissionMonitoring()
-        } else {
+    private nonisolated static func checkAccessibilityPermission(prompt: Bool) -> Bool {
+        guard prompt else {
+            return AXIsProcessTrusted()
+        }
+
+        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
+        return AXIsProcessTrustedWithOptions(options)
+    }
+
+    private func synchronizeAccessibilityState(showMissingPermissionDialog: Bool = true) {
+        let hasPermission = AppDelegate.permissionState.refresh()
+
+        if hasPermission {
             hadPermissionPreviously = true
             startMouseMonitor()
-            // Continue monitoring in case permission is revoked
-            startPermissionMonitoring()
+        } else {
+            hadPermissionPreviously = false
+            stopMouseMonitor(eventMonitoringState: .waiting)
+            NSLog("[MacDragScroll] Accessibility permission is missing; event monitoring is waiting.")
+
+            if showMissingPermissionDialog && SettingsManager.shared.hasCompletedWelcome {
+                showPermissionDialog()
+            }
         }
+
+        startPermissionMonitoring()
     }
     
     private func startPermissionMonitoring() {
         // Continuously monitor permission status (every 1 second)
         permissionCheckTimer?.invalidate()
-        permissionCheckTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+        permissionCheckTimer = Timer(timeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self = self else { return }
             
-            let currentPermission = AXIsProcessTrusted()
-            AppDelegate.permissionState.refresh()
+            let currentPermission = AppDelegate.permissionState.refresh()
             
             if currentPermission && !self.hadPermissionPreviously {
                 // Permission was just granted
@@ -102,9 +181,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             } else if !currentPermission && self.hadPermissionPreviously {
                 // Permission was revoked while app was running
                 self.hadPermissionPreviously = false
-                self.mouseMonitor?.stop()
+                self.stopMouseMonitor(eventMonitoringState: .waiting)
                 self.showPermissionRevokedDialog()
+            } else if currentPermission, self.mouseMonitor?.isRunning != true {
+                self.startMouseMonitor()
             }
+        }
+
+        if let permissionCheckTimer {
+            RunLoop.main.add(permissionCheckTimer, forMode: .common)
         }
     }
     
@@ -118,7 +203,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         
         let response = alert.runModal()
         if response == .alertFirstButtonReturn {
-            AppDelegate.openAccessibilitySettings()
+            requestAccessibilityPermissionFromUser()
         }
     }
     
@@ -132,20 +217,67 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         
         let response = alert.runModal()
         if response == .alertFirstButtonReturn {
+            requestAccessibilityPermissionFromUser()
+        }
+    }
+    
+    @discardableResult
+    private func startMouseMonitor() -> Bool {
+        if mouseMonitor == nil {
+            mouseMonitor = MouseMonitor()
+        }
+
+        let wasRunning = mouseMonitor.isRunning
+        guard mouseMonitor.start() else {
+            if AppDelegate.permissionState.eventMonitoringState != .failed {
+                NSLog("[MacDragScroll] Event monitoring failed to start.")
+            }
+            AppDelegate.permissionState.setEventMonitoringState(.failed)
+            return false
+        }
+
+        if !wasRunning {
+            NSLog("[MacDragScroll] Event monitoring started.")
+        }
+        AppDelegate.permissionState.setEventMonitoringState(.active)
+        return true
+    }
+
+    private func stopMouseMonitor(eventMonitoringState: EventMonitoringState) {
+        mouseMonitor?.stop()
+        AppDelegate.permissionState.setEventMonitoringState(eventMonitoringState)
+    }
+
+    private func requestAccessibilityPermissionFromUser() {
+        let hasPermission = AppDelegate.permissionState.request()
+
+        if hasPermission {
+            hadPermissionPreviously = true
+            startMouseMonitor()
+        } else {
+            stopMouseMonitor(eventMonitoringState: .waiting)
             AppDelegate.openAccessibilitySettings()
         }
     }
     
-    private func startMouseMonitor() {
-        if mouseMonitor == nil {
-            mouseMonitor = MouseMonitor()
-        }
-        mouseMonitor.start()
-    }
-    
     static func openAccessibilitySettings() {
-        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
-            NSWorkspace.shared.open(url)
+        let settingsURLStrings: [String]
+        if #available(macOS 13.0, *) {
+            settingsURLStrings = [
+                "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility",
+                "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?Privacy_Accessibility"
+            ]
+        } else {
+            settingsURLStrings = [
+                "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
+            ]
+        }
+
+        for urlString in settingsURLStrings {
+            guard let url = URL(string: urlString), NSWorkspace.shared.open(url) else {
+                continue
+            }
+            return
         }
     }
     
@@ -235,16 +367,47 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             .sink { [weak self] _ in self?.applyAppearanceMode() }
             .store(in: &cancellables)
 
+        AppInstanceMonitor.shared.$duplicateInstanceCount
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.refreshDuplicateInstanceMenuItem() }
+            .store(in: &cancellables)
+
         NotificationCenter.default.publisher(for: Self.showWelcomeNotification)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.showWelcomeWindow() }
             .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: Self.requestAccessibilityPermissionNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.requestAccessibilityPermissionFromUser() }
+            .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: Self.refreshAccessibilityPermissionNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.synchronizeAccessibilityState(showMissingPermissionDialog: false) }
+            .store(in: &cancellables)
+    }
+
+    private func observePrimaryInstanceActivationRequests() {
+        DistributedNotificationCenter.default().addObserver(
+            self,
+            selector: #selector(primaryInstanceActivationRequested(_:)),
+            name: AppInstanceMonitor.activationRequestNotification,
+            object: AppInstanceMonitor.notificationObject
+        )
     }
 
     func menuNeedsUpdate(_ menu: NSMenu) {
         refreshStatusItem()
+        AppInstanceMonitor.shared.refreshDuplicateInstances()
+        refreshDuplicateInstanceMenuItem()
         refreshUpdateMenuItem()
         refreshIgnoreCurrentAppMenuItem()
+    }
+
+    @objc private func primaryInstanceActivationRequested(_ notification: Notification) {
+        AppInstanceMonitor.shared.refreshDuplicateInstances()
+        showSettingsWindow(selectedTab: .visualizer)
     }
 
     @objc private func toggleActiveState(_ sender: Any?) {
@@ -256,8 +419,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     }
 
     @objc private func openUpdates(_ sender: Any?) {
-        guard UpdateManager.shared.status.isMenuActionEnabled else { return }
-        showSettingsWindow(selectedTab: .updates)
+        UpdateManager.shared.checkForUpdates()
     }
 
     @objc private func ignoreCurrentApp(_ sender: Any?) {
@@ -370,6 +532,40 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         statusItem.button?.image = statusBarImage(isEnabled: isEnabled)
     }
 
+    private func refreshDuplicateInstanceMenuItem() {
+        guard let menu = statusItem?.menu else { return }
+
+        if AppInstanceMonitor.shared.hasDuplicateInstances {
+            let item: NSMenuItem
+            if let existingItem = duplicateInstanceMenuItem {
+                item = existingItem
+            } else {
+                item = NSMenuItem(
+                    title: "",
+                    action: #selector(openSettings(_:)),
+                    keyEquivalent: ""
+                )
+                item.target = self
+                item.image = NSImage(
+                    systemSymbolName: "exclamationmark.triangle.fill",
+                    accessibilityDescription: localized("multiple_instances_warning", value: "Multiple Copies Running", comment: "Multiple instances warning")
+                )
+
+                let activeIndex = activeMenuItem.map { menu.index(of: $0) } ?? -1
+                let insertionIndex = activeIndex >= 0 ? activeIndex + 1 : 0
+                menu.insertItem(item, at: insertionIndex)
+                duplicateInstanceMenuItem = item
+            }
+
+            item.title = localized("menu_multiple_instances_warning", value: "Multiple Copies Running", comment: "Multiple instances warning menu item")
+            item.toolTip = localized("multiple_instances_warning_detail", value: "Quit the extra copy so only one Mac Drag Scroll monitor is active.", comment: "Multiple instances warning detail")
+            item.isEnabled = true
+        } else if let item = duplicateInstanceMenuItem {
+            menu.removeItem(item)
+            duplicateInstanceMenuItem = nil
+        }
+    }
+
     private func observeSystemAppearance() {
         DistributedNotificationCenter.default().addObserver(
             self,
@@ -405,8 +601,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     private func refreshUpdateMenuItem() {
         let status = UpdateManager.shared.status
         updateMenuItem?.title = status.menuTitle
-        updateMenuItem?.isEnabled = status.isMenuActionEnabled
-        updateMenuItem?.action = status.isMenuActionEnabled ? #selector(openUpdates(_:)) : nil
+        updateMenuItem?.isEnabled = UpdateManager.shared.canCheckForUpdates
+        updateMenuItem?.action = #selector(openUpdates(_:))
     }
 
     private func refreshIgnoreCurrentAppMenuItem() {
@@ -445,6 +641,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         settingsWindow?.title = AppDelegate.appName
         welcomeWindow?.title = localized("welcome_window_title", value: "Welcome to Mac Drag Scroll", comment: "Welcome window title")
         refreshStatusItem()
+        refreshDuplicateInstanceMenuItem()
         refreshUpdateMenuItem()
         refreshIgnoreCurrentAppMenuItem()
     }

@@ -25,6 +25,7 @@
 "acceleration_high" = "Alto";
 "acceleration_max" = "máx.";
 "show_indicator" = "Mostrar indicador";
+"visualizer_animation" = "Animación";
 "visualizer_size" = "Tamaño";
 "liquid_glass" = "VIDRIO LÍQUIDO";
 "opacity" = "Opacidad";
@@ -70,6 +71,9 @@
 "status_enabled" = "Activo";
 "status_disabled" = "Discapacitado";
 "status_waiting" = "esperando";
+"status_failed" = "Falló";
+"multiple_instances_warning" = "Varias copias en ejecución";
+"multiple_instances_warning_detail" = "Cierra la copia adicional para que solo haya un monitor de Mac Drag Scroll activo.";
 "auto_update" = "Actualización automática";
 "current_version" = "Versión actual";
 "last_checked" = "Última comprobación";
@@ -113,6 +117,7 @@
 "menu_disable" = "Deshabilitar Mac Drag Scroll";
 "menu_enable" = "Habilitar Mac Drag Scroll";
 "menu_settings" = "Configuración...";
+"menu_multiple_instances_warning" = "Varias copias en ejecución";
 "menu_ignore_current_app" = "Ignorar la aplicación actual";
 "menu_ignore_app" = "Ignorar %@";
 "menu_ignored_app" = "%@ Ignorado";
@@ -140,6 +145,7 @@
 "tooltip_horizontal_scrolling" = "Permita el movimiento de arrastre lateral para enviar eventos de desplazamiento horizontal.";
 "tooltip_invert_horizontal" = "Voltee solo la dirección de desplazamiento horizontal.";
 "tooltip_show_indicator" = "Muestra el indicador visual mientras arrastras el desplazamiento.";
+"tooltip_visualizer_animation" = "Anima el visualizador cuando aparece, desaparece y reacciona a la dirección de arrastre.";
 "tooltip_visualizer_size" = "Controla el tamaño del visualizador de arrastre.";
 "tooltip_liquid_glass" = "Controla la refracción del vidrio, el brillo y el movimiento reactivo al arrastre.";
 "tooltip_opacity" = "Controla la opacidad del visualizador.";

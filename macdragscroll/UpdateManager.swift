@@ -8,6 +8,7 @@
 import AppKit
 import Combine
 import Foundation
+import Sparkle
 
 enum UpdateStatus: Equatable {
     case checking
@@ -25,12 +26,12 @@ enum UpdateStatus: Equatable {
         case .checking:
             return localized("update_menu_checking", value: "Checking for Updates...")
         case .upToDate:
-            return localized("update_menu_up_to_date", value: "Up to Date")
+            return localized("check_for_update", value: "Check For Update")
         case let .available(version, _):
             let format = localized("update_menu_available", value: "Update Available: %@")
             return String(format: format, version)
         case .failed:
-            return localized("update_menu_unavailable", value: "Update Check Unavailable")
+            return localized("check_for_update", value: "Check For Update")
         }
     }
 
@@ -51,11 +52,11 @@ enum UpdateStatus: Equatable {
     var statusDetail: String {
         switch self {
         case .checking:
-            return localized("update_detail_checking", value: "Contacting GitHub Releases.")
+            return localized("update_detail_checking", value: "Contacting the signed update feed.")
         case .upToDate:
             return localized("update_detail_up_to_date", value: "You are running the newest known version.")
         case let .available(version, _):
-            let format = localized("update_detail_available", value: "Version %@ is available from GitHub Releases.")
+            let format = localized("update_detail_available", value: "Version %@ is available as a signed app update.")
             return String(format: format, version)
         case let .failed(message):
             return message
@@ -63,8 +64,7 @@ enum UpdateStatus: Equatable {
     }
 
     var isMenuActionEnabled: Bool {
-        if case .available = self { return true }
-        return false
+        !isChecking
     }
 
     private func localized(_ key: String, value: String) -> String {
@@ -84,24 +84,28 @@ struct UpdateHistoryEntry: Identifiable, Codable, Equatable {
     }
 }
 
-final class UpdateManager: ObservableObject {
+final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
     static let shared = UpdateManager()
 
     static let repositoryURL = URL(string: "https://github.com/martincalander/MacDragScroll")!
     static let websiteURL = URL(string: "https://martincalander.com")!
 
-    private let latestReleaseURL = URL(string: "https://api.github.com/repos/martincalander/MacDragScroll/releases/latest")!
-    private let defaults = UserDefaults.standard
-    private let autoUpdateEnabledKey = "autoUpdateEnabled"
+    private let defaults = PersistentPreferences.userDefaults
     private let lastCheckedKey = "lastUpdateCheckDate"
     private let historyKey = "updateHistory"
+    private var isSyncingSparklePreferences = false
+
+    private lazy var updaterController = SPUStandardUpdaterController(
+        startingUpdater: !Self.isRunningUnitTests,
+        updaterDelegate: self,
+        userDriverDelegate: nil
+    )
 
     @Published var autoUpdateEnabled: Bool {
         didSet {
-            defaults.set(autoUpdateEnabled, forKey: autoUpdateEnabledKey)
-            if autoUpdateEnabled {
-                checkForUpdatesIfNeeded()
-            }
+            guard !isSyncingSparklePreferences, autoUpdateEnabled != oldValue else { return }
+            updaterController.updater.automaticallyChecksForUpdates = autoUpdateEnabled
+            appendHistory(autoUpdateEnabled ? "Automatic update checks enabled." : "Automatic update checks disabled.")
         }
     }
 
@@ -113,9 +117,20 @@ final class UpdateManager: ObservableObject {
         AppDelegate.appVersion
     }
 
-    private init() {
-        defaults.register(defaults: [autoUpdateEnabledKey: true])
-        autoUpdateEnabled = defaults.bool(forKey: autoUpdateEnabledKey)
+    var currentBuild: String {
+        AppDelegate.appBuild
+    }
+
+    var currentVersionDisplay: String {
+        "\(currentVersion) (\(currentBuild))"
+    }
+
+    var canCheckForUpdates: Bool {
+        updaterController.updater.canCheckForUpdates && !status.isChecking
+    }
+
+    override private init() {
+        autoUpdateEnabled = true
         lastChecked = defaults.object(forKey: lastCheckedKey) as? Date
 
         if let data = defaults.data(forKey: historyKey),
@@ -126,27 +141,30 @@ final class UpdateManager: ObservableObject {
                 UpdateHistoryEntry(message: "Update history starts with this build.")
             ]
         }
+
+        super.init()
+
+        syncPreferencesFromSparkle()
     }
 
     func checkForUpdatesIfNeeded() {
-        guard autoUpdateEnabled else { return }
-        checkForUpdates()
+        syncPreferencesFromSparkle()
     }
 
     func checkForUpdates() {
         guard !status.isChecking else { return }
+        guard updaterController.updater.canCheckForUpdates else {
+            let message = "Sparkle cannot start an update check right now."
+            status = .failed(message: message)
+            appendHistory(message)
+            return
+        }
 
         status = .checking
-
-        var request = URLRequest(url: latestReleaseURL, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 12)
-        request.setValue("MacDragScroll/\(currentVersion)", forHTTPHeaderField: "User-Agent")
-        request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
-
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            DispatchQueue.main.async {
-                self?.finishCheck(data: data, response: response, error: error)
-            }
-        }.resume()
+        lastChecked = Date()
+        defaults.set(lastChecked, forKey: lastCheckedKey)
+        appendHistory("Started update check.")
+        updaterController.checkForUpdates(nil)
     }
 
     func openReleasePage() {
@@ -157,46 +175,36 @@ final class UpdateManager: ObservableObject {
         }
     }
 
-    private func finishCheck(data: Data?, response: URLResponse?, error: Error?) {
+    func updater(_ updater: SPUUpdater, didFindValidUpdate item: SUAppcastItem) {
         lastChecked = Date()
         defaults.set(lastChecked, forKey: lastCheckedKey)
 
-        if let error {
-            let message = "Update check failed: \(error.localizedDescription)"
-            status = .failed(message: message)
-            appendHistory(message)
-            return
-        }
+        let version = item.displayVersionString
+        status = .available(version: version, releaseURL: item.infoURL ?? item.fileURL)
+        appendHistory("Found update \(version).")
+    }
 
-        if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 404 {
-            status = .upToDate
-            appendHistory("No public GitHub release was found; keeping the current build.")
-            return
-        }
+    func updaterDidNotFindUpdate(_ updater: SPUUpdater, error: Error) {
+        lastChecked = Date()
+        defaults.set(lastChecked, forKey: lastCheckedKey)
+        status = .upToDate
+        appendHistory("Checked for updates. \(currentVersionDisplay) is up to date.")
+    }
 
-        guard let data else {
-            let message = "Update check failed: no response data."
-            status = .failed(message: message)
-            appendHistory(message)
-            return
-        }
+    func updater(_ updater: SPUUpdater, willInstallUpdate item: SUAppcastItem) {
+        appendHistory("Installing update \(item.displayVersionString).")
+    }
 
-        do {
-            let release = try JSONDecoder().decode(GitHubRelease.self, from: data)
-            let latestVersion = Self.normalizedVersion(release.tagName)
+    func updater(_ updater: SPUUpdater, didAbortWithError error: Error) {
+        let message = "Update failed: \(error.localizedDescription)"
+        status = .failed(message: message)
+        appendHistory(message)
+    }
 
-            if Self.isVersion(latestVersion, newerThan: currentVersion) {
-                status = .available(version: latestVersion, releaseURL: release.htmlURL)
-                appendHistory("Found update \(latestVersion).")
-            } else {
-                status = .upToDate
-                appendHistory("Checked GitHub Releases. \(currentVersion) is up to date.")
-            }
-        } catch {
-            let message = "Update check failed: \(error.localizedDescription)"
-            status = .failed(message: message)
-            appendHistory(message)
-        }
+    private func syncPreferencesFromSparkle() {
+        isSyncingSparklePreferences = true
+        autoUpdateEnabled = updaterController.updater.automaticallyChecksForUpdates
+        isSyncingSparklePreferences = false
     }
 
     private func appendHistory(_ message: String) {
@@ -210,45 +218,7 @@ final class UpdateManager: ObservableObject {
         }
     }
 
-    private static func normalizedVersion(_ version: String) -> String {
-        version.trimmingCharacters(in: CharacterSet(charactersIn: "vV "))
-    }
-
-    private static func isVersion(_ candidate: String, newerThan current: String) -> Bool {
-        compareVersions(candidate, current) == .orderedDescending
-    }
-
-    private static func compareVersions(_ lhs: String, _ rhs: String) -> ComparisonResult {
-        let lhsParts = versionParts(lhs)
-        let rhsParts = versionParts(rhs)
-        let count = max(lhsParts.count, rhsParts.count)
-
-        for index in 0..<count {
-            let left = index < lhsParts.count ? lhsParts[index] : 0
-            let right = index < rhsParts.count ? rhsParts[index] : 0
-            if left < right { return .orderedAscending }
-            if left > right { return .orderedDescending }
-        }
-
-        return .orderedSame
-    }
-
-    private static func versionParts(_ version: String) -> [Int] {
-        normalizedVersion(version)
-            .split(separator: ".", omittingEmptySubsequences: false)
-            .map { component in
-                let digits = component.prefix { $0.isNumber }
-                return Int(digits) ?? 0
-            }
-    }
-
-    private struct GitHubRelease: Decodable {
-        let tagName: String
-        let htmlURL: URL?
-
-        enum CodingKeys: String, CodingKey {
-            case tagName = "tag_name"
-            case htmlURL = "html_url"
-        }
+    private static var isRunningUnitTests: Bool {
+        ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
     }
 }

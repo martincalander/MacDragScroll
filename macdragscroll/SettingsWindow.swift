@@ -8,6 +8,7 @@
 import SwiftUI
 import AppKit
 import Combine
+import UniformTypeIdentifiers
 
 private func localized(_ key: String, value: String, comment: String) -> String {
     AppLocalization.shared.localizedString(key, value: value, comment: comment)
@@ -18,11 +19,12 @@ struct SettingsWindowView: View {
     @ObservedObject private var permissionState = AppDelegate.permissionState
     @ObservedObject private var updateManager = UpdateManager.shared
     @ObservedObject private var navigation = SettingsWindowNavigation.shared
+    @ObservedObject private var instanceMonitor = AppInstanceMonitor.shared
 
-    @State private var showingAppPicker = true
     @State private var capturedFrontmostBundleId: String?
     @State private var showingResetConfirmation = false
     @State private var logoPop = false
+    @State private var settingsIntroVisible = false
     @FocusState private var focusedSidebarTab: SettingsTab?
 
     var body: some View {
@@ -56,6 +58,11 @@ struct SettingsWindowView: View {
                 Divider()
                 bottomBar
             }
+            .opacity(settingsIntroVisible ? 1 : 0)
+            .scaleEffect(settingsIntroVisible ? 1 : 0.985, anchor: .center)
+            .offset(y: settingsIntroVisible ? 0 : 10)
+            .blur(radius: settingsIntroVisible ? 0 : 0.9)
+            .animation(.smooth(duration: 0.32), value: settingsIntroVisible)
         }
         .frame(minWidth: 760, minHeight: 560)
         .preferredColorScheme(settings.appAppearance.colorScheme)
@@ -67,6 +74,11 @@ struct SettingsWindowView: View {
         }
         .onAppear {
             focusedSidebarTab = navigation.selectedTab
+            AppDelegate.refreshAccessibilityPermission()
+            guard !settingsIntroVisible else { return }
+            DispatchQueue.main.async {
+                settingsIntroVisible = true
+            }
         }
         .onChange(of: navigation.selectedTab) { _, selectedTab in
             focusedSidebarTab = selectedTab
@@ -215,9 +227,18 @@ struct SettingsWindowView: View {
                 ToggleRow(
                     icon: "dot.circle",
                     title: localized("show_indicator", value: "Show Indicator", comment: "Show Indicator toggle"),
-                    isOn: $settings.animationsEnabled,
+                    isOn: $settings.showIndicator,
                     tooltip: localized("tooltip_show_indicator", value: "Show the visual indicator while drag scrolling.", comment: "Show indicator tooltip")
                 )
+
+                ToggleRow(
+                    icon: "play.circle",
+                    title: localized("visualizer_animation", value: "Animation", comment: "Visualizer animation toggle"),
+                    isOn: $settings.visualizerAnimationsEnabled,
+                    tooltip: localized("tooltip_visualizer_animation", value: "Animate the visualizer when it appears, disappears, and reacts to drag direction.", comment: "Visualizer animation tooltip")
+                )
+                .disabled(!settings.showIndicator)
+                .opacity(settings.showIndicator ? 1 : 0.55)
 
                 Divider()
 
@@ -322,43 +343,6 @@ struct SettingsWindowView: View {
     private var appSettings: some View {
         VStack(spacing: 14) {
             GlassSection {
-                HStack(alignment: .top, spacing: 10) {
-                    Image(systemName: "app.badge")
-                        .font(.system(size: 18, weight: .medium))
-                        .foregroundStyle(.secondary)
-                        .frame(width: 24)
-
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(localized("excluded_apps", value: "Ignored Apps", comment: "Excluded Apps section"))
-                            .font(.system(size: 13, weight: .semibold))
-                        Text(localized("excluded_apps_detail", value: "Drag scrolling stays off in these apps. Add a running app, installed app, or manual bundle identifier.", comment: "Excluded apps detail"))
-                            .font(.system(size: 11))
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-
-                    Spacer()
-
-                    Button {
-                        if !showingAppPicker {
-                            capturedFrontmostBundleId = SettingsManager.shared.getFrontmostAppBundleId()
-                        }
-                        withAnimation(.easeInOut(duration: 0.18)) {
-                            showingAppPicker.toggle()
-                        }
-                    } label: {
-                        Label(
-                            showingAppPicker ? localized("hide_picker", value: "Hide Picker", comment: "Hide picker button") : localized("show_picker", value: "Show Picker", comment: "Show picker button"),
-                            systemImage: showingAppPicker ? "chevron.up.circle.fill" : "plus.circle.fill"
-                        )
-                        .font(.system(size: 11, weight: .medium))
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
-                }
-            }
-
-            GlassSection {
                 Label(localized("ignored_apps_list", value: "Ignored Apps", comment: "Ignored apps list title"), systemImage: "hand.raised.slash")
                     .font(.system(size: 12, weight: .semibold))
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -381,19 +365,16 @@ struct SettingsWindowView: View {
                 }
             }
 
-            if showingAppPicker {
-                GlassSection {
-                    InlineAppPickerView(
-                        excludedApps: settings.excludedApps,
-                        frontmostBundleId: capturedFrontmostBundleId,
-                        onAdd: { bundleId in
-                            withAnimation(.easeOut(duration: 0.15)) {
-                                settings.addExcludedApp(bundleId)
-                            }
+            GlassSection {
+                InlineAppPickerView(
+                    excludedApps: settings.excludedApps,
+                    frontmostBundleId: capturedFrontmostBundleId,
+                    onAdd: { bundleId in
+                        withAnimation(.easeOut(duration: 0.15)) {
+                            settings.addExcludedApp(bundleId)
                         }
-                    )
-                }
-                .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
+                )
             }
         }
         .onAppear {
@@ -436,7 +417,7 @@ struct SettingsWindowView: View {
 
                 HStack(spacing: 8) {
                     Button {
-                        AppDelegate.openAccessibilitySettings()
+                        AppDelegate.requestAccessibilityPermission()
                     } label: {
                         Label(localized("open_system_settings", value: "Open System Settings", comment: "Open System Settings button"), systemImage: "gearshape")
                     }
@@ -444,7 +425,7 @@ struct SettingsWindowView: View {
                     .controlSize(.small)
 
                     Button {
-                        permissionState.refresh()
+                        AppDelegate.refreshAccessibilityPermission()
                     } label: {
                         Label(localized("refresh", value: "Refresh", comment: "Refresh button"), systemImage: "arrow.clockwise")
                     }
@@ -459,9 +440,7 @@ struct SettingsWindowView: View {
                 InfoRow(
                     icon: "cursorarrow.motionlines",
                     title: localized("event_monitoring", value: "Event Monitoring", comment: "Event monitoring label"),
-                    value: permissionState.hasAccessibilityPermission && settings.isEnabled
-                        ? localized("status_active", value: "Active", comment: "Active state")
-                        : localized("status_waiting", value: "Waiting", comment: "Waiting state")
+                    value: eventMonitoringStatusText
                 )
 
                 Divider()
@@ -484,7 +463,7 @@ struct SettingsWindowView: View {
                     icon: "arrow.triangle.2.circlepath",
                     title: localized("auto_update", value: "Auto Update", comment: "Auto update toggle"),
                     isOn: $updateManager.autoUpdateEnabled,
-                    tooltip: localized("tooltip_auto_update", value: "Automatically check GitHub Releases for newer versions.", comment: "Auto update tooltip")
+                    tooltip: localized("tooltip_auto_update", value: "Automatically check for signed app updates.", comment: "Auto update tooltip")
                 )
 
                 Divider()
@@ -492,7 +471,7 @@ struct SettingsWindowView: View {
                 InfoRow(
                     icon: "shippingbox",
                     title: localized("current_version", value: "Current Version", comment: "Current version label"),
-                    value: updateManager.currentVersion
+                    value: updateManager.currentVersionDisplay
                 )
 
                 Divider()
@@ -604,11 +583,23 @@ struct SettingsWindowView: View {
                     .buttonStyle(.plain)
                     .scaleEffect(logoPop ? 1.08 : 1.0)
                     .rotationEffect(.degrees(logoPop ? -2.5 : 0))
+                    .onDrag {
+                        brandMarkDragProvider()
+                    }
                     .accessibilityLabel(localized("app_logo", value: "App logo", comment: "App logo accessibility label"))
 
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("\(AppDelegate.appName) ©")
-                            .font(.system(size: 28, weight: .semibold))
+                        HStack(alignment: .top, spacing: 3) {
+                            Text(AppDelegate.appName)
+                                .font(.system(size: 28, weight: .semibold))
+
+                            Text("©")
+                                .font(.system(size: 9, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                                .padding(.top, 3)
+                        }
+                        .accessibilityElement(children: .combine)
+
                         Text(localized("about_slogan", value: "Windows-style drag scrolling, built for macOS.", comment: "About slogan"))
                             .font(.system(size: 13))
                             .foregroundStyle(.secondary)
@@ -683,6 +674,25 @@ struct SettingsWindowView: View {
         }
     }
 
+    private func brandMarkDragProvider() -> NSItemProvider {
+        let provider = NSItemProvider()
+        provider.suggestedName = "Mac Drag Scroll Logo.png"
+
+        if let image = NSImage(named: "BrandMark"),
+           let tiffData = image.tiffRepresentation,
+           let bitmap = NSBitmapImageRep(data: tiffData),
+           let pngData = bitmap.representation(using: .png, properties: [:]) {
+            provider.registerDataRepresentation(forTypeIdentifier: UTType.png.identifier, visibility: .all) { completion in
+                completion(pngData, nil)
+                return nil
+            }
+        } else {
+            provider.registerObject(AppDelegate.appName as NSString, visibility: .all)
+        }
+
+        return provider
+    }
+
     private var permissionBanner: some View {
         HStack(spacing: 12) {
             Image(systemName: "hand.raised.circle")
@@ -701,7 +711,7 @@ struct SettingsWindowView: View {
             Spacer()
 
             Button(localized("open_system_settings", value: "Open System Settings", comment: "Open System Settings button")) {
-                AppDelegate.openAccessibilitySettings()
+                AppDelegate.requestAccessibilityPermission()
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.small)
@@ -719,14 +729,25 @@ struct SettingsWindowView: View {
 
     private var bottomBar: some View {
         HStack(spacing: 12) {
-            Label(
-                settings.isEnabled
-                    ? localized("status_enabled", value: "Active", comment: "Enabled status")
-                    : localized("status_disabled", value: "Disabled", comment: "Disabled status"),
-                systemImage: settings.isEnabled ? "checkmark.circle.fill" : "pause.circle.fill"
-	            )
-	            .font(.system(size: 11, weight: .medium))
-	            .foregroundStyle(settings.isEnabled ? .primary : .secondary)
+            HStack(spacing: 10) {
+                Label(
+                    settings.isEnabled
+                        ? localized("status_enabled", value: "Active", comment: "Enabled status")
+                        : localized("status_disabled", value: "Disabled", comment: "Disabled status"),
+                    systemImage: settings.isEnabled ? "checkmark.circle.fill" : "pause.circle.fill"
+                )
+                .foregroundStyle(settings.isEnabled ? .primary : .secondary)
+
+                if instanceMonitor.hasDuplicateInstances {
+                    Label(
+                        localized("multiple_instances_warning", value: "Multiple Copies Running", comment: "Multiple instances warning"),
+                        systemImage: "exclamationmark.triangle.fill"
+                    )
+                    .foregroundStyle(.orange)
+                    .help(localized("multiple_instances_warning_detail", value: "Quit the extra copy so only one Mac Drag Scroll monitor is active.", comment: "Multiple instances warning detail"))
+                }
+            }
+            .font(.system(size: 11, weight: .medium))
 
             Spacer()
 
@@ -752,6 +773,17 @@ struct SettingsWindowView: View {
             .regular.tint(Color(nsColor: .controlBackgroundColor).opacity(0.16)),
             in: Rectangle()
         )
+    }
+
+    private var eventMonitoringStatusText: String {
+        switch permissionState.eventMonitoringState {
+        case .active:
+            return localized("status_active", value: "Active", comment: "Active state")
+        case .waiting:
+            return localized("status_waiting", value: "Waiting", comment: "Waiting state")
+        case .failed:
+            return localized("status_failed", value: "Failed", comment: "Failed state")
+        }
     }
 
     private func accelerationLabel(_ value: Double) -> String {
@@ -896,7 +928,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         case .permissions:
             return localized("settings_permissions_subtitle", value: "Check required macOS permissions and runtime status.", comment: "Permissions settings subtitle")
         case .updates:
-            return localized("settings_updates_subtitle", value: "Check releases, auto update status, and update history.", comment: "Updates settings subtitle")
+            return localized("settings_updates_subtitle", value: "Check signed updates, automatic update status, and update history.", comment: "Updates settings subtitle")
         case .about:
             return localized("settings_about_subtitle", value: "Product identity, links, and credits.", comment: "About settings subtitle")
         }

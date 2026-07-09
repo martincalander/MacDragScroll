@@ -25,6 +25,7 @@
 "acceleration_high" = "High";
 "acceleration_max" = "Max";
 "show_indicator" = "Show Indicator";
+"visualizer_animation" = "Animation";
 "visualizer_size" = "Size";
 "liquid_glass" = "Liquid Glass";
 "opacity" = "Opacity";
@@ -70,6 +71,9 @@
 "status_enabled" = "Active";
 "status_disabled" = "Disabled";
 "status_waiting" = "Waiting";
+"status_failed" = "Failed";
+"multiple_instances_warning" = "Multiple Copies Running";
+"multiple_instances_warning_detail" = "Quit the extra copy so only one Mac Drag Scroll monitor is active.";
 "auto_update" = "Auto Update";
 "current_version" = "Current Version";
 "last_checked" = "Last Checked";
@@ -86,9 +90,9 @@
 "update_status_up_to_date" = "Up to Date";
 "update_status_available" = "Update Available: %@";
 "update_status_unable" = "Unable to Check";
-"update_detail_checking" = "Contacting GitHub Releases.";
+"update_detail_checking" = "Contacting the signed update feed.";
 "update_detail_up_to_date" = "You are running the newest known version.";
-"update_detail_available" = "Version %@ is available from GitHub Releases.";
+"update_detail_available" = "Version %@ is available as a signed app update.";
 "about_slogan" = "Windows-style drag scrolling, built for macOS.";
 "about_author" = "Made by Martin Calander";
 "about_runtime_note" = "Designed as a quiet menu bar utility with native macOS controls and a Liquid Glass drag indicator.";
@@ -113,6 +117,7 @@
 "menu_disable" = "Disable Mac Drag Scroll";
 "menu_enable" = "Enable Mac Drag Scroll";
 "menu_settings" = "Settings...";
+"menu_multiple_instances_warning" = "Multiple Copies Running";
 "menu_ignore_current_app" = "Ignore Current App";
 "menu_ignore_app" = "Ignore %@";
 "menu_ignored_app" = "%@ Ignored";
@@ -140,11 +145,12 @@
 "tooltip_horizontal_scrolling" = "Allow sideways drag movement to send horizontal scroll events.";
 "tooltip_invert_horizontal" = "Flip only the horizontal scroll direction.";
 "tooltip_show_indicator" = "Show the visual indicator while drag scrolling.";
+"tooltip_visualizer_animation" = "Animate the visualizer when it appears, disappears, and reacts to drag direction.";
 "tooltip_visualizer_size" = "Controls the size of the drag visualizer.";
 "tooltip_liquid_glass" = "Controls glass refraction, sheen, and drag-reactive movement.";
 "tooltip_opacity" = "Controls visualizer opacity.";
 "tooltip_visualizer_tint" = "Controls the subtle tint of the glass visualizer.";
-"tooltip_auto_update" = "Automatically check GitHub Releases for newer versions.";
+"tooltip_auto_update" = "Automatically check for signed app updates.";
 "tooltip_show_welcome" = "Open the welcome page again.";
 "tooltip_custom_bundle_id" = "Use this when an app is not found in the picker. Example: com.company.AppName";
 "settings_general" = "General";
@@ -159,7 +165,7 @@
 "settings_scrolling_subtitle" = "Adjust speed, acceleration, and dead zone.";
 "settings_apps_subtitle" = "Disable drag scrolling in selected apps.";
 "settings_permissions_subtitle" = "Check required macOS permissions and runtime status.";
-"settings_updates_subtitle" = "Check releases, auto update status, and update history.";
+"settings_updates_subtitle" = "Check signed updates, automatic update status, and update history.";
 "settings_about_subtitle" = "Product identity, links, and credits.";
 "crash_detected_title" = "Mac Drag Scroll Crashed";
 "crash_detected_message" = "The app crashed unexpectedly during the last session. You can copy the crash report to help diagnose the issue.";

@@ -279,13 +279,14 @@ class SettingsManager: ObservableObject {
     static let visualizerSizeRange: ClosedRange<Double> = 0.45...1.5
     static let liquidGlassIntensityRange: ClosedRange<Double> = 0.7...2.0
     
-    private let defaults = UserDefaults.standard
+    private let defaults = PersistentPreferences.userDefaults
 
     @Published var isCapturingTrigger = false
     
     // Keys
     private let isEnabledKey = "isEnabled"
-    private let animationsEnabledKey = "animationsEnabled"
+    private let showIndicatorKey = "animationsEnabled" // Legacy key name, kept to preserve existing preferences.
+    private let visualizerAnimationsEnabledKey = "visualizerAnimationsEnabled"
     private let excludedAppsKey = "excludedApps"
     private let scrollSpeedKey = "scrollSpeed"
     private let deadZoneRadiusKey = "deadZoneRadius"
@@ -313,8 +314,12 @@ class SettingsManager: ObservableObject {
         didSet { defaults.set(isEnabled, forKey: isEnabledKey) }
     }
     
-    @Published var animationsEnabled: Bool {
-        didSet { defaults.set(animationsEnabled, forKey: animationsEnabledKey) }
+    @Published var showIndicator: Bool {
+        didSet { defaults.set(showIndicator, forKey: showIndicatorKey) }
+    }
+
+    @Published var visualizerAnimationsEnabled: Bool {
+        didSet { defaults.set(visualizerAnimationsEnabled, forKey: visualizerAnimationsEnabledKey) }
     }
 
     @Published var reverseScrollDirection: Bool {
@@ -404,7 +409,8 @@ class SettingsManager: ObservableObject {
     private init() {
         defaults.register(defaults: [
             isEnabledKey: true,
-            animationsEnabledKey: true,
+            showIndicatorKey: true,
+            visualizerAnimationsEnabledKey: true,
             excludedAppsKey: [String](),
             scrollSpeedKey: 2.0,
             deadZoneRadiusKey: 20.0,
@@ -422,7 +428,8 @@ class SettingsManager: ObservableObject {
         ])
         
         self.isEnabled = defaults.bool(forKey: isEnabledKey)
-        self.animationsEnabled = defaults.bool(forKey: animationsEnabledKey)
+        self.showIndicator = defaults.bool(forKey: showIndicatorKey)
+        self.visualizerAnimationsEnabled = defaults.bool(forKey: visualizerAnimationsEnabledKey)
         self.reverseScrollDirection = defaults.bool(forKey: reverseScrollDirectionKey)
         self.horizontalScrollingEnabled = defaults.object(forKey: horizontalScrollingEnabledKey) == nil ? true : defaults.bool(forKey: horizontalScrollingEnabledKey)
         self.invertHorizontalScroll = defaults.bool(forKey: invertHorizontalScrollKey)
@@ -598,7 +605,8 @@ class SettingsManager: ObservableObject {
     
     func resetToDefaults() {
         isEnabled = true
-        animationsEnabled = true
+        showIndicator = true
+        visualizerAnimationsEnabled = true
         reverseScrollDirection = false
         horizontalScrollingEnabled = true
         invertHorizontalScroll = false

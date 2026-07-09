@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/martincalander/MacDragScroll/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/martincalander/MacDragScroll/actions/workflows/ci.yml/badge.svg?branch=main"></a>
+  <a href="https://github.com/martincalander/MacDragScroll/actions/workflows/ci.yml"><img alt="Quality Gate" src="https://github.com/martincalander/MacDragScroll/actions/workflows/ci.yml/badge.svg?branch=main"></a>
   <a href="https://github.com/martincalander/MacDragScroll/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/martincalander/MacDragScroll?display_name=tag&sort=semver"></a>
   <img alt="macOS 26.2+" src="https://img.shields.io/badge/macOS-26.2%2B-111111?logo=apple&logoColor=white">
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-2f80ed.svg"></a>
@@ -41,11 +41,23 @@ Mac Drag Scroll brings the familiar Windows middle-click drag scroll gesture to 
 ## Install
 
 1. Open the [latest release](https://github.com/martincalander/MacDragScroll/releases/latest).
-2. Download `Mac Drag Scroll.app` or the release archive.
-3. Move **Mac Drag Scroll** to your Applications folder.
+2. Download `MacDragScroll.dmg`.
+3. Open the disk image and move **Mac Drag Scroll** to your Applications folder.
 4. Open the app and approve Accessibility access when macOS asks.
 
+<p align="center">
+  <img src="docs/assets/mac-drag-scroll-install-demo.gif" width="760" alt="Mac Drag Scroll installation demo">
+</p>
+
 If macOS blocks the first launch, right-click **Mac Drag Scroll** in Finder, choose **Open**, then confirm. You only need to do that once for unsigned or locally built copies.
+
+CLI install:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/martincalander/MacDragScroll/main/scripts/install.sh | bash
+```
+
+Homebrew tap support is prepared for release maintainers; see [Releasing](docs/RELEASING.md).
 
 ## Grant Permission
 
@@ -56,6 +68,10 @@ Mac Drag Scroll needs Accessibility permission so it can detect the middle mouse
 3. Open **Accessibility**.
 4. Enable **Mac Drag Scroll**.
 
+<p align="center">
+  <img src="docs/assets/mac-drag-scroll-permission-demo.gif" width="760" alt="Mac Drag Scroll Accessibility permission demo">
+</p>
+
 The app shows permission status in Settings, and it disables drag scrolling if permission is removed.
 
 ## Use
@@ -63,6 +79,10 @@ The app shows permission status in Settings, and it disables drag scrolling if p
 1. Press and hold the middle mouse button.
 2. Move the mouse away from the starting point.
 3. Release the middle mouse button to stop.
+
+<p align="center">
+  <img src="docs/assets/mac-drag-scroll-usage-demo.gif" width="760" alt="Mac Drag Scroll drag scrolling usage demo">
+</p>
 
 The farther you drag from the origin, the faster the scroll becomes. A small glass indicator appears while dragging unless you turn it off in Settings.
 
@@ -81,6 +101,8 @@ Open Settings from the menu bar icon.
 | Launch at Login | Starts Mac Drag Scroll automatically when you sign in. |
 | Excluded Apps | Keeps drag scrolling disabled in chosen apps. |
 
+Settings are saved per macOS user at `~/Library/Preferences/com.martincalander.macdragscroll.plist`. Normal app removal or reinstall does not delete this file, so preferences survive uninstall and upgrade cycles.
+
 ## Privacy
 
 Mac Drag Scroll is designed as a local utility. It needs Accessibility access for the drag-scroll gesture, but it does not record what you type, inspect document contents, or track your browsing.
@@ -89,7 +111,7 @@ Read the full [privacy note](PRIVACY.md).
 
 ## Updates
 
-Use **Settings -> Updates** to check for new versions. The app checks GitHub releases when update checking is enabled.
+Use **Settings -> Updates** or the menu bar **Check For Update** command to check for new versions. Updates are installed through Sparkle using signed release archives from GitHub Releases.
 
 ## Support
 
@@ -106,3 +128,5 @@ Need help? Start with [Support](SUPPORT.md), then open an issue if the problem i
 Mac Drag Scroll is made by [Martin Calander](https://martincalander.com).
 
 Developers and contributors can read [Contributing](CONTRIBUTING.md).
+
+Release maintainers can read [Releasing](docs/RELEASING.md).

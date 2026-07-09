@@ -25,6 +25,7 @@
 "acceleration_high" = "Cao";
 "acceleration_max" = "Tối đa";
 "show_indicator" = "Hiển thị chỉ báo";
+"visualizer_animation" = "Hoạt ảnh";
 "visualizer_size" = "Kích thước";
 "liquid_glass" = "Liquid Glass";
 "opacity" = "Độ mờ";
@@ -70,6 +71,9 @@
 "status_enabled" = "Đang hoạt động";
 "status_disabled" = "Đã tắt";
 "status_waiting" = "Đang chờ";
+"status_failed" = "Thất bại";
+"multiple_instances_warning" = "Nhiều bản sao đang chạy";
+"multiple_instances_warning_detail" = "Thoát bản sao thừa để chỉ một trình giám sát Mac Drag Scroll hoạt động.";
 "auto_update" = "Tự động cập nhật";
 "current_version" = "Phiên bản hiện tại";
 "last_checked" = "Kiểm tra lần cuối";
@@ -113,6 +117,7 @@
 "menu_disable" = "Tắt Mac Drag Scroll";
 "menu_enable" = "Kích hoạt Mac Drag Scroll";
 "menu_settings" = "Cài đặt...";
+"menu_multiple_instances_warning" = "Nhiều bản sao đang chạy";
 "menu_ignore_current_app" = "Bỏ qua ứng dụng hiện tại";
 "menu_ignore_app" = "Bỏ qua %@";
 "menu_ignored_app" = "%@ Đã bỏ qua";
@@ -140,6 +145,7 @@
 "tooltip_horizontal_scrolling" = "Cho phép chuyển động kéo sang một bên để gửi các sự kiện cuộn ngang.";
 "tooltip_invert_horizontal" = "Chỉ lật theo hướng cuộn ngang.";
 "tooltip_show_indicator" = "Hiển thị chỉ báo trực quan trong khi kéo cuộn.";
+"tooltip_visualizer_animation" = "Tạo hoạt ảnh cho trình hiển thị khi xuất hiện, biến mất và phản ứng với hướng kéo.";
 "tooltip_visualizer_size" = "Kiểm soát kích thước của trình hiển thị kéo.";
 "tooltip_liquid_glass" = "Kiểm soát khúc xạ, độ bóng và chuyển động phản ứng kéo của kính.";
 "tooltip_opacity" = "Kiểm soát độ mờ của trình hiển thị.";

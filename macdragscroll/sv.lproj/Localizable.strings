@@ -25,6 +25,7 @@
 "acceleration_high" = "Hög";
 "acceleration_max" = "Max";
 "show_indicator" = "Visa indikator";
+"visualizer_animation" = "Animation";
 "visualizer_size" = "Storlek";
 "liquid_glass" = "Liquid Glass";
 "opacity" = "Opacitet";
@@ -70,6 +71,9 @@
 "status_enabled" = "Aktiv";
 "status_disabled" = "Inaktiverad";
 "status_waiting" = "Väntar";
+"status_failed" = "Misslyckades";
+"multiple_instances_warning" = "Flera kopior körs";
+"multiple_instances_warning_detail" = "Avsluta den extra kopian så att bara en Mac Drag Scroll-monitor är aktiv.";
 "auto_update" = "Automatisk uppdatering";
 "current_version" = "Aktuell version";
 "last_checked" = "Senast kontrollerad";
@@ -113,6 +117,7 @@
 "menu_disable" = "Inaktivera Mac Drag Scroll";
 "menu_enable" = "Aktivera Mac Drag Scroll";
 "menu_settings" = "Inställningar...";
+"menu_multiple_instances_warning" = "Flera kopior körs";
 "menu_ignore_current_app" = "Ignorera aktuell app";
 "menu_ignore_app" = "Ignorera %@";
 "menu_ignored_app" = "%@ Ignoreras";
@@ -140,6 +145,7 @@
 "tooltip_horizontal_scrolling" = "Tillåt sidledes dragrörelse för att skicka horisontella rullningshändelser.";
 "tooltip_invert_horizontal" = "Vänd endast den horisontella rullningsriktningen.";
 "tooltip_show_indicator" = "Visa den visuella indikatorn medan du drar rullar.";
+"tooltip_visualizer_animation" = "Animera visualiseraren när den visas, döljs och reagerar på dragriktningen.";
 "tooltip_visualizer_size" = "Styr storleken på dragvisualiseraren.";
 "tooltip_liquid_glass" = "Kontrollerar glasets brytning, glans och drag-reaktiva rörelser.";
 "tooltip_opacity" = "Styr visualiserarens opacitet.";

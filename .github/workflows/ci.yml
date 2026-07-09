@@ -1,4 +1,4 @@
-name: CI
+name: Quality Gate
 
 on:
   push:
@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   build-and-test:
-    name: Build and test
+    name: Build, test, and release check
     runs-on: macos-26
     timeout-minutes: 30
 

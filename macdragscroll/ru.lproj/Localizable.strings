@@ -25,6 +25,7 @@
 "acceleration_high" = "Высокий";
 "acceleration_max" = "Макс";
 "show_indicator" = "Показать индикатор";
+"visualizer_animation" = "Анимация";
 "visualizer_size" = "Размер";
 "liquid_glass" = "ЖИДКОСТЕКЛОСТОКЕН";
 "opacity" = "Непрозрачность";
@@ -70,6 +71,9 @@
 "status_enabled" = "Активный";
 "status_disabled" = "Отключено";
 "status_waiting" = "Ожидание";
+"status_failed" = "Сбой";
+"multiple_instances_warning" = "Запущено несколько копий";
+"multiple_instances_warning_detail" = "Закройте лишнюю копию, чтобы был активен только один монитор Mac Drag Scroll.";
 "auto_update" = "Автоматическое обновление";
 "current_version" = "Текущая версия";
 "last_checked" = "Последняя проверка";
@@ -113,6 +117,7 @@
 "menu_disable" = "Отключить Mac Drag Scroll";
 "menu_enable" = "Включить Mac Drag Scroll";
 "menu_settings" = "Настройки...";
+"menu_multiple_instances_warning" = "Запущено несколько копий";
 "menu_ignore_current_app" = "Игнорировать текущее приложение";
 "menu_ignore_app" = "Игнорировать %@";
 "menu_ignored_app" = "%@ игнорируется";
@@ -140,6 +145,7 @@
 "tooltip_horizontal_scrolling" = "Разрешить перетаскивание вбок для отправки событий горизонтальной прокрутки.";
 "tooltip_invert_horizontal" = "Переверните только горизонтальное направление прокрутки.";
 "tooltip_show_indicator" = "Показывать визуальный индикатор во время прокрутки.";
+"tooltip_visualizer_animation" = "Анимирует визуализатор, когда он появляется, исчезает и реагирует на направление перетаскивания.";
 "tooltip_visualizer_size" = "Управляет размером визуализатора перетаскивания.";
 "tooltip_liquid_glass" = "Контролирует преломление стекла, блеск и движение, реагирующее на сопротивление.";
 "tooltip_opacity" = "Управляет непрозрачностью визуализатора.";

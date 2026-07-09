@@ -10,15 +10,17 @@ Current state:
 
 - No BadgeApp entry exists yet for `https://github.com/martincalander/MacDragScroll`.
 - Because there is no entry, Scorecard reports `no effort to earn an OpenSSF best practices badge detected`.
+- The repository includes `.bestpractices.json` so BadgeApp can prefill evidence-backed proposed answers once the project entry is created.
 
 To improve the check:
 
 1. Open [bestpractices.dev](https://www.bestpractices.dev/en).
 2. Sign in with the GitHub account that owns or maintains this repository.
 3. Create a new project for `https://github.com/martincalander/MacDragScroll`.
-4. Fill in the self-certification criteria honestly.
-5. Aim for at least the passing badge first.
-6. After the project has a numeric BadgeApp id, add the generated badge to the README badge block:
+4. Review the proposed answers imported from `.bestpractices.json`.
+5. Fill in any remaining self-certification criteria honestly.
+6. Aim for at least the passing badge first.
+7. After the project has a numeric BadgeApp id, add the generated badge to the README badge block:
 
 ```markdown
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/PROJECT_ID/badge)](https://www.bestpractices.dev/projects/PROJECT_ID)

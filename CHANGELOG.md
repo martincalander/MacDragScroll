@@ -6,6 +6,8 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-07-09
+
 ### Added
 
 - Added resilient preference backup storage so user settings can be restored from `~/Library/Application Support/Mac Drag Scroll/Preferences.plist` if the primary preferences domain is missing.
@@ -14,18 +16,21 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 - Added OpenSSF Scorecard and Gitleaks security scans with README badges.
 - Added CodeQL Swift static analysis and pinned GitHub Action dependencies for supply-chain hardening.
 - Added a Swift fuzz harness for preference-input parsing and normalization paths.
+- Added directional Settings tab transitions with subtle vertical movement based on the previous tab position.
 
 ### Changed
 
 - The CLI installer now stages the new app bundle before replacing the installed copy, with rollback if the replacement fails.
 - Settings and update preferences now persist through a shared preference layer instead of direct scattered writes.
 - Sparkle is now resolved as an exact Swift Package dependency instead of storing the binary framework in the source repository.
+- Changed the About logo to an in-place squishy interaction instead of a draggable export item.
 
 ### Fixed
 
 - Fixed local options appearing to reset after updates or development builds by anchoring production settings to `com.martincalander.macdragscroll` and mirroring recoverable values.
 - Fixed automated tests polluting the real per-user Mac Drag Scroll preferences on development machines.
 - Improved crash logging reliability by relying on safe exception handling plus macOS DiagnosticReports import instead of unsafe Swift work inside POSIX signal handlers.
+- Fixed the Settings red close button leaving Mac Drag Scroll visible in the Dock while the menu bar helper stayed active.
 
 ## [1.0.2] - 2026-07-09
 

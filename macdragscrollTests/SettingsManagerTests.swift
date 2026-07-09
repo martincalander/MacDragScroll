@@ -460,10 +460,10 @@ final class SettingsManagerTests: XCTestCase {
     func testAppBundleVersionMetadataUsesStableReleaseValues() {
         let appBundle = Bundle(for: AppDelegate.self)
 
-        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "1.0.2")
-        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String, "102")
-        XCTAssertEqual(AppDelegate.appVersion, "1.0.2")
-        XCTAssertEqual(AppDelegate.appBuild, "102")
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "1.0.3")
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String, "103")
+        XCTAssertEqual(AppDelegate.appVersion, "1.0.3")
+        XCTAssertEqual(AppDelegate.appBuild, "103")
     }
 
     func testSparkleUpdateConfigurationIsPresent() {
@@ -654,6 +654,13 @@ final class SettingsManagerTests: XCTestCase {
         XCTAssertEqual(SettingsTab.next(after: .about), .general)
         XCTAssertEqual(SettingsTab.previous(before: .visualizer), .general)
         XCTAssertEqual(SettingsTab.next(after: .visualizer), .scrolling)
+    }
+
+    func testSettingsTabTransitionDirectionFollowsSidebarOrder() {
+        XCTAssertEqual(SettingsTab.transitionVerticalDirection(from: .general, to: .visualizer), -1)
+        XCTAssertEqual(SettingsTab.transitionVerticalDirection(from: .updates, to: .apps), 1)
+        XCTAssertEqual(SettingsTab.transitionVerticalDirection(from: .about, to: .general), 1)
+        XCTAssertEqual(SettingsTab.transitionVerticalDirection(from: .scrolling, to: .scrolling), 0)
     }
 
     func testCrashReportFileNameIsStableAndSanitized() {

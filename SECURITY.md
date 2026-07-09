@@ -4,7 +4,7 @@
 
 Security fixes are handled for the latest public release of Mac Drag Scroll.
 
-Current public releases are Sparkle-verified but not Apple Developer ID signed or notarized. The README documents the macOS first-launch bypass for unsigned builds.
+Current public release archives are Sparkle-signed and include GitHub build provenance. The app bundle is not Apple Developer ID signed or notarized, so the README documents the macOS first-launch bypass.
 
 ## Automated Scans
 

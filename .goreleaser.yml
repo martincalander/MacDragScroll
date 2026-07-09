@@ -22,4 +22,6 @@ release:
     - glob: "{{ .Env.ARTIFACTS_DIR }}/{{ .Env.APP_ZIP }}"
     - glob: "{{ .Env.ARTIFACTS_DIR }}/{{ .Env.APP_DMG }}"
     - glob: "{{ .Env.ARTIFACTS_DIR }}/appcast.xml"
+    - glob: "{{ .Env.ARTIFACTS_DIR }}/{{ .Env.SIGNATURE_FILE }}"
     - glob: "{{ .Env.ARTIFACTS_DIR }}/SHA256SUMS.txt"
+    - glob: "{{ .Env.ARTIFACTS_DIR }}/{{ .Env.PROVENANCE_FILE }}"

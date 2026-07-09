@@ -10,6 +10,7 @@ This release flow does not require a paid Apple Developer Program account. Becau
 - **Manual installer:** each release publishes `MacDragScroll.dmg` with the app and an Applications shortcut.
 - **CLI install:** `install.sh` downloads the latest `MacDragScroll.zip` release asset, verifies the checksum when available, stages the app, and installs it into `/Applications`.
 - **Homebrew:** publish `packaging/homebrew/Casks/mac-drag-scroll.rb` to `martincalander/homebrew-tap`. The cask downloads the same `MacDragScroll.zip` asset and sets `auto_updates true`.
+- **Release integrity:** each release publishes a detached Sparkle EdDSA signature and GitHub build-provenance bundle alongside the app archives.
 
 GitHub Releases is the source of truth. The appcast URL embedded in the app is:
 
@@ -155,8 +156,9 @@ scripts/publish-release.sh <version>
 - create `MacDragScroll.zip`;
 - create `MacDragScroll.dmg`;
 - generate the Sparkle appcast;
+- publish the archive's detached Sparkle signature as `MacDragScroll.zip.sig`;
 - create `SHA256SUMS.txt`;
-- attest the release files;
+- attest the release files and publish `MacDragScroll.intoto.jsonl` for offline verification;
 - publish/update the GitHub release and its assets through GoReleaser.
 
 ## Verify A Release
@@ -166,8 +168,15 @@ After the workflow completes:
 ```sh
 curl -I https://github.com/martincalander/MacDragScroll/releases/latest/download/appcast.xml
 curl -I https://github.com/martincalander/MacDragScroll/releases/latest/download/MacDragScroll.zip
+curl -I https://github.com/martincalander/MacDragScroll/releases/latest/download/MacDragScroll.zip.sig
 curl -fsSL https://github.com/martincalander/MacDragScroll/releases/latest/download/SHA256SUMS.txt
+
+release_dir="$(mktemp -d)"
+gh release download --repo martincalander/MacDragScroll --dir "$release_dir"
+gh attestation verify "$release_dir/MacDragScroll.zip" --repo martincalander/MacDragScroll
 ```
+
+The detached `.sig` contains the same Sparkle EdDSA signature embedded in `appcast.xml`. The `.intoto.jsonl` file is the portable GitHub attestation bundle. These supply-chain signatures do not replace Apple Developer ID signing or notarization, so Gatekeeper can still require the documented first-launch bypass.
 
 Install from CLI:
 

@@ -48,6 +48,14 @@ Mac Drag Scroll is packaged through GitHub Releases, Sparkle appcasts, the CLI i
 
 The release workflow uses a pinned GoReleaser action to publish the `.zip`, `.dmg`, `appcast.xml`, and checksum files produced by the existing Xcode and Sparkle pipeline. This keeps GitHub Releases as the source of truth while making the real packaging workflow recognizable to Scorecard. Scorecard requires at least one successful run of that workflow before the `Packaging` check passes.
 
+## Signed Releases
+
+Release ZIPs are signed with the same Sparkle EdDSA key trusted by the app. The workflow publishes that detached signature as `MacDragScroll.zip.sig`, generates GitHub build provenance, and attaches the portable bundle as `MacDragScroll.intoto.jsonl`.
+
+OpenSSF Scorecard checks filenames in the five most recent GitHub releases. A detached signature on every release earns 8/10; provenance on every release earns 10/10. Historic releases should only be backfilled with signatures or provenance that genuinely exists. Do not generate misleading provenance or delete valid releases solely to raise the score.
+
+This check is independent of Apple Developer ID signing and notarization. It does not require a paid Apple Developer Program account.
+
 ## Code Review
 
 Required pull request approval is not enabled for now because Mac Drag Scroll is currently maintained by a single developer, and GitHub does not allow a pull request author to approve their own pull request. The repository still protects `main` against deletion and non-fast-forward pushes, and it requires the build/test and secret-scan checks before changes land.

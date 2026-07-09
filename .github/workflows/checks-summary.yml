@@ -26,7 +26,7 @@ jobs:
   aggregate:
     name: Quality Gate, CodeQL, Secret Scan
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
 
     steps:
       - name: Resolve target commit
@@ -70,7 +70,7 @@ jobs:
             run_status=""
             conclusion=""
 
-            for attempt in $(seq 1 80); do
+            for attempt in $(seq 1 240); do
               run_json="$(
                 gh api "repos/$REPO/actions/workflows/$workflow/runs?branch=main&per_page=50" |
                   jq -c --arg sha "$TARGET_SHA" '[.workflow_runs[] | select(.head_sha == $sha)] | sort_by(.created_at) | reverse | first // {}'
@@ -83,7 +83,7 @@ jobs:
                 break
               fi
 
-              if [ "$attempt" -eq 80 ]; then
+              if [ "$attempt" -eq 240 ]; then
                 echo "$label did not complete for $TARGET_SHA in time." >&2
                 exit 1
               fi

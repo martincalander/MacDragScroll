@@ -6,6 +6,16 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 
 ## [Unreleased]
 
+## [1.0.4] - 2026-07-09
+
+### Added
+
+- Added a quiet update check on every app launch when Auto Update is enabled.
+
+### Changed
+
+- GitHub release assets are now published through a pinned GoReleaser action after the existing Xcode build, Sparkle signing, checksums, and provenance steps complete.
+
 ## [1.0.3] - 2026-07-09
 
 ### Added

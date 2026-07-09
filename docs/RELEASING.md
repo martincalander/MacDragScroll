@@ -47,7 +47,7 @@ The app has two version fields:
 
 For `1.0.0`, the build number starts at `100`. The current public line is:
 
-- `1.0.3` -> build `103`
+- `1.0.4` -> build `104`
 
 A practical next sequence is:
 
@@ -156,7 +156,8 @@ scripts/publish-release.sh <version>
 - create `MacDragScroll.dmg`;
 - generate the Sparkle appcast;
 - create `SHA256SUMS.txt`;
-- publish/update the GitHub release.
+- attest the release files;
+- publish/update the GitHub release and its assets through GoReleaser.
 
 ## Verify A Release
 

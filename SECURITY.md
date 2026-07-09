@@ -18,6 +18,8 @@ The repository runs these free security checks:
 
 Scan results are advisory and do not replace manual review, but they help catch common repository, workflow, and secret-handling risks before release.
 
+Scorecard checks that depend on external profile or badge-program metadata are documented in [OpenSSF Scorecard Notes](docs/SCORECARD.md).
+
 ## Reporting A Vulnerability
 
 Please do not open a public issue for a suspected vulnerability.

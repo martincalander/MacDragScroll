@@ -6,6 +6,10 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 
 ## [Unreleased]
 
+### Added
+
+- Documented the remaining OpenSSF Scorecard CII Best Practices and contributor-organization remediation steps.
+
 ## [1.0.3] - 2026-07-09
 
 ### Added

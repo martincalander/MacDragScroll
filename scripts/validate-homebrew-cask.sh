@@ -16,16 +16,18 @@ if ! command -v brew >/dev/null 2>&1; then
   exit 0
 fi
 
-tap_user="macdragscroll-audit"
+tap_user="macdragscroll-audit-$$"
 tap_repo="tap"
 tap_name="${tap_user}/${tap_repo}"
 tap_root="$(brew --repo)/Library/Taps/${tap_user}/homebrew-${tap_repo}"
 
 cleanup() {
+  brew untap --force "$tap_name" >/dev/null 2>&1 || true
   rm -rf "$tap_root"
 }
 trap cleanup EXIT
 
+brew untap --force "$tap_name" >/dev/null 2>&1 || true
 rm -rf "$tap_root"
 brew tap-new --no-git "$tap_name" >/dev/null
 mkdir -p "$tap_root/Casks"

@@ -85,7 +85,12 @@ if [[ ! -x scripts/extract-release-notes.sh || ! -x scripts/install.sh ]]; then
 fi
 
 if [[ -f packaging/homebrew/Casks/mac-drag-scroll.rb ]]; then
-  scripts/validate-homebrew-cask.sh >/dev/null
+  cask_version="$(ruby -ne 'puts $1 if /^\s*version "([^"]+)"/' packaging/homebrew/Casks/mac-drag-scroll.rb)"
+  if [[ "$cask_version" != "$version" ]]; then
+    echo "Homebrew cask version is $cask_version, expected $version" >&2
+    exit 65
+  fi
+  scripts/validate-homebrew-cask.sh
 fi
 
 if ! security find-identity -v -p codesigning | grep -q "Developer ID Application"; then

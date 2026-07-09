@@ -65,7 +65,8 @@ Before tagging a release:
 1. Move relevant `Unreleased` entries into a new version section.
 2. Set the release date.
 3. Update `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION`.
-4. Run `scripts/extract-release-notes.sh 1.0.1` and confirm it prints useful notes.
+4. Update `packaging/homebrew/Casks/mac-drag-scroll.rb` to the same version.
+5. Run `scripts/extract-release-notes.sh 1.0.1` and confirm it prints useful notes.
 
 ## Required GitHub Secrets
 
@@ -118,13 +119,12 @@ scripts/validate-homebrew-cask.sh
 scripts/check-release-readiness.sh 1.0.0
 ```
 
-2. Commit the release changes.
+2. Commit and push the release changes to `main`.
 
-3. Tag the release:
+3. Publish the release tag:
 
 ```sh
-git tag v1.0.0
-git push origin main --tags
+scripts/publish-release.sh 1.0.0
 ```
 
 4. The `Release` GitHub Actions workflow will:

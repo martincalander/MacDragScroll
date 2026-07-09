@@ -8,9 +8,20 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 
 ### Added
 
+- Added resilient preference backup storage so user settings can be restored from `~/Library/Application Support/Mac Drag Scroll/Preferences.plist` if the primary preferences domain is missing.
+- Added local crash-report import for macOS `.crash` and `.ips` DiagnosticReports, alongside the existing in-app crash report tools.
+- Added dedicated development and test preference domains so local debug builds and test runs do not overwrite production user settings.
+
 ### Changed
 
+- The CLI installer now stages the new app bundle before replacing the installed copy, with rollback if the replacement fails.
+- Settings and update preferences now persist through a shared preference layer instead of direct scattered writes.
+
 ### Fixed
+
+- Fixed local options appearing to reset after updates or development builds by anchoring production settings to `com.martincalander.macdragscroll` and mirroring recoverable values.
+- Fixed automated tests polluting the real per-user Mac Drag Scroll preferences on development machines.
+- Improved crash logging reliability by relying on safe exception handling plus macOS DiagnosticReports import instead of unsafe Swift work inside POSIX signal handlers.
 
 ## [1.0.2] - 2026-07-09
 
@@ -54,7 +65,7 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 - Added a Liquid Glass drag visualizer with size, intensity, tint, visibility, and animation controls.
 - Added Launch at Login, ignored apps, trigger safety, scroll speed, acceleration, dead-zone, horizontal scrolling, and horizontal inversion settings.
 - Added first-run welcome flow, Permissions, Updates, and About settings sections.
-- Added Sparkle-based in-app updates backed by signed update archives.
+- Added Sparkle-based in-app updates backed by verified update archives.
 - Added localized settings UI across the bundled languages.
 - Added branded app icon, dock icon, menu bar icon, and About logo.
 - Added duplicate-instance monitoring and warnings.

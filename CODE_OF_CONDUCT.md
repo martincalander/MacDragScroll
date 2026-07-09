@@ -1,4 +1,4 @@
-# Code Of Conduct
+# Code of Conduct
 
 Mac Drag Scroll should be a practical and respectful project space.
 
@@ -8,6 +8,7 @@ Mac Drag Scroll should be a practical and respectful project space.
 - Assume good intent, but correct technical problems clearly.
 - Keep issues and pull requests focused on the app.
 - Respect maintainers' time and decisions.
+- Share enough context to make debugging possible.
 
 ## Unacceptable Behavior
 

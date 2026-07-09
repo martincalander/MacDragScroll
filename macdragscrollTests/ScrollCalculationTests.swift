@@ -658,3 +658,178 @@ final class ScrollOverlayGeometryTests: XCTestCase {
         XCTAssertEqual(anchor.y, 0.5, accuracy: 0.001)
     }
 }
+
+final class ScrollOverlayMotionTests: XCTestCase {
+    func testFlickSquashIgnoresSteadyMovement() {
+        let squash = ScrollOverlayMotion.flickSquash(
+            previousVelocity: CGPoint(x: 0, y: 900),
+            currentVelocity: CGPoint(x: 0, y: 1200),
+            liquidGlassIntensity: 1.35
+        )
+
+        XCTAssertEqual(squash, .none)
+    }
+
+    func testVerticalFlickCreatesSubtleVerticalSquash() {
+        let squash = ScrollOverlayMotion.flickSquash(
+            previousVelocity: CGPoint(x: 80, y: 1300),
+            currentVelocity: CGPoint(x: -40, y: -1350),
+            liquidGlassIntensity: 1.35
+        )
+
+        XCTAssertEqual(squash.axis, .vertical)
+        XCTAssertGreaterThan(squash.amount, 0.20)
+        XCTAssertLessThanOrEqual(squash.amount, ScrollOverlayMotion.maximumSquash)
+
+        let scale = ScrollOverlayMotion.dotScale(for: squash)
+        XCTAssertGreaterThan(scale.width, 1)
+        XCTAssertLessThan(scale.height, 1)
+    }
+
+    func testHorizontalFlickSquashesAcrossHorizontalAxis() {
+        let squash = ScrollOverlayMotion.flickSquash(
+            previousVelocity: CGPoint(x: 1450, y: 120),
+            currentVelocity: CGPoint(x: -1500, y: -60),
+            liquidGlassIntensity: 1.35
+        )
+
+        XCTAssertEqual(squash.axis, .horizontal)
+        XCTAssertGreaterThan(squash.amount, 0.16)
+
+        let scale = ScrollOverlayMotion.dotScale(for: squash)
+        XCTAssertLessThan(scale.width, 1)
+        XCTAssertGreaterThan(scale.height, 1)
+    }
+}
+
+final class TriggerClickSequenceTests: XCTestCase {
+    func testDoubleClickRequiresSameButtonAndModifiersWithinTravel() {
+        let previous = TriggerClickSample(
+            button: 2,
+            modifiers: [],
+            point: CGPoint(x: 100, y: 100),
+            clickState: 1,
+            timestamp: 1.0
+        )
+        let current = TriggerClickSample(
+            button: 2,
+            modifiers: [],
+            point: CGPoint(x: 104, y: 103),
+            clickState: 1,
+            timestamp: 1.24
+        )
+
+        XCTAssertTrue(TriggerClickSequence.isDoubleClick(
+            previous: previous,
+            current: current,
+            maxInterval: 0.34,
+            maxTravel: 8
+        ))
+    }
+
+    func testDoubleClickRejectsSlowOrDistantClicks() {
+        let previous = TriggerClickSample(
+            button: 2,
+            modifiers: [],
+            point: CGPoint(x: 100, y: 100),
+            clickState: 1,
+            timestamp: 1.0
+        )
+        let slow = TriggerClickSample(
+            button: 2,
+            modifiers: [],
+            point: CGPoint(x: 102, y: 101),
+            clickState: 1,
+            timestamp: 1.42
+        )
+        let distant = TriggerClickSample(
+            button: 2,
+            modifiers: [],
+            point: CGPoint(x: 130, y: 100),
+            clickState: 1,
+            timestamp: 1.18
+        )
+
+        XCTAssertFalse(TriggerClickSequence.isDoubleClick(
+            previous: previous,
+            current: slow,
+            maxInterval: 0.34,
+            maxTravel: 8
+        ))
+        XCTAssertFalse(TriggerClickSequence.isDoubleClick(
+            previous: previous,
+            current: distant,
+            maxInterval: 0.34,
+            maxTravel: 8
+        ))
+    }
+
+    func testDoubleClickRejectsDifferentTriggerChord() {
+        let previous = TriggerClickSample(
+            button: 2,
+            modifiers: [],
+            point: CGPoint(x: 100, y: 100),
+            clickState: 1,
+            timestamp: 1.0
+        )
+        let differentButton = TriggerClickSample(
+            button: 3,
+            modifiers: [],
+            point: CGPoint(x: 100, y: 100),
+            clickState: 1,
+            timestamp: 1.12
+        )
+        let differentModifiers = TriggerClickSample(
+            button: 2,
+            modifiers: [.shift],
+            point: CGPoint(x: 100, y: 100),
+            clickState: 1,
+            timestamp: 1.12
+        )
+
+        XCTAssertFalse(TriggerClickSequence.isDoubleClick(
+            previous: previous,
+            current: differentButton,
+            maxInterval: 0.34,
+            maxTravel: 8
+        ))
+        XCTAssertFalse(TriggerClickSequence.isDoubleClick(
+            previous: previous,
+            current: differentModifiers,
+            maxInterval: 0.34,
+            maxTravel: 8
+        ))
+    }
+
+    func testSystemDoubleClickStateTriggersWithoutPreviousSample() {
+        let current = TriggerClickSample(
+            button: 2,
+            modifiers: [],
+            point: CGPoint(x: 100, y: 100),
+            clickState: 2,
+            timestamp: 1.0
+        )
+
+        XCTAssertTrue(TriggerClickSequence.isDoubleClick(
+            previous: nil,
+            current: current,
+            maxInterval: 0.34,
+            maxTravel: 8
+        ))
+    }
+}
+
+final class TriggerInputSourceTests: XCTestCase {
+    func testDefaultMouseSubtypeCanStartDragScroll() {
+        XCTAssertTrue(TriggerInputSource.canStartDragScroll(mouseSubtype: 0))
+    }
+
+    func testTrackpadTouchSubtypeCannotStartDragScroll() {
+        XCTAssertFalse(TriggerInputSource.canStartDragScroll(mouseSubtype: 3))
+    }
+
+    func testTabletMouseSubtypesCannotStartDragScroll() {
+        XCTAssertFalse(TriggerInputSource.canStartDragScroll(mouseSubtype: 1))
+        XCTAssertFalse(TriggerInputSource.canStartDragScroll(mouseSubtype: 2))
+    }
+}

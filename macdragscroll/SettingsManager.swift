@@ -278,6 +278,34 @@ class SettingsManager: ObservableObject {
     static let shared = SettingsManager()
     static let visualizerSizeRange: ClosedRange<Double> = 0.45...1.5
     static let liquidGlassIntensityRange: ClosedRange<Double> = 0.7...2.0
+    private static let migratablePreferenceKeys: Set<String> = [
+        "isEnabled",
+        "keepRunningInMenuBar",
+        "animationsEnabled",
+        "visualizerAnimationsEnabled",
+        "excludedApps",
+        "scrollSpeed",
+        "deadZoneRadius",
+        "acceleration",
+        "overlayOpacity",
+        "visualizerSize",
+        "visualizerTintStyle",
+        "liquidGlassIntensity",
+        "reverseScrollDirection",
+        "horizontalScrollingEnabled",
+        "invertHorizontalScroll",
+        "triggerConfig",
+        "hasCompletedWelcome",
+        "appLanguage",
+        "appAppearance",
+        "autoUpdateEnabled",
+        "lastUpdateCheckDate",
+        "updateHistory",
+        "SUEnableAutomaticChecks",
+        "SUAutomaticallyUpdate",
+        "SUHasLaunchedBefore",
+        "SULastCheckTime"
+    ]
     
     private let defaults = PersistentPreferences.userDefaults
 
@@ -312,42 +340,42 @@ class SettingsManager: ObservableObject {
     }
     
     @Published var isEnabled: Bool {
-        didSet { defaults.set(isEnabled, forKey: isEnabledKey) }
+        didSet { persist(isEnabled, forKey: isEnabledKey) }
     }
 
     @Published var keepRunningInMenuBar: Bool {
-        didSet { defaults.set(keepRunningInMenuBar, forKey: keepRunningInMenuBarKey) }
+        didSet { persist(keepRunningInMenuBar, forKey: keepRunningInMenuBarKey) }
     }
     
     @Published var showIndicator: Bool {
-        didSet { defaults.set(showIndicator, forKey: showIndicatorKey) }
+        didSet { persist(showIndicator, forKey: showIndicatorKey) }
     }
 
     @Published var visualizerAnimationsEnabled: Bool {
-        didSet { defaults.set(visualizerAnimationsEnabled, forKey: visualizerAnimationsEnabledKey) }
+        didSet { persist(visualizerAnimationsEnabled, forKey: visualizerAnimationsEnabledKey) }
     }
 
     @Published var reverseScrollDirection: Bool {
-        didSet { defaults.set(reverseScrollDirection, forKey: reverseScrollDirectionKey) }
+        didSet { persist(reverseScrollDirection, forKey: reverseScrollDirectionKey) }
     }
 
     @Published var horizontalScrollingEnabled: Bool {
-        didSet { defaults.set(horizontalScrollingEnabled, forKey: horizontalScrollingEnabledKey) }
+        didSet { persist(horizontalScrollingEnabled, forKey: horizontalScrollingEnabledKey) }
     }
 
     @Published var invertHorizontalScroll: Bool {
-        didSet { defaults.set(invertHorizontalScroll, forKey: invertHorizontalScrollKey) }
+        didSet { persist(invertHorizontalScroll, forKey: invertHorizontalScrollKey) }
     }
     
     @Published var excludedApps: [String] {
-        didSet { defaults.set(excludedApps, forKey: excludedAppsKey) }
+        didSet { persist(excludedApps, forKey: excludedAppsKey) }
     }
     
     @Published var scrollSpeed: Double {
         didSet {
             let clamped = min(max(scrollSpeed, 0.5), 5.0)
             if clamped != scrollSpeed { scrollSpeed = clamped }
-            defaults.set(scrollSpeed, forKey: scrollSpeedKey)
+            persist(scrollSpeed, forKey: scrollSpeedKey)
         }
     }
 
@@ -355,7 +383,7 @@ class SettingsManager: ObservableObject {
         didSet {
             let clamped = min(max(deadZoneRadius, 5.0), 50.0)
             if clamped != deadZoneRadius { deadZoneRadius = clamped }
-            defaults.set(deadZoneRadius, forKey: deadZoneRadiusKey)
+            persist(deadZoneRadius, forKey: deadZoneRadiusKey)
         }
     }
 
@@ -363,7 +391,7 @@ class SettingsManager: ObservableObject {
         didSet {
             let clamped = min(max(acceleration, 1.0), 3.0)
             if clamped != acceleration { acceleration = clamped }
-            defaults.set(acceleration, forKey: accelerationKey)
+            persist(acceleration, forKey: accelerationKey)
         }
     }
 
@@ -371,7 +399,7 @@ class SettingsManager: ObservableObject {
         didSet {
             let clamped = min(max(overlayOpacity, 0.2), 1.0)
             if clamped != overlayOpacity { overlayOpacity = clamped }
-            defaults.set(overlayOpacity, forKey: overlayOpacityKey)
+            persist(overlayOpacity, forKey: overlayOpacityKey)
         }
     }
 
@@ -379,32 +407,32 @@ class SettingsManager: ObservableObject {
         didSet {
             let clamped = min(max(visualizerSize, Self.visualizerSizeRange.lowerBound), Self.visualizerSizeRange.upperBound)
             if clamped != visualizerSize { visualizerSize = clamped }
-            defaults.set(visualizerSize, forKey: visualizerSizeKey)
+            persist(visualizerSize, forKey: visualizerSizeKey)
         }
     }
 
     @Published var visualizerTintStyle: VisualizerTintStyle {
-        didSet { defaults.set(visualizerTintStyle.rawValue, forKey: visualizerTintStyleKey) }
+        didSet { persist(visualizerTintStyle.rawValue, forKey: visualizerTintStyleKey) }
     }
 
     @Published var liquidGlassIntensity: Double {
         didSet {
             let clamped = min(max(liquidGlassIntensity, Self.liquidGlassIntensityRange.lowerBound), Self.liquidGlassIntensityRange.upperBound)
             if clamped != liquidGlassIntensity { liquidGlassIntensity = clamped }
-            defaults.set(liquidGlassIntensity, forKey: liquidGlassIntensityKey)
+            persist(liquidGlassIntensity, forKey: liquidGlassIntensityKey)
         }
     }
 
     @Published var hasCompletedWelcome: Bool {
-        didSet { defaults.set(hasCompletedWelcome, forKey: hasCompletedWelcomeKey) }
+        didSet { persist(hasCompletedWelcome, forKey: hasCompletedWelcomeKey) }
     }
 
     @Published var appLanguage: AppLanguage {
-        didSet { defaults.set(appLanguage.rawValue, forKey: appLanguageKey) }
+        didSet { persist(appLanguage.rawValue, forKey: appLanguageKey) }
     }
 
     @Published var appAppearance: AppAppearance {
-        didSet { defaults.set(appAppearance.rawValue, forKey: appAppearanceKey) }
+        didSet { persist(appAppearance.rawValue, forKey: appAppearanceKey) }
     }
     
     @Published var triggerConfig: TriggerConfig {
@@ -412,6 +440,10 @@ class SettingsManager: ObservableObject {
     }
     
     private init() {
+        PersistentPreferences.restoreBackup(allowedKeys: Self.migratablePreferenceKeys)
+        PersistentPreferences.migrateLegacyDomains(allowedKeys: Self.migratablePreferenceKeys)
+        PersistentPreferences.refreshBackup(allowedKeys: Self.migratablePreferenceKeys)
+
         defaults.register(defaults: [
             isEnabledKey: true,
             keepRunningInMenuBarKey: true,
@@ -433,44 +465,31 @@ class SettingsManager: ObservableObject {
             appAppearanceKey: AppAppearance.system.rawValue
         ])
         
-        self.isEnabled = defaults.bool(forKey: isEnabledKey)
-        self.keepRunningInMenuBar = defaults.bool(forKey: keepRunningInMenuBarKey)
-        self.showIndicator = defaults.bool(forKey: showIndicatorKey)
-        self.visualizerAnimationsEnabled = defaults.bool(forKey: visualizerAnimationsEnabledKey)
-        self.reverseScrollDirection = defaults.bool(forKey: reverseScrollDirectionKey)
-        self.horizontalScrollingEnabled = defaults.object(forKey: horizontalScrollingEnabledKey) == nil ? true : defaults.bool(forKey: horizontalScrollingEnabledKey)
-        self.invertHorizontalScroll = defaults.bool(forKey: invertHorizontalScrollKey)
-        self.hasCompletedWelcome = defaults.bool(forKey: hasCompletedWelcomeKey)
-        let appLanguageRawValue = defaults.string(forKey: appLanguageKey) ?? AppLanguage.system.rawValue
+        self.isEnabled = Self.boolValue(from: defaults, forKey: isEnabledKey, defaultValue: true)
+        self.keepRunningInMenuBar = Self.boolValue(from: defaults, forKey: keepRunningInMenuBarKey, defaultValue: true)
+        self.showIndicator = Self.boolValue(from: defaults, forKey: showIndicatorKey, defaultValue: true)
+        self.visualizerAnimationsEnabled = Self.boolValue(from: defaults, forKey: visualizerAnimationsEnabledKey, defaultValue: true)
+        self.reverseScrollDirection = Self.boolValue(from: defaults, forKey: reverseScrollDirectionKey, defaultValue: false)
+        self.horizontalScrollingEnabled = Self.boolValue(from: defaults, forKey: horizontalScrollingEnabledKey, defaultValue: true)
+        self.invertHorizontalScroll = Self.boolValue(from: defaults, forKey: invertHorizontalScrollKey, defaultValue: false)
+        self.hasCompletedWelcome = Self.boolValue(from: defaults, forKey: hasCompletedWelcomeKey, defaultValue: false)
+        let appLanguageRawValue = Self.stringValue(from: defaults, forKey: appLanguageKey, defaultValue: AppLanguage.system.rawValue)
         self.appLanguage = AppLanguage(rawValue: appLanguageRawValue) ?? .system
-        let appAppearanceRawValue = defaults.string(forKey: appAppearanceKey) ?? AppAppearance.system.rawValue
+        let appAppearanceRawValue = Self.stringValue(from: defaults, forKey: appAppearanceKey, defaultValue: AppAppearance.system.rawValue)
         self.appAppearance = AppAppearance(rawValue: appAppearanceRawValue) ?? .system
-        self.excludedApps = defaults.stringArray(forKey: excludedAppsKey) ?? []
+        self.excludedApps = Self.stringArrayValue(from: defaults, forKey: excludedAppsKey, defaultValue: [])
 
         // Load and clamp values to valid ranges (protects against corrupted UserDefaults)
-        let loadedSpeed = defaults.double(forKey: scrollSpeedKey)
-        self.scrollSpeed = min(max(loadedSpeed, 0.5), 5.0)
+        self.scrollSpeed = Self.doubleValue(from: defaults, forKey: scrollSpeedKey, defaultValue: 2.0, range: 0.5...5.0)
+        self.deadZoneRadius = Self.doubleValue(from: defaults, forKey: deadZoneRadiusKey, defaultValue: 20.0, range: 5.0...50.0)
+        self.acceleration = Self.doubleValue(from: defaults, forKey: accelerationKey, defaultValue: 1.8, range: 1.0...3.0)
+        self.overlayOpacity = Self.doubleValue(from: defaults, forKey: overlayOpacityKey, defaultValue: 1.0, range: 0.2...1.0)
+        self.visualizerSize = Self.doubleValue(from: defaults, forKey: visualizerSizeKey, defaultValue: 1.0, range: Self.visualizerSizeRange)
 
-        let loadedDeadZone = defaults.double(forKey: deadZoneRadiusKey)
-        self.deadZoneRadius = min(max(loadedDeadZone, 5.0), 50.0)
-
-        let loadedAcceleration = defaults.double(forKey: accelerationKey)
-        self.acceleration = min(max(loadedAcceleration, 1.0), 3.0)
-
-        let loadedOpacity = defaults.object(forKey: overlayOpacityKey) as? Double ?? 1.0
-        self.overlayOpacity = min(max(loadedOpacity, 0.2), 1.0)
-
-        let loadedVisualizerSize = defaults.object(forKey: visualizerSizeKey) as? Double ?? 1.0
-        self.visualizerSize = min(max(loadedVisualizerSize, Self.visualizerSizeRange.lowerBound), Self.visualizerSizeRange.upperBound)
-
-        let tintRawValue = defaults.string(forKey: visualizerTintStyleKey) ?? VisualizerTintStyle.clear.rawValue
+        let tintRawValue = Self.stringValue(from: defaults, forKey: visualizerTintStyleKey, defaultValue: VisualizerTintStyle.clear.rawValue)
         self.visualizerTintStyle = VisualizerTintStyle(rawValue: tintRawValue) ?? .clear
 
-        let loadedLiquidGlassIntensity = defaults.object(forKey: liquidGlassIntensityKey) as? Double ?? 1.35
-        self.liquidGlassIntensity = min(
-            max(loadedLiquidGlassIntensity, Self.liquidGlassIntensityRange.lowerBound),
-            Self.liquidGlassIntensityRange.upperBound
-        )
+        self.liquidGlassIntensity = Self.doubleValue(from: defaults, forKey: liquidGlassIntensityKey, defaultValue: 1.35, range: Self.liquidGlassIntensityRange)
 
         self.triggerConfig = Self.loadTriggerConfig(from: defaults)
         
@@ -487,17 +506,58 @@ class SettingsManager: ObservableObject {
         }
         return config
     }
+
+    private static func boolValue(from defaults: UserDefaults, forKey key: String, defaultValue: Bool) -> Bool {
+        let value = defaults.object(forKey: key)
+        if let bool = value as? Bool {
+            return bool
+        }
+        if let number = value as? NSNumber {
+            return number.boolValue
+        }
+        return defaultValue
+    }
+
+    private static func stringValue(from defaults: UserDefaults, forKey key: String, defaultValue: String) -> String {
+        defaults.string(forKey: key) ?? defaultValue
+    }
+
+    private static func stringArrayValue(from defaults: UserDefaults, forKey key: String, defaultValue: [String]) -> [String] {
+        defaults.stringArray(forKey: key) ?? defaultValue
+    }
+
+    private static func doubleValue(
+        from defaults: UserDefaults,
+        forKey key: String,
+        defaultValue: Double,
+        range: ClosedRange<Double>
+    ) -> Double {
+        let rawValue = defaults.object(forKey: key)
+        let value: Double
+
+        if let double = rawValue as? Double {
+            value = double
+        } else if let number = rawValue as? NSNumber {
+            value = number.doubleValue
+        } else {
+            value = defaultValue
+        }
+
+        return min(max(value, range.lowerBound), range.upperBound)
+    }
+
+    private func persist(_ value: Any, forKey key: String) {
+        PersistentPreferences.persist(value, forKey: key)
+    }
     
     private func saveTriggerConfig() {
         if let data = try? JSONEncoder().encode(triggerConfig) {
-            defaults.set(data, forKey: triggerConfigKey)
+            persist(data, forKey: triggerConfigKey)
         }
     }
 
     func completeWelcome() {
         hasCompletedWelcome = true
-        defaults.set(true, forKey: hasCompletedWelcomeKey)
-        defaults.synchronize()
     }
     
     // Check if app is excluded by bundle identifier

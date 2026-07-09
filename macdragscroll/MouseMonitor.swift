@@ -14,6 +14,50 @@ struct ScrollDeltas: Equatable {
     let vertical: Int32
 }
 
+struct TriggerClickSample: Equatable {
+    let button: Int
+    let modifiers: NSEvent.ModifierFlags
+    let point: CGPoint
+    let clickState: Int64
+    let timestamp: CFTimeInterval
+}
+
+enum TriggerClickSequence {
+    static func isDoubleClick(
+        previous: TriggerClickSample?,
+        current: TriggerClickSample,
+        maxInterval: CFTimeInterval,
+        maxTravel: CGFloat
+    ) -> Bool {
+        if current.clickState >= 2 {
+            return true
+        }
+
+        guard let previous else { return false }
+        guard previous.button == current.button,
+              previous.modifiers == current.modifiers else {
+            return false
+        }
+
+        let elapsed = current.timestamp - previous.timestamp
+        guard elapsed >= 0, elapsed <= maxInterval else {
+            return false
+        }
+
+        let deltaX = current.point.x - previous.point.x
+        let deltaY = current.point.y - previous.point.y
+        return sqrt(deltaX * deltaX + deltaY * deltaY) <= maxTravel
+    }
+}
+
+enum TriggerInputSource {
+    private static let defaultMouseSubtype: Int64 = 0
+
+    static func canStartDragScroll(mouseSubtype: Int64) -> Bool {
+        mouseSubtype == defaultMouseSubtype
+    }
+}
+
 enum ScrollPhysics {
     private static let minimumAxisDirection = 0.12
 
@@ -115,7 +159,12 @@ enum ScrollEventFactory {
 final class MouseMonitor {
     private struct Constants {
         static let overlayShowDelay: TimeInterval = 0.12
-        static let quickClickReplayLimit: CFTimeInterval = 0.22
+        static let quickClickReplayLimit: CFTimeInterval = 0.26
+        static var doubleClickReactionInterval: CFTimeInterval {
+            min(max(NSEvent.doubleClickInterval, 0.34), 0.75)
+        }
+        static let doubleClickReactionMaxTravel: CGFloat = 8
+        static let doubleClickReactionDuration: TimeInterval = 0.42
         static let windowValidationInterval: TimeInterval = 0.15
     }
 
@@ -133,6 +182,7 @@ final class MouseMonitor {
         let button: Int
         let modifiers: NSEvent.ModifierFlags
         let quartzPoint: CGPoint
+        let clickState: Int64
         let startedAt: CFTimeInterval
     }
 
@@ -141,6 +191,8 @@ final class MouseMonitor {
     private var scrollTimer: Timer?
     private var overlayShowTimer: Timer?
     private var overlayWindow: ScrollOverlayWindow?
+    private var clickReactionWindow: ScrollOverlayWindow?
+    private var clickReactionHideTimer: Timer?
 
     private var isTriggerActive = false
     private var isActivated = false
@@ -154,6 +206,8 @@ final class MouseMonitor {
     private var originWindow: WindowSnapshot?
     private var activeTriggerConfig: TriggerConfig?
     private var pendingClick: PendingClick?
+    private var lastQuickClick: TriggerClickSample?
+    private var didShowReactionForActivePress = false
     private var isOriginWindowAvailable = false
     private var lastWindowValidation = Date.distantPast
 
@@ -217,6 +271,7 @@ final class MouseMonitor {
 
     func stop() {
         cancelInteraction()
+        hideClickReaction(immediately: true)
 
         if let tap = eventTap {
             CGEvent.tapEnable(tap: tap, enable: false)
@@ -312,6 +367,7 @@ final class MouseMonitor {
         if Self.isMouseDown(type) {
             let config = triggerConfig
             guard config.matches(button: buttonNumber, modifiers: modifiers),
+                  Self.canStartDragScroll(from: event),
                   let targetWindow = windowAtPoint(point),
                   !isAppExcluded(processIdentifier: targetWindow.identity.ownerPID) else {
                 return pass(event)
@@ -322,6 +378,7 @@ final class MouseMonitor {
                 quartzPoint: quartzPoint,
                 button: buttonNumber,
                 modifiers: modifiers,
+                clickState: event.getIntegerValueField(.mouseEventClickState),
                 targetWindow: targetWindow,
                 config: config
             )
@@ -364,11 +421,14 @@ final class MouseMonitor {
         quartzPoint: CGPoint,
         button: Int,
         modifiers: NSEvent.ModifierFlags,
+        clickState: Int64,
         targetWindow: WindowSnapshot,
         config: TriggerConfig
     ) {
         guard !isTriggerActive else { return }
 
+        hideClickReaction(immediately: true)
+        didShowReactionForActivePress = false
         isTriggerActive = true
         isActivated = true
         isOverlayVisible = false
@@ -378,6 +438,7 @@ final class MouseMonitor {
             button: button,
             modifiers: modifiers,
             quartzPoint: quartzPoint,
+            clickState: max(clickState, 1),
             startedAt: CACurrentMediaTime()
         )
         originPoint = point
@@ -387,6 +448,12 @@ final class MouseMonitor {
         originWindow = targetWindow
         isOriginWindowAvailable = true
         lastWindowValidation = .distantPast
+
+        if clickState >= 2 {
+            lastQuickClick = nil
+            didShowReactionForActivePress = true
+            showDoubleClickReaction(at: point)
+        }
 
         updateOriginWindowAvailability(force: true)
         startScrollTimer()
@@ -403,6 +470,12 @@ final class MouseMonitor {
         overlayShowTimer = nil
         stopScrolling()
 
+        if let clickToReplay, !didShowReactionForActivePress {
+            registerQuickClickReaction(for: clickToReplay)
+        }
+
+        didShowReactionForActivePress = false
+
         if let clickToReplay {
             self.replayClick(clickToReplay)
         }
@@ -412,6 +485,7 @@ final class MouseMonitor {
         isTriggerActive = false
         activeTriggerConfig = nil
         pendingClick = nil
+        didShowReactionForActivePress = false
         overlayShowTimer?.invalidate()
         overlayShowTimer = nil
         stopScrolling()
@@ -435,6 +509,7 @@ final class MouseMonitor {
 
         if !hasMovedOutsideDeadZone && distance > deadZoneRadius {
             hasMovedOutsideDeadZone = true
+            lastQuickClick = nil
             if isOverlayVisible && isOriginWindowAvailable {
                 overlayWindow?.animateClickBounce()
             }
@@ -491,6 +566,70 @@ final class MouseMonitor {
 
         overlayWindow?.hide()
         overlayWindow = nil
+    }
+
+    private func registerQuickClickReaction(for pendingClick: PendingClick) {
+        let sample = TriggerClickSample(
+            button: pendingClick.button,
+            modifiers: pendingClick.modifiers,
+            point: appKitPoint(fromQuartzPoint: pendingClick.quartzPoint),
+            clickState: pendingClick.clickState,
+            timestamp: CACurrentMediaTime()
+        )
+
+        if TriggerClickSequence.isDoubleClick(
+            previous: lastQuickClick,
+            current: sample,
+            maxInterval: Constants.doubleClickReactionInterval,
+            maxTravel: Constants.doubleClickReactionMaxTravel
+        ) {
+            lastQuickClick = nil
+            showDoubleClickReaction(at: sample.point)
+        } else {
+            lastQuickClick = sample
+        }
+    }
+
+    private func showDoubleClickReaction(at point: CGPoint) {
+        guard SettingsManager.shared.showIndicator,
+              SettingsManager.shared.visualizerAnimationsEnabled else {
+            return
+        }
+
+        hideClickReaction(immediately: true)
+
+        let window = ScrollOverlayWindow(origin: point)
+        clickReactionWindow = window
+        window.showDoubleClickReaction()
+
+        clickReactionHideTimer = Timer.scheduledTimer(withTimeInterval: Constants.doubleClickReactionDuration, repeats: false) { [weak self, weak window] _ in
+            guard let self else { return }
+
+            window?.hide()
+            if self.clickReactionWindow === window {
+                self.clickReactionWindow = nil
+                self.clickReactionHideTimer = nil
+            }
+        }
+
+        if let clickReactionHideTimer {
+            RunLoop.main.add(clickReactionHideTimer, forMode: .common)
+        }
+    }
+
+    private func hideClickReaction(immediately: Bool) {
+        clickReactionHideTimer?.invalidate()
+        clickReactionHideTimer = nil
+
+        guard let clickReactionWindow else { return }
+
+        if immediately {
+            clickReactionWindow.orderOut(nil)
+        } else {
+            clickReactionWindow.hide()
+        }
+
+        self.clickReactionWindow = nil
     }
 
     private func performScroll() {
@@ -644,6 +783,7 @@ final class MouseMonitor {
         [downEvent, upEvent].forEach { event in
             event.flags = flags
             event.setIntegerValueField(.mouseEventButtonNumber, value: Int64(pendingClick.button))
+            event.setIntegerValueField(.mouseEventClickState, value: pendingClick.clickState)
             event.setIntegerValueField(.eventSourceUserData, value: ScrollEventFactory.syntheticEventMarker)
         }
 
@@ -745,6 +885,11 @@ final class MouseMonitor {
         default:
             return nil
         }
+    }
+
+    private static func canStartDragScroll(from event: CGEvent) -> Bool {
+        let mouseSubtype = event.getIntegerValueField(.mouseEventSubtype)
+        return TriggerInputSource.canStartDragScroll(mouseSubtype: mouseSubtype)
     }
 
     private static func isMouseDown(_ type: CGEventType) -> Bool {

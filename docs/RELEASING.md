@@ -2,13 +2,13 @@
 
 Mac Drag Scroll currently ships as an unsigned macOS app with Sparkle-verified updates.
 
-This release flow does not require a paid Apple Developer Program account. Because the app is not Developer ID signed or notarized, macOS will block the first launch for most users. The install instructions document the standard Finder bypass: right-click the app, choose **Open**, then confirm.
+This release flow does not require a paid Apple Developer Program account. Because the app is not Developer ID signed or notarized, macOS may block the first launch for most users. The install instructions document the standard Finder bypass: right-click the app, choose **Open**, then confirm.
 
 ## Strategy
 
 - **In-app updates:** Sparkle 2 verifies and installs update archives from the GitHub release appcast.
 - **Manual installer:** each release publishes `MacDragScroll.dmg` with the app and an Applications shortcut.
-- **CLI install:** `install.sh` downloads the latest `MacDragScroll.zip` release asset and installs it into `/Applications`.
+- **CLI install:** `install.sh` downloads the latest `MacDragScroll.zip` release asset, verifies the checksum when available, stages the app, and installs it into `/Applications`.
 - **Homebrew:** publish `packaging/homebrew/Casks/mac-drag-scroll.rb` to `martincalander/homebrew-tap`. The cask downloads the same `MacDragScroll.zip` asset and sets `auto_updates true`.
 
 GitHub Releases is the source of truth. The appcast URL embedded in the app is:
@@ -17,7 +17,14 @@ GitHub Releases is the source of truth. The appcast URL embedded in the app is:
 https://github.com/martincalander/MacDragScroll/releases/latest/download/appcast.xml
 ```
 
-User preferences live in `~/Library/Preferences/com.martincalander.macdragscroll.plist`. Installers and the Homebrew cask intentionally leave this file alone so settings survive uninstall/reinstall and app updates.
+User preferences live in:
+
+```text
+~/Library/Preferences/com.martincalander.macdragscroll.plist
+~/Library/Application Support/Mac Drag Scroll/Preferences.plist
+```
+
+Installers, Sparkle updates, and the Homebrew cask intentionally leave these files alone so settings survive uninstall, reinstall, and app updates. Debug builds use a separate development domain, and tests use per-process domains.
 
 ## Versioning
 
@@ -38,9 +45,13 @@ The app has two version fields:
 - `MARKETING_VERSION` -> `CFBundleShortVersionString`, shown to users.
 - `CURRENT_PROJECT_VERSION` -> `CFBundleVersion`, used by Sparkle and must increase on every shipped build.
 
-For `1.0.0`, the build number starts at `100`. A practical next sequence is:
+For `1.0.0`, the build number starts at `100`. The current public line is:
 
-- `1.0.1` -> build `101`
+- `1.0.2` -> build `102`
+
+A practical next sequence is:
+
+- `1.0.3` -> build `103`
 - `1.1.0` -> build `110`
 - `2.0.0` -> build `200`
 
@@ -68,7 +79,8 @@ Before tagging a release:
 2. Set the release date.
 3. Update `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION`.
 4. Update `packaging/homebrew/Casks/mac-drag-scroll.rb` to the same version.
-5. Run `scripts/extract-release-notes.sh 1.0.1` and confirm it prints useful notes.
+5. Update `UpdateManager.versionHistory` so the latest row matches the shipped app build.
+6. Run `scripts/extract-release-notes.sh <version>` and confirm it prints useful notes.
 
 ## Required GitHub Secret
 
@@ -94,6 +106,8 @@ rm sparkle_private_key.txt
 
 Use Sparkle `2.9.4` for that command, matching the vendored framework.
 
+Never commit the private key, exported key files, or workflow logs containing the private key.
+
 Apple Developer ID signing and notarization can be added later, but they are intentionally not required by the current workflow.
 
 ## Release
@@ -101,9 +115,28 @@ Apple Developer ID signing and notarization can be added later, but they are int
 1. Confirm the app builds and tests locally:
 
 ```sh
-xcodebuild test -project macdragscroll.xcodeproj -scheme macdragscroll -destination 'platform=macOS'
+xcodebuild test \
+  -project macdragscroll.xcodeproj \
+  -scheme macdragscroll \
+  -destination 'platform=macOS' \
+  -derivedDataPath /tmp/MacDragScroll-Test
+
+xcodebuild analyze \
+  -project macdragscroll.xcodeproj \
+  -scheme macdragscroll \
+  -destination 'platform=macOS' \
+  -derivedDataPath /tmp/MacDragScroll-Analyze
+
+xcodebuild build \
+  -project macdragscroll.xcodeproj \
+  -scheme macdragscroll \
+  -configuration Release \
+  -destination 'platform=macOS' \
+  -derivedDataPath /tmp/MacDragScroll-Release
+
+bash -n install.sh scripts/*.sh
 scripts/validate-homebrew-cask.sh
-scripts/check-release-readiness.sh 1.0.0
+scripts/check-release-readiness.sh <version>
 ```
 
 2. Commit and push the release changes to `main`.
@@ -111,7 +144,7 @@ scripts/check-release-readiness.sh 1.0.0
 3. Publish the release tag:
 
 ```sh
-scripts/publish-release.sh 1.0.0
+scripts/publish-release.sh <version>
 ```
 
 4. The `Release` GitHub Actions workflow will:
@@ -123,6 +156,7 @@ scripts/publish-release.sh 1.0.0
 - create `MacDragScroll.zip`;
 - create `MacDragScroll.dmg`;
 - generate the Sparkle appcast;
+- create `SHA256SUMS.txt`;
 - publish/update the GitHub release.
 
 ## Verify A Release
@@ -139,6 +173,12 @@ Install from CLI:
 
 ```sh
 curl -fsSL https://github.com/martincalander/MacDragScroll/raw/main/install.sh | bash
+```
+
+Install from Homebrew after the tap has been updated:
+
+```sh
+brew install --cask martincalander/tap/mac-drag-scroll
 ```
 
 To test Sparkle, run an older installed build and choose **Check For Update** from the menu bar.

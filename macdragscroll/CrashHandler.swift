@@ -31,12 +31,19 @@ final class CrashHandler: ObservableObject {
     let crashReportDirectory: URL
 
     private let legacyCrashLogPath: URL
+    private let systemDiagnosticReportsDirectory: URL
+    private static let supportedCrashReportExtensions: Set<String> = ["log", "crash", "ips"]
     
     private init() {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         let appFolder = appSupport.appendingPathComponent("MacDragScroll")
+        let libraryFolder = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first
+            ?? FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library", isDirectory: true)
         crashReportDirectory = appFolder.appendingPathComponent("Crash Reports", isDirectory: true)
         legacyCrashLogPath = appFolder.appendingPathComponent("crash.log")
+        systemDiagnosticReportsDirectory = libraryFolder
+            .appendingPathComponent("Logs", isDirectory: true)
+            .appendingPathComponent("DiagnosticReports", isDirectory: true)
         
         ensureCrashReportDirectory()
     }
@@ -56,57 +63,10 @@ final class CrashHandler: ObservableObject {
     // MARK: - Setup
     
     func setup() {
-        setupSignalHandlers()
         setupExceptionHandler()
         migrateLegacyCrashLogIfNeeded()
+        importSystemDiagnosticReportsIfNeeded()
         refreshCrashReports()
-    }
-    
-    // MARK: - Signal Handlers
-    
-    private func setupSignalHandlers() {
-        // Handle common crash signals
-        signal(SIGABRT) { signal in
-            CrashHandler.shared.handleSignal(signal, name: "SIGABRT")
-        }
-        signal(SIGILL) { signal in
-            CrashHandler.shared.handleSignal(signal, name: "SIGILL")
-        }
-        signal(SIGSEGV) { signal in
-            CrashHandler.shared.handleSignal(signal, name: "SIGSEGV")
-        }
-        signal(SIGFPE) { signal in
-            CrashHandler.shared.handleSignal(signal, name: "SIGFPE")
-        }
-        signal(SIGBUS) { signal in
-            CrashHandler.shared.handleSignal(signal, name: "SIGBUS")
-        }
-        signal(SIGTRAP) { signal in
-            CrashHandler.shared.handleSignal(signal, name: "SIGTRAP")
-        }
-    }
-    
-    private func handleSignal(_ signal: Int32, name: String) {
-        let crashInfo = """
-        Mac Drag Scroll Crash Report
-        ============================
-        Date: \(Date())
-        Version: \(CrashHandler.appVersion)
-        Build: \(CrashHandler.appBuild)
-        macOS: \(ProcessInfo.processInfo.operatingSystemVersionString)
-        Process: \(ProcessInfo.processInfo.processName) (\(ProcessInfo.processInfo.processIdentifier))
-        Signal: \(name) (\(signal))
-        
-        Stack Trace:
-        \(Thread.callStackSymbols.joined(separator: "\n"))
-        """
-        
-        // Write crash log synchronously (we're about to crash)
-        writeCrashReport(crashInfo, kind: name)
-        
-        // Re-raise the signal to get default behavior
-        Darwin.signal(signal, SIG_DFL)
-        Darwin.raise(signal)
     }
     
     // MARK: - Exception Handler
@@ -202,7 +162,7 @@ final class CrashHandler: ObservableObject {
         }
 
         return urls
-            .filter { $0.pathExtension.lowercased() == "log" }
+            .filter { supportedCrashReportExtensions.contains($0.pathExtension.lowercased()) }
             .compactMap { url -> CrashReport? in
                 guard isRegularFile(url: url, fileManager: fileManager) else { return nil }
                 return CrashReport(url: url, createdAt: fileDate(url: url, fileManager: fileManager))
@@ -247,8 +207,59 @@ final class CrashHandler: ObservableObject {
         }
     }
 
+    private func importSystemDiagnosticReportsIfNeeded() {
+        ensureCrashReportDirectory()
+        Self.importSystemDiagnosticReports(
+            from: systemDiagnosticReportsDirectory,
+            to: crashReportDirectory
+        )
+    }
+
+    @discardableResult
+    static func importSystemDiagnosticReports(
+        from sourceDirectory: URL,
+        to destinationDirectory: URL,
+        fileManager: FileManager = .default
+    ) -> Int {
+        guard let urls = try? fileManager.contentsOfDirectory(
+            at: sourceDirectory,
+            includingPropertiesForKeys: [.creationDateKey, .contentModificationDateKey, .isRegularFileKey],
+            options: [.skipsHiddenFiles]
+        ) else {
+            return 0
+        }
+
+        try? fileManager.createDirectory(at: destinationDirectory, withIntermediateDirectories: true)
+
+        var importedCount = 0
+        for url in urls where isMacDragScrollDiagnosticReport(url) && isRegularFile(url: url, fileManager: fileManager) {
+            let destinationURL = destinationDirectory.appendingPathComponent(url.lastPathComponent)
+            guard !fileManager.fileExists(atPath: destinationURL.path) else { continue }
+
+            do {
+                try fileManager.copyItem(at: url, to: destinationURL)
+                importedCount += 1
+            } catch {
+                continue
+            }
+        }
+
+        return importedCount
+    }
+
     private func ensureCrashReportDirectory() {
         try? FileManager.default.createDirectory(at: crashReportDirectory, withIntermediateDirectories: true)
+    }
+
+    private static func isMacDragScrollDiagnosticReport(_ url: URL) -> Bool {
+        guard supportedCrashReportExtensions.contains(url.pathExtension.lowercased()) else {
+            return false
+        }
+
+        let fileName = url.deletingPathExtension().lastPathComponent.lowercased()
+        return fileName.hasPrefix("mac drag scroll")
+            || fileName.hasPrefix("macdragscroll")
+            || fileName.hasPrefix("mac-drag-scroll")
     }
 
     private static func sanitizedCrashReportKind(_ kind: String) -> String {

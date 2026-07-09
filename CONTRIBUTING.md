@@ -11,6 +11,8 @@ Mac Drag Scroll should stay small, reliable, and native-feeling:
 - Keep the menu bar experience quiet.
 - Match the app name exactly as **Mac Drag Scroll** in user-facing text.
 - Use `MacDragScroll` only where spaces are awkward, such as repository names or internal identifiers.
+- Treat settings persistence, permissions, and input handling as reliability-sensitive code.
+- Keep public docs clear enough for non-developers; avoid exposing implementation detail unless it helps users make a decision.
 
 ## Requirements
 
@@ -29,15 +31,34 @@ xcodebuild test \
   -derivedDataPath /tmp/MacDragScrollDerivedData
 ```
 
-For CI-style local builds without signing:
+For CI-style local builds and static analysis:
 
 ```sh
 xcodebuild build \
   -project macdragscroll.xcodeproj \
   -scheme macdragscroll \
   -destination 'platform=macOS' \
+  -configuration Release \
   CODE_SIGNING_ALLOWED=NO
+
+xcodebuild analyze \
+  -project macdragscroll.xcodeproj \
+  -scheme macdragscroll \
+  -destination 'platform=macOS'
 ```
+
+Use separate `-derivedDataPath` values when running multiple `xcodebuild` commands at the same time.
+
+## Local Settings
+
+Release builds use:
+
+```text
+~/Library/Preferences/com.martincalander.macdragscroll.plist
+~/Library/Application Support/Mac Drag Scroll/Preferences.plist
+```
+
+Debug builds use `com.martincalander.macdragscroll.development` and a separate Application Support folder. Tests use per-process test domains. This keeps local development from overwriting a user's production settings.
 
 ## Pull Requests
 
@@ -47,6 +68,14 @@ Before opening a pull request:
 - Keep UI changes consistent with the existing Liquid Glass direction.
 - Include a short explanation of behavior changes.
 - Add or update tests when changing scroll math, settings persistence, permissions, or update behavior.
+- Update `README.md`, localized READMEs, `SUPPORT.md`, or `PRIVACY.md` when behavior changes what users need to know.
+
+## Documentation Style
+
+- Use **Mac Drag Scroll** in prose.
+- Use short sections, direct verbs, and concrete file paths where they help troubleshooting.
+- Keep installation steps aligned across `README.md`, `README.ja.md`, and `README.zh-Hans.md`.
+- Keep release-process details in `docs/RELEASING.md`, not in the main README.
 
 ## Release Notes
 

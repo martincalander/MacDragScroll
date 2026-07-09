@@ -18,6 +18,18 @@ final class SettingsManagerTests: XCTestCase {
     private var originalShowIndicator = true
     private var originalVisualizerAnimationsEnabled = true
     private var originalKeepRunningInMenuBar = true
+    private var originalExcludedApps: [String] = []
+    private var originalScrollSpeed = 2.0
+    private var originalDeadZoneRadius = 20.0
+    private var originalAcceleration = 1.8
+    private var originalOverlayOpacity = 1.0
+    private var originalVisualizerSize = 1.0
+    private var originalVisualizerTintStyle: VisualizerTintStyle = .clear
+    private var originalLiquidGlassIntensity = 1.35
+    private var originalReverseScrollDirection = false
+    private var originalHorizontalScrollingEnabled = true
+    private var originalInvertHorizontalScroll = false
+    private var originalTriggerConfig = TriggerConfig.default
     
     override func setUp() {
         super.setUp()
@@ -28,17 +40,33 @@ final class SettingsManagerTests: XCTestCase {
         originalShowIndicator = settings.showIndicator
         originalVisualizerAnimationsEnabled = settings.visualizerAnimationsEnabled
         originalKeepRunningInMenuBar = settings.keepRunningInMenuBar
+        originalExcludedApps = settings.excludedApps
+        originalScrollSpeed = settings.scrollSpeed
+        originalDeadZoneRadius = settings.deadZoneRadius
+        originalAcceleration = settings.acceleration
+        originalOverlayOpacity = settings.overlayOpacity
+        originalVisualizerSize = settings.visualizerSize
+        originalVisualizerTintStyle = settings.visualizerTintStyle
+        originalLiquidGlassIntensity = settings.liquidGlassIntensity
+        originalReverseScrollDirection = settings.reverseScrollDirection
+        originalHorizontalScrollingEnabled = settings.horizontalScrollingEnabled
+        originalInvertHorizontalScroll = settings.invertHorizontalScroll
+        originalTriggerConfig = settings.triggerConfig
     }
     
     override func tearDown() {
-        // Reset excluded apps after each test
-        settings.excludedApps = []
-        settings.reverseScrollDirection = false
-        settings.horizontalScrollingEnabled = true
-        settings.invertHorizontalScroll = false
-        settings.visualizerSize = 1.0
-        settings.visualizerTintStyle = .clear
-        settings.liquidGlassIntensity = 1.35
+        settings.excludedApps = originalExcludedApps
+        settings.scrollSpeed = originalScrollSpeed
+        settings.deadZoneRadius = originalDeadZoneRadius
+        settings.acceleration = originalAcceleration
+        settings.overlayOpacity = originalOverlayOpacity
+        settings.visualizerSize = originalVisualizerSize
+        settings.visualizerTintStyle = originalVisualizerTintStyle
+        settings.liquidGlassIntensity = originalLiquidGlassIntensity
+        settings.reverseScrollDirection = originalReverseScrollDirection
+        settings.horizontalScrollingEnabled = originalHorizontalScrollingEnabled
+        settings.invertHorizontalScroll = originalInvertHorizontalScroll
+        settings.triggerConfig = originalTriggerConfig
         settings.hasCompletedWelcome = originalHasCompletedWelcome
         settings.appLanguage = originalAppLanguage
         settings.appAppearance = originalAppAppearance
@@ -115,9 +143,11 @@ final class SettingsManagerTests: XCTestCase {
         XCTAssertEqual(
             PersistentPreferences.preferencesFilePath,
             FileManager.default.homeDirectoryForCurrentUser
-                .appendingPathComponent("Library/Preferences/com.martincalander.macdragscroll.plist")
+                .appendingPathComponent("Library/Preferences/\(PersistentPreferences.storageDomainIdentifier).plist")
                 .path
         )
+        XCTAssertTrue(PersistentPreferences.storageDomainIdentifier.hasPrefix(PersistentPreferences.domainIdentifier))
+        XCTAssertTrue(PersistentPreferences.backupFilePath.hasSuffix("Preferences.plist"))
         let probeKey = "persistentPreferencesTestProbe"
         defer {
             PersistentPreferences.userDefaults.removeObject(forKey: probeKey)
@@ -128,9 +158,167 @@ final class SettingsManagerTests: XCTestCase {
         PersistentPreferences.userDefaults.synchronize()
 
         XCTAssertEqual(
-            PersistentPreferences.userDefaults.persistentDomain(forName: PersistentPreferences.domainIdentifier)?[probeKey] as? String,
+            PersistentPreferences.userDefaults.persistentDomain(forName: PersistentPreferences.storageDomainIdentifier)?[probeKey] as? String,
             "ok"
         )
+    }
+
+    func testPreferenceBackupRestoresMissingCanonicalValues() throws {
+        let defaults = UserDefaults.standard
+        let canonicalDomain = PersistentPreferences.storageDomainIdentifier
+        let originalCanonicalDomain = defaults.persistentDomain(forName: canonicalDomain)
+        let tempDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("MacDragScrollPreferenceRestore-\(UUID().uuidString)", isDirectory: true)
+        let backupURL = tempDirectory.appendingPathComponent("Preferences.plist")
+
+        defer {
+            if let originalCanonicalDomain {
+                defaults.setPersistentDomain(originalCanonicalDomain, forName: canonicalDomain)
+            } else {
+                defaults.removePersistentDomain(forName: canonicalDomain)
+            }
+            defaults.synchronize()
+            PersistentPreferences.userDefaults.synchronize()
+            try? FileManager.default.removeItem(at: tempDirectory)
+        }
+
+        defaults.removePersistentDomain(forName: canonicalDomain)
+        try writePropertyList([
+            "scrollSpeed": 4.25,
+            "appAppearance": AppAppearance.dark.rawValue,
+            "unrelatedPreference": "ignored"
+        ], to: backupURL)
+
+        let restoredCount = PersistentPreferences.restoreBackup(
+            from: backupURL,
+            allowedKeys: ["scrollSpeed", "appAppearance"]
+        )
+
+        let restoredDomain = defaults.persistentDomain(forName: canonicalDomain)
+        XCTAssertEqual(restoredCount, 2)
+        XCTAssertEqual(numberValue(in: restoredDomain, forKey: "scrollSpeed"), 4.25)
+        XCTAssertEqual(restoredDomain?["appAppearance"] as? String, AppAppearance.dark.rawValue)
+        XCTAssertNil(restoredDomain?["unrelatedPreference"])
+    }
+
+    func testPreferenceBackupRefreshMirrorsCanonicalValues() throws {
+        let defaults = UserDefaults.standard
+        let canonicalDomain = PersistentPreferences.storageDomainIdentifier
+        let originalCanonicalDomain = defaults.persistentDomain(forName: canonicalDomain)
+        let tempDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("MacDragScrollPreferenceBackup-\(UUID().uuidString)", isDirectory: true)
+        let backupURL = tempDirectory.appendingPathComponent("Preferences.plist")
+
+        defer {
+            if let originalCanonicalDomain {
+                defaults.setPersistentDomain(originalCanonicalDomain, forName: canonicalDomain)
+            } else {
+                defaults.removePersistentDomain(forName: canonicalDomain)
+            }
+            defaults.synchronize()
+            PersistentPreferences.userDefaults.synchronize()
+            try? FileManager.default.removeItem(at: tempDirectory)
+        }
+
+        defaults.setPersistentDomain([
+            "visualizerSize": 0.55,
+            "excludedApps": ["com.example.Editor"],
+            "unrelatedPreference": "ignored"
+        ], forName: canonicalDomain)
+
+        PersistentPreferences.refreshBackup(
+            at: backupURL,
+            allowedKeys: ["visualizerSize", "excludedApps"]
+        )
+
+        let backup = try readPropertyList(from: backupURL)
+        XCTAssertEqual(numberValue(in: backup, forKey: "visualizerSize"), 0.55)
+        XCTAssertEqual(backup["excludedApps"] as? [String], ["com.example.Editor"])
+        XCTAssertNil(backup["unrelatedPreference"])
+    }
+
+    func testLegacyPreferenceMigrationCopiesMissingKeysWithoutOverwritingCanonicalValues() {
+        let defaults = UserDefaults.standard
+        let canonicalDomain = PersistentPreferences.storageDomainIdentifier
+        let legacyDomain = "com.martincalander.macdragscroll.legacyMigrationTest.\(UUID().uuidString)"
+        let originalCanonicalDomain = defaults.persistentDomain(forName: canonicalDomain)
+
+        defer {
+            if let originalCanonicalDomain {
+                defaults.setPersistentDomain(originalCanonicalDomain, forName: canonicalDomain)
+            } else {
+                defaults.removePersistentDomain(forName: canonicalDomain)
+            }
+            defaults.removePersistentDomain(forName: legacyDomain)
+            defaults.synchronize()
+            PersistentPreferences.userDefaults.synchronize()
+        }
+
+        defaults.setPersistentDomain(["scrollSpeed": 4.0], forName: canonicalDomain)
+        defaults.setPersistentDomain([
+            "scrollSpeed": 1.0,
+            "deadZoneRadius": 35.0,
+            "unrelatedPreference": "ignored"
+        ], forName: legacyDomain)
+
+        let migratedCount = PersistentPreferences.migrateLegacyDomains(
+            [legacyDomain],
+            allowedKeys: ["scrollSpeed", "deadZoneRadius"]
+        )
+
+        let migratedDomain = defaults.persistentDomain(forName: canonicalDomain)
+        XCTAssertEqual(migratedCount, 1)
+        XCTAssertEqual(numberValue(in: migratedDomain, forKey: "scrollSpeed"), 4.0)
+        XCTAssertEqual(numberValue(in: migratedDomain, forKey: "deadZoneRadius"), 35.0)
+        XCTAssertNil(migratedDomain?["unrelatedPreference"])
+    }
+
+    func testLegacyAppSettingsBlobMigratesToCurrentPreferenceKeys() throws {
+        let defaults = UserDefaults.standard
+        let canonicalDomain = PersistentPreferences.storageDomainIdentifier
+        let legacyDomain = "com.local.MacDragScroll.legacyBlobTest.\(UUID().uuidString)"
+        let originalCanonicalDomain = defaults.persistentDomain(forName: canonicalDomain)
+        let legacySettings: [String: Any] = [
+            "isEnabled": false,
+            "sensitivity": 1.25,
+            "invertVertical": true,
+            "invertHorizontal": true,
+            "excludedBundleIdentifiers": ["com.example.Editor"]
+        ]
+        let legacyData = try JSONSerialization.data(withJSONObject: legacySettings)
+
+        defer {
+            if let originalCanonicalDomain {
+                defaults.setPersistentDomain(originalCanonicalDomain, forName: canonicalDomain)
+            } else {
+                defaults.removePersistentDomain(forName: canonicalDomain)
+            }
+            defaults.removePersistentDomain(forName: legacyDomain)
+            defaults.synchronize()
+            PersistentPreferences.userDefaults.synchronize()
+        }
+
+        defaults.removePersistentDomain(forName: canonicalDomain)
+        defaults.setPersistentDomain([PersistentPreferences.legacyAppSettingsKey: legacyData], forName: legacyDomain)
+
+        let migratedCount = PersistentPreferences.migrateLegacyDomains(
+            [legacyDomain],
+            allowedKeys: [
+                "isEnabled",
+                "scrollSpeed",
+                "reverseScrollDirection",
+                "invertHorizontalScroll",
+                "excludedApps"
+            ]
+        )
+
+        let migratedDomain = defaults.persistentDomain(forName: canonicalDomain)
+        XCTAssertEqual(migratedCount, 5)
+        XCTAssertEqual(migratedDomain?["isEnabled"] as? Bool, false)
+        XCTAssertEqual(numberValue(in: migratedDomain, forKey: "scrollSpeed"), 1.25)
+        XCTAssertEqual(migratedDomain?["reverseScrollDirection"] as? Bool, true)
+        XCTAssertEqual(migratedDomain?["invertHorizontalScroll"] as? Bool, true)
+        XCTAssertEqual(migratedDomain?["excludedApps"] as? [String], ["com.example.Editor"])
     }
     
     func testDefaultScrollSpeedRange() {
@@ -479,28 +667,66 @@ final class SettingsManagerTests: XCTestCase {
         XCTAssertFalse(fileName.contains(":"))
     }
 
-    func testCrashReportDiscoveryReturnsNewestLogFilesFirst() throws {
+    func testCrashReportDiscoveryReturnsNewestSupportedFilesFirst() throws {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
 
         let older = directory.appendingPathComponent("older.log")
-        let newer = directory.appendingPathComponent("newer.log")
+        let newer = directory.appendingPathComponent("newer.ips")
+        let crash = directory.appendingPathComponent("middle.crash")
         let ignored = directory.appendingPathComponent("ignored.txt")
 
         try "older".write(to: older, atomically: true, encoding: .utf8)
         try "newer".write(to: newer, atomically: true, encoding: .utf8)
+        try "middle".write(to: crash, atomically: true, encoding: .utf8)
         try "ignored".write(to: ignored, atomically: true, encoding: .utf8)
 
         let olderDate = Date(timeIntervalSince1970: 100)
+        let crashDate = Date(timeIntervalSince1970: 150)
         let newerDate = Date(timeIntervalSince1970: 200)
         try FileManager.default.setAttributes([.creationDate: olderDate, .modificationDate: olderDate], ofItemAtPath: older.path)
+        try FileManager.default.setAttributes([.creationDate: crashDate, .modificationDate: crashDate], ofItemAtPath: crash.path)
         try FileManager.default.setAttributes([.creationDate: newerDate, .modificationDate: newerDate], ofItemAtPath: newer.path)
 
         let reports = CrashHandler.crashReports(in: directory)
 
-        XCTAssertEqual(reports.map(\.fileName), ["newer.log", "older.log"])
+        XCTAssertEqual(reports.map(\.fileName), ["newer.ips", "middle.crash", "older.log"])
+    }
+
+    func testSystemDiagnosticReportImportCopiesOnlyMacDragScrollReports() throws {
+        let sourceDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let destinationDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: sourceDirectory, withIntermediateDirectories: true)
+        defer {
+            try? FileManager.default.removeItem(at: sourceDirectory)
+            try? FileManager.default.removeItem(at: destinationDirectory)
+        }
+
+        let macCrash = sourceDirectory.appendingPathComponent("Mac Drag Scroll_2026-07-09-010101_Mac.crash")
+        let macIps = sourceDirectory.appendingPathComponent("MacDragScroll-2026-07-09.ips")
+        let unrelated = sourceDirectory.appendingPathComponent("OtherApp_2026-07-09.crash")
+        let unsupported = sourceDirectory.appendingPathComponent("Mac Drag Scroll_2026-07-09.txt")
+
+        try "crash".write(to: macCrash, atomically: true, encoding: .utf8)
+        try "ips".write(to: macIps, atomically: true, encoding: .utf8)
+        try "other".write(to: unrelated, atomically: true, encoding: .utf8)
+        try "text".write(to: unsupported, atomically: true, encoding: .utf8)
+
+        let importedCount = CrashHandler.importSystemDiagnosticReports(
+            from: sourceDirectory,
+            to: destinationDirectory
+        )
+
+        let importedNames = try FileManager.default.contentsOfDirectory(atPath: destinationDirectory.path).sorted()
+        XCTAssertEqual(importedCount, 2)
+        XCTAssertEqual(importedNames, [
+            "Mac Drag Scroll_2026-07-09-010101_Mac.crash",
+            "MacDragScroll-2026-07-09.ips"
+        ])
     }
     
     // MARK: - Settings Persistence Tests
@@ -522,6 +748,36 @@ final class SettingsManagerTests: XCTestCase {
         }
 
         return Set(strings.keys)
+    }
+
+    private func numberValue(in domain: [String: Any]?, forKey key: String) -> Double? {
+        if let number = domain?[key] as? NSNumber {
+            return number.doubleValue
+        }
+        if let double = domain?[key] as? Double {
+            return double
+        }
+        return nil
+    }
+
+    private func writePropertyList(_ propertyList: [String: Any], to url: URL) throws {
+        try FileManager.default.createDirectory(
+            at: url.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+
+        let data = try PropertyListSerialization.data(
+            fromPropertyList: propertyList,
+            format: .xml,
+            options: 0
+        )
+        try data.write(to: url, options: .atomic)
+    }
+
+    private func readPropertyList(from url: URL) throws -> [String: Any] {
+        let data = try Data(contentsOf: url)
+        let propertyList = try PropertyListSerialization.propertyList(from: data, options: [], format: nil)
+        return try XCTUnwrap(propertyList as? [String: Any])
     }
 }
 

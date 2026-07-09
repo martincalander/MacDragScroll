@@ -135,7 +135,18 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
         )
     ]
 
+    private static let migratablePreferenceKeys: Set<String> = [
+        "autoUpdateEnabled",
+        "lastUpdateCheckDate",
+        "updateHistory",
+        "SUEnableAutomaticChecks",
+        "SUAutomaticallyUpdate",
+        "SUHasLaunchedBefore",
+        "SULastCheckTime"
+    ]
+
     private let defaults = PersistentPreferences.userDefaults
+    private let autoUpdateEnabledKey = "autoUpdateEnabled"
     private let lastCheckedKey = "lastUpdateCheckDate"
     private let historyKey = "updateHistory"
     private var isSyncingSparklePreferences = false
@@ -148,7 +159,9 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
 
     @Published var autoUpdateEnabled: Bool {
         didSet {
-            guard !isSyncingSparklePreferences, autoUpdateEnabled != oldValue else { return }
+            guard autoUpdateEnabled != oldValue else { return }
+            persist(autoUpdateEnabled, forKey: autoUpdateEnabledKey)
+            guard !isSyncingSparklePreferences else { return }
             updaterController.updater.automaticallyChecksForUpdates = autoUpdateEnabled
             appendHistory(autoUpdateEnabled ? "Automatic update checks enabled." : "Automatic update checks disabled.")
         }
@@ -175,7 +188,11 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
     }
 
     override private init() {
-        autoUpdateEnabled = true
+        PersistentPreferences.restoreBackup(allowedKeys: Self.migratablePreferenceKeys)
+        PersistentPreferences.migrateLegacyDomains(allowedKeys: Self.migratablePreferenceKeys)
+        PersistentPreferences.refreshBackup(allowedKeys: Self.migratablePreferenceKeys)
+
+        autoUpdateEnabled = Self.autoUpdatePreference(from: defaults)
         lastChecked = defaults.object(forKey: lastCheckedKey) as? Date
 
         if let data = defaults.data(forKey: historyKey),
@@ -189,6 +206,8 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
 
         super.init()
 
+        updaterController.updater.automaticallyChecksForUpdates = autoUpdateEnabled
+        persist(autoUpdateEnabled, forKey: autoUpdateEnabledKey)
         syncPreferencesFromSparkle()
     }
 
@@ -206,8 +225,9 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
         }
 
         status = .checking
-        lastChecked = Date()
-        defaults.set(lastChecked, forKey: lastCheckedKey)
+        let now = Date()
+        lastChecked = now
+        persist(now, forKey: lastCheckedKey)
         appendHistory("Started update check.")
         updaterController.checkForUpdates(nil)
     }
@@ -221,8 +241,9 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
     }
 
     func updater(_ updater: SPUUpdater, didFindValidUpdate item: SUAppcastItem) {
-        lastChecked = Date()
-        defaults.set(lastChecked, forKey: lastCheckedKey)
+        let now = Date()
+        lastChecked = now
+        persist(now, forKey: lastCheckedKey)
 
         let version = item.displayVersionString
         status = .available(version: version, releaseURL: item.infoURL ?? item.fileURL)
@@ -254,8 +275,9 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
     }
 
     private func markUpToDate() {
-        lastChecked = Date()
-        defaults.set(lastChecked, forKey: lastCheckedKey)
+        let now = Date()
+        lastChecked = now
+        persist(now, forKey: lastCheckedKey)
         status = .upToDate
         appendHistory("Checked for updates. \(currentVersionDisplay) is up to date.")
     }
@@ -273,8 +295,36 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
         }
 
         if let data = try? JSONEncoder().encode(history) {
-            defaults.set(data, forKey: historyKey)
+            persist(data, forKey: historyKey)
         }
+    }
+
+    private static func autoUpdatePreference(from defaults: UserDefaults) -> Bool {
+        if let appPreference = boolValue(from: defaults, forKey: "autoUpdateEnabled") {
+            return appPreference
+        }
+        if let sparklePreference = boolValue(from: defaults, forKey: "SUEnableAutomaticChecks") {
+            return sparklePreference
+        }
+        if let sparklePreference = boolValue(from: defaults, forKey: "SUAutomaticallyUpdate") {
+            return sparklePreference
+        }
+        return true
+    }
+
+    private static func boolValue(from defaults: UserDefaults, forKey key: String) -> Bool? {
+        let value = defaults.object(forKey: key)
+        if let bool = value as? Bool {
+            return bool
+        }
+        if let number = value as? NSNumber {
+            return number.boolValue
+        }
+        return nil
+    }
+
+    private func persist(_ value: Any, forKey key: String) {
+        PersistentPreferences.persist(value, forKey: key)
     }
 
     private static var isRunningUnitTests: Bool {

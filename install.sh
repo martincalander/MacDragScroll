@@ -11,6 +11,9 @@ checksum_url="https://github.com/${repo}/releases/latest/download/SHA256SUMS.txt
 tmp_dir="$(mktemp -d)"
 cleanup() {
   rm -rf "$tmp_dir"
+  if [[ -n "${staged_app:-}" && -w "$install_dir" ]]; then
+    rm -rf "$staged_app"
+  fi
 }
 trap cleanup EXIT
 
@@ -49,6 +52,8 @@ if [[ ! -d "$source_app" ]]; then
 fi
 
 destination_app="$install_dir/$app_name"
+staged_app="$install_dir/.${app_name}.installing.$$"
+backup_app="$install_dir/.${app_name}.previous.$$"
 
 if pgrep -x "Mac Drag Scroll" >/dev/null 2>&1; then
   osascript -e 'tell application "Mac Drag Scroll" to quit' >/dev/null 2>&1 || true
@@ -56,15 +61,67 @@ if pgrep -x "Mac Drag Scroll" >/dev/null 2>&1; then
 fi
 
 copy_app() {
-  rm -rf "$destination_app"
-  ditto "$source_app" "$destination_app"
+  rm -rf "$staged_app" "$backup_app"
+  if ! ditto "$source_app" "$staged_app"; then
+    rm -rf "$staged_app"
+    echo "Install failed while staging $app_name." >&2
+    return 1
+  fi
+
+  if [[ -e "$destination_app" || -L "$destination_app" ]]; then
+    if ! mv "$destination_app" "$backup_app"; then
+      rm -rf "$staged_app"
+      echo "Install failed while preparing to replace $destination_app." >&2
+      return 1
+    fi
+  fi
+
+  if mv "$staged_app" "$destination_app"; then
+    rm -rf "$backup_app"
+    return 0
+  fi
+
+  if [[ -e "$backup_app" || -L "$backup_app" ]]; then
+    mv "$backup_app" "$destination_app" || true
+  fi
+  rm -rf "$staged_app"
+  echo "Install failed while replacing $destination_app; restored the previous app if possible." >&2
+  return 1
+}
+
+copy_app_with_sudo() {
+  sudo rm -rf "$staged_app" "$backup_app"
+  if ! sudo ditto "$source_app" "$staged_app"; then
+    sudo rm -rf "$staged_app"
+    echo "Install failed while staging $app_name." >&2
+    return 1
+  fi
+
+  if [[ -e "$destination_app" || -L "$destination_app" ]]; then
+    if ! sudo mv "$destination_app" "$backup_app"; then
+      sudo rm -rf "$staged_app"
+      echo "Install failed while preparing to replace $destination_app." >&2
+      return 1
+    fi
+  fi
+
+  if sudo mv "$staged_app" "$destination_app"; then
+    sudo rm -rf "$backup_app"
+    return 0
+  fi
+
+  if [[ -e "$backup_app" || -L "$backup_app" ]]; then
+    sudo mv "$backup_app" "$destination_app" || true
+  fi
+  sudo rm -rf "$staged_app"
+  echo "Install failed while replacing $destination_app; restored the previous app if possible." >&2
+  return 1
 }
 
 if [[ -w "$install_dir" ]]; then
   copy_app
 else
-  sudo rm -rf "$destination_app"
-  sudo ditto "$source_app" "$destination_app"
+  copy_app_with_sudo
 fi
 
 echo "Installed Mac Drag Scroll to $destination_app"

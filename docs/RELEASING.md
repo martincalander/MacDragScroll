@@ -8,8 +8,8 @@ This release flow does not require a paid Apple Developer Program account. Becau
 
 - **In-app updates:** Sparkle 2 verifies and installs update archives from the GitHub release appcast.
 - **Manual installer:** each release publishes `MacDragScroll.dmg` with the app and an Applications shortcut.
-- **CLI install:** `scripts/install.sh` downloads the latest `MacDragScroll.zip` release asset and installs it into `/Applications`.
-- **Homebrew:** publish `packaging/homebrew/Casks/mac-drag-scroll.rb` to a separate `martincalander/homebrew-tap` repo after the first release exists. The cask downloads the same `MacDragScroll.zip` asset and sets `auto_updates true`.
+- **CLI install:** `install.sh` downloads the latest `MacDragScroll.zip` release asset and installs it into `/Applications`.
+- **Homebrew:** publish `packaging/homebrew/Casks/mac-drag-scroll.rb` to `martincalander/homebrew-tap`. The cask downloads the same `MacDragScroll.zip` asset and sets `auto_updates true`.
 
 GitHub Releases is the source of truth. The appcast URL embedded in the app is:
 
@@ -138,30 +138,28 @@ curl -fsSL https://github.com/martincalander/MacDragScroll/releases/latest/downl
 Install from CLI:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/martincalander/MacDragScroll/main/scripts/install.sh | bash
+curl -fsSL https://github.com/martincalander/MacDragScroll/raw/main/install.sh | bash
 ```
 
 To test Sparkle, run an older installed build and choose **Check For Update** from the menu bar.
 
 ## Homebrew Tap
 
-After `v1.0.0` is published, create a tap repo once:
+The tap repo is [martincalander/homebrew-tap](https://github.com/martincalander/homebrew-tap). Users can install with:
 
 ```sh
-gh repo create martincalander/homebrew-tap --public --clone
-mkdir -p homebrew-tap/Casks
-cp packaging/homebrew/Casks/mac-drag-scroll.rb homebrew-tap/Casks/
+brew install --cask martincalander/tap/mac-drag-scroll
+```
+
+For future releases, copy the updated cask into the tap repo after the GitHub release exists:
+
+```sh
+git clone https://github.com/martincalander/homebrew-tap.git
+cp packaging/homebrew/Casks/mac-drag-scroll.rb homebrew-tap/Casks/mac-drag-scroll.rb
 cd homebrew-tap
 git add Casks/mac-drag-scroll.rb
-git commit -m "Add Mac Drag Scroll cask"
+git commit -m "Update Mac Drag Scroll cask"
 git push origin main
 ```
 
-Users can then install with:
-
-```sh
-brew tap martincalander/tap
-brew install --cask mac-drag-scroll
-```
-
-For future releases, update `version` in the cask and commit it to the tap. The cask uses `sha256 :no_check` because the GitHub release asset is checked by the release workflow and the app updates itself through Sparkle.
+The cask uses `sha256 :no_check` because the GitHub release asset is checked by the release workflow and the app updates itself through Sparkle.

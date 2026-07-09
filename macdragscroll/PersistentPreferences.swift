@@ -2,7 +2,7 @@
 //  PersistentPreferences.swift
 //  macdragscroll
 //
-//  Created by OpenAI Codex on 2026-07-09.
+//  Created by Martin Calander on 2026-07-09.
 //
 
 import Foundation

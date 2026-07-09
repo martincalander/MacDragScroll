@@ -2,7 +2,7 @@
 //  WelcomeWindow.swift
 //  macdragscroll
 //
-//  Created by OpenAI Codex on 2026-07-08.
+//  Created by Martin Calander on 2026-07-08.
 //
 
 import AppKit

@@ -44,7 +44,7 @@ Mac Drag Scroll brings the familiar Windows middle-click drag scroll gesture to 
 2. Download `MacDragScroll.dmg`.
 3. Open the disk image and move **Mac Drag Scroll** to your Applications folder.
 4. First launch only: right-click **Mac Drag Scroll** in Finder, choose **Open**, then confirm.
-5. Approve Accessibility access when macOS asks.
+5. Approve Accessibility and Input Monitoring access when macOS asks.
 
 <p align="center">
   <img src="docs/assets/mac-drag-scroll-install-demo.gif" width="760" alt="Mac Drag Scroll installation demo">
@@ -59,25 +59,30 @@ Current releases are unsigned and not Apple-notarized, so macOS may block the fi
 CLI install:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/martincalander/MacDragScroll/main/scripts/install.sh | bash
+curl -fsSL https://github.com/martincalander/MacDragScroll/raw/main/install.sh | bash
 ```
 
-Homebrew tap support is prepared for release maintainers; see [Releasing](docs/RELEASING.md).
+Homebrew:
 
-## Grant Permission
+```sh
+brew install --cask martincalander/tap/mac-drag-scroll
+```
 
-Mac Drag Scroll needs Accessibility permission so it can detect the middle mouse button and send scroll events.
+## Grant Permissions
+
+Mac Drag Scroll needs Accessibility and Input Monitoring permissions so it can detect the middle mouse button globally and send scroll events.
 
 1. Open **System Settings**.
 2. Go to **Privacy & Security**.
-3. Open **Accessibility**.
-4. Enable **Mac Drag Scroll**.
+3. Open **Accessibility** and enable **Mac Drag Scroll**.
+4. Open **Input Monitoring** and enable **Mac Drag Scroll**.
+5. Quit and reopen Mac Drag Scroll if macOS asks for a restart.
 
 <p align="center">
-  <img src="docs/assets/mac-drag-scroll-permission-demo.gif" width="760" alt="Mac Drag Scroll Accessibility permission demo">
+  <img src="docs/assets/mac-drag-scroll-permission-demo.gif" width="760" alt="Mac Drag Scroll permissions demo">
 </p>
 
-The app shows permission status in Settings, and it disables drag scrolling if permission is removed.
+The app shows permission status in Settings, and it disables drag scrolling if either required permission is removed.
 
 ## Use
 
@@ -110,7 +115,7 @@ Settings are saved per macOS user at `~/Library/Preferences/com.martincalander.m
 
 ## Privacy
 
-Mac Drag Scroll is designed as a local utility. It needs Accessibility access for the drag-scroll gesture, but it does not record what you type, inspect document contents, or track your browsing.
+Mac Drag Scroll is designed as a local utility. It needs Accessibility and Input Monitoring access for the drag-scroll gesture, but it does not record what you type, inspect document contents, or track your browsing.
 
 Read the full [privacy note](PRIVACY.md).
 
@@ -126,7 +131,7 @@ Need help? Start with [Support](SUPPORT.md), then open an issue if the problem i
 
 - macOS 26.2 or later
 - External mouse with a middle button or scroll-wheel click
-- Accessibility permission
+- Accessibility and Input Monitoring permissions
 
 ## Made By
 

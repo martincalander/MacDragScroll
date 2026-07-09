@@ -74,8 +74,8 @@ if [[ -n "$unreleased_entries" ]]; then
   exit 66
 fi
 
-if [[ ! -x scripts/extract-release-notes.sh || ! -x scripts/install.sh ]]; then
-  echo "Release scripts must be executable" >&2
+if [[ ! -x install.sh || ! -x scripts/extract-release-notes.sh || ! -x scripts/install.sh ]]; then
+  echo "Install and release scripts must be executable" >&2
   exit 65
 fi
 

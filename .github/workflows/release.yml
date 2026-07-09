@@ -109,9 +109,9 @@ jobs:
             -project macdragscroll.xcodeproj \
             -scheme macdragscroll \
             -destination 'platform=macOS' \
-              -derivedDataPath "$RUNNER_TEMP/MacDragScrollTestDerivedData" \
-              CODE_SIGNING_ALLOWED=NO \
-              CODE_SIGNING_REQUIRED=NO
+            -derivedDataPath "$RUNNER_TEMP/MacDragScrollTestDerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO
 
       - name: Build unsigned app
         run: |

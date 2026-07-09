@@ -60,4 +60,5 @@ body:
       options:
         - label: Mac Drag Scroll is enabled in the menu bar.
         - label: Accessibility permission is enabled in System Settings.
+        - label: Input Monitoring permission is enabled in System Settings.
         - label: The affected app is not in Excluded Apps.

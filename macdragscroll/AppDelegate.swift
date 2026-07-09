@@ -634,9 +634,26 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     }
 
     private func hideDockIconIfNoAppWindowsAreVisible() {
-        guard settingsWindow?.isVisible == true || welcomeWindow?.isVisible == true else {
+        guard hasVisibleWindowThatShouldKeepDockIcon else {
             NSApp.setActivationPolicy(.accessory)
             return
+        }
+    }
+
+    private var hasVisibleWindowThatShouldKeepDockIcon: Bool {
+        if settingsWindow?.isVisible == true || welcomeWindow?.isVisible == true {
+            return true
+        }
+
+        return NSApp.windows.contains { window in
+            guard window.isVisible,
+                  !window.isMiniaturized,
+                  !window.ignoresMouseEvents,
+                  window.level != .statusBar else {
+                return false
+            }
+
+            return window.canBecomeKey || window.canBecomeMain
         }
     }
 

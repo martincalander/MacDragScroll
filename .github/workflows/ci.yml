@@ -19,7 +19,7 @@ permissions:
 jobs:
   build-and-test:
     name: Build, test, and release check
-    runs-on: macos-latest
+    runs-on: macos-26
     timeout-minutes: 30
 
     steps:

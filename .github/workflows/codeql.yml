@@ -23,7 +23,7 @@ concurrency:
 jobs:
   analyze:
     name: Swift SAST
-    runs-on: macos-latest
+    runs-on: macos-26
     timeout-minutes: 40
 
     steps:

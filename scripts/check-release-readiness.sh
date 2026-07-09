@@ -85,7 +85,7 @@ if [[ ! -x scripts/extract-release-notes.sh || ! -x scripts/install.sh ]]; then
 fi
 
 if [[ -f packaging/homebrew/Casks/mac-drag-scroll.rb ]]; then
-  ruby -c packaging/homebrew/Casks/mac-drag-scroll.rb >/dev/null
+  scripts/validate-homebrew-cask.sh >/dev/null
 fi
 
 if ! security find-identity -v -p codesigning | grep -q "Developer ID Application"; then

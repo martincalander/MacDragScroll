@@ -114,6 +114,7 @@ Use Sparkle `2.9.4` for that command, matching the vendored framework.
 
 ```sh
 xcodebuild test -project macdragscroll.xcodeproj -scheme macdragscroll -destination 'platform=macOS'
+scripts/validate-homebrew-cask.sh
 scripts/check-release-readiness.sh 1.0.0
 ```
 

@@ -4,11 +4,11 @@ cask "mac-drag-scroll" do
 
   url "https://github.com/martincalander/MacDragScroll/releases/download/v#{version}/MacDragScroll.zip"
   name "Mac Drag Scroll"
-  desc "Windows-style drag scrolling for external mice on macOS"
+  desc "Windows-style drag scrolling for external mice"
   homepage "https://github.com/martincalander/MacDragScroll"
 
   auto_updates true
-  depends_on macos: ">= :tahoe"
+  depends_on macos: :tahoe
 
   app "Mac Drag Scroll.app"
 

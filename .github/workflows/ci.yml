@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Select Xcode
         run: |
@@ -54,3 +54,9 @@ jobs:
             -derivedDataPath "$RUNNER_TEMP/MacDragScrollReleaseDerivedData" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO
+
+      - name: Release metadata checks
+        run: |
+          bash -n scripts/*.sh
+          scripts/extract-release-notes.sh 1.0.0 >/dev/null
+          scripts/validate-homebrew-cask.sh

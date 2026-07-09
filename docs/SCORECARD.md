@@ -41,3 +41,15 @@ gh api --method PATCH user -f company=''
 The extra `user` OAuth scope is required because this changes the authenticated GitHub account profile globally, not just this repository.
 
 Clearing the company field removes the unwanted organization label, but it does not make the Contributors score high by itself. Scorecard rewards real contributor diversity across multiple GitHub profile company values.
+
+## Packaging
+
+Mac Drag Scroll is packaged through GitHub Releases, Sparkle appcasts, the CLI installer, and the public Homebrew tap at [martincalander/homebrew-tap](https://github.com/martincalander/homebrew-tap).
+
+Scorecard's `Packaging` check is currently narrower than that distribution model. It looks for specific publishing workflow patterns such as npm, Maven, PyPI, Docker, GoReleaser, Cargo, and Semantic Release. The current macOS release workflow publishes `.zip`, `.dmg`, `appcast.xml`, checksums, and build provenance to GitHub Releases, but Scorecard may still report `packaging workflow not detected` until it supports GitHub Releases/Homebrew casks or the project adopts one of the packaging workflows it recognizes.
+
+## Code Review
+
+Required pull request approval is not enabled for now because Mac Drag Scroll is currently maintained by a single developer, and GitHub does not allow a pull request author to approve their own pull request. The repository still protects `main` against deletion and non-fast-forward pushes, and it requires the build/test and secret-scan checks before changes land.
+
+Required independent review should be enabled if or when the project has trusted collaborators who can review maintainer-authored pull requests.

@@ -1,0 +1,103 @@
+name: Checks 3/3
+
+on:
+  workflow_run:
+    workflows:
+      - Quality Gate
+      - CodeQL
+      - Secret Scan
+    branches:
+      - main
+    types:
+      - completed
+  workflow_dispatch:
+  schedule:
+    - cron: "8 7 * * 1"
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: checks-3-of-3-${{ github.event.workflow_run.head_sha || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  aggregate:
+    name: Quality Gate, CodeQL, Secret Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Resolve target commit
+        id: target
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          EVENT_NAME: ${{ github.event_name }}
+          WORKFLOW_RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+
+          if [ "$EVENT_NAME" = "workflow_run" ] && [ -n "$WORKFLOW_RUN_SHA" ]; then
+            target_sha="$WORKFLOW_RUN_SHA"
+          else
+            target_sha="$(gh api "repos/$REPO/commits/main" --jq '.sha')"
+          fi
+
+          echo "sha=$target_sha" >> "$GITHUB_OUTPUT"
+          echo "Target commit: $target_sha"
+
+      - name: Verify required workflows
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TARGET_SHA: ${{ steps.target.outputs.sha }}
+        run: |
+          set -euo pipefail
+
+          workflows=(
+            "ci.yml:Quality Gate"
+            "codeql.yml:CodeQL"
+            "secret-scan.yml:Secret Scan"
+          )
+
+          passed=0
+
+          for item in "${workflows[@]}"; do
+            workflow="${item%%:*}"
+            label="${item#*:}"
+            run_status=""
+            conclusion=""
+
+            for attempt in $(seq 1 80); do
+              run_json="$(
+                gh api "repos/$REPO/actions/workflows/$workflow/runs?branch=main&per_page=50" |
+                  jq -c --arg sha "$TARGET_SHA" '[.workflow_runs[] | select(.head_sha == $sha)] | sort_by(.created_at) | reverse | first // {}'
+              )"
+
+              run_status="$(jq -r '.status // empty' <<< "$run_json")"
+              conclusion="$(jq -r '.conclusion // empty' <<< "$run_json")"
+
+              if [ "$run_status" = "completed" ]; then
+                break
+              fi
+
+              if [ "$attempt" -eq 80 ]; then
+                echo "$label did not complete for $TARGET_SHA in time." >&2
+                exit 1
+              fi
+
+              sleep 15
+            done
+
+            if [ "$conclusion" != "success" ]; then
+              echo "$label is not passing for $TARGET_SHA. conclusion=${conclusion:-missing}" >&2
+              exit 1
+            fi
+
+            passed=$((passed + 1))
+            echo "$label passed."
+          done
+
+          echo "Checks passed: $passed/3"

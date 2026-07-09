@@ -18,6 +18,7 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 - Added a Swift fuzz harness for preference-input parsing and normalization paths.
 - Added directional Settings tab transitions with subtle vertical movement based on the previous tab position.
 - Added OpenSSF Best Practices BadgeApp prefill metadata, README badges, and documented the remaining Scorecard CII and contributor-organization remediation steps.
+- Added Scorecard notes for solo-maintainer code review and macOS packaging detection limits.
 
 ### Changed
 
@@ -25,6 +26,7 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 - Settings and update preferences now persist through a shared preference layer instead of direct scattered writes.
 - Sparkle is now resolved as an exact Swift Package dependency instead of storing the binary framework in the source repository.
 - Changed the About logo to an in-place squishy interaction instead of a draggable export item.
+- Consolidated the README workflow badges into one `Checks 3/3` aggregate badge.
 
 ### Fixed
 

@@ -76,6 +76,8 @@ Before opening a pull request:
 - Add or update tests when changing scroll math, settings persistence, permissions, or update behavior.
 - Update `README.md`, localized READMEs, `SUPPORT.md`, or `PRIVACY.md` when behavior changes what users need to know.
 
+Mac Drag Scroll is currently a solo-maintainer project, so required PR approval is not enforced yet. Independent required review should be enabled if or when trusted collaborators are available.
+
 ## Documentation Style
 
 - Use **Mac Drag Scroll** in prose.

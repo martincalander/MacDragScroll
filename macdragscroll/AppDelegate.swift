@@ -296,11 +296,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         menu.autoenablesItems = false
 
         let activeItem = NSMenuItem(
-            title: localized("menu_disable", value: "Disable Mac Drag Scroll", comment: "Disable menu item"),
+            title: activeMenuTitle(isEnabled: SettingsManager.shared.isEnabled),
             action: #selector(toggleActiveState(_:)),
             keyEquivalent: ""
         )
         activeItem.target = self
+        activeItem.state = .off
         menu.addItem(activeItem)
         activeMenuItem = activeItem
 
@@ -526,11 +527,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
 
     private func refreshStatusItem() {
         let isEnabled = SettingsManager.shared.isEnabled
-        activeMenuItem?.title = isEnabled
-            ? localized("menu_disable", value: "Disable Mac Drag Scroll", comment: "Disable menu item")
-            : localized("menu_enable", value: "Enable Mac Drag Scroll", comment: "Enable menu item")
-        activeMenuItem?.state = isEnabled ? .on : .off
+        activeMenuItem?.title = activeMenuTitle(isEnabled: isEnabled)
+        activeMenuItem?.state = .off
         statusItem.button?.image = statusBarImage(isEnabled: isEnabled)
+    }
+
+    private func activeMenuTitle(isEnabled: Bool) -> String {
+        if isEnabled {
+            return localized("menu_disable", value: "Pause Drag Scrolling", comment: "Pause drag scrolling menu item")
+        }
+
+        return localized("menu_enable", value: "Resume Drag Scrolling", comment: "Resume drag scrolling menu item")
     }
 
     private func refreshDuplicateInstanceMenuItem() {

@@ -114,8 +114,8 @@
 "welcome_star_detail" = "Het helpt het project en maakt het gemakkelijker om later terug te vinden.";
 "star_on_github" = "Ster";
 "welcome_get_started" = "Aan de slag";
-"menu_disable" = "Mac Drag Scroll uitschakelen";
-"menu_enable" = "Schakel Mac Drag Scroll in";
+"menu_disable" = "Sleep-scrollen pauzeren";
+"menu_enable" = "Sleep-scrollen hervatten";
 "menu_settings" = "Instellingen...";
 "menu_multiple_instances_warning" = "Meerdere kopieën actief";
 "menu_ignore_current_app" = "Negeer de huidige app";

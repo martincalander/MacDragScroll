@@ -114,8 +114,8 @@
 "welcome_star_detail" = "It helps the project and makes it easier to find later.";
 "star_on_github" = "Star";
 "welcome_get_started" = "Get Started";
-"menu_disable" = "Disable Mac Drag Scroll";
-"menu_enable" = "Enable Mac Drag Scroll";
+"menu_disable" = "Pause Drag Scrolling";
+"menu_enable" = "Resume Drag Scrolling";
 "menu_settings" = "Settings...";
 "menu_multiple_instances_warning" = "Multiple Copies Running";
 "menu_ignore_current_app" = "Ignore Current App";

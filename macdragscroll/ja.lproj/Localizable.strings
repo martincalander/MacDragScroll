@@ -114,8 +114,8 @@
 "welcome_star_detail" = "プロジェクトに役立ち、後で見つけやすくなります。";
 "star_on_github" = "星";
 "welcome_get_started" = "始めましょう";
-"menu_disable" = "Mac Drag Scroll を無効にする";
-"menu_enable" = "Mac Drag Scroll を有効にする";
+"menu_disable" = "ドラッグスクロールを一時停止";
+"menu_enable" = "ドラッグスクロールを再開";
 "menu_settings" = "設定...";
 "menu_multiple_instances_warning" = "複数のコピーが実行中";
 "menu_ignore_current_app" = "現在のアプリを無視する";

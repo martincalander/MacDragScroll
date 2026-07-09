@@ -114,8 +114,8 @@
 "welcome_star_detail" = "Nó giúp ích cho dự án và làm cho việc tìm kiếm sau này dễ dàng hơn.";
 "star_on_github" = "Ngôi sao";
 "welcome_get_started" = "Bắt đầu";
-"menu_disable" = "Tắt Mac Drag Scroll";
-"menu_enable" = "Kích hoạt Mac Drag Scroll";
+"menu_disable" = "Tạm dừng cuộn bằng cách kéo";
+"menu_enable" = "Tiếp tục cuộn bằng cách kéo";
 "menu_settings" = "Cài đặt...";
 "menu_multiple_instances_warning" = "Nhiều bản sao đang chạy";
 "menu_ignore_current_app" = "Bỏ qua ứng dụng hiện tại";

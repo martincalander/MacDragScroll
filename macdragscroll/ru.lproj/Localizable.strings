@@ -114,8 +114,8 @@
 "welcome_star_detail" = "Это помогает проекту и облегчает его поиск в дальнейшем.";
 "star_on_github" = "Звезда";
 "welcome_get_started" = "Начать";
-"menu_disable" = "Отключить Mac Drag Scroll";
-"menu_enable" = "Включить Mac Drag Scroll";
+"menu_disable" = "Приостановить прокрутку перетаскиванием";
+"menu_enable" = "Возобновить прокрутку перетаскиванием";
 "menu_settings" = "Настройки...";
 "menu_multiple_instances_warning" = "Запущено несколько копий";
 "menu_ignore_current_app" = "Игнорировать текущее приложение";

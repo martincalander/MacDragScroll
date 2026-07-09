@@ -114,8 +114,8 @@
 "welcome_star_detail" = "它對項目有幫助，並且讓以後更容易找到。";
 "star_on_github" = "星星";
 "welcome_get_started" = "開始使用";
-"menu_disable" = "停用 Mac Drag Scroll";
-"menu_enable" = "啟用應用程式令牌";
+"menu_disable" = "暫停拖曳滾動";
+"menu_enable" = "繼續拖曳滾動";
 "menu_settings" = "設定...";
 "menu_multiple_instances_warning" = "多個副本正在執行";
 "menu_ignore_current_app" = "忽略當前應用程式";

@@ -150,14 +150,22 @@ struct SettingsWindowView: View {
     }
 
     private var contentHeader: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Label(navigation.selectedTab.title, systemImage: navigation.selectedTab.icon)
-                .font(.system(size: 20, weight: .semibold))
-                .labelStyle(.titleAndIcon)
+        HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Label(navigation.selectedTab.title, systemImage: navigation.selectedTab.icon)
+                    .font(.system(size: 20, weight: .semibold))
+                    .labelStyle(.titleAndIcon)
 
-            Text(navigation.selectedTab.subtitle)
-                .font(.system(size: 12))
-                .foregroundStyle(.secondary)
+                Text(navigation.selectedTab.subtitle)
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer(minLength: 12)
+
+            #if DEBUG
+            DevelopmentWatermarkBadge(style: .topBar)
+            #endif
         }
     }
 
@@ -840,6 +848,10 @@ struct SettingsWindowView: View {
                     .foregroundStyle(.orange)
                     .help(localized("multiple_instances_warning_detail", value: "Quit the extra copy so only one Mac Drag Scroll monitor is active.", comment: "Multiple instances warning detail"))
                 }
+
+                #if DEBUG
+                DevelopmentWatermarkBadge(style: .bottomBar)
+                #endif
             }
             .font(.system(size: 11, weight: .medium))
 
@@ -1055,6 +1067,124 @@ final class SettingsWindowNavigation: ObservableObject {
 
     private init() {}
 }
+
+#if DEBUG
+private struct DevelopmentWatermarkBadge: View {
+    enum Style {
+        case topBar
+        case bottomBar
+    }
+
+    let style: Style
+
+    private var title: String {
+        switch style {
+        case .topBar:
+            return "DEV BUILD"
+        case .bottomBar:
+            return "Development Build"
+        }
+    }
+
+    private var icon: String {
+        switch style {
+        case .topBar:
+            return "hammer.fill"
+        case .bottomBar:
+            return "wrench.and.screwdriver.fill"
+        }
+    }
+
+    var body: some View {
+        Label(title, systemImage: icon)
+            .font(.system(size: fontSize, weight: .semibold))
+            .lineLimit(1)
+            .labelStyle(.titleAndIcon)
+            .foregroundStyle(foregroundStyle)
+            .padding(.horizontal, horizontalPadding)
+            .padding(.vertical, verticalPadding)
+            .glassEffect(.regular.tint(tint), in: Capsule())
+            .overlay {
+                Capsule()
+                    .stroke(borderColor, lineWidth: 0.6)
+            }
+            .shadow(color: shadowColor, radius: shadowRadius, x: 0, y: 1)
+            .help("Debug-only development build marker. Release builds do not show this.")
+    }
+
+    private var fontSize: CGFloat {
+        switch style {
+        case .topBar:
+            return 10
+        case .bottomBar:
+            return 9
+        }
+    }
+
+    private var horizontalPadding: CGFloat {
+        switch style {
+        case .topBar:
+            return 9
+        case .bottomBar:
+            return 7
+        }
+    }
+
+    private var verticalPadding: CGFloat {
+        switch style {
+        case .topBar:
+            return 4
+        case .bottomBar:
+            return 2.5
+        }
+    }
+
+    private var tint: Color {
+        switch style {
+        case .topBar:
+            return Color.orange.opacity(0.20)
+        case .bottomBar:
+            return Color.orange.opacity(0.12)
+        }
+    }
+
+    private var foregroundStyle: Color {
+        switch style {
+        case .topBar:
+            return Color.orange
+        case .bottomBar:
+            return Color.orange.opacity(0.82)
+        }
+    }
+
+    private var borderColor: Color {
+        switch style {
+        case .topBar:
+            return Color.orange.opacity(0.34)
+        case .bottomBar:
+            return Color.orange.opacity(0.22)
+        }
+    }
+
+    private var shadowColor: Color {
+        switch style {
+        case .topBar:
+            return Color.orange.opacity(0.12)
+        case .bottomBar:
+            return Color.clear
+        }
+    }
+
+    private var shadowRadius: CGFloat {
+        switch style {
+        case .topBar:
+            return 5
+        case .bottomBar:
+            return 0
+        }
+    }
+}
+#endif
 
 private struct SettingsSidebarButton: View {
     let tab: SettingsTab

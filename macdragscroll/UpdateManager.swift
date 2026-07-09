@@ -104,6 +104,14 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
     static let websiteURL = URL(string: "https://martincalander.com")!
     static let versionHistory: [VersionHistoryEntry] = [
         VersionHistoryEntry(
+            version: "1.0.4",
+            build: "104",
+            releaseDate: "2026-07-09",
+            changes: [
+                "Mac Drag Scroll now checks quietly for updates whenever it launches and Auto Update is enabled."
+            ]
+        ),
+        VersionHistoryEntry(
             version: "1.0.3",
             build: "103",
             releaseDate: "2026-07-09",
@@ -221,8 +229,19 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
         syncPreferencesFromSparkle()
     }
 
-    func checkForUpdatesIfNeeded() {
+    func checkForUpdatesOnLaunch() {
         syncPreferencesFromSparkle()
+
+        let updater = updaterController.updater
+        guard Self.shouldCheckForUpdatesOnLaunch(
+            automaticallyChecksForUpdates: updater.automaticallyChecksForUpdates,
+            canCheckForUpdates: updater.canCheckForUpdates,
+            sessionInProgress: updater.sessionInProgress,
+            status: status
+        ) else { return }
+
+        beginUpdateCheck(historyMessage: "Started automatic update check.")
+        updater.checkForUpdatesInBackground()
     }
 
     func checkForUpdates() {
@@ -234,11 +253,7 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
             return
         }
 
-        status = .checking
-        let now = Date()
-        lastChecked = now
-        persist(now, forKey: lastCheckedKey)
-        appendHistory("Started update check.")
+        beginUpdateCheck(historyMessage: "Started manual update check.")
         updaterController.checkForUpdates(nil)
     }
 
@@ -282,6 +297,23 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
     static func isNoUpdateError(_ error: Error) -> Bool {
         let nsError = error as NSError
         return nsError.domain == SUSparkleErrorDomain && nsError.code == Int(SUError.noUpdateError.rawValue)
+    }
+
+    static func shouldCheckForUpdatesOnLaunch(
+        automaticallyChecksForUpdates: Bool,
+        canCheckForUpdates: Bool,
+        sessionInProgress: Bool,
+        status: UpdateStatus
+    ) -> Bool {
+        automaticallyChecksForUpdates && canCheckForUpdates && !sessionInProgress && !status.isChecking
+    }
+
+    private func beginUpdateCheck(historyMessage: String) {
+        status = .checking
+        let now = Date()
+        lastChecked = now
+        persist(now, forKey: lastCheckedKey)
+        appendHistory(historyMessage)
     }
 
     private func markUpToDate() {

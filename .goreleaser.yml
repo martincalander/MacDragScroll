@@ -1,0 +1,25 @@
+version: 2
+
+project_name: mac-drag-scroll
+
+# Xcode builds and packages the app before GoReleaser publishes the verified files.
+builds:
+  - id: mac-drag-scroll
+    skip: true
+
+checksum:
+  disable: true
+
+source:
+  enabled: false
+
+release:
+  name_template: "Mac Drag Scroll {{ .Version }}"
+  mode: replace
+  replace_existing_artifacts: true
+  make_latest: true
+  extra_files:
+    - glob: "{{ .Env.ARTIFACTS_DIR }}/{{ .Env.APP_ZIP }}"
+    - glob: "{{ .Env.ARTIFACTS_DIR }}/{{ .Env.APP_DMG }}"
+    - glob: "{{ .Env.ARTIFACTS_DIR }}/appcast.xml"
+    - glob: "{{ .Env.ARTIFACTS_DIR }}/SHA256SUMS.txt"

@@ -46,7 +46,7 @@ Clearing the company field removes the unwanted organization label, but it does 
 
 Mac Drag Scroll is packaged through GitHub Releases, Sparkle appcasts, the CLI installer, and the public Homebrew tap at [martincalander/homebrew-tap](https://github.com/martincalander/homebrew-tap).
 
-Scorecard's `Packaging` check is currently narrower than that distribution model. It looks for specific publishing workflow patterns such as npm, Maven, PyPI, Docker, GoReleaser, Cargo, and Semantic Release. The current macOS release workflow publishes `.zip`, `.dmg`, `appcast.xml`, checksums, and build provenance to GitHub Releases, but Scorecard may still report `packaging workflow not detected` until it supports GitHub Releases/Homebrew casks or the project adopts one of the packaging workflows it recognizes.
+The release workflow uses a pinned GoReleaser action to publish the `.zip`, `.dmg`, `appcast.xml`, and checksum files produced by the existing Xcode and Sparkle pipeline. This keeps GitHub Releases as the source of truth while making the real packaging workflow recognizable to Scorecard. Scorecard requires at least one successful run of that workflow before the `Packaging` check passes.
 
 ## Code Review
 

@@ -149,6 +149,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         CrashHandler.shared.setup()
         
         setupMenuBar()
+        UpdateManager.shared.checkForUpdatesOnLaunch()
         observeSettings()
         observePrimaryInstanceActivationRequests()
         AppInstanceMonitor.shared.startMonitoring()
@@ -160,7 +161,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         
         // Check accessibility permissions
         synchronizeAccessibilityState()
-        UpdateManager.shared.checkForUpdatesIfNeeded()
 
         DispatchQueue.main.async { [weak self] in
             self?.presentWelcomeIfNeeded()

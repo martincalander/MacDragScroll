@@ -460,10 +460,10 @@ final class SettingsManagerTests: XCTestCase {
     func testAppBundleVersionMetadataUsesStableReleaseValues() {
         let appBundle = Bundle(for: AppDelegate.self)
 
-        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "1.0.3")
-        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String, "103")
-        XCTAssertEqual(AppDelegate.appVersion, "1.0.3")
-        XCTAssertEqual(AppDelegate.appBuild, "103")
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "1.0.4")
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String, "104")
+        XCTAssertEqual(AppDelegate.appVersion, "1.0.4")
+        XCTAssertEqual(AppDelegate.appBuild, "104")
     }
 
     func testSparkleUpdateConfigurationIsPresent() {
@@ -500,6 +500,58 @@ final class SettingsManagerTests: XCTestCase {
         )
 
         XCTAssertFalse(UpdateManager.isNoUpdateError(downloadError))
+    }
+
+    func testLaunchUpdateCheckRunsWhenAutomaticChecksAreEnabled() {
+        XCTAssertTrue(
+            UpdateManager.shouldCheckForUpdatesOnLaunch(
+                automaticallyChecksForUpdates: true,
+                canCheckForUpdates: true,
+                sessionInProgress: false,
+                status: .upToDate
+            )
+        )
+    }
+
+    func testLaunchUpdateCheckRespectsAutomaticCheckPreference() {
+        XCTAssertFalse(
+            UpdateManager.shouldCheckForUpdatesOnLaunch(
+                automaticallyChecksForUpdates: false,
+                canCheckForUpdates: true,
+                sessionInProgress: false,
+                status: .upToDate
+            )
+        )
+    }
+
+    func testLaunchUpdateCheckDoesNotOverlapAnotherCheck() {
+        XCTAssertFalse(
+            UpdateManager.shouldCheckForUpdatesOnLaunch(
+                automaticallyChecksForUpdates: true,
+                canCheckForUpdates: true,
+                sessionInProgress: true,
+                status: .upToDate
+            )
+        )
+        XCTAssertFalse(
+            UpdateManager.shouldCheckForUpdatesOnLaunch(
+                automaticallyChecksForUpdates: true,
+                canCheckForUpdates: true,
+                sessionInProgress: false,
+                status: .checking
+            )
+        )
+    }
+
+    func testLaunchUpdateCheckDoesNotStartWhenSparkleIsUnavailable() {
+        XCTAssertFalse(
+            UpdateManager.shouldCheckForUpdatesOnLaunch(
+                automaticallyChecksForUpdates: true,
+                canCheckForUpdates: false,
+                sessionInProgress: false,
+                status: .upToDate
+            )
+        )
     }
 
     func testVersionHistoryStartsWithCurrentRelease() {

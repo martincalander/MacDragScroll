@@ -158,8 +158,9 @@ jobs:
         run: |
           set -euo pipefail
 
-          artifacts="$RUNNER_TEMP/release-artifacts"
+          artifacts=".build/release-artifacts"
           dmg_root="$RUNNER_TEMP/dmg-root"
+          rm -rf "$artifacts"
           mkdir -p "$artifacts" "$dmg_root"
 
           ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$artifacts/$APP_ZIP"

@@ -17,7 +17,7 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 - Added CodeQL Swift static analysis and pinned GitHub Action dependencies for supply-chain hardening.
 - Added a Swift fuzz harness for preference-input parsing and normalization paths.
 - Added directional Settings tab transitions with subtle vertical movement based on the previous tab position.
-- Added OpenSSF Best Practices BadgeApp prefill metadata and documented the remaining Scorecard CII and contributor-organization remediation steps.
+- Added OpenSSF Best Practices BadgeApp prefill metadata, README badges, and documented the remaining Scorecard CII and contributor-organization remediation steps.
 
 ### Changed
 

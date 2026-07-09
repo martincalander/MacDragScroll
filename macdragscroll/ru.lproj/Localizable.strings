@@ -100,6 +100,13 @@
 "check_for_update" = "Проверить наличие обновлений";
 "open_release" = "Открытый выпуск";
 "update_history" = "Обновить историю";
+"version_history" = "Version History";
+"current_release" = "Current";
+"build_format" = "Build %@";
+"show_update_log" = "Show Update Log";
+"hide_update_log" = "Hide Update Log";
+"update_log" = "Update Log";
+"update_log_detail" = "Diagnostic Sparkle events and manual update checks.";
 "update_menu_checking" = "Проверка обновлений...";
 "update_menu_up_to_date" = "Актуально";
 "update_menu_available" = "Доступно обновление: %@.";
@@ -188,7 +195,7 @@
 "settings_scrolling_subtitle" = "Отрегулируйте скорость, ускорение и мертвую зону.";
 "settings_apps_subtitle" = "Отключите прокрутку с помощью перетаскивания в выбранных приложениях.";
 "settings_permissions_subtitle" = "Проверьте необходимые разрешения macOS и состояние выполнения.";
-"settings_updates_subtitle" = "Проверьте выпуски, статус автоматического обновления и историю обновлений.";
+"settings_updates_subtitle" = "Check verified updates, automatic update status, and version history.";
 "settings_about_subtitle" = "Идентичность продукта, ссылки и сведения об авторах.";
 "crash_detected_title" = "Mac Drag Scroll разбился";
 "crash_detected_message" = "Приложение неожиданно аварийно завершилось во время последнего сеанса. Вы можете скопировать отчет о сбое, чтобы диагностировать проблему.";

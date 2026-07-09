@@ -100,6 +100,13 @@
 "check_for_update" = "Kiểm tra cập nhật";
 "open_release" = "Bản phát hành mở";
 "update_history" = "Cập nhật lịch sử";
+"version_history" = "Version History";
+"current_release" = "Current";
+"build_format" = "Build %@";
+"show_update_log" = "Show Update Log";
+"hide_update_log" = "Hide Update Log";
+"update_log" = "Update Log";
+"update_log_detail" = "Diagnostic Sparkle events and manual update checks.";
 "update_menu_checking" = "Đang kiểm tra cập nhật...";
 "update_menu_up_to_date" = "Cập nhật";
 "update_menu_available" = "Đã có bản cập nhật: %@";
@@ -188,7 +195,7 @@
 "settings_scrolling_subtitle" = "Điều chỉnh tốc độ, khả năng tăng tốc và vùng chết.";
 "settings_apps_subtitle" = "Tắt tính năng kéo cuộn trong các ứng dụng đã chọn.";
 "settings_permissions_subtitle" = "Kiểm tra các quyền macOS cần thiết và trạng thái thời gian chạy.";
-"settings_updates_subtitle" = "Kiểm tra các bản phát hành, trạng thái cập nhật tự động và lịch sử cập nhật.";
+"settings_updates_subtitle" = "Check verified updates, automatic update status, and version history.";
 "settings_about_subtitle" = "Nhận dạng sản phẩm, liên kết và tín dụng.";
 "crash_detected_title" = "Mac Drag Scroll bị lỗi";
 "crash_detected_message" = "Ứng dụng bị lỗi bất ngờ trong phiên cuối cùng. Bạn có thể sao chép báo cáo sự cố để giúp chẩn đoán sự cố.";

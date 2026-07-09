@@ -100,6 +100,13 @@
 "check_for_update" = "업데이트 확인";
 "open_release" = "공개 릴리스";
 "update_history" = "업데이트 기록";
+"version_history" = "Version History";
+"current_release" = "Current";
+"build_format" = "Build %@";
+"show_update_log" = "Show Update Log";
+"hide_update_log" = "Hide Update Log";
+"update_log" = "Update Log";
+"update_log_detail" = "Diagnostic Sparkle events and manual update checks.";
 "update_menu_checking" = "업데이트 확인 중...";
 "update_menu_up_to_date" = "최신";
 "update_menu_available" = "업데이트 가능: %@";
@@ -188,7 +195,7 @@
 "settings_scrolling_subtitle" = "속도, 가속도, 데드존을 조정합니다.";
 "settings_apps_subtitle" = "선택한 앱에서 드래그 스크롤을 비활성화합니다.";
 "settings_permissions_subtitle" = "필요한 macOS 권한과 런타임 상태를 확인하세요.";
-"settings_updates_subtitle" = "릴리스, 자동 업데이트 상태, 업데이트 내역을 확인하세요.";
+"settings_updates_subtitle" = "Check verified updates, automatic update status, and version history.";
 "settings_about_subtitle" = "제품 ID, 링크 및 크레딧.";
 "crash_detected_title" = "Mac Drag Scroll이 다운되었습니다.";
 "crash_detected_message" = "마지막 세션 중에 앱이 예기치 않게 충돌했습니다. 문제 진단에 도움이 되도록 충돌 보고서를 복사할 수 있습니다.";

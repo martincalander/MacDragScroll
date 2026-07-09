@@ -272,10 +272,10 @@ final class SettingsManagerTests: XCTestCase {
     func testAppBundleVersionMetadataUsesStableReleaseValues() {
         let appBundle = Bundle(for: AppDelegate.self)
 
-        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "1.0.1")
-        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String, "101")
-        XCTAssertEqual(AppDelegate.appVersion, "1.0.1")
-        XCTAssertEqual(AppDelegate.appBuild, "101")
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "1.0.2")
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String, "102")
+        XCTAssertEqual(AppDelegate.appVersion, "1.0.2")
+        XCTAssertEqual(AppDelegate.appBuild, "102")
     }
 
     func testSparkleUpdateConfigurationIsPresent() {
@@ -312,6 +312,23 @@ final class SettingsManagerTests: XCTestCase {
         )
 
         XCTAssertFalse(UpdateManager.isNoUpdateError(downloadError))
+    }
+
+    func testVersionHistoryStartsWithCurrentRelease() {
+        let latest = UpdateManager.versionHistory.first
+
+        XCTAssertEqual(latest?.version, AppDelegate.appVersion)
+        XCTAssertEqual(latest?.build, AppDelegate.appBuild)
+        XCTAssertEqual(latest?.releaseDate, "2026-07-09")
+        XCTAssertEqual(latest?.isCurrent, true)
+        XCTAssertFalse(latest?.changes.isEmpty ?? true)
+    }
+
+    func testVersionHistoryKeepsInitialReleaseEntry() {
+        let initialRelease = UpdateManager.versionHistory.first { $0.version == "1.0.0" }
+
+        XCTAssertEqual(initialRelease?.build, "100")
+        XCTAssertFalse(initialRelease?.changes.isEmpty ?? true)
     }
 
     func testPermissionStateResetsMonitoringWhenAccessibilityIsMissing() {

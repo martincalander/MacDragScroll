@@ -100,6 +100,13 @@
 "check_for_update" = "檢查更新";
 "open_release" = "開放發布";
 "update_history" = "更新歷史";
+"version_history" = "Version History";
+"current_release" = "Current";
+"build_format" = "Build %@";
+"show_update_log" = "Show Update Log";
+"hide_update_log" = "Hide Update Log";
+"update_log" = "Update Log";
+"update_log_detail" = "Diagnostic Sparkle events and manual update checks.";
 "update_menu_checking" = "正在檢查更新...";
 "update_menu_up_to_date" = "最新";
 "update_menu_available" = "可用更新：%@";
@@ -188,7 +195,7 @@
 "settings_scrolling_subtitle" = "調整速度、加速度和死區。";
 "settings_apps_subtitle" = "在選定的應用程式中停用拖曳滾動。";
 "settings_permissions_subtitle" = "檢查所需的 macOS 權限和執行時間狀態。";
-"settings_updates_subtitle" = "檢查版本、自動更新狀態和更新歷史記錄。";
+"settings_updates_subtitle" = "Check verified updates, automatic update status, and version history.";
 "settings_about_subtitle" = "產品標識、連結和信用。";
 "crash_detected_title" = "Mac Drag Scroll 崩潰";
 "crash_detected_message" = "該應用程式在上次會話期間意外崩潰。您可以複製崩潰報告來幫助診斷問題。";

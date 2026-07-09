@@ -100,6 +100,13 @@
 "check_for_update" = "Check For Update";
 "open_release" = "Open Release";
 "update_history" = "Update History";
+"version_history" = "Version History";
+"current_release" = "Current";
+"build_format" = "Build %@";
+"show_update_log" = "Show Update Log";
+"hide_update_log" = "Hide Update Log";
+"update_log" = "Update Log";
+"update_log_detail" = "Diagnostic Sparkle events and manual update checks.";
 "update_menu_checking" = "Checking for Updates...";
 "update_menu_up_to_date" = "Up to Date";
 "update_menu_available" = "Update Available: %@";
@@ -188,7 +195,7 @@
 "settings_scrolling_subtitle" = "Adjust speed, acceleration, and dead zone.";
 "settings_apps_subtitle" = "Disable drag scrolling in selected apps.";
 "settings_permissions_subtitle" = "Check required macOS permissions and runtime status.";
-"settings_updates_subtitle" = "Check verified updates, automatic update status, and update history.";
+"settings_updates_subtitle" = "Check verified updates, automatic update status, and version history.";
 "settings_about_subtitle" = "Product identity, links, and credits.";
 "crash_detected_title" = "Mac Drag Scroll Crashed";
 "crash_detected_message" = "The app crashed unexpectedly during the last session. You can copy the crash report to help diagnose the issue.";

@@ -100,6 +100,13 @@
 "check_for_update" = "Rechercher une mise à jour";
 "open_release" = "Version ouverte";
 "update_history" = "Historique des mises à jour";
+"version_history" = "Version History";
+"current_release" = "Current";
+"build_format" = "Build %@";
+"show_update_log" = "Show Update Log";
+"hide_update_log" = "Hide Update Log";
+"update_log" = "Update Log";
+"update_log_detail" = "Diagnostic Sparkle events and manual update checks.";
 "update_menu_checking" = "Vérification des mises à jour...";
 "update_menu_up_to_date" = "À jour";
 "update_menu_available" = "Mise à jour disponible : %@";
@@ -188,7 +195,7 @@
 "settings_scrolling_subtitle" = "Ajustez la vitesse, l’accélération et la zone morte.";
 "settings_apps_subtitle" = "Désactivez le défilement par glisser-déposer dans les applications sélectionnées.";
 "settings_permissions_subtitle" = "Vérifiez les autorisations macOS requises et l'état d'exécution.";
-"settings_updates_subtitle" = "Vérifiez les versions, l'état de la mise à jour automatique et l'historique des mises à jour.";
+"settings_updates_subtitle" = "Check verified updates, automatic update status, and version history.";
 "settings_about_subtitle" = "Identité du produit, liens et crédits.";
 "crash_detected_title" = "Mac Drag Scroll crashé";
 "crash_detected_message" = "L'application s'est écrasée de manière inattendue lors de la dernière session. Vous pouvez copier le rapport d'erreur pour aider à diagnostiquer le problème.";

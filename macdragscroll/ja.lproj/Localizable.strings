@@ -100,6 +100,13 @@
 "check_for_update" = "アップデートの確認";
 "open_release" = "オープンリリース";
 "update_history" = "更新履歴";
+"version_history" = "Version History";
+"current_release" = "Current";
+"build_format" = "Build %@";
+"show_update_log" = "Show Update Log";
+"hide_update_log" = "Hide Update Log";
+"update_log" = "Update Log";
+"update_log_detail" = "Diagnostic Sparkle events and manual update checks.";
 "update_menu_checking" = "アップデートをチェックしています...";
 "update_menu_up_to_date" = "最新の";
 "update_menu_available" = "利用可能なアップデート: %@";
@@ -188,7 +195,7 @@
 "settings_scrolling_subtitle" = "速度、加速度、デッドゾーンを調整します。";
 "settings_apps_subtitle" = "選択したアプリでドラッグ スクロールを無効にします。";
 "settings_permissions_subtitle" = "必要な macOS 権限と実行時のステータスを確認します。";
-"settings_updates_subtitle" = "リリース、自動アップデートの状況、アップデート履歴を確認します。";
+"settings_updates_subtitle" = "Check verified updates, automatic update status, and version history.";
 "settings_about_subtitle" = "製品のアイデンティティ、リンク、クレジット。";
 "crash_detected_title" = "Mac Drag Scroll がクラッシュしました";
 "crash_detected_message" = "最後のセッション中にアプリが予期せずクラッシュしました。クラッシュ レポートをコピーすると、問題の診断に役立ちます。";

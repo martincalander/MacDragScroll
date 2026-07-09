@@ -27,6 +27,7 @@ struct SettingsWindowView: View {
     @State private var showingClearCrashReportsConfirmation = false
     @State private var logoPop = false
     @State private var settingsIntroVisible = false
+    @State private var showsUpdateLog = false
     @FocusState private var focusedSidebarTab: SettingsTab?
 
     var body: some View {
@@ -748,28 +749,134 @@ struct SettingsWindowView: View {
                 }
             }
 
-            GlassSection {
-                VStack(alignment: .leading, spacing: 8) {
-                    Label(localized("update_history", value: "Update History", comment: "Update history title"), systemImage: "list.bullet.rectangle")
+            versionHistorySection
+
+            if showsUpdateLog {
+                updateLogSection
+            }
+        }
+    }
+
+    private var versionHistorySection: some View {
+        GlassSection {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 10) {
+                    Label(localized("version_history", value: "Version History", comment: "Version history title"), systemImage: "clock.badge.checkmark")
                         .font(.system(size: 12, weight: .semibold))
 
-                    ForEach(updateManager.history) { entry in
-                        HStack(alignment: .top, spacing: 8) {
-                            Text(historyTime(entry.date))
-                                .font(.system(size: 10, weight: .medium, design: .rounded))
-                                .foregroundStyle(.secondary)
-                                .monospacedDigit()
-                                .frame(width: 74, alignment: .leading)
+                    Spacer(minLength: 10)
 
-                            Text(entry.message)
+                    Button {
+                        withAnimation(.smooth(duration: 0.18)) {
+                            showsUpdateLog.toggle()
+                        }
+                    } label: {
+                        Label(
+                            showsUpdateLog
+                                ? localized("hide_update_log", value: "Hide Update Log", comment: "Hide update log button")
+                                : localized("show_update_log", value: "Show Update Log", comment: "Show update log button"),
+                            systemImage: showsUpdateLog ? "chevron.up.circle" : "list.bullet.rectangle"
+                        )
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                }
+
+                Divider()
+
+                ForEach(UpdateManager.versionHistory.indices, id: \.self) { index in
+                    versionHistoryRow(UpdateManager.versionHistory[index])
+
+                    if index < UpdateManager.versionHistory.count - 1 {
+                        Divider()
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private func versionHistoryRow(_ entry: VersionHistoryEntry) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: entry.isCurrent ? "checkmark.seal.fill" : "shippingbox")
+                .font(.system(size: 13, weight: .medium))
+                .symbolRenderingMode(.hierarchical)
+                .foregroundStyle(entry.isCurrent ? Color.green : Color.secondary)
+                .frame(width: SettingsLayout.rowIconWidth)
+
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 8) {
+                    Text("\(localized("version", value: "Version", comment: "Version label")) \(entry.version)")
+                        .font(.system(size: 12, weight: .semibold))
+
+                    if entry.isCurrent {
+                        StatusBadge(
+                            title: localized("current_release", value: "Current", comment: "Current release badge"),
+                            color: .green
+                        )
+                    }
+
+                    Spacer(minLength: 8)
+
+                    Text(entry.releaseDate)
+                        .font(.system(size: 10, weight: .medium, design: .rounded))
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                }
+
+                Text(String(format: localized("build_format", value: "Build %@", comment: "Build number format"), entry.build))
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(.secondary)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(entry.changes, id: \.self) { change in
+                        HStack(alignment: .top, spacing: 7) {
+                            Image(systemName: "circle.fill")
+                                .font(.system(size: 3, weight: .bold))
+                                .foregroundStyle(.secondary)
+                                .frame(width: 6, height: 12)
+                                .padding(.top, 2)
+
+                            Text(change)
                                 .font(.system(size: 11))
                                 .foregroundStyle(.secondary)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                     }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
             }
+        }
+    }
+
+    private var updateLogSection: some View {
+        GlassSection {
+            VStack(alignment: .leading, spacing: 8) {
+                Label(localized("update_log", value: "Update Log", comment: "Update log title"), systemImage: "list.bullet.rectangle")
+                    .font(.system(size: 12, weight: .semibold))
+
+                Text(localized("update_log_detail", value: "Diagnostic Sparkle events and manual update checks.", comment: "Update log detail"))
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Divider()
+
+                ForEach(updateManager.history) { entry in
+                    HStack(alignment: .top, spacing: 8) {
+                        Text(historyTime(entry.date))
+                            .font(.system(size: 10, weight: .medium, design: .rounded))
+                            .foregroundStyle(.secondary)
+                            .monospacedDigit()
+                            .frame(width: 74, alignment: .leading)
+
+                        Text(entry.message)
+                            .font(.system(size: 11))
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 

@@ -12,6 +12,21 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 
 ### Fixed
 
+## [1.0.2] - 2026-07-09
+
+### Added
+
+- Added a dedicated Version History view in Updates.
+- Added a hidden diagnostic Update Log that can be revealed when Sparkle troubleshooting is needed.
+
+### Changed
+
+- Updates now shows release history by default instead of showing raw update-check events.
+
+### Fixed
+
+- Kept the bundled version history covered by tests so the current release row stays aligned with the app build.
+
 ## [1.0.1] - 2026-07-09
 
 ### Added

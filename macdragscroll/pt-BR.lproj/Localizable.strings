@@ -100,6 +100,13 @@
 "check_for_update" = "Verifique se há atualização";
 "open_release" = "Lançamento aberto";
 "update_history" = "Histórico de atualizações";
+"version_history" = "Version History";
+"current_release" = "Current";
+"build_format" = "Build %@";
+"show_update_log" = "Show Update Log";
+"hide_update_log" = "Hide Update Log";
+"update_log" = "Update Log";
+"update_log_detail" = "Diagnostic Sparkle events and manual update checks.";
 "update_menu_checking" = "Verificando atualizações...";
 "update_menu_up_to_date" = "Atualizado";
 "update_menu_available" = "Atualização disponível: %@";
@@ -188,7 +195,7 @@
 "settings_scrolling_subtitle" = "Ajuste a velocidade, aceleração e zona morta.";
 "settings_apps_subtitle" = "Desative a rolagem por arrastar em aplicativos selecionados.";
 "settings_permissions_subtitle" = "Verifique as permissões necessárias do macOS e o status do tempo de execução.";
-"settings_updates_subtitle" = "Verifique lançamentos, status de atualização automática e histórico de atualizações.";
+"settings_updates_subtitle" = "Check verified updates, automatic update status, and version history.";
 "settings_about_subtitle" = "Identidade do produto, links e créditos.";
 "crash_detected_title" = "Mac Drag Scroll travou";
 "crash_detected_message" = "O aplicativo travou inesperadamente durante a última sessão. Você pode copiar o relatório de falha para ajudar a diagnosticar o problema.";

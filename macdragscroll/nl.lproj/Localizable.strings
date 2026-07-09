@@ -100,6 +100,13 @@
 "check_for_update" = "Controleer op updates";
 "open_release" = "Vrijgave openen";
 "update_history" = "Geschiedenis bijwerken";
+"version_history" = "Version History";
+"current_release" = "Current";
+"build_format" = "Build %@";
+"show_update_log" = "Show Update Log";
+"hide_update_log" = "Hide Update Log";
+"update_log" = "Update Log";
+"update_log_detail" = "Diagnostic Sparkle events and manual update checks.";
 "update_menu_checking" = "Controleren op updates...";
 "update_menu_up_to_date" = "Up-to-date";
 "update_menu_available" = "Update beschikbaar: %@";
@@ -188,7 +195,7 @@
 "settings_scrolling_subtitle" = "Pas de snelheid, acceleratie en dode zone aan.";
 "settings_apps_subtitle" = "Schakel slepen-scrollen uit in geselecteerde apps.";
 "settings_permissions_subtitle" = "Controleer de vereiste macOS-machtigingen en runtime-status.";
-"settings_updates_subtitle" = "Controleer releases, automatische updatestatus en updategeschiedenis.";
+"settings_updates_subtitle" = "Check verified updates, automatic update status, and version history.";
 "settings_about_subtitle" = "Productidentiteit, links en credits.";
 "crash_detected_title" = "Mac Drag Scroll Gecrasht";
 "crash_detected_message" = "De app crashte onverwachts tijdens de laatste sessie. U kunt het crashrapport kopiëren om het probleem te diagnosticeren.";

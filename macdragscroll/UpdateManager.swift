@@ -84,11 +84,56 @@ struct UpdateHistoryEntry: Identifiable, Codable, Equatable {
     }
 }
 
+struct VersionHistoryEntry: Identifiable, Equatable {
+    let version: String
+    let build: String
+    let releaseDate: String
+    let changes: [String]
+
+    var id: String { "\(version)-\(build)" }
+
+    var isCurrent: Bool {
+        version == AppDelegate.appVersion && build == AppDelegate.appBuild
+    }
+}
+
 final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
     static let shared = UpdateManager()
 
     static let repositoryURL = URL(string: "https://github.com/martincalander/MacDragScroll")!
     static let websiteURL = URL(string: "https://martincalander.com")!
+    static let versionHistory: [VersionHistoryEntry] = [
+        VersionHistoryEntry(
+            version: "1.0.2",
+            build: "102",
+            releaseDate: "2026-07-09",
+            changes: [
+                "Added a proper Version History view in Updates so releases are easier to scan.",
+                "Moved diagnostic Sparkle update events behind a Show Update Log control.",
+                "Added tests to keep the bundled version history aligned with the current app build."
+            ]
+        ),
+        VersionHistoryEntry(
+            version: "1.0.1",
+            build: "101",
+            releaseDate: "2026-07-09",
+            changes: [
+                "Added a General setting to keep Mac Drag Scroll running in the menu bar after closing Settings.",
+                "Made Accessibility and Input Monitoring setup clearer, including app reveal and restart repair actions.",
+                "Fixed up-to-date Sparkle checks being shown as update failures."
+            ]
+        ),
+        VersionHistoryEntry(
+            version: "1.0.0",
+            build: "100",
+            releaseDate: "2026-07-09",
+            changes: [
+                "Initial public release with Windows-style middle-mouse drag scrolling for external mice.",
+                "Added the Liquid Glass visualizer, menu bar controls, ignored apps, permissions, updates, and About sections.",
+                "Added Sparkle-based updates backed by GitHub Releases."
+            ]
+        )
+    ]
 
     private let defaults = PersistentPreferences.userDefaults
     private let lastCheckedKey = "lastUpdateCheckDate"

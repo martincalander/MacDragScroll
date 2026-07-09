@@ -100,6 +100,13 @@
 "check_for_update" = "Sök efter uppdatering";
 "open_release" = "Öppna Release";
 "update_history" = "Uppdatera historik";
+"version_history" = "Version History";
+"current_release" = "Current";
+"build_format" = "Build %@";
+"show_update_log" = "Show Update Log";
+"hide_update_log" = "Hide Update Log";
+"update_log" = "Update Log";
+"update_log_detail" = "Diagnostic Sparkle events and manual update checks.";
 "update_menu_checking" = "Söker efter uppdateringar...";
 "update_menu_up_to_date" = "Upp till datum";
 "update_menu_available" = "Uppdatering tillgänglig: %@";
@@ -188,7 +195,7 @@
 "settings_scrolling_subtitle" = "Justera hastighet, acceleration och dödzon.";
 "settings_apps_subtitle" = "Inaktivera dragrullning i valda appar.";
 "settings_permissions_subtitle" = "Kontrollera nödvändiga macOS-behörigheter och körtidsstatus.";
-"settings_updates_subtitle" = "Kontrollera releaser, automatisk uppdateringsstatus och uppdateringshistorik.";
+"settings_updates_subtitle" = "Check verified updates, automatic update status, and version history.";
 "settings_about_subtitle" = "Produktidentitet, länkar och krediter.";
 "crash_detected_title" = "Mac Drag Scroll kraschade";
 "crash_detected_message" = "Appen kraschade oväntat under den senaste sessionen. Du kan kopiera kraschrapporten för att diagnostisera problemet.";

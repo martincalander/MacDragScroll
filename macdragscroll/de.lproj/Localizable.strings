@@ -100,6 +100,13 @@
 "check_for_update" = "Suchen Sie nach Updates";
 "open_release" = "Veröffentlichung öffnen";
 "update_history" = "Update-Verlauf";
+"version_history" = "Version History";
+"current_release" = "Current";
+"build_format" = "Build %@";
+"show_update_log" = "Show Update Log";
+"hide_update_log" = "Hide Update Log";
+"update_log" = "Update Log";
+"update_log_detail" = "Diagnostic Sparkle events and manual update checks.";
 "update_menu_checking" = "Suche nach Updates...";
 "update_menu_up_to_date" = "Auf dem neuesten Stand";
 "update_menu_available" = "Update verfügbar: %@";
@@ -188,7 +195,7 @@
 "settings_scrolling_subtitle" = "Passen Sie Geschwindigkeit, Beschleunigung und Totzone an.";
 "settings_apps_subtitle" = "Deaktivieren Sie Drag-Scrolling in ausgewählten Apps.";
 "settings_permissions_subtitle" = "Überprüfen Sie die erforderlichen macOS-Berechtigungen und den Laufzeitstatus.";
-"settings_updates_subtitle" = "Überprüfen Sie Veröffentlichungen, den Status der automatischen Updates und den Update-Verlauf.";
+"settings_updates_subtitle" = "Check verified updates, automatic update status, and version history.";
 "settings_about_subtitle" = "Produktidentität, Links und Credits.";
 "crash_detected_title" = "Mac Drag Scroll ist abgestürzt";
 "crash_detected_message" = "Die App ist während der letzten Sitzung unerwartet abgestürzt. Sie können den Absturzbericht kopieren, um bei der Diagnose des Problems zu helfen.";

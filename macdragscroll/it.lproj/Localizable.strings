@@ -100,6 +100,13 @@
 "check_for_update" = "Controlla aggiornamenti";
 "open_release" = "Apri la versione";
 "update_history" = "Aggiorna cronologia";
+"version_history" = "Version History";
+"current_release" = "Current";
+"build_format" = "Build %@";
+"show_update_log" = "Show Update Log";
+"hide_update_log" = "Hide Update Log";
+"update_log" = "Update Log";
+"update_log_detail" = "Diagnostic Sparkle events and manual update checks.";
 "update_menu_checking" = "Controllo aggiornamenti...";
 "update_menu_up_to_date" = "Aggiornato";
 "update_menu_available" = "Aggiornamento disponibile: %@";
@@ -188,7 +195,7 @@
 "settings_scrolling_subtitle" = "Regola velocità, accelerazione e zona morta.";
 "settings_apps_subtitle" = "Disattiva lo scorrimento tramite trascinamento nelle app selezionate.";
 "settings_permissions_subtitle" = "Controlla le autorizzazioni macOS richieste e lo stato di runtime.";
-"settings_updates_subtitle" = "Controlla le versioni, lo stato degli aggiornamenti automatici e la cronologia degli aggiornamenti.";
+"settings_updates_subtitle" = "Check verified updates, automatic update status, and version history.";
 "settings_about_subtitle" = "Identità del prodotto, collegamenti e crediti.";
 "crash_detected_title" = "Mac Drag Scroll si è bloccato";
 "crash_detected_message" = "L'app si è bloccata inaspettatamente durante l'ultima sessione. Puoi copiare il rapporto sull'arresto anomalo per facilitare la diagnosi del problema.";

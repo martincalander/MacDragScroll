@@ -10,5 +10,6 @@ Regenerate the assets on macOS with Google Chrome, Node.js, npm, and FFmpeg:
 ./scripts/render-readme-demos.sh
 ```
 
-The renderer pins Playwright, uses the checked-in app icon, writes the three GIF
-files to `docs/assets`, and removes its temporary PNG frames when complete.
+The renderer installs Playwright with `npm ci` from the committed lockfile, uses
+the checked-in app icon, writes the three GIF files to `docs/assets`, and removes
+its temporary PNG frames when complete.

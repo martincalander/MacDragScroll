@@ -130,10 +130,13 @@ xcodebuild build \
   -project macdragscroll.xcodeproj \
   -scheme macdragscroll \
   -configuration Release \
-  -destination 'platform=macOS' \
-  -derivedDataPath /tmp/MacDragScroll-Release
+  -destination 'generic/platform=macOS' \
+  -derivedDataPath /tmp/MacDragScroll-Release \
+  ARCHS='arm64 x86_64' \
+  ONLY_ACTIVE_ARCH=NO
 
-bash -n install.sh scripts/*.sh
+scripts/check-repository-quality.sh
+scripts/check-macos-compatibility.sh "/tmp/MacDragScroll-Release/Build/Products/Release/Mac Drag Scroll.app"
 scripts/validate-homebrew-cask.sh
 scripts/check-release-readiness.sh <version>
 ```

@@ -16,7 +16,7 @@ Mac Drag Scroll should stay small, reliable, and native-feeling:
 
 ## Requirements
 
-- macOS 26.2 or later
+- macOS 14 or later
 - Xcode 26.2 or later
 
 ## Build And Test
@@ -76,7 +76,9 @@ Before opening a pull request:
 - Add or update tests when changing scroll math, settings persistence, permissions, or update behavior.
 - Update `README.md`, localized READMEs, `SUPPORT.md`, or `PRIVACY.md` when behavior changes what users need to know.
 
-Mac Drag Scroll is currently a solo-maintainer project, so required PR approval is not enforced yet. Independent required review should be enabled if or when trusted collaborators are available.
+Changes to `main` require two approvals, including code-owner review. New pushes dismiss stale reviews, the latest push needs independent approval, and all review conversations must be resolved before merge.
+
+Maintainer responsibilities and the decision process are documented in [Governance](GOVERNANCE.md).
 
 ## Documentation Style
 
@@ -90,6 +92,7 @@ Mac Drag Scroll is currently a solo-maintainer project, so required PR approval 
 - Follow the [Swift API Design Guidelines](https://www.swift.org/documentation/api-design-guidelines/).
 - Preserve the existing AppKit and SwiftUI ownership boundaries described in `ARCHITECTURE.md`.
 - Treat compiler warnings and static-analysis findings as defects; do not suppress them without a documented reason.
+- Keep GitHub Actions pinned to full commit SHAs and update dependency lockfiles atomically.
 - Prefer small, testable helpers for input classification, persistence normalization, and release-sensitive behavior.
 - Add comments only where a safety invariant or platform limitation is not evident from the code.
 

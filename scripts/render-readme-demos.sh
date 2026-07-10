@@ -2,12 +2,11 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PLAYWRIGHT_VERSION="1.61.1"
-RENDER_RUNTIME="${TMPDIR:-/tmp}/macdragscroll-readme-render"
-PLAYWRIGHT_DIR="${RENDER_RUNTIME}/node_modules/playwright"
+SOURCE_DIR="${ROOT_DIR}/docs/assets/source"
+PLAYWRIGHT_DIR="${SOURCE_DIR}/node_modules/playwright"
 
 if [[ ! -d "${PLAYWRIGHT_DIR}" ]]; then
-  npm install --prefix "${RENDER_RUNTIME}" "playwright@${PLAYWRIGHT_VERSION}"
+  npm ci --prefix "${SOURCE_DIR}" --ignore-scripts --no-audit --no-fund
 fi
 
 PLAYWRIGHT_PATH="${PLAYWRIGHT_DIR}" \

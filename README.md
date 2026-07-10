@@ -14,7 +14,7 @@
   <a href="https://github.com/martincalander/MacDragScroll/actions/workflows/checks-summary.yml"><img alt="Checks 3/3" src="https://github.com/martincalander/MacDragScroll/actions/workflows/checks-summary.yml/badge.svg?branch=main"></a>
   <a href="https://scorecard.dev/viewer/?uri=github.com/martincalander/MacDragScroll"><img alt="OpenSSF Scorecard" src="https://api.scorecard.dev/projects/github.com/martincalander/MacDragScroll/badge"></a>
   <a href="https://www.bestpractices.dev/projects/13546"><img alt="OpenSSF Best Practices" src="https://www.bestpractices.dev/projects/13546/badge"></a>
-  <img alt="macOS 26.2 or later" src="https://img.shields.io/badge/macOS-26.2%2B-111111?logo=apple&logoColor=white">
+  <img alt="macOS 14 or later" src="https://img.shields.io/badge/macOS-14%2B-111111?logo=apple&logoColor=white">
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-2f80ed.svg"></a>
 </p>
 
@@ -128,7 +128,7 @@ Read [Privacy](PRIVACY.md), [Security](SECURITY.md), and the implementation [Arc
 
 ## Build from Source
 
-Requirements: macOS 26.2 or later and a compatible version of Xcode.
+Requirements: macOS 14 or later and Xcode 26.2 or later.
 
 ```sh
 git clone https://github.com/martincalander/MacDragScroll.git
@@ -158,13 +158,14 @@ Contributions are welcome. Start with [Contributing](CONTRIBUTING.md), the [Code
 | [Architecture](ARCHITECTURE.md) | Runtime boundaries, safety invariants, and event flow. |
 | [Privacy](PRIVACY.md) | What the app can access and what it never collects. |
 | [Security](SECURITY.md) | Vulnerability reporting and release verification. |
+| [Governance](GOVERNANCE.md) | Maintainer roles, review policy, and project decisions. |
 | [Changelog](CHANGELOG.md) | Version history and release notes. |
 | [Scorecard notes](docs/SCORECARD.md) | OpenSSF posture, controls, and current limitations. |
 | [Releasing](docs/RELEASING.md) | Maintainer release and provenance process. |
 
 ## Requirements
 
-- macOS 26.2 or later
+- macOS 14 or later
 - An external mouse with a middle button or clickable scroll wheel
 - Accessibility and Input Monitoring permissions
 

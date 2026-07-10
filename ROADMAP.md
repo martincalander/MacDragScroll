@@ -17,16 +17,17 @@ From July 2026 through July 2027, the project intends to:
 
 - Add regression tests whenever a real input, persistence, permission, or update edge case is found.
 - Continue accessibility and keyboard-navigation audits for Settings and onboarding.
-- Complete evidence-backed OpenSSF Best Practices criteria that fit a solo-maintainer project.
+- Raise meaningful automated test coverage beyond the current core-logic focus.
+- Complete evidence-backed OpenSSF Best Practices Silver criteria.
 - Evaluate Apple Developer ID signing and notarization only if sustainable distribution funding becomes available.
 
 ## Collaboration Milestones
 
-When trusted maintainers join the project:
+With independent maintainers now reviewing changes:
 
-- Introduce required independent review and code-owner approval.
 - Document maintainer succession and release-key recovery procedures.
-- Pursue OpenSSF Best Practices Silver and Gold criteria that require multiple maintainers.
+- Reduce the remaining release-key and private-security-response bus factor.
+- Pursue OpenSSF Best Practices Gold criteria that require broader maintenance continuity and stronger coverage.
 
 ## Non-Goals
 

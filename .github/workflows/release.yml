@@ -122,7 +122,9 @@ jobs:
             -destination 'platform=macOS' \
             -derivedDataPath "$RUNNER_TEMP/MacDragScrollTestDerivedData" \
             CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO
+            CODE_SIGNING_REQUIRED=NO \
+            GCC_TREAT_WARNINGS_AS_ERRORS=YES \
+            SWIFT_TREAT_WARNINGS_AS_ERRORS=YES
 
       - name: Build unsigned app
         run: |
@@ -134,16 +136,22 @@ jobs:
             -project macdragscroll.xcodeproj \
             -scheme macdragscroll \
             -configuration Release \
-            -destination 'platform=macOS' \
+            -destination 'generic/platform=macOS' \
             -derivedDataPath "$derived_data" \
+            ARCHS='arm64 x86_64' \
+            ONLY_ACTIVE_ARCH=NO \
             CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO
+            CODE_SIGNING_REQUIRED=NO \
+            GCC_TREAT_WARNINGS_AS_ERRORS=YES \
+            SWIFT_TREAT_WARNINGS_AS_ERRORS=YES
 
           app_path="$derived_data/Build/Products/Release/$APP_BUNDLE"
           if [ ! -d "$app_path" ]; then
             echo "Built app not found at $app_path" >&2
             exit 66
           fi
+
+          scripts/check-macos-compatibility.sh "$app_path"
 
           codesign --force --deep --sign - "$app_path"
           codesign --verify --deep --strict --verbose=2 "$app_path"

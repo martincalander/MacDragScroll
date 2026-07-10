@@ -22,8 +22,9 @@ The repository runs these free security checks:
 
 - **OpenSSF Scorecard:** checks open-source security posture and publishes the public Scorecard badge.
 - **CodeQL:** runs static analysis for Swift security issues.
-- **Gitleaks:** scans pushes, pull requests, and weekly scheduled runs for committed secrets.
-- **Quality Gate:** builds, tests, and validates release metadata on macOS.
+- **Gitleaks and GitHub secret scanning:** scan committed secrets, while push protection blocks recognized credentials before they enter the repository.
+- **Dependency Review:** blocks pull requests that introduce dependencies with moderate-or-higher known vulnerabilities.
+- **Quality Gate:** treats compiler warnings as errors, runs tests with coverage, executes the preference fuzzer corpus under macOS Guard Malloc heap checking, performs Xcode static analysis, and validates a universal macOS 14+ release build.
 - **Swift fuzz harnesses:** exercise preference-style parsers and normalization paths.
 
 Scan results are advisory and do not replace manual review, but they help catch common repository, workflow, and secret-handling risks before release.

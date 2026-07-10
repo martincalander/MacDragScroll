@@ -1,0 +1,12 @@
+{
+  "name": "mac-drag-scroll-readme-demos",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Reproducible tooling for the Mac Drag Scroll README demos.",
+  "devDependencies": {
+    "playwright": "1.61.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

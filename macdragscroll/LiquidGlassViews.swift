@@ -8,6 +8,27 @@
 import AppKit
 import SwiftUI
 
+extension View {
+    @ViewBuilder
+    func adaptiveGlassEffect<S: Shape>(tint: Color, in shape: S) -> some View {
+        if #available(macOS 26.0, *) {
+            modifier(NativeLiquidGlassModifier(tint: tint, shape: shape))
+        } else {
+            background(.ultraThinMaterial, in: shape)
+        }
+    }
+}
+
+@available(macOS 26.0, *)
+private struct NativeLiquidGlassModifier<S: Shape>: ViewModifier {
+    let tint: Color
+    let shape: S
+
+    func body(content: Content) -> some View {
+        content.glassEffect(.regular.tint(tint), in: shape)
+    }
+}
+
 struct LiquidGlassBackdrop: View {
     var dimmingOpacity = 0.62
 
@@ -82,8 +103,8 @@ struct LiquidGlassSurface<Content: View>: View {
     var body: some View {
         content
             .padding(padding)
-            .glassEffect(
-                .regular.tint(Color(nsColor: .controlBackgroundColor).opacity(tintOpacity)),
+            .adaptiveGlassEffect(
+                tint: Color(nsColor: .controlBackgroundColor).opacity(tintOpacity),
                 in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
             )
             .overlay {

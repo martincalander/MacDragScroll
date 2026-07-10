@@ -12,6 +12,7 @@ Current state:
 - The project earned the Passing badge on July 9, 2026, which Scorecard awards 5/10.
 - The README badge points to `https://www.bestpractices.dev/projects/13546`.
 - The repository includes `.bestpractices.json` so BadgeApp can prefill evidence-backed proposed answers.
+- Strict warnings, Guard Malloc fuzz execution, dependency review, governance, and two-person review now have repository evidence for the maintainer to assess in the Silver/Gold forms.
 
 To improve the check:
 
@@ -66,6 +67,10 @@ This check is independent of Apple Developer ID signing and notarization. It doe
 
 ## Code Review
 
-Changes to `main` require a pull request, resolved review conversations, and the build/test and secret-scan checks. Required approval remains at zero while Mac Drag Scroll has only one maintainer because GitHub does not allow a pull request author to approve their own pull request.
+Changes to `main` require a pull request, two approvals, code-owner review, approval after the latest push, resolved review conversations, and strict build/test and secret-scan checks. Stale approvals are dismissed and no bypass actors are configured.
 
-When two trusted reviewers are available, add them as collaborators and code owners, then require two approvals, code-owner review, stale-review dismissal, and approval after the latest push. Recent changes must accumulate genuine human review before the Code-Review score can rise; historical changes are not rewritten or backfilled.
+Scorecard evaluates a rolling history of recent changes, so the Code-Review score will rise as genuinely reviewed pull requests replace older direct commits. Historical changes are not rewritten or backfilled merely to improve the score.
+
+## Quality And Compatibility
+
+The required Quality Gate performs dependency review, strict warning-free tests, code coverage reporting, deterministic fuzz-corpus execution under macOS Guard Malloc, Xcode static analysis, and universal release compilation. The resulting executable must include both `arm64` and `x86_64` slices and declare macOS 14.0 as its minimum in both its bundle metadata and Mach-O load commands.

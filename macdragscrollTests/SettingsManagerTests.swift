@@ -516,6 +516,12 @@ final class SettingsManagerTests: XCTestCase {
         XCTAssertEqual(AppDelegate.appBuild, "107")
     }
 
+    func testAppBundleSupportsMacOS14AndLater() {
+        let appBundle = Bundle(for: AppDelegate.self)
+
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "LSMinimumSystemVersion") as? String, "14.0")
+    }
+
     func testSparkleUpdateConfigurationIsPresent() {
         let appBundle = Bundle(for: AppDelegate.self)
 

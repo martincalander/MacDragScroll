@@ -114,7 +114,7 @@ private struct VisualizerPreviewGlassCircle: View {
     var body: some View {
         Circle()
             .fill(Color.white.opacity(baseFillOpacity))
-            .glassEffect(.regular.tint(tint), in: Circle())
+            .adaptiveGlassEffect(tint: tint, in: Circle())
             .overlay { highlightWash }
             .overlay { outerHighlight }
             .overlay { lowerRim }

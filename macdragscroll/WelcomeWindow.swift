@@ -232,9 +232,6 @@ private struct WelcomeStatusPill: View {
             .foregroundStyle(tint)
             .padding(.horizontal, 9)
             .padding(.vertical, 5)
-            .glassEffect(
-                .regular.tint(tint.opacity(0.10)),
-                in: Capsule()
-            )
+            .adaptiveGlassEffect(tint: tint.opacity(0.10), in: Capsule())
     }
 }

@@ -7,7 +7,7 @@ Mac Drag Scroll is a native macOS menu bar utility. It converts a configured ext
 - `AppDelegate` owns application lifecycle, permissions, menu bar state, the settings and welcome windows, and the single-instance guard.
 - `MouseMonitor` owns the global event tap. It validates the trigger, input source, active application, target window, and permission state before starting a drag session.
 - `ScrollPhysics` converts cursor displacement from the drag origin into bounded horizontal and vertical scroll deltas.
-- `ScrollOverlayWindow` renders the optional Liquid Glass visualizer without accepting input or becoming the active app.
+- `ScrollOverlayWindow` renders the optional visualizer without accepting input or becoming the active app. macOS 26 uses native Liquid Glass; macOS 14 and 15 use a native vibrancy fallback behind the same custom reflections and motion.
 - `SettingsWindow` owns the settings shell and tab navigation. Reusable rows, ignored-app picking, and the visualizer preview live in focused companion files.
 - `SettingsManager` exposes user preferences. `PersistentPreferences` keeps the production domain stable and mirrors recoverable values to Application Support.
 - `UpdateManager` integrates Sparkle with the GitHub-hosted appcast and release history.
@@ -40,4 +40,4 @@ Mac Drag Scroll is a native macOS menu bar utility. It converts a configured ext
 
 ## Verification
 
-The test target covers input classification, trigger safety, scroll calculations, settings persistence, permissions, update state, release metadata, and crash-report handling. GitHub Actions runs tests, release-readiness checks, CodeQL, Gitleaks, fuzz-harness compilation, and OpenSSF Scorecard analysis.
+The test target covers input classification, trigger safety, scroll calculations, settings persistence, permissions, update state, release metadata, and crash-report handling. GitHub Actions enforces strict compiler warnings, dependency review, code coverage reporting, deterministic preference fuzz-corpus execution under macOS Guard Malloc, Xcode static analysis, universal macOS 14+ release builds, release-readiness checks, CodeQL, Gitleaks, fuzz-harness compilation, and OpenSSF Scorecard analysis.

@@ -48,7 +48,7 @@ The app has two version fields:
 
 For `1.0.0`, the build number starts at `100`. The current public line is:
 
-- `1.0.4` -> build `104`
+- `1.0.5` -> build `105`
 
 A practical next sequence is:
 

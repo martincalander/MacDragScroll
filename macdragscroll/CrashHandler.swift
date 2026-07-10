@@ -30,17 +30,23 @@ final class CrashHandler: ObservableObject {
 
     let crashReportDirectory: URL
 
-    private let legacyCrashLogPath: URL
+    private let legacyCrashReportDirectory: URL
+    private let legacyCrashLogPaths: [URL]
     private let systemDiagnosticReportsDirectory: URL
     private static let supportedCrashReportExtensions: Set<String> = ["log", "crash", "ips"]
     
     private init() {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        let appFolder = appSupport.appendingPathComponent("MacDragScroll")
+        let appFolder = appSupport.appendingPathComponent("Mac Drag Scroll", isDirectory: true)
+        let legacyAppFolder = appSupport.appendingPathComponent("MacDragScroll", isDirectory: true)
         let libraryFolder = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first
             ?? FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library", isDirectory: true)
         crashReportDirectory = appFolder.appendingPathComponent("Crash Reports", isDirectory: true)
-        legacyCrashLogPath = appFolder.appendingPathComponent("crash.log")
+        legacyCrashReportDirectory = legacyAppFolder.appendingPathComponent("Crash Reports", isDirectory: true)
+        legacyCrashLogPaths = [
+            appFolder.appendingPathComponent("crash.log"),
+            legacyAppFolder.appendingPathComponent("crash.log")
+        ]
         systemDiagnosticReportsDirectory = libraryFolder
             .appendingPathComponent("Logs", isDirectory: true)
             .appendingPathComponent("DiagnosticReports", isDirectory: true)
@@ -64,6 +70,7 @@ final class CrashHandler: ObservableObject {
     
     func setup() {
         setupExceptionHandler()
+        migrateLegacyCrashReportsIfNeeded()
         migrateLegacyCrashLogIfNeeded()
         importSystemDiagnosticReportsIfNeeded()
         refreshCrashReports()
@@ -191,20 +198,85 @@ final class CrashHandler: ObservableObject {
         try? crashInfo.write(to: url, atomically: true, encoding: .utf8)
     }
 
-    private func migrateLegacyCrashLogIfNeeded() {
-        guard FileManager.default.fileExists(atPath: legacyCrashLogPath.path) else { return }
-
+    private func migrateLegacyCrashReportsIfNeeded() {
         ensureCrashReportDirectory()
-        let migratedURL = crashReportDirectory.appendingPathComponent(Self.crashReportFileName(kind: "Migrated", date: Date()))
+        Self.migrateCrashReports(
+            from: legacyCrashReportDirectory,
+            to: crashReportDirectory
+        )
+    }
 
-        do {
-            try FileManager.default.moveItem(at: legacyCrashLogPath, to: migratedURL)
-        } catch {
-            if let legacyLog = try? String(contentsOf: legacyCrashLogPath, encoding: .utf8) {
-                try? legacyLog.write(to: migratedURL, atomically: true, encoding: .utf8)
+    private func migrateLegacyCrashLogIfNeeded() {
+        ensureCrashReportDirectory()
+
+        for (index, legacyCrashLogPath) in legacyCrashLogPaths.enumerated() {
+            guard FileManager.default.fileExists(atPath: legacyCrashLogPath.path) else { continue }
+
+            let kind = index == 0 ? "Migrated" : "Migrated-Legacy"
+            let migratedURL = crashReportDirectory.appendingPathComponent(
+                Self.crashReportFileName(kind: kind, date: Date())
+            )
+
+            do {
+                try FileManager.default.moveItem(at: legacyCrashLogPath, to: migratedURL)
+            } catch {
+                guard !FileManager.default.fileExists(atPath: migratedURL.path),
+                      let legacyLog = try? String(contentsOf: legacyCrashLogPath, encoding: .utf8) else {
+                    continue
+                }
+
+                do {
+                    try legacyLog.write(to: migratedURL, atomically: true, encoding: .utf8)
+                    try FileManager.default.removeItem(at: legacyCrashLogPath)
+                } catch {
+                    continue
+                }
             }
-            try? FileManager.default.removeItem(at: legacyCrashLogPath)
         }
+    }
+
+    @discardableResult
+    static func migrateCrashReports(
+        from sourceDirectory: URL,
+        to destinationDirectory: URL,
+        fileManager: FileManager = .default
+    ) -> Int {
+        guard sourceDirectory.standardizedFileURL != destinationDirectory.standardizedFileURL,
+              let urls = try? fileManager.contentsOfDirectory(
+                at: sourceDirectory,
+                includingPropertiesForKeys: [.isRegularFileKey],
+                options: [.skipsHiddenFiles]
+              ) else {
+            return 0
+        }
+
+        try? fileManager.createDirectory(at: destinationDirectory, withIntermediateDirectories: true)
+
+        var migratedCount = 0
+        for url in urls where supportedCrashReportExtensions.contains(url.pathExtension.lowercased())
+            && isRegularFile(url: url, fileManager: fileManager) {
+            let destinationURL = destinationDirectory.appendingPathComponent(url.lastPathComponent)
+            guard !fileManager.fileExists(atPath: destinationURL.path) else { continue }
+
+            do {
+                try fileManager.moveItem(at: url, to: destinationURL)
+                migratedCount += 1
+            } catch {
+                do {
+                    try fileManager.copyItem(at: url, to: destinationURL)
+                    try fileManager.removeItem(at: url)
+                    migratedCount += 1
+                } catch {
+                    continue
+                }
+            }
+        }
+
+        if (try? fileManager.contentsOfDirectory(atPath: sourceDirectory.path).isEmpty) == true {
+            try? fileManager.removeItem(at: sourceDirectory)
+        }
+
+        return migratedCount
     }
 
     private func importSystemDiagnosticReportsIfNeeded() {

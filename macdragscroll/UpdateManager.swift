@@ -104,6 +104,14 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
     static let websiteURL = URL(string: "https://martincalander.com")!
     static let versionHistory: [VersionHistoryEntry] = [
         VersionHistoryEntry(
+            version: "1.0.5",
+            build: "105",
+            releaseDate: "2026-07-10",
+            changes: [
+                "Crash reports now use the documented Application Support folder and migrate safely from the legacy path."
+            ]
+        ),
+        VersionHistoryEntry(
             version: "1.0.4",
             build: "104",
             releaseDate: "2026-07-09",

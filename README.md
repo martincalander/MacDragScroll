@@ -176,4 +176,6 @@ Mac Drag Scroll is made by [Martin Calander](https://martincalander.com).
 
 Developers and contributors can read [Contributing](CONTRIBUTING.md).
 
+The implementation boundaries and safety invariants are documented in [Architecture](ARCHITECTURE.md). Planned work and explicit non-goals are tracked in the [Roadmap](ROADMAP.md).
+
 Release maintainers can read [Releasing](docs/RELEASING.md).

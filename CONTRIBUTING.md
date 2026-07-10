@@ -85,6 +85,14 @@ Mac Drag Scroll is currently a solo-maintainer project, so required PR approval 
 - Keep installation steps aligned across `README.md`, `README.ja.md`, and `README.zh-Hans.md`.
 - Keep release-process details in `docs/RELEASING.md`, not in the main README.
 
+## Coding Standards
+
+- Follow the [Swift API Design Guidelines](https://www.swift.org/documentation/api-design-guidelines/).
+- Preserve the existing AppKit and SwiftUI ownership boundaries described in `ARCHITECTURE.md`.
+- Treat compiler warnings and static-analysis findings as defects; do not suppress them without a documented reason.
+- Prefer small, testable helpers for input classification, persistence normalization, and release-sensitive behavior.
+- Add comments only where a safety invariant or platform limitation is not evident from the code.
+
 ## Release Notes
 
 When a change affects users, add it to `CHANGELOG.md` under `Unreleased`.

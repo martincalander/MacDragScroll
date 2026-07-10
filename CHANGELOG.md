@@ -6,6 +6,12 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 
 ## [Unreleased]
 
+## [1.0.5] - 2026-07-10
+
+### Fixed
+
+- Moved crash reports to the documented `Mac Drag Scroll` Application Support folder and safely migrated reports created in the legacy `MacDragScroll` folder.
+
 ## [1.0.4] - 2026-07-09
 
 ### Added

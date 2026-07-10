@@ -137,6 +137,13 @@ enum AppAppearance: String, CaseIterable, Identifiable, Codable {
 // MARK: - Scroll Trigger Configuration
 
 struct TriggerConfig: Codable, Equatable {
+    private static let configurableModifierMask: NSEvent.ModifierFlags = [
+        .command,
+        .option,
+        .control,
+        .shift
+    ]
+
     var mouseButton: Int  // 0 = left, 1 = right, 2 = middle, 3+ = other buttons
     var requiresCommand: Bool
     var requiresOption: Bool
@@ -198,12 +205,9 @@ struct TriggerConfig: Codable, Equatable {
     
     func matches(button: Int, modifiers: NSEvent.ModifierFlags) -> Bool {
         guard button == mouseButton else { return false }
-        
-        // Check each required modifier
-        if requiresCommand && !modifiers.contains(.command) { return false }
-        if requiresOption && !modifiers.contains(.option) { return false }
-        if requiresControl && !modifiers.contains(.control) { return false }
-        if requiresShift && !modifiers.contains(.shift) { return false }
+
+        let pressedModifiers = modifiers.intersection(Self.configurableModifierMask)
+        guard pressedModifiers == modifierFlags else { return false }
         
         // Primary and secondary clicks are common trackpad gestures. Require a
         // modifier for them so normal trackpad clicking and dragging stays safe.

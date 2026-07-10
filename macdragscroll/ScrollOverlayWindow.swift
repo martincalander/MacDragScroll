@@ -136,6 +136,18 @@ final class ScrollOverlayWindow: NSWindow {
             materialView.wantsLayer = true
             materialView.layer?.cornerRadius = min(visualFrame.width, visualFrame.height) / 2
             materialView.layer?.masksToBounds = true
+
+            let tintColor = SettingsManager.shared.visualizerTintStyle.glassTintColor(
+                intensity: SettingsManager.shared.liquidGlassIntensity
+            ) ?? NSColor.white.withAlphaComponent(
+                min(0.090 + SettingsManager.shared.liquidGlassIntensity * 0.018, 0.14)
+            )
+            let tintView = NSView(frame: materialView.bounds)
+            tintView.wantsLayer = true
+            tintView.layer?.backgroundColor = tintColor.cgColor
+            tintView.autoresizingMask = [.width, .height]
+            materialView.addSubview(tintView)
+
             overlayView.frame = materialView.bounds
             overlayView.autoresizingMask = [.width, .height]
             materialView.addSubview(overlayView)

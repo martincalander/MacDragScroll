@@ -8,7 +8,7 @@ cask "mac-drag-scroll" do
   homepage "https://github.com/martincalander/MacDragScroll"
 
   auto_updates true
-  depends_on macos: :sonoma
+  depends_on macos: :tahoe
 
   app "Mac Drag Scroll.app"
 

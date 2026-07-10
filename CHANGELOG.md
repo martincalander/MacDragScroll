@@ -6,6 +6,12 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 
 ## [Unreleased]
 
+## [1.0.7] - 2026-07-10
+
+### Fixed
+
+- Replaced corrupted `NaN` and infinite numeric preferences with safe defaults before they can affect scrolling or visualizer calculations.
+
 ## [1.0.6] - 2026-07-10
 
 ### Fixed

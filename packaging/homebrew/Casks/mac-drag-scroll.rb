@@ -1,5 +1,5 @@
 cask "mac-drag-scroll" do
-  version "1.0.6"
+  version "1.0.7"
   sha256 :no_check
 
   url "https://github.com/martincalander/MacDragScroll/releases/download/v#{version}/MacDragScroll.zip"

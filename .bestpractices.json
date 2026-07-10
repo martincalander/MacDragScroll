@@ -104,6 +104,8 @@
   "updateable_reused_components_justification": "The reused Sparkle component is managed through Swift Package Manager and monitored by Dependabot instead of being copied into the repository.",
   "interfaces_current_status": "Met",
   "interfaces_current_justification": "The project targets the current macOS/Xcode toolchain, uses supported AppKit and SwiftUI interfaces, and keeps Sparkle pinned to a current reviewed release.",
+  "input_validation_status": "Met",
+  "input_validation_justification": "Trigger configuration, input-source classification, preference decoding, numeric ranges, finite numeric values, and imported crash-report filenames are validated before use; regression tests and fuzz harnesses cover these boundaries.",
   "signed_releases_status": "Met",
   "signed_releases_justification": "Every public release ZIP includes a detached Sparkle EdDSA signature, and current releases also publish GitHub build provenance for offline verification.",
   "general_comments": "This file contains maintainer-reviewable proposed answers for the OpenSSF Best Practices BadgeApp. The maintainer should review each answer in BadgeApp before saving a public badge entry."

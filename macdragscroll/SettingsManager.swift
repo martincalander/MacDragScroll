@@ -377,41 +377,45 @@ class SettingsManager: ObservableObject {
     
     @Published var scrollSpeed: Double {
         didSet {
-            let clamped = min(max(scrollSpeed, 0.5), 5.0)
-            if clamped != scrollSpeed { scrollSpeed = clamped }
-            persist(scrollSpeed, forKey: scrollSpeedKey)
+            let normalized = Self.normalizedDouble(scrollSpeed, defaultValue: 2.0, range: 0.5...5.0)
+            if normalized != scrollSpeed { scrollSpeed = normalized }
+            persist(normalized, forKey: scrollSpeedKey)
         }
     }
 
     @Published var deadZoneRadius: Double {
         didSet {
-            let clamped = min(max(deadZoneRadius, 5.0), 50.0)
-            if clamped != deadZoneRadius { deadZoneRadius = clamped }
-            persist(deadZoneRadius, forKey: deadZoneRadiusKey)
+            let normalized = Self.normalizedDouble(deadZoneRadius, defaultValue: 20.0, range: 5.0...50.0)
+            if normalized != deadZoneRadius { deadZoneRadius = normalized }
+            persist(normalized, forKey: deadZoneRadiusKey)
         }
     }
 
     @Published var acceleration: Double {
         didSet {
-            let clamped = min(max(acceleration, 1.0), 3.0)
-            if clamped != acceleration { acceleration = clamped }
-            persist(acceleration, forKey: accelerationKey)
+            let normalized = Self.normalizedDouble(acceleration, defaultValue: 1.8, range: 1.0...3.0)
+            if normalized != acceleration { acceleration = normalized }
+            persist(normalized, forKey: accelerationKey)
         }
     }
 
     @Published var overlayOpacity: Double {
         didSet {
-            let clamped = min(max(overlayOpacity, 0.2), 1.0)
-            if clamped != overlayOpacity { overlayOpacity = clamped }
-            persist(overlayOpacity, forKey: overlayOpacityKey)
+            let normalized = Self.normalizedDouble(overlayOpacity, defaultValue: 1.0, range: 0.2...1.0)
+            if normalized != overlayOpacity { overlayOpacity = normalized }
+            persist(normalized, forKey: overlayOpacityKey)
         }
     }
 
     @Published var visualizerSize: Double {
         didSet {
-            let clamped = min(max(visualizerSize, Self.visualizerSizeRange.lowerBound), Self.visualizerSizeRange.upperBound)
-            if clamped != visualizerSize { visualizerSize = clamped }
-            persist(visualizerSize, forKey: visualizerSizeKey)
+            let normalized = Self.normalizedDouble(
+                visualizerSize,
+                defaultValue: 1.0,
+                range: Self.visualizerSizeRange
+            )
+            if normalized != visualizerSize { visualizerSize = normalized }
+            persist(normalized, forKey: visualizerSizeKey)
         }
     }
 
@@ -421,9 +425,13 @@ class SettingsManager: ObservableObject {
 
     @Published var liquidGlassIntensity: Double {
         didSet {
-            let clamped = min(max(liquidGlassIntensity, Self.liquidGlassIntensityRange.lowerBound), Self.liquidGlassIntensityRange.upperBound)
-            if clamped != liquidGlassIntensity { liquidGlassIntensity = clamped }
-            persist(liquidGlassIntensity, forKey: liquidGlassIntensityKey)
+            let normalized = Self.normalizedDouble(
+                liquidGlassIntensity,
+                defaultValue: 1.35,
+                range: Self.liquidGlassIntensityRange
+            )
+            if normalized != liquidGlassIntensity { liquidGlassIntensity = normalized }
+            persist(normalized, forKey: liquidGlassIntensityKey)
         }
     }
 
@@ -545,6 +553,18 @@ class SettingsManager: ObservableObject {
             value = number.doubleValue
         } else {
             value = defaultValue
+        }
+
+        return normalizedDouble(value, defaultValue: defaultValue, range: range)
+    }
+
+    static func normalizedDouble(
+        _ value: Double,
+        defaultValue: Double,
+        range: ClosedRange<Double>
+    ) -> Double {
+        guard value.isFinite else {
+            return min(max(defaultValue, range.lowerBound), range.upperBound)
         }
 
         return min(max(value, range.lowerBound), range.upperBound)

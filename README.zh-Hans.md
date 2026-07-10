@@ -168,6 +168,10 @@ xcodebuild -project macdragscroll.xcodeproj \
 - 带中键或可点击滚轮的外接鼠标
 - 辅助功能和输入监控权限
 
+## 致谢
+
+- 日语翻译审校：[uglykatsuki](https://github.com/uglykatsuki)
+
 ## 许可证
 
 Mac Drag Scroll 采用 [MIT License](LICENSE) 开源。

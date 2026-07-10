@@ -7,7 +7,6 @@
 <p align="center">
   <strong>macOSに馴染む、中ボタンドラッグスクロール。</strong><br>
   ホイールを押したままマウスを動かすだけで、長いページ、エディタ、タイムライン、キャンバスを滑らかに移動できます。
-  翻訳：「ugly katsuki」。
 </p>
 
 <p align="center">
@@ -168,6 +167,10 @@ xcodebuild -project macdragscroll.xcodeproj \
 - macOS 26.2以降
 - 中ボタンまたはクリック可能なスクロールホイールを備えた外部マウス
 - アクセシビリティと入力監視の権限
+
+## クレジット
+
+- 日本語翻訳レビュー: [uglykatsuki](https://github.com/uglykatsuki)
 
 ## ライセンス
 

@@ -34,6 +34,8 @@
 	<string>NSApplication</string>
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
+	<key>SUAutomaticallyUpdate</key>
+	<true/>
 	<key>SUFeedURL</key>
 	<string>https://github.com/martincalander/MacDragScroll/releases/latest/download/appcast.xml</string>
 	<key>SUPublicEDKey</key>

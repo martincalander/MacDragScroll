@@ -6,6 +6,20 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 
 ## [Unreleased]
 
+### Changed
+
+- Auto Update now enables Sparkle's automatic update downloads as well as scheduled checks.
+- Release signing tools are checksum-verified before the Sparkle private key is made available.
+- The Homebrew cask now verifies the exact release archive checksum.
+- The CLI installer now stops instead of installing an archive without a valid published checksum.
+- Permission, update, and crash-report screens are now fully translated in every bundled language.
+- The project landing pages now use descriptive product artwork, artifact-free demos, and complete install, trust, build, and contributor guidance in English, Japanese, and Simplified Chinese.
+
+### Fixed
+
+- Cancel active scrolling when macOS disables the event tap so stale drag state cannot keep scrolling after the tap is restored.
+- Keep cleared macOS crash reports from being imported again on the next launch while still importing newer reports.
+
 ## [1.0.7] - 2026-07-10
 
 ### Fixed

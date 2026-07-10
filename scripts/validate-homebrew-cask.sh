@@ -11,6 +11,25 @@ fi
 
 ruby -c "$cask_path" >/dev/null
 
+cask_version="$(ruby -ne 'puts $1 if /^\s*version "([^"]+)"/' "$cask_path")"
+cask_checksum="$(ruby -ne 'puts $1 if /^\s*sha256 "([0-9a-f]+)"/' "$cask_path")"
+if [[ -z "$cask_version" || ! "$cask_checksum" =~ ^[0-9a-f]{64}$ ]]; then
+  echo "Cask must use a version and an exact 64-character SHA-256 checksum." >&2
+  exit 65
+fi
+
+published_checksum="$(
+  curl --fail --location --retry 3 --silent --show-error \
+    "https://github.com/martincalander/MacDragScroll/releases/download/v${cask_version}/SHA256SUMS.txt" |
+    awk '$2 == "MacDragScroll.zip" { print $1; exit }'
+)"
+if [[ "$cask_checksum" != "$published_checksum" ]]; then
+  echo "Cask checksum does not match the published MacDragScroll.zip checksum for v${cask_version}." >&2
+  echo "Cask:      $cask_checksum" >&2
+  echo "Published: ${published_checksum:-missing}" >&2
+  exit 65
+fi
+
 if ! command -v brew >/dev/null 2>&1; then
   echo "Homebrew not found; checked Ruby syntax only."
   exit 0

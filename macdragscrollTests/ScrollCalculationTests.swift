@@ -596,14 +596,12 @@ final class ScrollEventFactoryTests: XCTestCase {
 final class ScrollOverlayGeometryTests: XCTestCase {
 
     func testCenteredOriginUsesCenteredAnimationAnchor() {
-        let visibleFrame = CGRect(x: 0, y: 0, width: 800, height: 600)
         let origin = CGPoint(x: 400, y: 300)
-        let frame = ScrollOverlayGeometry.windowFrame(for: origin, deadZoneRadius: 20, visibleFrame: visibleFrame)
-        let originInWindow = ScrollOverlayGeometry.originInWindow(screenOrigin: origin, windowFrame: frame)
-        let anchor = ScrollOverlayGeometry.anchorPoint(originInWindow: originInWindow, windowSize: frame.size)
+        let frame = ScrollOverlayGeometry.windowFrame(for: origin, deadZoneRadius: 20)
+        let originInWindow = CGPoint(x: origin.x - frame.minX, y: origin.y - frame.minY)
 
-        XCTAssertEqual(anchor.x, 0.5, accuracy: 0.001)
-        XCTAssertEqual(anchor.y, 0.5, accuracy: 0.001)
+        XCTAssertEqual(originInWindow.x, frame.width / 2, accuracy: 0.001)
+        XCTAssertEqual(originInWindow.y, frame.height / 2, accuracy: 0.001)
     }
 
     func testWindowAddsPaddingAroundCenteredVisualSurface() {
@@ -611,8 +609,7 @@ final class ScrollOverlayGeometryTests: XCTestCase {
         let visualFrame = ScrollOverlayGeometry.visualFrame(deadZoneRadius: deadZoneRadius)
         let windowFrame = ScrollOverlayGeometry.windowFrame(
             for: CGPoint(x: 400, y: 300),
-            deadZoneRadius: deadZoneRadius,
-            visibleFrame: CGRect(x: 0, y: 0, width: 800, height: 600)
+            deadZoneRadius: deadZoneRadius
         )
 
         XCTAssertEqual(visualFrame.width, ScrollOverlayGeometry.sideLength(deadZoneRadius: deadZoneRadius), accuracy: 0.001)
@@ -628,14 +625,12 @@ final class ScrollOverlayGeometryTests: XCTestCase {
         let smallWindowFrame = ScrollOverlayGeometry.windowFrame(
             for: CGPoint(x: 400, y: 300),
             deadZoneRadius: deadZoneRadius,
-            visualizerSize: 0.45,
-            visibleFrame: CGRect(x: 0, y: 0, width: 800, height: 600)
+            visualizerSize: 0.45
         )
         let largeWindowFrame = ScrollOverlayGeometry.windowFrame(
             for: CGPoint(x: 400, y: 300),
             deadZoneRadius: deadZoneRadius,
-            visualizerSize: 1.3,
-            visibleFrame: CGRect(x: 0, y: 0, width: 800, height: 600)
+            visualizerSize: 1.3
         )
 
         XCTAssertLessThan(smallVisualFrame.width, largeVisualFrame.width)
@@ -646,16 +641,12 @@ final class ScrollOverlayGeometryTests: XCTestCase {
     }
 
     func testEdgeOriginStillUsesCenteredAnimationAnchor() {
-        let visibleFrame = CGRect(x: 0, y: 0, width: 800, height: 600)
         let origin = CGPoint(x: 12, y: 12)
-        let frame = ScrollOverlayGeometry.windowFrame(for: origin, deadZoneRadius: 20, visibleFrame: visibleFrame)
-        let originInWindow = ScrollOverlayGeometry.originInWindow(screenOrigin: origin, windowFrame: frame)
-        let anchor = ScrollOverlayGeometry.anchorPoint(originInWindow: originInWindow, windowSize: frame.size)
+        let frame = ScrollOverlayGeometry.windowFrame(for: origin, deadZoneRadius: 20)
+        let originInWindow = CGPoint(x: origin.x - frame.minX, y: origin.y - frame.minY)
 
         XCTAssertEqual(originInWindow.x, frame.width / 2, accuracy: 0.001)
         XCTAssertEqual(originInWindow.y, frame.height / 2, accuracy: 0.001)
-        XCTAssertEqual(anchor.x, 0.5, accuracy: 0.001)
-        XCTAssertEqual(anchor.y, 0.5, accuracy: 0.001)
     }
 }
 
@@ -831,5 +822,18 @@ final class TriggerInputSourceTests: XCTestCase {
     func testTabletMouseSubtypesCannotStartDragScroll() {
         XCTAssertFalse(TriggerInputSource.canStartDragScroll(mouseSubtype: 1))
         XCTAssertFalse(TriggerInputSource.canStartDragScroll(mouseSubtype: 2))
+    }
+}
+
+final class EventTapInterruptionTests: XCTestCase {
+    func testDisabledEventTapRequiresInteractionCancellation() {
+        XCTAssertTrue(EventTapInterruption.requiresInteractionCancellation(.tapDisabledByTimeout))
+        XCTAssertTrue(EventTapInterruption.requiresInteractionCancellation(.tapDisabledByUserInput))
+    }
+
+    func testRegularMouseEventsDoNotRequireInteractionCancellation() {
+        XCTAssertFalse(EventTapInterruption.requiresInteractionCancellation(.otherMouseDown))
+        XCTAssertFalse(EventTapInterruption.requiresInteractionCancellation(.otherMouseDragged))
+        XCTAssertFalse(EventTapInterruption.requiresInteractionCancellation(.otherMouseUp))
     }
 }

@@ -16,7 +16,7 @@ enum ScrollOverlayGeometry {
         return min(max(baseLength * visualizerSize, 42), 154)
     }
 
-    static func windowFrame(for origin: CGPoint, deadZoneRadius: CGFloat, visualizerSize: CGFloat = 1.0, visibleFrame _: CGRect) -> CGRect {
+    static func windowFrame(for origin: CGPoint, deadZoneRadius: CGFloat, visualizerSize: CGFloat = 1.0) -> CGRect {
         let side = windowSideLength(deadZoneRadius: deadZoneRadius, visualizerSize: visualizerSize)
         return CGRect(
             x: origin.x - side / 2,
@@ -35,26 +35,8 @@ enum ScrollOverlayGeometry {
         return CGRect(x: animationPadding, y: animationPadding, width: side, height: side)
     }
 
-    static func originInWindow(screenOrigin: CGPoint, windowFrame: CGRect) -> CGPoint {
-        CGPoint(
-            x: screenOrigin.x - windowFrame.minX,
-            y: screenOrigin.y - windowFrame.minY
-        )
-    }
-
     static func originInVisualFrame(visualFrame: CGRect) -> CGPoint {
         CGPoint(x: visualFrame.width / 2, y: visualFrame.height / 2)
-    }
-
-    static func anchorPoint(originInWindow: CGPoint, windowSize: CGSize) -> CGPoint {
-        guard windowSize.width > 0, windowSize.height > 0 else {
-            return CGPoint(x: 0.5, y: 0.5)
-        }
-
-        return CGPoint(
-            x: min(max(originInWindow.x / windowSize.width, 0), 1),
-            y: min(max(originInWindow.y / windowSize.height, 0), 1)
-        )
     }
 }
 
@@ -318,18 +300,10 @@ final class ScrollOverlayWindow: NSWindow {
     }
 
     private static func windowFrame(for origin: CGPoint) -> CGRect {
-        let screen = NSScreen.screens.first { NSMouseInRect(origin, $0.frame, false) } ?? NSScreen.main
-        let side = ScrollOverlayGeometry.sideLength(
-            deadZoneRadius: CGFloat(SettingsManager.shared.deadZoneRadius),
-            visualizerSize: CGFloat(SettingsManager.shared.visualizerSize)
-        )
-        let visibleFrame = screen?.visibleFrame ?? CGRect(origin: .zero, size: CGSize(width: side, height: side))
-
         return ScrollOverlayGeometry.windowFrame(
             for: origin,
             deadZoneRadius: CGFloat(SettingsManager.shared.deadZoneRadius),
-            visualizerSize: CGFloat(SettingsManager.shared.visualizerSize),
-            visibleFrame: visibleFrame
+            visualizerSize: CGFloat(SettingsManager.shared.visualizerSize)
         )
     }
 }

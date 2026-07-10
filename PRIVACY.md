@@ -15,7 +15,7 @@ Mac Drag Scroll needs Accessibility and Input Monitoring permissions to detect t
 
 ## Network Access
 
-Mac Drag Scroll may contact GitHub when you check for updates or when automatic update checks are enabled. That request is used to compare the installed version with the latest GitHub release and download Sparkle update metadata.
+Mac Drag Scroll may contact GitHub when you check for updates or when Auto Update is enabled. It downloads Sparkle update metadata and, when a newer version is available, the signed update archive. Sparkle verifies that archive before installation.
 
 ## Local Settings
 

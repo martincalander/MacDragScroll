@@ -204,8 +204,8 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
             guard autoUpdateEnabled != oldValue else { return }
             persist(autoUpdateEnabled, forKey: autoUpdateEnabledKey)
             guard !isSyncingSparklePreferences else { return }
-            updaterController.updater.automaticallyChecksForUpdates = autoUpdateEnabled
-            appendHistory(autoUpdateEnabled ? "Automatic update checks enabled." : "Automatic update checks disabled.")
+            applyAutomaticUpdatePreference()
+            appendHistory(autoUpdateEnabled ? "Automatic updates enabled." : "Automatic updates disabled.")
         }
     }
 
@@ -248,7 +248,7 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
 
         super.init()
 
-        updaterController.updater.automaticallyChecksForUpdates = autoUpdateEnabled
+        applyAutomaticUpdatePreference()
         persist(autoUpdateEnabled, forKey: autoUpdateEnabledKey)
         syncPreferencesFromSparkle()
     }
@@ -352,6 +352,12 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
         isSyncingSparklePreferences = true
         autoUpdateEnabled = updaterController.updater.automaticallyChecksForUpdates
         isSyncingSparklePreferences = false
+    }
+
+    private func applyAutomaticUpdatePreference() {
+        let updater = updaterController.updater
+        updater.automaticallyChecksForUpdates = autoUpdateEnabled
+        updater.automaticallyDownloadsUpdates = autoUpdateEnabled
     }
 
     private func appendHistory(_ message: String) {

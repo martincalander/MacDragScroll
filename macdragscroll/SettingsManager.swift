@@ -253,10 +253,6 @@ enum VisualizerTintStyle: String, CaseIterable, Identifiable, Codable {
         }
     }
 
-    var glassTintColor: NSColor? {
-        glassTintColor(intensity: 1.0)
-    }
-
     func glassTintColor(intensity: Double) -> NSColor? {
         let multiplier = min(max(intensity, 0.7), 2.0)
         switch self {
@@ -590,19 +586,6 @@ class SettingsManager: ObservableObject {
         return excludedApps.contains(bundleId)
     }
     
-    // Get currently running applications (excluding system apps)
-    func getRunningApps() -> [(name: String, bundleId: String)] {
-        let runningApps = NSWorkspace.shared.runningApplications
-        return runningApps
-            .filter { $0.activationPolicy == .regular && $0.bundleIdentifier != nil }
-            .compactMap { app -> (name: String, bundleId: String)? in
-                guard let bundleId = app.bundleIdentifier,
-                      let name = app.localizedName else { return nil }
-                return (name: name, bundleId: bundleId)
-            }
-            .sorted { $0.name.lowercased() < $1.name.lowercased() }
-    }
-    
     // Get the bundle identifier of the currently frontmost app (excluding our own app)
     func getFrontmostAppBundleId() -> String? {
         // Get the frontmost app that isn't our own app
@@ -730,7 +713,7 @@ class SettingsManager: ObservableObject {
                 try SMAppService.mainApp.unregister()
             }
         } catch {
-            print("Failed to \(enabled ? "enable" : "disable") launch at login: \(error)")
+            NSLog("[MacDragScroll] Failed to \(enabled ? "enable" : "disable") launch at login: \(error.localizedDescription)")
             // Revert the published value if operation failed
             DispatchQueue.main.async {
                 self.launchAtLogin = self.getLaunchAtLoginStatus()

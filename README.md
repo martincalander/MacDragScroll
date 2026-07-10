@@ -1,181 +1,177 @@
 <p align="center">
-  <img src="docs/assets/mac-drag-scroll-icon.png" width="128" alt="Mac Drag Scroll app icon">
+  <img src="docs/assets/mac-drag-scroll-icon.png" width="112" alt="Mac Drag Scroll app icon">
 </p>
 
 <h1 align="center">Mac Drag Scroll</h1>
 
 <p align="center">
-  <strong>Native-feeling middle-mouse drag scrolling for external mice on macOS.</strong>
+  <strong>Middle-button drag scrolling that feels at home on macOS.</strong><br>
+  Hold the wheel, move the mouse, and glide through long pages, editors, timelines, and canvases.
 </p>
 
 <p align="center">
-  Hold the middle mouse button, move the mouse, and glide through long pages, editors, timelines, and canvases without touching the wheel.
-</p>
-
-<p align="center">
+  <a href="https://github.com/martincalander/MacDragScroll/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/martincalander/MacDragScroll?display_name=tag&sort=semver"></a>
   <a href="https://github.com/martincalander/MacDragScroll/actions/workflows/checks-summary.yml"><img alt="Checks 3/3" src="https://github.com/martincalander/MacDragScroll/actions/workflows/checks-summary.yml/badge.svg?branch=main"></a>
   <a href="https://scorecard.dev/viewer/?uri=github.com/martincalander/MacDragScroll"><img alt="OpenSSF Scorecard" src="https://api.scorecard.dev/projects/github.com/martincalander/MacDragScroll/badge"></a>
   <a href="https://www.bestpractices.dev/projects/13546"><img alt="OpenSSF Best Practices" src="https://www.bestpractices.dev/projects/13546/badge"></a>
-  <a href="https://github.com/martincalander/MacDragScroll/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/martincalander/MacDragScroll?display_name=tag&sort=semver"></a>
-  <img alt="macOS 26.2+" src="https://img.shields.io/badge/macOS-26.2%2B-111111?logo=apple&logoColor=white">
-  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-2f80ed.svg"></a>
+  <img alt="macOS 26.2 or later" src="https://img.shields.io/badge/macOS-26.2%2B-111111?logo=apple&logoColor=white">
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-2f80ed.svg"></a>
 </p>
 
 <p align="center">
-  <img src="docs/assets/mac-drag-scroll-hero.png" alt="Mac Drag Scroll Liquid Glass drag indicator preview">
+  <a href="README.md">English</a> · <a href="README.ja.md">日本語</a> · <a href="README.zh-Hans.md">简体中文</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/martincalander/MacDragScroll/releases/latest"><strong>Download the latest release</strong></a>
+  <img src="docs/assets/mac-drag-scroll-hero.png" alt="Mac Drag Scroll controlling a long document with a compact Liquid Glass drag indicator">
 </p>
 
 <p align="center">
-  English | <a href="README.ja.md">日本語</a> | <a href="README.zh-Hans.md">简体中文</a>
+  <strong><a href="https://github.com/martincalander/MacDragScroll/releases/latest">Download for macOS</a></strong>
+  &nbsp;·&nbsp;
+  <a href="#quick-start">Install with Homebrew</a>
+  &nbsp;·&nbsp;
+  <a href="#build-from-source">Build from source</a>
 </p>
 
-## Overview
+Mac Drag Scroll brings the familiar Windows-style middle-click drag gesture to an external mouse on macOS. It is a small native menu bar utility: no account, no cloud service, and no interference with normal trackpad gestures.
 
-Mac Drag Scroll is a small menu bar app that brings the familiar Windows middle-click drag scroll gesture to macOS. It is designed for external mice, stays out of the Dock, and keeps normal trackpad gestures untouched.
+## See It in Action
 
-- **Drag to scroll:** press the middle mouse button, move away from the origin, and release to stop.
-- **All-direction movement:** vertical, horizontal, and diagonal scrolling work from the same gesture.
-- **Stable targeting:** scrolling stays tied to the window where the drag started.
-- **Liquid Glass visualizer:** a compact glass origin marker reacts to direction, distance, double-clicks, and fast flicks.
-- **Menu bar first:** keep it running quietly in the background, with Settings available when needed.
-- **Trackpad-safe by design:** trackpad gestures are ignored, and unsafe primary/secondary click triggers require modifiers.
-- **Recoverable diagnostics:** crash reports stay local and can be opened, copied, or cleared from Settings.
+<p align="center">
+  <img src="docs/assets/mac-drag-scroll-usage-demo.gif" width="800" alt="Hold the middle mouse button, drag to scroll, flick to reverse, and release to stop">
+</p>
 
-## Install
+Press and hold the middle mouse button, then move away from the origin. Distance controls speed, direction controls the scroll vector, and releasing stops immediately. The compact visualizer can be resized, restyled, animated, or turned off.
 
-Recommended:
+## Why Mac Drag Scroll
+
+| | |
+| --- | --- |
+| **Natural control** | Scroll vertically, horizontally, or diagonally with one continuous gesture. |
+| **Stable targeting** | The gesture stays attached to the window where the drag began. |
+| **External-mouse focus** | Trackpad gestures are ignored instead of being intercepted or remapped. |
+| **Responsive feedback** | The one-dot Liquid Glass visualizer reacts to direction, distance, double-clicks, and fast reversals. |
+| **Menu bar native** | Run quietly in the background and open Settings only when needed. |
+| **Made to recover** | Permission repair, persistent preferences, local diagnostics, and verified updates are built in. |
+
+## Quick Start
+
+### Homebrew
 
 ```sh
 brew install --cask martincalander/tap/mac-drag-scroll
 ```
 
-Manual install:
+### Direct Download
 
-1. Open the [latest release](https://github.com/martincalander/MacDragScroll/releases/latest).
-2. Download `MacDragScroll.dmg`.
-3. Open the disk image and move **Mac Drag Scroll** to your Applications folder.
-4. First launch only: right-click **Mac Drag Scroll** in Finder, choose **Open**, then confirm.
-5. Approve Accessibility and Input Monitoring access when macOS asks.
-
-<p align="center">
-  <img src="docs/assets/mac-drag-scroll-install-demo.gif" width="760" alt="Mac Drag Scroll installation demo">
-</p>
-
-Current releases are unsigned and not Apple-notarized, so macOS may block the first launch. This is expected for the free release flow. You only need to use the right-click **Open** bypass once per downloaded build.
+1. Download `MacDragScroll.dmg` from the [latest release](https://github.com/martincalander/MacDragScroll/releases/latest).
+2. Open the disk image and drag **Mac Drag Scroll** into **Applications**.
+3. Right-click the app in Finder, choose **Open**, then confirm the first launch.
+4. Grant Accessibility and Input Monitoring access when macOS asks.
 
 <p align="center">
-  <img src="docs/assets/mac-drag-scroll-gatekeeper-bypass.gif" width="760" alt="How to open an unsigned Mac Drag Scroll build">
+  <img src="docs/assets/mac-drag-scroll-install-demo.gif" width="800" alt="Drag Mac Drag Scroll into the Applications folder">
 </p>
 
-CLI install without Homebrew:
+<details>
+<summary><strong>Why does the first launch require right-click → Open?</strong></summary>
+
+Current releases are not Apple-notarized because notarization requires a paid Apple Developer membership. macOS may therefore block a normal double-click on a newly downloaded build. In Finder, right-click **Mac Drag Scroll**, choose **Open**, and confirm. This is required once for each downloaded build.
+
+The project still publishes Sparkle signatures and GitHub build provenance so release files can be verified independently. See [Security](SECURITY.md) and [Releasing](docs/RELEASING.md).
+</details>
+
+<details>
+<summary><strong>Install without Homebrew</strong></summary>
 
 ```sh
 curl -fsSL https://github.com/martincalander/MacDragScroll/raw/main/install.sh | bash
 ```
+</details>
 
 ## Grant Permissions
 
-Mac Drag Scroll needs Accessibility and Input Monitoring permissions so it can detect the middle mouse button globally and send scroll events.
-
-1. Open **System Settings**.
-2. Go to **Privacy & Security**.
-3. Open **Accessibility** and enable **Mac Drag Scroll**.
-4. Open **Input Monitoring** and enable **Mac Drag Scroll**.
-5. Quit and reopen Mac Drag Scroll if macOS asks for a restart.
+Mac Drag Scroll needs two macOS permissions: **Input Monitoring** detects the external mouse button globally, and **Accessibility** sends scroll events to the target window. It does not use these permissions to record typing or inspect content.
 
 <p align="center">
-  <img src="docs/assets/mac-drag-scroll-permission-demo.gif" width="760" alt="Mac Drag Scroll permissions demo">
+  <img src="docs/assets/mac-drag-scroll-permission-demo.gif" width="800" alt="Enable Accessibility and Input Monitoring for Mac Drag Scroll">
 </p>
 
-The app shows permission status in Settings, and it disables drag scrolling if either required permission is removed.
+Open **System Settings → Privacy & Security**, enable Mac Drag Scroll under both **Accessibility** and **Input Monitoring**, then reopen the app if macOS requests it. The Permissions tab shows live status and provides repair shortcuts.
 
-## Use
-
-1. Press and hold the middle mouse button.
-2. Move the mouse away from the starting point.
-3. Release the middle mouse button to stop.
-
-<p align="center">
-  <img src="docs/assets/mac-drag-scroll-usage-demo.gif" width="760" alt="Mac Drag Scroll drag scrolling usage demo">
-</p>
-
-The farther you drag from the origin, the faster the scroll becomes. A small glass indicator appears while dragging unless you turn it off in Settings.
-
-## Settings
+## Tune the Feel
 
 Open Settings from the menu bar icon.
 
-| Setting | What it changes |
+| Setting | What it controls |
 | --- | --- |
-| Enable | Turns Mac Drag Scroll on or off. |
-| Keep in Menu Bar | Keeps the menu bar helper alive after closing Settings. |
-| Speed | Adjusts the scroll speed. |
-| Acceleration | Changes how quickly speed ramps up as you drag farther. |
-| Dead zone | Sets the small area around the origin where scrolling has not started yet. |
-| Visualizer | Controls size, opacity, tint, Liquid Glass intensity, and animation. |
-| Launch at Login | Starts Mac Drag Scroll automatically when you sign in. |
-| Excluded Apps | Keeps drag scrolling disabled in chosen apps. |
-| Permissions | Shows Accessibility and Input Monitoring status, with repair shortcuts. |
-| Updates | Checks GitHub Releases through Sparkle and shows version history. |
+| Speed and acceleration | Base scroll rate and how quickly it increases with drag distance. |
+| Dead zone | The neutral area around the gesture origin. |
+| Trigger | Middle click by default, with guarded alternatives for primary and secondary buttons. |
+| Visualizer | Size, opacity, tint, glass intensity, and motion effects. |
+| Excluded apps | Applications where drag scrolling should stay disabled. |
+| Launch behavior | Login startup and whether the helper remains in the menu bar. |
+| Updates | Automatic checks, release history, and manual update controls. |
 
-Settings are saved per macOS user at:
+Preferences are stored per macOS user and survive app updates and normal uninstall/reinstall cycles. Details and recovery paths are documented in [Support](SUPPORT.md).
 
-```text
-~/Library/Preferences/com.martincalander.macdragscroll.plist
+## Built for Trust
+
+- **Local by design:** no account, analytics, advertising, or cloud backend.
+- **Narrow input scope:** only the configured mouse trigger starts scrolling; trackpad gestures are filtered out.
+- **Permission aware:** scrolling disables itself when required access is missing or revoked.
+- **Inspectable releases:** automated checks, secret scanning, CodeQL, Sparkle signatures, and GitHub attestations run through the public repository.
+- **Private diagnostics:** crash reports stay on the Mac until the user chooses to share them.
+
+Read [Privacy](PRIVACY.md), [Security](SECURITY.md), and the implementation [Architecture](ARCHITECTURE.md).
+
+## Build from Source
+
+Requirements: macOS 26.2 or later and a compatible version of Xcode.
+
+```sh
+git clone https://github.com/martincalander/MacDragScroll.git
+cd MacDragScroll
+xcodebuild -project macdragscroll.xcodeproj \
+  -scheme macdragscroll \
+  -configuration Debug \
+  build
 ```
 
-Mac Drag Scroll also mirrors recoverable app settings to:
+Run the test suite with:
 
-```text
-~/Library/Application Support/Mac Drag Scroll/Preferences.plist
+```sh
+xcodebuild -project macdragscroll.xcodeproj \
+  -scheme macdragscroll \
+  -destination 'platform=macOS' \
+  test
 ```
 
-Normal app removal, reinstall, Homebrew upgrades, and Sparkle updates leave these files alone, so preferences survive update and uninstall cycles.
+Contributions are welcome. Start with [Contributing](CONTRIBUTING.md), the [Code of Conduct](CODE_OF_CONDUCT.md), and the [Roadmap](ROADMAP.md).
 
-## Diagnostics
+## Project Guide
 
-If the app crashes, Settings shows a **Crash Reports** section with options to open the folder, copy the latest report, reveal the latest report, or clear saved reports.
-
-Crash reports are stored locally at:
-
-```text
-~/Library/Application Support/Mac Drag Scroll/Crash Reports
-```
-
-macOS DiagnosticReports for Mac Drag Scroll are imported into that folder on the next launch when available.
-
-## Privacy
-
-Mac Drag Scroll is designed as a local utility. It needs Accessibility and Input Monitoring access for the drag-scroll gesture, but it does not record what you type, inspect document contents, or track your browsing.
-
-Read the full [privacy note](PRIVACY.md).
-
-## Updates
-
-Use **Settings -> Updates** or the menu bar **Check For Update** command to check for new versions. Updates are verified by Sparkle and hosted on GitHub Releases.
-
-The current free release flow is unsigned and not Apple-notarized. If macOS blocks a freshly downloaded build, use the Finder right-click **Open** flow shown above.
-
-## Support
-
-Need help? Start with [Support](SUPPORT.md), then open an issue if the problem is reproducible.
+| Resource | Purpose |
+| --- | --- |
+| [Support](SUPPORT.md) | Permission repair, diagnostics, and common questions. |
+| [Architecture](ARCHITECTURE.md) | Runtime boundaries, safety invariants, and event flow. |
+| [Privacy](PRIVACY.md) | What the app can access and what it never collects. |
+| [Security](SECURITY.md) | Vulnerability reporting and release verification. |
+| [Changelog](CHANGELOG.md) | Version history and release notes. |
+| [Scorecard notes](docs/SCORECARD.md) | OpenSSF posture, controls, and current limitations. |
+| [Releasing](docs/RELEASING.md) | Maintainer release and provenance process. |
 
 ## Requirements
 
 - macOS 26.2 or later
-- External mouse with a middle button or scroll-wheel click
+- An external mouse with a middle button or clickable scroll wheel
 - Accessibility and Input Monitoring permissions
 
-## Made By
+## License
 
-Mac Drag Scroll is made by [Martin Calander](https://martincalander.com).
+Mac Drag Scroll is available under the [MIT License](LICENSE).
 
-Developers and contributors can read [Contributing](CONTRIBUTING.md).
-
-The implementation boundaries and safety invariants are documented in [Architecture](ARCHITECTURE.md). Planned work and explicit non-goals are tracked in the [Roadmap](ROADMAP.md).
-
-Release maintainers can read [Releasing](docs/RELEASING.md).
+<p align="center">
+  Made by <a href="https://martincalander.com">Martin Calander</a>.
+</p>

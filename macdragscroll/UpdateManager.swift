@@ -104,6 +104,16 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
     static let websiteURL = URL(string: "https://martincalander.com")!
     static let versionHistory: [VersionHistoryEntry] = [
         VersionHistoryEntry(
+            version: "1.1.0",
+            build: "110",
+            releaseDate: "2026-07-10",
+            changes: [
+                "Added macOS 14 and 15 support with a native material visualizer while keeping Liquid Glass on macOS 26.",
+                "Strengthened release quality with strict warnings, dependency review, Guard Malloc stress tests, static analysis, and universal Intel and Apple Silicon builds.",
+                "Improved automatic updates, permission recovery, crash diagnostics, localization, and installation verification."
+            ]
+        ),
+        VersionHistoryEntry(
             version: "1.0.7",
             build: "107",
             releaseDate: "2026-07-10",

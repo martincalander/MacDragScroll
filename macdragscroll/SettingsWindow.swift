@@ -128,8 +128,8 @@ struct SettingsWindowView: View {
         }
         .padding(16)
         .frame(width: 178, alignment: .topLeading)
-        .glassEffect(
-            .regular.tint(Color(nsColor: .controlBackgroundColor).opacity(0.18)),
+        .adaptiveGlassEffect(
+            tint: Color(nsColor: .controlBackgroundColor).opacity(0.18),
             in: Rectangle()
         )
     }
@@ -1088,8 +1088,8 @@ struct SettingsWindowView: View {
             .controlSize(.small)
         }
         .padding(12)
-        .glassEffect(
-            .regular.tint(Color.orange.opacity(0.12)),
+        .adaptiveGlassEffect(
+            tint: Color.orange.opacity(0.12),
             in: RoundedRectangle(cornerRadius: 10, style: .continuous)
         )
         .overlay {
@@ -1144,8 +1144,8 @@ struct SettingsWindowView: View {
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 10)
-        .glassEffect(
-            .regular.tint(Color(nsColor: .controlBackgroundColor).opacity(0.16)),
+        .adaptiveGlassEffect(
+            tint: Color(nsColor: .controlBackgroundColor).opacity(0.16),
             in: Rectangle()
         )
     }

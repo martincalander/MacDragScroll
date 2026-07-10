@@ -29,6 +29,16 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Review dependency changes
+        if: github.event_name == 'pull_request'
+        # actions/dependency-review-action@v5.0.0
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294
+        with:
+          fail-on-severity: moderate
+          comment-summary-in-pr: never
+          show-openssf-scorecard: true
+          warn-on-openssf-scorecard-level: 5
+
       - name: Select Xcode
         run: |
           if [ -d /Applications/Xcode_26.2.app ]; then
@@ -37,26 +47,72 @@ jobs:
           xcodebuild -version
           xcodebuild -showsdks
 
-      - name: Test
+      - name: Repository quality checks
+        run: scripts/check-repository-quality.sh
+
+      - name: Test with strict warnings and coverage
         run: |
+          set -o pipefail
+
           xcodebuild test \
             -project macdragscroll.xcodeproj \
             -scheme macdragscroll \
             -destination 'platform=macOS' \
             -derivedDataPath "$RUNNER_TEMP/MacDragScrollDerivedData" \
+            -resultBundlePath "$RUNNER_TEMP/MacDragScrollTests.xcresult" \
+            -enableCodeCoverage YES \
             CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO
+            CODE_SIGNING_REQUIRED=NO \
+            GCC_TREAT_WARNINGS_AS_ERRORS=YES \
+            SWIFT_TREAT_WARNINGS_AS_ERRORS=YES
 
-      - name: Release build
+          xcrun xccov view --report "$RUNNER_TEMP/MacDragScrollTests.xcresult" | sed -n '1,3p'
+
+      - name: Address Sanitizer tests
+        run: |
+          xcodebuild test \
+            -project macdragscroll.xcodeproj \
+            -scheme macdragscroll \
+            -destination 'platform=macOS' \
+            -derivedDataPath "$RUNNER_TEMP/MacDragScrollSanitizerDerivedData" \
+            -enableAddressSanitizer YES \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            GCC_TREAT_WARNINGS_AS_ERRORS=YES \
+            SWIFT_TREAT_WARNINGS_AS_ERRORS=YES
+
+      - name: Static analysis
+        run: |
+          xcodebuild analyze \
+            -project macdragscroll.xcodeproj \
+            -scheme macdragscroll \
+            -configuration Debug \
+            -destination 'generic/platform=macOS' \
+            -derivedDataPath "$RUNNER_TEMP/MacDragScrollAnalyzeDerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            GCC_TREAT_WARNINGS_AS_ERRORS=YES \
+            SWIFT_TREAT_WARNINGS_AS_ERRORS=YES
+
+      - name: Universal release build
         run: |
           xcodebuild build \
             -project macdragscroll.xcodeproj \
             -scheme macdragscroll \
             -configuration Release \
-            -destination 'platform=macOS' \
+            -destination 'generic/platform=macOS' \
             -derivedDataPath "$RUNNER_TEMP/MacDragScrollReleaseDerivedData" \
+            ARCHS='arm64 x86_64' \
+            ONLY_ACTIVE_ARCH=NO \
             CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO
+            CODE_SIGNING_REQUIRED=NO \
+            GCC_TREAT_WARNINGS_AS_ERRORS=YES \
+            SWIFT_TREAT_WARNINGS_AS_ERRORS=YES
+
+      - name: macOS compatibility checks
+        run: |
+          scripts/check-macos-compatibility.sh \
+            "$RUNNER_TEMP/MacDragScrollReleaseDerivedData/Build/Products/Release/Mac Drag Scroll.app"
 
       - name: Release metadata checks
         run: |

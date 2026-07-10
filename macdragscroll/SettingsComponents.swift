@@ -47,7 +47,7 @@ struct DevelopmentWatermarkBadge: View {
             .foregroundStyle(foregroundStyle)
             .padding(.horizontal, horizontalPadding)
             .padding(.vertical, verticalPadding)
-            .glassEffect(.regular.tint(tint), in: Capsule())
+            .adaptiveGlassEffect(tint: tint, in: Capsule())
             .overlay {
                 Capsule()
                     .stroke(borderColor, lineWidth: 0.6)

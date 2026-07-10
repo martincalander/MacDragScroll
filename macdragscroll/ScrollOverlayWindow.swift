@@ -99,7 +99,7 @@ enum ScrollOverlayMotion {
 
 final class ScrollOverlayWindow: NSWindow {
     private let overlayView: ScrollOverlayView
-    private let glassView: NSGlassEffectView
+    private let glassView: NSView
     private let containerView: NSView
     private let screenOrigin: CGPoint
     private let animationPosition: CGPoint
@@ -117,7 +117,30 @@ final class ScrollOverlayWindow: NSWindow {
         screenOrigin = origin
         containerView = NSView(frame: CGRect(origin: .zero, size: frame.size))
         overlayView = ScrollOverlayView(origin: originInVisualFrame, screenOrigin: origin, frame: CGRect(origin: .zero, size: visualFrame.size))
-        glassView = NSGlassEffectView(frame: visualFrame)
+        if #available(macOS 26.0, *) {
+            let nativeGlassView = NSGlassEffectView(frame: visualFrame)
+            nativeGlassView.style = .clear
+            nativeGlassView.cornerRadius = min(visualFrame.width, visualFrame.height) / 2
+            nativeGlassView.tintColor = SettingsManager.shared.visualizerTintStyle.glassTintColor(
+                intensity: SettingsManager.shared.liquidGlassIntensity
+            ) ?? NSColor.white.withAlphaComponent(
+                min(0.090 + SettingsManager.shared.liquidGlassIntensity * 0.018, 0.14)
+            )
+            nativeGlassView.contentView = overlayView
+            glassView = nativeGlassView
+        } else {
+            let materialView = NSVisualEffectView(frame: visualFrame)
+            materialView.material = .hudWindow
+            materialView.blendingMode = .behindWindow
+            materialView.state = .active
+            materialView.wantsLayer = true
+            materialView.layer?.cornerRadius = min(visualFrame.width, visualFrame.height) / 2
+            materialView.layer?.masksToBounds = true
+            overlayView.frame = materialView.bounds
+            overlayView.autoresizingMask = [.width, .height]
+            materialView.addSubview(overlayView)
+            glassView = materialView
+        }
         animationPosition = CGPoint(x: visualFrame.midX, y: visualFrame.midY)
 
         super.init(
@@ -140,14 +163,6 @@ final class ScrollOverlayWindow: NSWindow {
 
         glassView.autoresizingMask = []
         glassView.wantsLayer = true
-        glassView.style = .clear
-        glassView.cornerRadius = min(visualFrame.width, visualFrame.height) / 2
-        glassView.tintColor = SettingsManager.shared.visualizerTintStyle.glassTintColor(
-            intensity: SettingsManager.shared.liquidGlassIntensity
-        ) ?? NSColor.white.withAlphaComponent(
-            min(0.090 + SettingsManager.shared.liquidGlassIntensity * 0.018, 0.14)
-        )
-        glassView.contentView = overlayView
         containerView.addSubview(glassView)
         contentView = containerView
 

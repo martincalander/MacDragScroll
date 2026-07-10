@@ -60,7 +60,7 @@ Release ZIPs are signed with the same Sparkle EdDSA key trusted by the app. The 
 
 OpenSSF Scorecard checks filenames in the five most recent GitHub releases. A detached signature on every release earns 8/10; provenance on every release earns 10/10. Historic releases should only be backfilled with signatures or provenance that genuinely exists. Do not generate misleading provenance or delete valid releases solely to raise the score.
 
-The current five releases all include a detached signature, so Signed-Releases scores 8/10. Releases from `v1.0.3` onward include genuine provenance. When the five-release window reaches `v1.0.3` through `v1.0.7`, every release in the window will qualify for 10/10.
+Signed-Releases scores 10/10. Each release from `v1.0.3` through `v1.0.7` includes both `MacDragScroll.zip.sig` and genuine `MacDragScroll.intoto.jsonl` provenance, so every release in the current five-release window is covered.
 
 This check is independent of Apple Developer ID signing and notarization. It does not require a paid Apple Developer Program account.
 

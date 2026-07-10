@@ -460,10 +460,10 @@ final class SettingsManagerTests: XCTestCase {
     func testAppBundleVersionMetadataUsesStableReleaseValues() {
         let appBundle = Bundle(for: AppDelegate.self)
 
-        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "1.0.4")
-        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String, "104")
-        XCTAssertEqual(AppDelegate.appVersion, "1.0.4")
-        XCTAssertEqual(AppDelegate.appBuild, "104")
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "1.0.5")
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String, "105")
+        XCTAssertEqual(AppDelegate.appVersion, "1.0.5")
+        XCTAssertEqual(AppDelegate.appBuild, "105")
     }
 
     func testSparkleUpdateConfigurationIsPresent() {
@@ -559,7 +559,7 @@ final class SettingsManagerTests: XCTestCase {
 
         XCTAssertEqual(latest?.version, AppDelegate.appVersion)
         XCTAssertEqual(latest?.build, AppDelegate.appBuild)
-        XCTAssertEqual(latest?.releaseDate, "2026-07-09")
+        XCTAssertEqual(latest?.releaseDate, "2026-07-10")
         XCTAssertEqual(latest?.isCurrent, true)
         XCTAssertFalse(latest?.changes.isEmpty ?? true)
     }
@@ -786,6 +786,84 @@ final class SettingsManagerTests: XCTestCase {
             "Mac Drag Scroll_2026-07-09-010101_Mac.crash",
             "MacDragScroll-2026-07-09.ips"
         ])
+    }
+
+    func testLegacyCrashReportMigrationMovesOnlySupportedFilesWithoutOverwriting() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let sourceDirectory = root.appendingPathComponent("MacDragScroll/Crash Reports", isDirectory: true)
+        let destinationDirectory = root.appendingPathComponent("Mac Drag Scroll/Crash Reports", isDirectory: true)
+        try FileManager.default.createDirectory(at: sourceDirectory, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: destinationDirectory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        try "legacy".write(
+            to: sourceDirectory.appendingPathComponent("legacy.crash"),
+            atomically: true,
+            encoding: .utf8
+        )
+        try "keep".write(
+            to: sourceDirectory.appendingPathComponent("notes.txt"),
+            atomically: true,
+            encoding: .utf8
+        )
+        try "source".write(
+            to: sourceDirectory.appendingPathComponent("duplicate.log"),
+            atomically: true,
+            encoding: .utf8
+        )
+        try "destination".write(
+            to: destinationDirectory.appendingPathComponent("duplicate.log"),
+            atomically: true,
+            encoding: .utf8
+        )
+
+        let migratedCount = CrashHandler.migrateCrashReports(
+            from: sourceDirectory,
+            to: destinationDirectory
+        )
+
+        XCTAssertEqual(migratedCount, 1)
+        XCTAssertTrue(FileManager.default.fileExists(
+            atPath: destinationDirectory.appendingPathComponent("legacy.crash").path
+        ))
+        XCTAssertTrue(FileManager.default.fileExists(
+            atPath: sourceDirectory.appendingPathComponent("notes.txt").path
+        ))
+        XCTAssertTrue(FileManager.default.fileExists(
+            atPath: sourceDirectory.appendingPathComponent("duplicate.log").path
+        ))
+        XCTAssertEqual(
+            try String(
+                contentsOf: destinationDirectory.appendingPathComponent("duplicate.log"),
+                encoding: .utf8
+            ),
+            "destination"
+        )
+    }
+
+    func testLegacyCrashReportMigrationRemovesEmptySourceDirectory() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let sourceDirectory = root.appendingPathComponent("legacy", isDirectory: true)
+        let destinationDirectory = root.appendingPathComponent("current", isDirectory: true)
+        try FileManager.default.createDirectory(at: sourceDirectory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        try "report".write(
+            to: sourceDirectory.appendingPathComponent("report.ips"),
+            atomically: true,
+            encoding: .utf8
+        )
+
+        XCTAssertEqual(
+            CrashHandler.migrateCrashReports(from: sourceDirectory, to: destinationDirectory),
+            1
+        )
+        XCTAssertFalse(FileManager.default.fileExists(atPath: sourceDirectory.path))
+        XCTAssertTrue(FileManager.default.fileExists(
+            atPath: destinationDirectory.appendingPathComponent("report.ips").path
+        ))
     }
     
     // MARK: - Settings Persistence Tests

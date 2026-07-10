@@ -12,4 +12,28 @@ while IFS= read -r -d '' harness; do
   swiftc -D FUZZING -parse-as-library -emit-object "$harness" -o "$tmp_dir/${name}.o"
 done < <(find "$root/Fuzzers" -name '*.swift' -print0 | sort -z)
 
-echo "Fuzz harness syntax checks passed."
+cat > "$tmp_dir/main.swift" <<'SWIFT'
+import Foundation
+
+let corpus = [
+    Data(),
+    Data("com.example.application".utf8),
+    Data("https://github.com/martincalander/MacDragScroll".utf8),
+    Data([0x00, 0xFF, 0xC0, 0xAF]),
+    Data(repeating: 0x41, count: 8192)
+]
+
+for input in corpus {
+    PreferenceInputFuzzer.exercise(input)
+}
+SWIFT
+
+swiftc \
+  -sanitize=address \
+  "$root/Fuzzers/PreferenceInputFuzzer.swift" \
+  "$tmp_dir/main.swift" \
+  -o "$tmp_dir/preference-input-sanitizer"
+
+ASAN_OPTIONS="abort_on_error=1" "$tmp_dir/preference-input-sanitizer"
+
+echo "Fuzz harness syntax and Address Sanitizer smoke checks passed."

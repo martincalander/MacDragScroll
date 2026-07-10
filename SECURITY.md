@@ -24,7 +24,7 @@ The repository runs these free security checks:
 - **CodeQL:** runs static analysis for Swift security issues.
 - **Gitleaks and GitHub secret scanning:** scan committed secrets, while push protection blocks recognized credentials before they enter the repository.
 - **Dependency Review:** blocks pull requests that introduce dependencies with moderate-or-higher known vulnerabilities.
-- **Quality Gate:** treats compiler warnings as errors, runs tests with coverage and Address Sanitizer, performs Xcode static analysis, and validates a universal macOS 14+ release build.
+- **Quality Gate:** treats compiler warnings as errors, runs tests with coverage, executes the preference fuzzer corpus under Address Sanitizer, performs Xcode static analysis, and validates a universal macOS 14+ release build.
 - **Swift fuzz harnesses:** exercise preference-style parsers and normalization paths.
 
 Scan results are advisory and do not replace manual review, but they help catch common repository, workflow, and secret-handling risks before release.

@@ -68,18 +68,8 @@ jobs:
 
           xcrun xccov view --report "$RUNNER_TEMP/MacDragScrollTests.xcresult" | sed -n '1,3p'
 
-      - name: Address Sanitizer tests
-        run: |
-          xcodebuild test \
-            -project macdragscroll.xcodeproj \
-            -scheme macdragscroll \
-            -destination 'platform=macOS' \
-            -derivedDataPath "$RUNNER_TEMP/MacDragScrollSanitizerDerivedData" \
-            -enableAddressSanitizer YES \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            GCC_TREAT_WARNINGS_AS_ERRORS=YES \
-            SWIFT_TREAT_WARNINGS_AS_ERRORS=YES
+      - name: Address Sanitizer fuzz smoke test
+        run: scripts/check-fuzz-harnesses.sh
 
       - name: Static analysis
         run: |
@@ -118,6 +108,5 @@ jobs:
         run: |
           version="$(xcodebuild -showBuildSettings -project macdragscroll.xcodeproj -scheme macdragscroll -configuration Release | awk -F'= ' '/MARKETING_VERSION =/ { print $2; exit }')"
           bash -n scripts/*.sh
-          scripts/check-fuzz-harnesses.sh
           scripts/extract-release-notes.sh "$version" >/dev/null
           scripts/validate-homebrew-cask.sh

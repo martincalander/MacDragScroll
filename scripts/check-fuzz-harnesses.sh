@@ -13,6 +13,7 @@ while IFS= read -r -d '' harness; do
 done < <(find "$root/Fuzzers" -name '*.swift' -print0 | sort -z)
 
 cat > "$tmp_dir/main.swift" <<'SWIFT'
+import Dispatch
 import Foundation
 
 let corpus = [
@@ -23,17 +24,19 @@ let corpus = [
     Data(repeating: 0x41, count: 8192)
 ]
 
-for input in corpus {
-    PreferenceInputFuzzer.exercise(input)
+DispatchQueue.concurrentPerform(iterations: 8) { _ in
+    for input in corpus {
+        PreferenceInputFuzzer.exercise(input)
+    }
 }
 SWIFT
 
 swiftc \
-  -sanitize=undefined \
+  -sanitize=thread \
   "$root/Fuzzers/PreferenceInputFuzzer.swift" \
   "$tmp_dir/main.swift" \
-  -o "$tmp_dir/preference-input-ubsan"
+  -o "$tmp_dir/preference-input-tsan"
 
-UBSAN_OPTIONS="halt_on_error=1:print_stacktrace=1" "$tmp_dir/preference-input-ubsan"
+TSAN_OPTIONS="halt_on_error=1" "$tmp_dir/preference-input-tsan"
 
-echo "Fuzz harness syntax and Undefined Behavior Sanitizer smoke checks passed."
+echo "Fuzz harness syntax and Thread Sanitizer concurrency checks passed."

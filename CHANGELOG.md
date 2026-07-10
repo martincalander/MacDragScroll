@@ -9,7 +9,7 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 ### Changed
 
 - Lowered the supported runtime requirement to macOS 14 while retaining native Liquid Glass on macOS 26 and a native material fallback on earlier systems.
-- Expanded the required quality gate with strict compiler warnings, dependency review, Undefined Behavior Sanitizer fuzz execution, Xcode static analysis, code coverage reporting, and universal Intel/Apple Silicon compatibility verification.
+- Expanded the required quality gate with strict compiler warnings, dependency review, concurrent Swift fuzz execution under Thread Sanitizer, Xcode static analysis, code coverage reporting, and universal Intel/Apple Silicon compatibility verification.
 - Auto Update now enables Sparkle's automatic update downloads as well as scheduled checks.
 - Release signing tools are checksum-verified before the Sparkle private key is made available.
 - The Homebrew cask now verifies the exact release archive checksum.

@@ -104,6 +104,14 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
     static let websiteURL = URL(string: "https://martincalander.com")!
     static let versionHistory: [VersionHistoryEntry] = [
         VersionHistoryEntry(
+            version: "1.0.7",
+            build: "107",
+            releaseDate: "2026-07-10",
+            changes: [
+                "Corrupted non-finite numeric preferences now recover to safe defaults before affecting scrolling or the visualizer."
+            ]
+        ),
+        VersionHistoryEntry(
             version: "1.0.6",
             build: "106",
             releaseDate: "2026-07-10",

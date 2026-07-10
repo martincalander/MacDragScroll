@@ -354,6 +354,33 @@ final class SettingsManagerTests: XCTestCase {
         XCTAssertEqual(settings.liquidGlassIntensity, SettingsManager.liquidGlassIntensityRange.upperBound, accuracy: 0.001)
     }
 
+    func testNumericSettingsReplaceNonFiniteValuesWithSafeDefaults() {
+        settings.scrollSpeed = .nan
+        settings.deadZoneRadius = .infinity
+        settings.acceleration = -.infinity
+        settings.overlayOpacity = .nan
+        settings.visualizerSize = .infinity
+        settings.liquidGlassIntensity = -.infinity
+
+        XCTAssertEqual(settings.scrollSpeed, 2.0, accuracy: 0.001)
+        XCTAssertEqual(settings.deadZoneRadius, 20.0, accuracy: 0.001)
+        XCTAssertEqual(settings.acceleration, 1.8, accuracy: 0.001)
+        XCTAssertEqual(settings.overlayOpacity, 1.0, accuracy: 0.001)
+        XCTAssertEqual(settings.visualizerSize, 1.0, accuracy: 0.001)
+        XCTAssertEqual(settings.liquidGlassIntensity, 1.35, accuracy: 0.001)
+    }
+
+    func testNumericNormalizationRejectsNonFiniteValuesAndClampsFiniteValues() {
+        let range = 1.0...5.0
+
+        XCTAssertEqual(SettingsManager.normalizedDouble(.nan, defaultValue: 2.5, range: range), 2.5)
+        XCTAssertEqual(SettingsManager.normalizedDouble(.infinity, defaultValue: 2.5, range: range), 2.5)
+        XCTAssertEqual(SettingsManager.normalizedDouble(-.infinity, defaultValue: 2.5, range: range), 2.5)
+        XCTAssertEqual(SettingsManager.normalizedDouble(-10, defaultValue: 2.5, range: range), 1.0)
+        XCTAssertEqual(SettingsManager.normalizedDouble(10, defaultValue: 2.5, range: range), 5.0)
+        XCTAssertEqual(SettingsManager.normalizedDouble(3, defaultValue: 2.5, range: range), 3.0)
+    }
+
     func testWelcomeCompletionCanBePersisted() {
         settings.hasCompletedWelcome = false
         XCTAssertFalse(settings.hasCompletedWelcome)
@@ -460,10 +487,10 @@ final class SettingsManagerTests: XCTestCase {
     func testAppBundleVersionMetadataUsesStableReleaseValues() {
         let appBundle = Bundle(for: AppDelegate.self)
 
-        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "1.0.6")
-        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String, "106")
-        XCTAssertEqual(AppDelegate.appVersion, "1.0.6")
-        XCTAssertEqual(AppDelegate.appBuild, "106")
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "1.0.7")
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String, "107")
+        XCTAssertEqual(AppDelegate.appVersion, "1.0.7")
+        XCTAssertEqual(AppDelegate.appBuild, "107")
     }
 
     func testSparkleUpdateConfigurationIsPresent() {

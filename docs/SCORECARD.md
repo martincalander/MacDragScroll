@@ -9,7 +9,7 @@ Scorecard's `CII-Best-Practices` check is based on the OpenSSF Best Practices Ba
 Current state:
 
 - BadgeApp project `13546` exists for Mac Drag Scroll.
-- The project is currently in progress and not yet passing.
+- The project earned the Passing badge on July 9, 2026, which Scorecard awards 5/10.
 - The README badge points to `https://www.bestpractices.dev/projects/13546`.
 - The repository includes `.bestpractices.json` so BadgeApp can prefill evidence-backed proposed answers.
 
@@ -19,7 +19,7 @@ To improve the check:
 2. Sign in with the GitHub account that owns or maintains this repository.
 3. Review the proposed answers imported from `.bestpractices.json`.
 4. Fill in any remaining self-certification criteria honestly.
-5. Aim for at least the passing badge first.
+5. Complete Silver for 7/10 before pursuing Gold for 10/10.
 
 ```markdown
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13546/badge)](https://www.bestpractices.dev/projects/13546)
@@ -42,6 +42,12 @@ The extra `user` OAuth scope is required because this changes the authenticated 
 
 Clearing the company field removes the unwanted organization label, but it does not make the Contributors score high by itself. Scorecard rewards real contributor diversity across multiple GitHub profile company values.
 
+The maximum score requires substantive recent work from at least three real organizations, with at least five commits per organization in Scorecard's recent-commit window. Do not create cosmetic commits or inaccurate company affiliations for this check.
+
+## Token Permissions
+
+Workflow-level permissions stay read-only. Jobs that publish security results declare only their required write permission at job scope. This preserves least privilege and prevents a future job from inheriting write access accidentally.
+
 ## Packaging
 
 Mac Drag Scroll is packaged through GitHub Releases, Sparkle appcasts, the CLI installer, and the public Homebrew tap at [martincalander/homebrew-tap](https://github.com/martincalander/homebrew-tap).
@@ -54,10 +60,12 @@ Release ZIPs are signed with the same Sparkle EdDSA key trusted by the app. The 
 
 OpenSSF Scorecard checks filenames in the five most recent GitHub releases. A detached signature on every release earns 8/10; provenance on every release earns 10/10. Historic releases should only be backfilled with signatures or provenance that genuinely exists. Do not generate misleading provenance or delete valid releases solely to raise the score.
 
+The current five releases all include a detached signature, so Signed-Releases scores 8/10. Releases `v1.0.3` and `v1.0.4` also include genuine provenance. If every real release from `v1.0.5` through `v1.0.7` includes provenance, the five-release window will qualify for 10/10.
+
 This check is independent of Apple Developer ID signing and notarization. It does not require a paid Apple Developer Program account.
 
 ## Code Review
 
-Required pull request approval is not enabled for now because Mac Drag Scroll is currently maintained by a single developer, and GitHub does not allow a pull request author to approve their own pull request. The repository still protects `main` against deletion and non-fast-forward pushes, and it requires the build/test and secret-scan checks before changes land.
+Changes to `main` require a pull request, resolved review conversations, and the build/test and secret-scan checks. Required approval remains at zero while Mac Drag Scroll has only one maintainer because GitHub does not allow a pull request author to approve their own pull request.
 
-Required independent review should be enabled if or when the project has trusted collaborators who can review maintainer-authored pull requests.
+When two trusted reviewers are available, add them as collaborators and code owners, then require two approvals, code-owner review, stale-review dismissal, and approval after the latest push. Recent changes must accumulate genuine human review before the Code-Review score can rise; historical changes are not rewritten or backfilled.

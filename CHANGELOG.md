@@ -6,6 +6,8 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-07-10
+
 ### Changed
 
 - Lowered the supported runtime requirement to macOS 14 while retaining native Liquid Glass on macOS 26 and a native material fallback on earlier systems.

@@ -510,10 +510,10 @@ final class SettingsManagerTests: XCTestCase {
     func testAppBundleVersionMetadataUsesStableReleaseValues() {
         let appBundle = Bundle(for: AppDelegate.self)
 
-        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "1.0.7")
-        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String, "107")
-        XCTAssertEqual(AppDelegate.appVersion, "1.0.7")
-        XCTAssertEqual(AppDelegate.appBuild, "107")
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "1.1.0")
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String, "110")
+        XCTAssertEqual(AppDelegate.appVersion, "1.1.0")
+        XCTAssertEqual(AppDelegate.appBuild, "110")
     }
 
     func testAppBundleSupportsMacOS14AndLater() {

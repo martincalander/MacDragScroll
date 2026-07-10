@@ -29,10 +29,17 @@ jq -e '
   )
 ' "$package_resolved" >/dev/null
 
+npm_manifest="docs/assets/source/package.json"
 npm_lock="docs/assets/source/package-lock.json"
-jq -e '
+playwright_version="$(
+  jq -er '.devDependencies.playwright | select(test("^[0-9]+\\.[0-9]+\\.[0-9]+([-.][0-9A-Za-z.-]+)?$"))' \
+    "$npm_manifest"
+)"
+
+jq -e --arg playwright_version "$playwright_version" '
   .lockfileVersion == 3 and
-  .packages["node_modules/playwright"].version == "1.61.1" and
+  .packages[""].devDependencies.playwright == $playwright_version and
+  .packages["node_modules/playwright"].version == $playwright_version and
   ([.packages | to_entries[] |
     select(.key != "") |
     select(.value.resolved? | type == "string") |

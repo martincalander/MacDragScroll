@@ -24,23 +24,25 @@ extract_dir="$tmp_dir/extract"
 echo "Downloading Mac Drag Scroll from $download_url"
 curl --fail --location --retry 3 --retry-delay 2 --progress-bar "$download_url" --output "$archive_path"
 
-if curl --fail --location --retry 3 --retry-delay 2 --silent --show-error "$checksum_url" --output "$checksum_path"; then
-  expected_checksum="$(awk -v asset="$asset" '$2 == asset { print $1; exit }' "$checksum_path")"
-  if [[ -n "$expected_checksum" ]]; then
-    actual_checksum="$(shasum -a 256 "$archive_path" | awk '{ print $1 }')"
-    if [[ "$actual_checksum" != "$expected_checksum" ]]; then
-      echo "Checksum mismatch for $asset" >&2
-      echo "Expected: $expected_checksum" >&2
-      echo "Actual:   $actual_checksum" >&2
-      exit 66
-    fi
-    echo "Verified SHA-256 checksum for $asset"
-  else
-    echo "Checksum file did not contain $asset; continuing with downloaded archive."
-  fi
-else
-  echo "No checksum file found for latest release; continuing with downloaded archive."
+if ! curl --fail --location --retry 3 --retry-delay 2 --silent --show-error "$checksum_url" --output "$checksum_path"; then
+  echo "Could not download the checksum file for the latest release." >&2
+  exit 69
 fi
+
+expected_checksum="$(awk -v asset="$asset" '$2 == asset { print $1; exit }' "$checksum_path")"
+if ! [[ "$expected_checksum" =~ ^[[:xdigit:]]{64}$ ]]; then
+  echo "Checksum file does not contain a valid SHA-256 value for $asset." >&2
+  exit 66
+fi
+
+actual_checksum="$(shasum -a 256 "$archive_path" | awk '{ print $1 }')"
+if [[ "$actual_checksum" != "$expected_checksum" ]]; then
+  echo "Checksum mismatch for $asset" >&2
+  echo "Expected: $expected_checksum" >&2
+  echo "Actual:   $actual_checksum" >&2
+  exit 66
+fi
+echo "Verified SHA-256 checksum for $asset"
 
 mkdir -p "$extract_dir"
 ditto -x -k "$archive_path" "$extract_dir"

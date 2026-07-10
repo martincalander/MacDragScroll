@@ -8,7 +8,7 @@ This release flow does not require a paid Apple Developer Program account. Becau
 
 - **In-app updates:** Sparkle 2 verifies and installs update archives from the GitHub release appcast.
 - **Manual installer:** each release publishes `MacDragScroll.dmg` with the app and an Applications shortcut.
-- **CLI install:** `install.sh` downloads the latest `MacDragScroll.zip` release asset, verifies the checksum when available, stages the app, and installs it into `/Applications`.
+- **CLI install:** `install.sh` downloads the latest `MacDragScroll.zip` release asset, verifies its published checksum, stages the app, and installs it into `/Applications`.
 - **Homebrew:** publish `packaging/homebrew/Casks/mac-drag-scroll.rb` to `martincalander/homebrew-tap`. The cask downloads the same `MacDragScroll.zip` asset and sets `auto_updates true`.
 - **Release integrity:** each release publishes a detached Sparkle EdDSA signature and GitHub build-provenance bundle alongside the app archives.
 
@@ -78,9 +78,8 @@ Before tagging a release:
 1. Move relevant `Unreleased` entries into a new version section.
 2. Set the release date.
 3. Update `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION`.
-4. Update `packaging/homebrew/Casks/mac-drag-scroll.rb` to the same version.
-5. Update `UpdateManager.versionHistory` so the latest row matches the shipped app build.
-6. Run `scripts/extract-release-notes.sh <version>` and confirm it prints useful notes.
+4. Update `UpdateManager.versionHistory` so the latest row matches the shipped app build.
+5. Run `scripts/extract-release-notes.sh <version>` and confirm it prints useful notes.
 
 ## Required GitHub Secret
 
@@ -156,6 +155,7 @@ scripts/publish-release.sh <version>
 - create `MacDragScroll.zip`;
 - create `MacDragScroll.dmg`;
 - generate the Sparkle appcast;
+- verify the pinned Sparkle tools archive before exposing the signing key to those tools;
 - publish the archive's detached Sparkle signature as `MacDragScroll.zip.sig`;
 - create `SHA256SUMS.txt`;
 - attest the release files and publish `MacDragScroll.intoto.jsonl` for offline verification;
@@ -200,7 +200,7 @@ The tap repo is [martincalander/homebrew-tap](https://github.com/martincalander/
 brew install --cask martincalander/tap/mac-drag-scroll
 ```
 
-For future releases, copy the updated cask into the tap repo after the GitHub release exists:
+After the GitHub release exists, update the cask version and `sha256` from the published `SHA256SUMS.txt`, validate it, and copy it into the tap repo:
 
 ```sh
 git clone https://github.com/martincalander/homebrew-tap.git
@@ -211,4 +211,4 @@ git commit -m "Update Mac Drag Scroll cask"
 git push origin main
 ```
 
-The cask uses `sha256 :no_check` because the GitHub release asset is checked by the release workflow and the app updates itself through Sparkle.
+Do not use `sha256 :no_check`. The cask must contain the exact `MacDragScroll.zip` SHA-256 value published with that release.

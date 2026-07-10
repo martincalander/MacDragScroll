@@ -26,6 +26,7 @@ env:
   PROVENANCE_FILE: "MacDragScroll.intoto.jsonl"
   BUNDLE_ID: "com.martincalander.macdragscroll"
   SPARKLE_VERSION: "2.9.4"
+  SPARKLE_ARCHIVE_SHA256: "ce89daf967db1e1893ed3ebd67575ed82d3902563e3191ca92aaec9164fbdef9"
 
 jobs:
   release:
@@ -182,6 +183,30 @@ jobs:
             echo "DMG_PATH=$artifacts/$APP_DMG"
           } >> "$GITHUB_ENV"
 
+      - name: Download verified Sparkle tools
+        run: |
+          set -euo pipefail
+
+          sparkle_archive="$RUNNER_TEMP/Sparkle-${SPARKLE_VERSION}.tar.xz"
+          sparkle_tools="$RUNNER_TEMP/sparkle-tools"
+
+          curl --fail --location \
+            "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz" \
+            --output "$sparkle_archive"
+
+          actual_checksum="$(shasum -a 256 "$sparkle_archive" | awk '{ print $1 }')"
+          if [ "$actual_checksum" != "$SPARKLE_ARCHIVE_SHA256" ]; then
+            echo "Sparkle tools checksum mismatch" >&2
+            echo "Expected: $SPARKLE_ARCHIVE_SHA256" >&2
+            echo "Actual:   $actual_checksum" >&2
+            exit 66
+          fi
+
+          mkdir -p "$sparkle_tools"
+          tar -xf "$sparkle_archive" -C "$sparkle_tools"
+
+          echo "SPARKLE_TOOLS=$sparkle_tools" >> "$GITHUB_ENV"
+
       - name: Generate Sparkle appcast
         env:
           SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
@@ -193,16 +218,9 @@ jobs:
             exit 67
           fi
 
-          sparkle_archive="$RUNNER_TEMP/Sparkle-${SPARKLE_VERSION}.tar.xz"
-          sparkle_tools="$RUNNER_TEMP/sparkle-tools"
           appcast_source="$RUNNER_TEMP/appcast-source"
           sparkle_key="$RUNNER_TEMP/sparkle_private_key"
-
-          curl --fail --location \
-            "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz" \
-            --output "$sparkle_archive"
-          mkdir -p "$sparkle_tools" "$appcast_source"
-          tar -xf "$sparkle_archive" -C "$sparkle_tools"
+          mkdir -p "$appcast_source"
 
           printf "%s" "$SPARKLE_PRIVATE_KEY" > "$sparkle_key"
           chmod 600 "$sparkle_key"
@@ -210,14 +228,14 @@ jobs:
           cp "$ZIP_PATH" "$appcast_source/$APP_ZIP"
           cp "$RELEASE_NOTES" "$appcast_source/MacDragScroll.md"
 
-          "$sparkle_tools/bin/generate_appcast" \
+          "$SPARKLE_TOOLS/bin/generate_appcast" \
             --ed-key-file "$sparkle_key" \
             --download-url-prefix "https://github.com/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/" \
             --embed-release-notes \
             -o "$ARTIFACTS_DIR/appcast.xml" \
             "$appcast_source"
 
-          signature="$("$sparkle_tools/bin/sign_update" --ed-key-file "$sparkle_key" -p "$ZIP_PATH")"
+          signature="$("$SPARKLE_TOOLS/bin/sign_update" --ed-key-file "$sparkle_key" -p "$ZIP_PATH")"
           appcast_signature="$(xmllint --xpath 'string(//*[local-name()="enclosure"]/@*[local-name()="edSignature"])' "$ARTIFACTS_DIR/appcast.xml")"
           if [ -z "$signature" ] || [ "$signature" != "$appcast_signature" ]; then
             echo "Detached Sparkle signature does not match appcast.xml" >&2

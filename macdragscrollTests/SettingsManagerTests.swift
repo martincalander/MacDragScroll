@@ -464,6 +464,29 @@ final class SettingsManagerTests: XCTestCase {
         }
     }
 
+    func testAllBundledTranslationsPreserveFormatSpecifiers() {
+        guard let englishStrings = localizationStrings(for: "en") else {
+            return XCTFail("Expected English localization to be bundled")
+        }
+
+        for language in AppLanguage.allCases {
+            guard let code = language.lprojCode, code != "en" else { continue }
+            guard let translatedStrings = localizationStrings(for: code) else {
+                XCTFail("Expected localization bundle for \(code)")
+                continue
+            }
+
+            for (key, englishValue) in englishStrings {
+                guard let translatedValue = translatedStrings[key] else { continue }
+                XCTAssertEqual(
+                    formatArgumentTypes(in: translatedValue),
+                    formatArgumentTypes(in: englishValue),
+                    "\(code).lproj key \(key) must preserve its format specifiers"
+                )
+            }
+        }
+    }
+
     func testAppearanceSelectionCanBePersisted() {
         settings.appAppearance = .dark
         XCTAssertEqual(settings.appAppearance, .dark)
@@ -505,6 +528,7 @@ final class SettingsManagerTests: XCTestCase {
             "IRTPmGbPo3tpWiuGZIjzn99mFwiCjaCCPw6Kz62hkvQ="
         )
         XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "SUEnableAutomaticChecks") as? Bool, true)
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "SUAutomaticallyUpdate") as? Bool, true)
     }
 
     func testSparkleNoUpdateErrorIsTreatedAsUpToDate() {
@@ -815,6 +839,47 @@ final class SettingsManagerTests: XCTestCase {
         ])
     }
 
+    func testSystemDiagnosticReportImportRespectsClearCutoff() throws {
+        let sourceDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let destinationDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: sourceDirectory, withIntermediateDirectories: true)
+        defer {
+            try? FileManager.default.removeItem(at: sourceDirectory)
+            try? FileManager.default.removeItem(at: destinationDirectory)
+        }
+
+        let oldReport = sourceDirectory.appendingPathComponent("MacDragScroll-old.ips")
+        let newReport = sourceDirectory.appendingPathComponent("MacDragScroll-new.ips")
+        try "old".write(to: oldReport, atomically: true, encoding: .utf8)
+        try "new".write(to: newReport, atomically: true, encoding: .utf8)
+
+        let oldDate = Date(timeIntervalSince1970: 100)
+        let cutoffDate = Date(timeIntervalSince1970: 150)
+        let newDate = Date(timeIntervalSince1970: 200)
+        try FileManager.default.setAttributes(
+            [.creationDate: oldDate, .modificationDate: oldDate],
+            ofItemAtPath: oldReport.path
+        )
+        try FileManager.default.setAttributes(
+            [.creationDate: newDate, .modificationDate: newDate],
+            ofItemAtPath: newReport.path
+        )
+
+        let importedCount = CrashHandler.importSystemDiagnosticReports(
+            from: sourceDirectory,
+            to: destinationDirectory,
+            newerThan: cutoffDate
+        )
+
+        XCTAssertEqual(importedCount, 1)
+        XCTAssertEqual(
+            try FileManager.default.contentsOfDirectory(atPath: destinationDirectory.path),
+            ["MacDragScroll-new.ips"]
+        )
+    }
+
     func testLegacyCrashReportMigrationMovesOnlySupportedFilesWithoutOverwriting() throws {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
@@ -906,12 +971,27 @@ final class SettingsManagerTests: XCTestCase {
     }
 
     private func localizationKeys(for lprojCode: String) -> Set<String>? {
-        guard let path = Bundle.main.path(forResource: lprojCode, ofType: "lproj"),
-              let strings = NSDictionary(contentsOfFile: (path as NSString).appendingPathComponent("Localizable.strings")) as? [String: String] else {
+        localizationStrings(for: lprojCode).map { Set($0.keys) }
+    }
+
+    private func localizationStrings(for lprojCode: String) -> [String: String]? {
+        guard let path = Bundle.main.path(forResource: lprojCode, ofType: "lproj") else {
             return nil
         }
 
-        return Set(strings.keys)
+        return NSDictionary(
+            contentsOfFile: (path as NSString).appendingPathComponent("Localizable.strings")
+        ) as? [String: String]
+    }
+
+    private func formatArgumentTypes(in value: String) -> [String] {
+        let pattern = #"%(?:\d+\$)?[-+ #0]*(?:\d+|\*)?(?:\.\d+|\.\*)?(?:hh|h|ll|l|q|z|t|j)?[@diuoxXfFeEgGaAcCsSp]"#
+        guard let expression = try? NSRegularExpression(pattern: pattern) else { return [] }
+        let range = NSRange(value.startIndex..., in: value)
+
+        return expression.matches(in: value, range: range).compactMap { match in
+            Range(match.range, in: value).flatMap { value[$0].last.map(String.init) }
+        }.sorted()
     }
 
     private func numberValue(in domain: [String: Any]?, forKey key: String) -> Double? {

@@ -58,6 +58,12 @@ enum TriggerInputSource {
     }
 }
 
+enum EventTapInterruption {
+    static func requiresInteractionCancellation(_ eventType: CGEventType) -> Bool {
+        eventType == .tapDisabledByTimeout || eventType == .tapDisabledByUserInput
+    }
+}
+
 enum ScrollPhysics {
     private static let minimumAxisDirection = 0.12
 
@@ -322,7 +328,10 @@ final class MouseMonitor {
     }
 
     private func handleEventTap(type: CGEventType, event: CGEvent) -> Unmanaged<CGEvent>? {
-        if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
+        if EventTapInterruption.requiresInteractionCancellation(type) {
+            // The matching release event may have been lost while the tap was disabled.
+            // Stop the timer before re-enabling the tap so stale drag state cannot scroll.
+            cancelInteraction()
             if let eventTap {
                 CGEvent.tapEnable(tap: eventTap, enable: true)
             }

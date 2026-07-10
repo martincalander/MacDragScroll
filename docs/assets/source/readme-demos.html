@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mac Drag Scroll README demos</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+      letter-spacing: 0;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body { background: #e9eef5; color: #1f252c; }
+
+    .stage {
+      position: relative;
+      width: 960px;
+      height: 540px;
+      overflow: hidden;
+      background:
+        linear-gradient(155deg, rgba(255, 255, 255, 0.96), rgba(224, 232, 242, 0.94)),
+        #e9eef5;
+    }
+
+    .stage::before {
+      position: absolute;
+      inset: 0;
+      content: "";
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.26) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.22) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: 0.4;
+    }
+
+    .brand {
+      position: absolute;
+      top: 24px;
+      left: 30px;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      color: #343b44;
+      font-size: 17px;
+      font-weight: 650;
+    }
+
+    .brand img { width: 34px; height: 34px; border-radius: 8px; box-shadow: 0 7px 16px rgba(24, 31, 42, 0.2); }
+
+    .step-dots {
+      position: absolute;
+      top: 36px;
+      right: 34px;
+      z-index: 5;
+      display: flex;
+      gap: 8px;
+    }
+
+    .step-dots i {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(43, 50, 59, 0.19);
+      transition: background 120ms ease, transform 120ms ease;
+    }
+
+    .step-dots i.active { background: #3979f6; transform: scale(1.3); }
+
+    .demo { position: absolute; inset: 0; display: none; }
+    .demo.active { display: block; }
+
+    .window {
+      position: absolute;
+      overflow: hidden;
+      border: 1px solid rgba(82, 92, 108, 0.2);
+      border-radius: 18px;
+      background: rgba(250, 252, 255, 0.9);
+      box-shadow: 0 26px 70px rgba(42, 53, 70, 0.22), inset 0 1px 0 #fff;
+    }
+
+    .titlebar {
+      position: relative;
+      height: 50px;
+      border-bottom: 1px solid rgba(82, 92, 108, 0.13);
+      background: rgba(246, 248, 251, 0.72);
+    }
+
+    .traffic { position: absolute; left: 18px; top: 18px; display: flex; gap: 8px; }
+    .traffic i { width: 11px; height: 11px; border-radius: 50%; }
+    .traffic i:nth-child(1) { background: #ff665f; }
+    .traffic i:nth-child(2) { background: #f6bd3a; }
+    .traffic i:nth-child(3) { background: #5bc85a; }
+
+    .title {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      font-weight: 650;
+      color: #454d57;
+    }
+
+    .finder {
+      left: 92px;
+      top: 88px;
+      width: 776px;
+      height: 400px;
+    }
+
+    .finder-body { position: absolute; inset: 50px 0 0; }
+    .finder-sidebar {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 166px;
+      padding: 28px 18px;
+      border-right: 1px solid rgba(82, 92, 108, 0.12);
+      background: rgba(231, 236, 243, 0.68);
+    }
+
+    .sidebar-row { display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px; border-radius: 7px; color: #5f6873; font-size: 13px; }
+    .sidebar-row.selected { background: rgba(89, 105, 126, 0.12); color: #2f3741; font-weight: 600; }
+    .sidebar-icon { width: 15px; height: 15px; border: 2px solid #788493; border-radius: 4px; }
+
+    .install-area { position: absolute; inset: 0 0 0 166px; }
+    .install-target {
+      position: absolute;
+      top: 96px;
+      right: 102px;
+      width: 148px;
+      height: 148px;
+      display: grid;
+      justify-items: center;
+      align-content: center;
+      gap: 14px;
+      border: 2px dashed rgba(74, 91, 113, 0.25);
+      border-radius: 24px;
+      color: #4e5965;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background 100ms ease, border-color 100ms ease, transform 100ms ease;
+    }
+
+    .folder {
+      position: relative;
+      width: 82px;
+      height: 58px;
+      border-radius: 10px 10px 14px 14px;
+      background: #4b93fb;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 8px 18px rgba(38, 113, 220, 0.25);
+    }
+
+    .folder::before { position: absolute; top: -10px; left: 7px; width: 37px; height: 17px; content: ""; border-radius: 8px 8px 0 0; background: #66a6ff; }
+
+    .draggable-app {
+      position: absolute;
+      top: 101px;
+      left: 78px;
+      width: 138px;
+      display: grid;
+      justify-items: center;
+      gap: 12px;
+      color: #333b45;
+      font-size: 14px;
+      font-weight: 650;
+      transform-origin: center;
+      will-change: transform;
+    }
+
+    .draggable-app img { width: 104px; height: 104px; border-radius: 23px; box-shadow: 0 16px 28px rgba(25, 31, 39, 0.28); }
+    .draggable-app span { will-change: opacity; }
+
+    .cursor-hand {
+      position: absolute;
+      z-index: 10;
+      width: 21px;
+      height: 29px;
+      border: 2px solid rgba(34, 39, 46, 0.75);
+      border-radius: 13px 13px 8px 8px;
+      background: rgba(255, 255, 255, 0.86);
+      box-shadow: 0 4px 10px rgba(29, 36, 45, 0.16);
+      transform: rotate(-18deg);
+      opacity: 0;
+    }
+
+    .completion {
+      position: absolute;
+      right: 16px;
+      bottom: 16px;
+      width: 29px;
+      height: 29px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #2ca660;
+      color: white;
+      font-size: 19px;
+      font-weight: 800;
+      opacity: 0;
+      transform: scale(0.6);
+    }
+
+    .settings {
+      left: 94px;
+      top: 82px;
+      width: 772px;
+      height: 414px;
+    }
+
+    .settings-body { position: absolute; inset: 50px 0 0; display: grid; grid-template-columns: 188px 1fr; }
+    .settings-sidebar { padding: 20px 14px; border-right: 1px solid rgba(82, 92, 108, 0.12); background: rgba(232, 237, 244, 0.66); }
+    .settings-sidebar .sidebar-row { margin-bottom: 2px; }
+    .settings-sidebar .selected { background: #3979f6; color: white; }
+    .settings-sidebar .selected .sidebar-icon { border-color: white; }
+
+    .permission-pane { padding: 30px 34px; }
+    .pane-heading { font-size: 21px; font-weight: 700; color: #2d343d; }
+    .pane-subtitle { margin-top: 7px; color: #737c88; font-size: 13px; }
+
+    .permission-list {
+      margin-top: 25px;
+      overflow: hidden;
+      border: 1px solid rgba(82, 92, 108, 0.16);
+      border-radius: 13px;
+      background: rgba(255, 255, 255, 0.65);
+    }
+
+    .permission-row { height: 82px; display: grid; grid-template-columns: 42px 1fr auto; align-items: center; gap: 14px; padding: 0 18px; }
+    .permission-row + .permission-row { border-top: 1px solid rgba(82, 92, 108, 0.13); }
+    .permission-row img { width: 38px; height: 38px; border-radius: 9px; box-shadow: 0 4px 9px rgba(29, 36, 45, 0.2); }
+    .permission-name { font-size: 14px; font-weight: 650; }
+    .permission-detail { margin-top: 4px; color: #7a838e; font-size: 11px; }
+
+    .toggle { position: relative; width: 42px; height: 24px; border-radius: 13px; background: #b7bec8; transition: background 120ms ease; }
+    .toggle::after { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; content: ""; border-radius: 50%; background: white; box-shadow: 0 2px 5px rgba(30, 36, 44, 0.28); transition: transform 120ms ease; }
+    .toggle.on { background: #2b9e58; }
+    .toggle.on::after { transform: translateX(18px); }
+
+    .permission-status {
+      position: absolute;
+      right: 34px;
+      bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #2c8a51;
+      font-size: 13px;
+      font-weight: 650;
+      opacity: 0;
+      transform: translateY(5px);
+    }
+
+    .status-check { width: 18px; height: 18px; display: grid; place-items: center; border-radius: 50%; background: #2ca660; color: white; font-size: 12px; }
+
+    .usage-window {
+      left: 68px;
+      top: 84px;
+      width: 666px;
+      height: 410px;
+    }
+
+    .article-viewport { position: absolute; inset: 50px 0 0; overflow: hidden; background: rgba(253, 254, 255, 0.72); }
+    .article { position: absolute; inset: 0; padding: 35px 54px 70px; will-change: transform; }
+    .article-kicker { width: 86px; height: 8px; margin-bottom: 16px; border-radius: 4px; background: #3979f6; }
+    .article-title { width: 68%; height: 24px; margin-bottom: 15px; border-radius: 6px; background: #27313d; }
+    .article-lede { width: 88%; height: 12px; margin-bottom: 31px; border-radius: 5px; background: #aab3be; }
+    .line { height: 9px; margin-bottom: 11px; border-radius: 4px; background: #d0d6de; }
+    .line:nth-child(3n) { width: 94%; }
+    .line:nth-child(4n) { width: 78%; }
+    .section-title { width: 46%; height: 17px; margin: 33px 0 16px; border-radius: 5px; background: #596675; }
+
+    .scrollbar { position: absolute; top: 63px; right: 8px; bottom: 12px; width: 5px; border-radius: 3px; background: rgba(73, 84, 99, 0.09); }
+    .scroll-thumb { position: absolute; top: 8px; right: 0; width: 5px; height: 74px; border-radius: 3px; background: rgba(73, 84, 99, 0.38); will-change: transform; }
+
+    .visualizer {
+      position: absolute;
+      z-index: 9;
+      left: 374px;
+      top: 284px;
+      width: 48px;
+      height: 48px;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: 50%;
+      background: rgba(234, 245, 252, 0.42);
+      box-shadow:
+        0 7px 18px rgba(45, 64, 83, 0.19),
+        inset 0 1px 0 rgba(255, 255, 255, 0.95),
+        inset 0 -7px 13px rgba(109, 165, 196, 0.12);
+      backdrop-filter: blur(12px) saturate(135%);
+      opacity: 0;
+      transform-origin: center;
+      will-change: transform, opacity;
+    }
+
+    .visualizer::before { position: absolute; inset: 5px 7px auto; height: 12px; content: ""; border-radius: 50%; border-top: 1px solid rgba(255, 255, 255, 0.92); opacity: 0.9; }
+    .direction-dot { position: absolute; left: 20px; top: 20px; width: 7px; height: 7px; border-radius: 50%; background: #fff; box-shadow: 0 1px 5px rgba(43, 61, 79, 0.34); will-change: transform; }
+
+    .mouse {
+      position: absolute;
+      right: 72px;
+      top: 169px;
+      width: 132px;
+      height: 205px;
+      border: 1px solid rgba(76, 85, 96, 0.28);
+      border-radius: 68px 68px 57px 57px;
+      background: rgba(249, 251, 253, 0.92);
+      box-shadow: 0 22px 44px rgba(44, 54, 66, 0.21), inset 0 1px 0 white;
+    }
+
+    .mouse-split { position: absolute; top: 71px; left: 0; right: 0; height: 1px; background: rgba(77, 86, 96, 0.22); }
+    .wheel { position: absolute; top: 27px; left: 56px; width: 20px; height: 43px; border-radius: 11px; background: #aeb7c1; box-shadow: inset 0 2px 3px rgba(48, 56, 66, 0.24); }
+    .wheel::before { position: absolute; left: 6px; top: 8px; width: 8px; height: 18px; content: ""; border-radius: 5px; background: #dce2e8; }
+    .wheel.pressed { background: #3979f6; transform: translateY(2px); box-shadow: inset 0 3px 4px rgba(22, 61, 135, 0.34), 0 0 0 5px rgba(57, 121, 246, 0.11); }
+    .wheel.pressed::before { background: #e8f1ff; }
+
+    .motion-trails { position: absolute; right: 219px; top: 210px; width: 46px; height: 117px; opacity: 0; }
+    .motion-trails i { position: absolute; right: 0; width: 34px; height: 2px; border-radius: 2px; background: #3979f6; }
+    .motion-trails i:nth-child(1) { top: 8px; width: 24px; }
+    .motion-trails i:nth-child(2) { top: 35px; width: 39px; }
+    .motion-trails i:nth-child(3) { top: 62px; width: 31px; }
+    .motion-trails i:nth-child(4) { top: 89px; width: 43px; }
+
+    .gesture-label {
+      position: absolute;
+      right: 79px;
+      top: 396px;
+      width: 118px;
+      text-align: center;
+      color: #69737f;
+      font-size: 12px;
+      font-weight: 650;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+  <main class="stage">
+    <div class="brand"><img src="../mac-drag-scroll-icon.png" alt=""><span>Mac Drag Scroll</span></div>
+    <div class="step-dots"><i></i><i></i><i></i></div>
+
+    <section class="demo" data-demo="install">
+      <div class="window finder">
+        <div class="titlebar">
+          <div class="traffic"><i></i><i></i><i></i></div>
+          <div class="title">Mac Drag Scroll</div>
+        </div>
+        <div class="finder-body">
+          <aside class="finder-sidebar">
+            <div class="sidebar-row"><i class="sidebar-icon"></i>Favorites</div>
+            <div class="sidebar-row selected"><i class="sidebar-icon"></i>Mac Drag Scroll</div>
+            <div class="sidebar-row"><i class="sidebar-icon"></i>Downloads</div>
+          </aside>
+          <div class="install-area">
+            <div class="draggable-app"><img src="../mac-drag-scroll-icon.png" alt=""><span>Mac Drag Scroll</span></div>
+            <div class="install-target"><i class="folder"></i><span>Applications</span><b class="completion">✓</b></div>
+            <i class="cursor-hand"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo" data-demo="permissions">
+      <div class="window settings">
+        <div class="titlebar">
+          <div class="traffic"><i></i><i></i><i></i></div>
+          <div class="title">Privacy &amp; Security</div>
+        </div>
+        <div class="settings-body">
+          <aside class="settings-sidebar">
+            <div class="sidebar-row"><i class="sidebar-icon"></i>General</div>
+            <div class="sidebar-row selected"><i class="sidebar-icon"></i>Privacy &amp; Security</div>
+            <div class="sidebar-row"><i class="sidebar-icon"></i>Notifications</div>
+            <div class="sidebar-row"><i class="sidebar-icon"></i>Login Items</div>
+          </aside>
+          <div class="permission-pane">
+            <div class="pane-heading">Allow Mac Drag Scroll</div>
+            <div class="pane-subtitle">Both permissions are required for global mouse input and scrolling.</div>
+            <div class="permission-list">
+              <div class="permission-row">
+                <img src="../mac-drag-scroll-icon.png" alt="">
+                <div><div class="permission-name">Accessibility</div><div class="permission-detail">Send scroll events to the active window</div></div>
+                <i class="toggle" data-toggle="accessibility"></i>
+              </div>
+              <div class="permission-row">
+                <img src="../mac-drag-scroll-icon.png" alt="">
+                <div><div class="permission-name">Input Monitoring</div><div class="permission-detail">Detect the external mouse middle button</div></div>
+                <i class="toggle" data-toggle="input"></i>
+              </div>
+            </div>
+            <div class="permission-status"><i class="status-check">✓</i>Ready to scroll</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo" data-demo="usage">
+      <div class="window usage-window">
+        <div class="titlebar">
+          <div class="traffic"><i></i><i></i><i></i></div>
+          <div class="title">A long page</div>
+        </div>
+        <div class="article-viewport">
+          <div class="article">
+            <div class="article-kicker"></div><div class="article-title"></div><div class="article-lede"></div>
+            <div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div>
+            <div class="section-title"></div>
+            <div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div>
+            <div class="section-title"></div>
+            <div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div>
+          </div>
+        </div>
+        <div class="scrollbar"><i class="scroll-thumb"></i></div>
+      </div>
+      <div class="visualizer"><i class="direction-dot"></i></div>
+      <div class="motion-trails"><i></i><i></i><i></i><i></i></div>
+      <div class="mouse"><i class="wheel"></i><i class="mouse-split"></i></div>
+      <div class="gesture-label">Hold middle button</div>
+    </section>
+  </main>
+
+  <script>
+    const clamp = value => Math.max(0, Math.min(1, value));
+    const ease = value => 1 - Math.pow(1 - clamp(value), 3);
+    const mix = (from, to, amount) => from + (to - from) * clamp(amount);
+
+    function setSteps(index) {
+      document.querySelectorAll('.step-dots i').forEach((dot, i) => dot.classList.toggle('active', i === index));
+    }
+
+    function renderInstall(progress) {
+      const app = document.querySelector('.draggable-app');
+      const cursor = document.querySelector('.cursor-hand');
+      const target = document.querySelector('.install-target');
+      const completion = document.querySelector('.completion');
+      const appLabel = app.querySelector('span');
+      const travel = ease((progress - 0.18) / 0.52);
+      const settle = ease((progress - 0.7) / 0.12);
+      const drop = ease((progress - 0.68) / 0.16);
+      const x = mix(0, 322, travel);
+      const y = -8 * Math.sin(travel * Math.PI);
+      const scale = (progress > 0.18 && progress < 0.68 ? 1.035 : 1) * mix(1, 0.68, drop);
+
+      app.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+      app.style.opacity = `${1 - drop}`;
+      appLabel.style.opacity = `${1 - ease((progress - 0.13) / 0.12)}`;
+      cursor.style.left = `${177 + x}px`;
+      cursor.style.top = `${174 + y}px`;
+      cursor.style.opacity = progress > 0.1 && progress < 0.78 ? '1' : '0';
+      target.style.background = `rgba(57, 121, 246, ${0.08 * settle})`;
+      target.style.borderColor = `rgba(57, 121, 246, ${mix(0.25, 0.72, settle)})`;
+      target.style.transform = `scale(${1 + 0.025 * Math.sin(settle * Math.PI)})`;
+      completion.style.opacity = `${settle}`;
+      completion.style.transform = `scale(${mix(0.6, 1, settle)})`;
+      setSteps(progress < 0.18 ? 0 : progress < 0.72 ? 1 : 2);
+    }
+
+    function renderPermissions(progress) {
+      const firstOn = progress > 0.28;
+      const secondOn = progress > 0.58;
+      document.querySelector('[data-toggle="accessibility"]').classList.toggle('on', firstOn);
+      document.querySelector('[data-toggle="input"]').classList.toggle('on', secondOn);
+      const status = document.querySelector('.permission-status');
+      const reveal = ease((progress - 0.66) / 0.16);
+      status.style.opacity = `${reveal}`;
+      status.style.transform = `translateY(${mix(5, 0, reveal)}px)`;
+      setSteps(progress < 0.28 ? 0 : progress < 0.58 ? 1 : 2);
+    }
+
+    function renderUsage(progress) {
+      const wheel = document.querySelector('.wheel');
+      const article = document.querySelector('.article');
+      const thumb = document.querySelector('.scroll-thumb');
+      const visualizer = document.querySelector('.visualizer');
+      const dot = document.querySelector('.direction-dot');
+      const trails = document.querySelector('.motion-trails');
+      const label = document.querySelector('.gesture-label');
+      const holding = progress >= 0.12 && progress < 0.9;
+      wheel.classList.toggle('pressed', holding);
+
+      let offset = 0;
+      let dotY = 0;
+      let squashX = 1;
+      let squashY = 1;
+      let phase = 'Hold middle button';
+
+      if (progress >= 0.2 && progress < 0.62) {
+        const amount = ease((progress - 0.2) / 0.42);
+        offset = mix(0, -178, amount);
+        dotY = mix(0, 13, amount);
+        phase = 'Drag to scroll';
+      } else if (progress >= 0.62 && progress < 0.78) {
+        const amount = ease((progress - 0.62) / 0.16);
+        offset = mix(-178, -112, amount);
+        dotY = mix(13, -10, amount);
+        squashX = 1 + 0.12 * Math.sin(amount * Math.PI);
+        squashY = 1 - 0.18 * Math.sin(amount * Math.PI);
+        phase = 'Flick to reverse';
+      } else if (progress >= 0.78) {
+        const amount = ease((progress - 0.78) / 0.12);
+        offset = mix(-112, -132, amount);
+        dotY = mix(-10, 4, amount);
+        phase = progress >= 0.9 ? 'Release to stop' : 'Drag to scroll';
+      }
+
+      article.style.transform = `translateY(${offset}px)`;
+      thumb.style.transform = `translateY(${Math.max(0, -offset * 0.58)}px)`;
+      dot.style.transform = `translateY(${dotY}px)`;
+      const fadeIn = ease((progress - 0.12) / 0.1);
+      const fadeOut = 1 - ease((progress - 0.9) / 0.08);
+      visualizer.style.opacity = `${Math.min(fadeIn, fadeOut)}`;
+      visualizer.style.transform = `scale(${squashX}, ${squashY})`;
+      trails.style.opacity = holding && progress > 0.24 ? '0.62' : '0';
+      label.textContent = phase;
+      setSteps(progress < 0.2 ? 0 : progress < 0.9 ? 1 : 2);
+    }
+
+    window.renderFrame = (demo, progress) => {
+      document.querySelectorAll('.demo').forEach(node => node.classList.toggle('active', node.dataset.demo === demo));
+      if (demo === 'install') renderInstall(progress);
+      if (demo === 'permissions') renderPermissions(progress);
+      if (demo === 'usage') renderUsage(progress);
+    };
+
+    window.renderFrame('usage', 0.46);
+  </script>
+</body>
+</html>

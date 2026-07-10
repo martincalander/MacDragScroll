@@ -8,6 +8,7 @@ Mac Drag Scroll is a native macOS menu bar utility. It converts a configured ext
 - `MouseMonitor` owns the global event tap. It validates the trigger, input source, active application, target window, and permission state before starting a drag session.
 - `ScrollPhysics` converts cursor displacement from the drag origin into bounded horizontal and vertical scroll deltas.
 - `ScrollOverlayWindow` renders the optional Liquid Glass visualizer without accepting input or becoming the active app.
+- `SettingsWindow` owns the settings shell and tab navigation. Reusable rows, ignored-app picking, and the visualizer preview live in focused companion files.
 - `SettingsManager` exposes user preferences. `PersistentPreferences` keeps the production domain stable and mirrors recoverable values to Application Support.
 - `UpdateManager` integrates Sparkle with the GitHub-hosted appcast and release history.
 - `CrashHandler` stores local exception reports and imports matching macOS DiagnosticReports for user-controlled sharing.

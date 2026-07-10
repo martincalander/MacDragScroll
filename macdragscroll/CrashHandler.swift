@@ -34,9 +34,12 @@ final class CrashHandler: ObservableObject {
     private let legacyCrashLogPaths: [URL]
     private let systemDiagnosticReportsDirectory: URL
     private static let supportedCrashReportExtensions: Set<String> = ["log", "crash", "ips"]
+    private static let lastCrashReportClearDateKey = "lastCrashReportClearDate"
     
     private init() {
-        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+            ?? FileManager.default.homeDirectoryForCurrentUser
+                .appendingPathComponent("Library/Application Support", isDirectory: true)
         let appFolder = appSupport.appendingPathComponent("Mac Drag Scroll", isDirectory: true)
         let legacyAppFolder = appSupport.appendingPathComponent("MacDragScroll", isDirectory: true)
         let libraryFolder = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first
@@ -156,6 +159,8 @@ final class CrashHandler: ObservableObject {
         Self.crashReports(in: crashReportDirectory).forEach { report in
             try? FileManager.default.removeItem(at: report.url)
         }
+        PersistentPreferences.userDefaults.set(Date(), forKey: Self.lastCrashReportClearDateKey)
+        PersistentPreferences.userDefaults.synchronize()
         refreshCrashReports()
     }
 
@@ -283,7 +288,10 @@ final class CrashHandler: ObservableObject {
         ensureCrashReportDirectory()
         Self.importSystemDiagnosticReports(
             from: systemDiagnosticReportsDirectory,
-            to: crashReportDirectory
+            to: crashReportDirectory,
+            newerThan: PersistentPreferences.userDefaults.object(
+                forKey: Self.lastCrashReportClearDateKey
+            ) as? Date
         )
     }
 
@@ -291,6 +299,7 @@ final class CrashHandler: ObservableObject {
     static func importSystemDiagnosticReports(
         from sourceDirectory: URL,
         to destinationDirectory: URL,
+        newerThan cutoffDate: Date? = nil,
         fileManager: FileManager = .default
     ) -> Int {
         guard let urls = try? fileManager.contentsOfDirectory(
@@ -304,7 +313,9 @@ final class CrashHandler: ObservableObject {
         try? fileManager.createDirectory(at: destinationDirectory, withIntermediateDirectories: true)
 
         var importedCount = 0
-        for url in urls where isMacDragScrollDiagnosticReport(url) && isRegularFile(url: url, fileManager: fileManager) {
+        for url in urls where isMacDragScrollDiagnosticReport(url)
+            && isRegularFile(url: url, fileManager: fileManager)
+            && cutoffDate.map({ fileDate(url: url, fileManager: fileManager) > $0 }) != false {
             let destinationURL = destinationDirectory.appendingPathComponent(url.lastPathComponent)
             guard !fileManager.fileExists(atPath: destinationURL.path) else { continue }
 
@@ -364,70 +375,5 @@ final class CrashHandler: ObservableObject {
         return attributes?[.creationDate] as? Date
             ?? attributes?[.modificationDate] as? Date
             ?? .distantPast
-    }
-    
-    // MARK: - Safe Execution
-    
-    /// Execute a closure with error handling. If it fails, show an alert to the user.
-    @discardableResult
-    static func safeExecute<T>(_ operation: String, _ block: () throws -> T) -> T? {
-        do {
-            return try block()
-        } catch {
-            DispatchQueue.main.async {
-                shared.showErrorAlert(operation: operation, error: error)
-            }
-            return nil
-        }
-    }
-    
-    /// Execute an async closure with error handling
-    static func safeExecuteAsync(_ operation: String, _ block: @escaping () async throws -> Void) {
-        Task {
-            do {
-                try await block()
-            } catch {
-                await MainActor.run {
-                    shared.showErrorAlert(operation: operation, error: error)
-                }
-            }
-        }
-    }
-    
-    private func showErrorAlert(operation: String, error: Error) {
-        let alert = NSAlert()
-        alert.messageText = Self.localized("error_occurred_title", value: "An Error Occurred", comment: "Error occurred alert title")
-        alert.informativeText = String(format: Self.localized("error_occurred_message", value: "An error occurred while %@:\n\n%@", comment: "Error occurred message"), operation, error.localizedDescription)
-        alert.alertStyle = .warning
-        alert.addButton(withTitle: Self.localized("ok", value: "OK", comment: "OK button"))
-        alert.runModal()
-    }
-    
-    // MARK: - Fatal Error Handler
-    
-    /// Show a fatal error alert and optionally quit the app
-    static func fatalError(_ message: String, shouldQuit: Bool = false) {
-        DispatchQueue.main.async {
-            let alert = NSAlert()
-            alert.messageText = localized("fatal_error_title", value: "Fatal Error", comment: "Fatal error alert title")
-            alert.informativeText = message
-            alert.alertStyle = .critical
-            
-            if shouldQuit {
-                alert.addButton(withTitle: localized("quit", value: "Quit", comment: "Quit button"))
-            } else {
-                alert.addButton(withTitle: localized("ok", value: "OK", comment: "OK button"))
-            }
-            
-            alert.runModal()
-            
-            if shouldQuit {
-                NSApplication.shared.terminate(nil)
-            }
-        }
-    }
-
-    private static func localized(_ key: String, value: String, comment: String) -> String {
-        AppLocalization.shared.localizedString(key, value: value, comment: comment)
     }
 }

@@ -81,9 +81,10 @@ fi
 
 if [[ -f packaging/homebrew/Casks/mac-drag-scroll.rb ]]; then
   cask_version="$(ruby -ne 'puts $1 if /^\s*version "([^"]+)"/' packaging/homebrew/Casks/mac-drag-scroll.rb)"
-  if [[ "$cask_version" != "$version" ]]; then
-    echo "Homebrew cask version is $cask_version, expected $version" >&2
-    exit 65
+  if [[ "$cask_version" == "$version" ]]; then
+    echo "Homebrew cask already targets v${version}."
+  else
+    echo "Homebrew cask remains at v${cask_version}; update its version and checksum after v${version} is published."
   fi
   scripts/validate-homebrew-cask.sh
 fi

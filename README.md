@@ -168,6 +168,10 @@ Contributions are welcome. Start with [Contributing](CONTRIBUTING.md), the [Code
 - An external mouse with a middle button or clickable scroll wheel
 - Accessibility and Input Monitoring permissions
 
+## Credits
+
+- Japanese translation review: [uglykatsuki](https://github.com/uglykatsuki)
+
 ## License
 
 Mac Drag Scroll is available under the [MIT License](LICENSE).

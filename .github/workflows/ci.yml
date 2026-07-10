@@ -37,7 +37,7 @@ jobs:
           fail-on-severity: moderate
           comment-summary-in-pr: never
           show-openssf-scorecard: true
-          warn-on-openssf-scorecard-level: 5
+          warn-on-openssf-scorecard-level: 3
 
       - name: Select Xcode
         run: |

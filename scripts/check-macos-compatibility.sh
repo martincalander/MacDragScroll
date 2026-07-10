@@ -41,7 +41,7 @@ if [[ "$declared_minimums" != "$EXPECTED_MINIMUM" ]]; then
   exit 65
 fi
 
-if otool -L "$binary" | grep -E '/(Applications/Xcode|Users|opt/homebrew|usr/local)/'; then
+if otool -L "$binary" | grep -E '^[[:space:]]+/(Applications/Xcode|Users|opt/homebrew|usr/local)/'; then
   echo "Release executable links a machine-local library path." >&2
   exit 65
 fi

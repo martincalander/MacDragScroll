@@ -7,6 +7,7 @@
 <p align="center">
   <strong>macOSに馴染む、中ボタンドラッグスクロール。</strong><br>
   ホイールを押したままマウスを動かすだけで、長いページ、エディタ、タイムライン、キャンバスを滑らかに移動できます。
+  翻訳：「ugly katsuki」。
 </p>
 
 <p align="center">

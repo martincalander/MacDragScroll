@@ -11,7 +11,9 @@ Mac Drag Scroll follows a reliability-first roadmap. Work should make external-m
 - Publish every release with Sparkle signatures, checksums, and GitHub build provenance.
 - Keep installation, localization, support, privacy, architecture, and release documentation aligned with shipped behavior.
 
-## Near Term
+## Next 12 Months
+
+From July 2026 through July 2027, the project intends to:
 
 - Add regression tests whenever a real input, persistence, permission, or update edge case is found.
 - Continue accessibility and keyboard-navigation audits for Settings and onboarding.

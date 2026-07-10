@@ -6,6 +6,16 @@ Security fixes are handled for the latest public release of Mac Drag Scroll.
 
 Current public release archives are Sparkle-signed and include GitHub build provenance. The app bundle is not Apple Developer ID signed or notarized, so the README documents the macOS first-launch bypass.
 
+## Security Expectations
+
+- Mac Drag Scroll runs locally and does not send telemetry, input history, document contents, or browsing activity to the project.
+- Accessibility and Input Monitoring are required to observe the configured mouse trigger and emit scroll events. The app rejects trackpad/tablet input by default and marks synthetic events to prevent feedback loops.
+- Ignored apps, trigger safety checks, permission loss, duplicate instances, and target-window changes fail closed by cancelling drag scrolling.
+- Sparkle verifies update archives with the public EdDSA key bundled in the app. GitHub Releases also publish checksums and build provenance for independent verification.
+- The freely distributed app is not Apple Developer ID signed or notarized. Users should treat the documented Finder Open bypass as a distribution tradeoff, not as equivalent to Apple notarization.
+
+Mac Drag Scroll is an input convenience utility, not a security boundary. macOS can revoke its permissions at any time, and users can disable or quit the app from the menu bar.
+
 ## Automated Scans
 
 The repository runs these free security checks:

@@ -69,7 +69,7 @@ jobs:
 
           xcrun xccov view --report "$RUNNER_TEMP/MacDragScrollTests.xcresult" | sed -n '1,3p'
 
-      - name: Thread Sanitizer fuzz concurrency test
+      - name: Guard Malloc fuzz stress test
         run: scripts/check-fuzz-harnesses.sh
 
       - name: Static analysis

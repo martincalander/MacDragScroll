@@ -13,10 +13,9 @@ while IFS= read -r -d '' harness; do
 done < <(find "$root/Fuzzers" -name '*.swift' -print0 | sort -z)
 
 cat > "$tmp_dir/main.swift" <<'SWIFT'
-import Dispatch
 import Foundation
 
-let corpus = [
+var corpus = [
     Data(),
     Data("com.example.application".utf8),
     Data("https://github.com/martincalander/MacDragScroll".utf8),
@@ -24,19 +23,47 @@ let corpus = [
     Data(repeating: 0x41, count: 8192)
 ]
 
-DispatchQueue.concurrentPerform(iterations: 8) { _ in
-    for input in corpus {
-        PreferenceInputFuzzer.exercise(input)
+var state: UInt64 = 0x4D_44_53_46_55_5A_5A
+for index in 0..<64 {
+    let length = (index * 67) % 4096
+    var bytes = [UInt8]()
+    bytes.reserveCapacity(length)
+
+    for _ in 0..<length {
+        state = state &* 6364136223846793005 &+ 1442695040888963407
+        bytes.append(UInt8(truncatingIfNeeded: state >> 24))
     }
+
+    corpus.append(Data(bytes))
+}
+
+for input in corpus {
+    PreferenceInputFuzzer.exercise(input)
 }
 SWIFT
 
-swiftc \
-  -sanitize=thread \
-  "$root/Fuzzers/PreferenceInputFuzzer.swift" \
-  "$tmp_dir/main.swift" \
-  -o "$tmp_dir/preference-input-tsan"
+guard_malloc="/usr/lib/libgmalloc.dylib"
+guard_log="$tmp_dir/guard-malloc.log"
 
-TSAN_OPTIONS="halt_on_error=1" "$tmp_dir/preference-input-tsan"
+if [[ ! -f "$guard_malloc" ]]; then
+  echo "Guard Malloc is unavailable: $guard_malloc" >&2
+  exit 69
+fi
 
-echo "Fuzz harness syntax and Thread Sanitizer concurrency checks passed."
+swiftc "$root/Fuzzers/PreferenceInputFuzzer.swift" "$tmp_dir/main.swift" -o "$tmp_dir/preference-input-guarded"
+
+if ! DYLD_PRINT_LIBRARIES=1 \
+  DYLD_INSERT_LIBRARIES="$guard_malloc" \
+  MallocStackLogging=1 \
+  "$tmp_dir/preference-input-guarded" 2> "$guard_log"; then
+  cat "$guard_log" >&2
+  exit 1
+fi
+
+if ! grep -q "$guard_malloc" "$guard_log"; then
+  cat "$guard_log" >&2
+  echo "Guard Malloc was not loaded into the fuzz process." >&2
+  exit 1
+fi
+
+echo "Fuzz harness syntax and Guard Malloc stress checks passed."

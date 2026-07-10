@@ -40,4 +40,4 @@ Mac Drag Scroll is a native macOS menu bar utility. It converts a configured ext
 
 ## Verification
 
-The test target covers input classification, trigger safety, scroll calculations, settings persistence, permissions, update state, release metadata, and crash-report handling. GitHub Actions enforces strict compiler warnings, dependency review, code coverage reporting, concurrent preference fuzz-corpus execution under Thread Sanitizer, Xcode static analysis, universal macOS 14+ release builds, release-readiness checks, CodeQL, Gitleaks, fuzz-harness compilation, and OpenSSF Scorecard analysis.
+The test target covers input classification, trigger safety, scroll calculations, settings persistence, permissions, update state, release metadata, and crash-report handling. GitHub Actions enforces strict compiler warnings, dependency review, code coverage reporting, deterministic preference fuzz-corpus execution under macOS Guard Malloc, Xcode static analysis, universal macOS 14+ release builds, release-readiness checks, CodeQL, Gitleaks, fuzz-harness compilation, and OpenSSF Scorecard analysis.

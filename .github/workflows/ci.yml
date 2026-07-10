@@ -68,7 +68,7 @@ jobs:
 
           xcrun xccov view --report "$RUNNER_TEMP/MacDragScrollTests.xcresult" | sed -n '1,3p'
 
-      - name: Address Sanitizer fuzz smoke test
+      - name: Undefined Behavior Sanitizer fuzz smoke test
         run: scripts/check-fuzz-harnesses.sh
 
       - name: Static analysis

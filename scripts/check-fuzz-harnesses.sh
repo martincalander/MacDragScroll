@@ -29,11 +29,11 @@ for input in corpus {
 SWIFT
 
 swiftc \
-  -sanitize=address \
+  -sanitize=undefined \
   "$root/Fuzzers/PreferenceInputFuzzer.swift" \
   "$tmp_dir/main.swift" \
-  -o "$tmp_dir/preference-input-sanitizer"
+  -o "$tmp_dir/preference-input-ubsan"
 
-ASAN_OPTIONS="abort_on_error=1" "$tmp_dir/preference-input-sanitizer"
+UBSAN_OPTIONS="halt_on_error=1:print_stacktrace=1" "$tmp_dir/preference-input-ubsan"
 
-echo "Fuzz harness syntax and Address Sanitizer smoke checks passed."
+echo "Fuzz harness syntax and Undefined Behavior Sanitizer smoke checks passed."

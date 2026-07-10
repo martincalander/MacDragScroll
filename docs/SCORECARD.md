@@ -12,7 +12,7 @@ Current state:
 - The project earned the Passing badge on July 9, 2026, which Scorecard awards 5/10.
 - The README badge points to `https://www.bestpractices.dev/projects/13546`.
 - The repository includes `.bestpractices.json` so BadgeApp can prefill evidence-backed proposed answers.
-- Strict warnings, Address Sanitizer fuzz execution, dependency review, governance, and two-person review now have repository evidence for the maintainer to assess in the Silver/Gold forms.
+- Strict warnings, Undefined Behavior Sanitizer fuzz execution, dependency review, governance, and two-person review now have repository evidence for the maintainer to assess in the Silver/Gold forms.
 
 To improve the check:
 
@@ -73,4 +73,4 @@ Scorecard evaluates a rolling history of recent changes, so the Code-Review scor
 
 ## Quality And Compatibility
 
-The required Quality Gate performs dependency review, strict warning-free tests, code coverage reporting, Address Sanitizer fuzz-corpus execution, Xcode static analysis, and universal release compilation. The resulting executable must include both `arm64` and `x86_64` slices and declare macOS 14.0 as its minimum in both its bundle metadata and Mach-O load commands.
+The required Quality Gate performs dependency review, strict warning-free tests, code coverage reporting, Undefined Behavior Sanitizer fuzz-corpus execution, Xcode static analysis, and universal release compilation. The resulting executable must include both `arm64` and `x86_64` slices and declare macOS 14.0 as its minimum in both its bundle metadata and Mach-O load commands.

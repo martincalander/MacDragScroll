@@ -6,6 +6,12 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 
 ## [Unreleased]
 
+## [1.0.6] - 2026-07-10
+
+### Fixed
+
+- Prevented drag scrolling from capturing mouse shortcuts when extra Command, Option, Control, or Shift modifiers are held beyond the configured trigger chord.
+
 ## [1.0.5] - 2026-07-10
 
 ### Fixed

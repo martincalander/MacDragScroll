@@ -104,6 +104,14 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
     static let websiteURL = URL(string: "https://martincalander.com")!
     static let versionHistory: [VersionHistoryEntry] = [
         VersionHistoryEntry(
+            version: "1.0.6",
+            build: "106",
+            releaseDate: "2026-07-10",
+            changes: [
+                "Drag scrolling now activates only for the exact configured modifier chord, preserving modified mouse shortcuts."
+            ]
+        ),
+        VersionHistoryEntry(
             version: "1.0.5",
             build: "105",
             releaseDate: "2026-07-10",

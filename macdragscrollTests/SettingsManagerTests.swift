@@ -460,10 +460,10 @@ final class SettingsManagerTests: XCTestCase {
     func testAppBundleVersionMetadataUsesStableReleaseValues() {
         let appBundle = Bundle(for: AppDelegate.self)
 
-        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "1.0.5")
-        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String, "105")
-        XCTAssertEqual(AppDelegate.appVersion, "1.0.5")
-        XCTAssertEqual(AppDelegate.appBuild, "105")
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "1.0.6")
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String, "106")
+        XCTAssertEqual(AppDelegate.appVersion, "1.0.6")
+        XCTAssertEqual(AppDelegate.appBuild, "106")
     }
 
     func testSparkleUpdateConfigurationIsPresent() {
@@ -925,6 +925,7 @@ final class TriggerConfigTests: XCTestCase {
 
         XCTAssertTrue(config.matches(button: 2, modifiers: []))
         XCTAssertFalse(config.matches(button: 1, modifiers: []))
+        XCTAssertFalse(config.matches(button: 2, modifiers: [.shift]))
     }
 
     func testLeftClickRequiresModifierForSafety() {
@@ -962,6 +963,7 @@ final class TriggerConfigTests: XCTestCase {
 
         XCTAssertTrue(config.matches(button: 2, modifiers: [.command, .option]))
         XCTAssertFalse(config.matches(button: 2, modifiers: [.command]))
+        XCTAssertFalse(config.matches(button: 2, modifiers: [.command, .option, .shift]))
         XCTAssertTrue(config.modifiersStillHeld([.command, .option, .shift]))
         XCTAssertFalse(config.modifiersStillHeld([.option]))
     }

@@ -22,6 +22,8 @@ env:
   APP_BUNDLE: "Mac Drag Scroll.app"
   APP_ZIP: "MacDragScroll.zip"
   APP_DMG: "MacDragScroll.dmg"
+  SIGNATURE_FILE: "MacDragScroll.zip.sig"
+  PROVENANCE_FILE: "MacDragScroll.intoto.jsonl"
   BUNDLE_ID: "com.martincalander.macdragscroll"
   SPARKLE_VERSION: "2.9.4"
 
@@ -215,12 +217,21 @@ jobs:
             -o "$ARTIFACTS_DIR/appcast.xml" \
             "$appcast_source"
 
+          signature="$("$sparkle_tools/bin/sign_update" --ed-key-file "$sparkle_key" -p "$ZIP_PATH")"
+          appcast_signature="$(xmllint --xpath 'string(//*[local-name()="enclosure"]/@*[local-name()="edSignature"])' "$ARTIFACTS_DIR/appcast.xml")"
+          if [ -z "$signature" ] || [ "$signature" != "$appcast_signature" ]; then
+            echo "Detached Sparkle signature does not match appcast.xml" >&2
+            exit 65
+          fi
+          printf '%s\n' "$signature" > "$ARTIFACTS_DIR/$SIGNATURE_FILE"
+
           (
             cd "$ARTIFACTS_DIR"
-            shasum -a 256 "$APP_ZIP" "$APP_DMG" appcast.xml > SHA256SUMS.txt
+            shasum -a 256 "$APP_ZIP" "$APP_DMG" appcast.xml "$SIGNATURE_FILE" > SHA256SUMS.txt
           )
 
       - name: Attest release artifacts
+        id: attest_release
         # actions/attest-build-provenance@v4.1.1
         uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373
         with:
@@ -228,7 +239,20 @@ jobs:
             ${{ env.ZIP_PATH }}
             ${{ env.DMG_PATH }}
             ${{ env.ARTIFACTS_DIR }}/appcast.xml
+            ${{ env.ARTIFACTS_DIR }}/${{ env.SIGNATURE_FILE }}
             ${{ env.ARTIFACTS_DIR }}/SHA256SUMS.txt
+
+      - name: Export release provenance
+        env:
+          BUNDLE_PATH: ${{ steps.attest_release.outputs.bundle-path }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "$BUNDLE_PATH" ] || [ ! -s "$BUNDLE_PATH" ]; then
+            echo "GitHub did not produce an attestation bundle" >&2
+            exit 66
+          fi
+          cp "$BUNDLE_PATH" "$ARTIFACTS_DIR/$PROVENANCE_FILE"
 
       - name: Verify release tag
         run: |

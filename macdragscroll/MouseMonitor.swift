@@ -108,6 +108,18 @@ enum CursorHoldBehavior {
     }
 }
 
+enum ScrollDeliveryBehavior {
+    static func location(
+        cursorHoldActive: Bool,
+        origin: CGPoint,
+        current: CGPoint,
+        targetBounds: CGRect
+    ) -> CGPoint? {
+        let location = cursorHoldActive ? origin : current
+        return targetBounds.contains(location) ? location : nil
+    }
+}
+
 enum ScrollPhysics {
     private static let minimumAxisDirection = 0.12
 
@@ -540,8 +552,8 @@ final class MouseMonitor {
         }
 
         if Self.isMouseDragged(type) {
-            handlePointerEvent(event)
-            return nil
+            let shouldSuppressEvent = handlePointerEvent(event)
+            return shouldSuppressEvent ? nil : pass(event)
         }
 
         return pass(event)
@@ -958,16 +970,12 @@ final class MouseMonitor {
 
     private func scrollDeliveryQuartzPoint() -> CGPoint? {
         guard let originWindow else { return nil }
-
-        if originWindow.bounds.contains(currentQuartzPoint) {
-            return currentQuartzPoint
-        }
-
-        if originWindow.bounds.contains(originQuartzPoint) {
-            return originQuartzPoint
-        }
-
-        return CGPoint(x: originWindow.bounds.midX, y: originWindow.bounds.midY)
+        return ScrollDeliveryBehavior.location(
+            cursorHoldActive: isCursorHoldActive,
+            origin: originQuartzPoint,
+            current: currentQuartzPoint,
+            targetBounds: originWindow.bounds
+        )
     }
 
     private func windowAtQuartzPoint(_ quartzPoint: CGPoint) -> WindowSnapshot? {

@@ -906,6 +906,50 @@ final class CursorHoldBehaviorTests: XCTestCase {
     }
 }
 
+final class ScrollDeliveryBehaviorTests: XCTestCase {
+    private let targetBounds = CGRect(x: 100, y: 100, width: 800, height: 600)
+
+    func testNormalDragAlwaysUsesLivePointerLocation() {
+        let origin = CGPoint(x: 500, y: 400)
+        let current = CGPoint(x: 500, y: 101)
+
+        XCTAssertEqual(
+            ScrollDeliveryBehavior.location(
+                cursorHoldActive: false,
+                origin: origin,
+                current: current,
+                targetBounds: targetBounds
+            ),
+            current
+        )
+    }
+
+    func testNormalDragNeverFallsBackToOriginOutsideTargetWindow() {
+        XCTAssertNil(
+            ScrollDeliveryBehavior.location(
+                cursorHoldActive: false,
+                origin: CGPoint(x: 500, y: 400),
+                current: CGPoint(x: 500, y: 99),
+                targetBounds: targetBounds
+            )
+        )
+    }
+
+    func testCursorHoldDeliversAtOrigin() {
+        let origin = CGPoint(x: 500, y: 400)
+
+        XCTAssertEqual(
+            ScrollDeliveryBehavior.location(
+                cursorHoldActive: true,
+                origin: origin,
+                current: CGPoint(x: 500, y: 101),
+                targetBounds: targetBounds
+            ),
+            origin
+        )
+    }
+}
+
 final class EventTapInterruptionTests: XCTestCase {
     func testDisabledEventTapRequiresInteractionCancellation() {
         XCTAssertTrue(EventTapInterruption.requiresInteractionCancellation(.tapDisabledByTimeout))

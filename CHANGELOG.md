@@ -24,6 +24,7 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 
 ### Fixed
 
+- Prevent normal drag scrolling from snapping the pointer back to its starting point at the top or bottom of a window.
 - Prevent repeated Accessibility resets after normal updates by replacing per-build ad-hoc identities with a stable designated requirement.
 - Cancel stale drag sessions when the Mac sleeps, the user session resigns, another app activates, or another window covers the intended scroll target.
 - Recover event monitoring when an existing event tap becomes invalid or disabled.

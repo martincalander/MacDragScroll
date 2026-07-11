@@ -9,7 +9,7 @@ Mac Drag Scroll is a native macOS menu bar utility. It converts a configured ext
 - `ScrollPhysics` converts cursor displacement from the drag origin into bounded horizontal and vertical scroll deltas.
 - `ScrollOverlayWindow` renders the optional visualizer without accepting input or becoming the active app. macOS 26 uses native Liquid Glass; macOS 14 and 15 use a native vibrancy fallback behind the same custom reflections and motion.
 - `SettingsWindow` owns the settings shell and tab navigation. Reusable rows, ignored-app picking, and the visualizer preview live in focused companion files.
-- `SettingsManager` exposes user preferences. `PersistentPreferences` keeps the production domain stable and mirrors recoverable values to Application Support.
+- `SettingsManager` exposes user preferences. `PersistentPreferences` keeps the production domain stable and mirrors recoverable values to Application Support. Debug builds use a separate `.development` bundle identity and preference domain so they cannot collide with production TCC grants.
 - `UpdateManager` integrates Sparkle with the GitHub-hosted appcast and release history.
 - `CrashHandler` stores local exception reports and imports matching macOS DiagnosticReports for user-controlled sharing.
 
@@ -36,7 +36,7 @@ Mac Drag Scroll is a native macOS menu bar utility. It converts a configured ext
 - Preferences: `~/Library/Preferences/com.martincalander.macdragscroll.plist`
 - Recoverable preference backup: `~/Library/Application Support/Mac Drag Scroll/Preferences.plist`
 - Crash reports: `~/Library/Application Support/Mac Drag Scroll/Crash Reports`
-- Updates: Sparkle verifies the signed ZIP from GitHub Releases. Releases also include checksums and GitHub build provenance.
+- Updates: Sparkle verifies the signed ZIP from GitHub Releases. The app bundle uses a pinned project code-signing identity to keep its macOS designated requirement stable, and releases also include checksums and GitHub build provenance.
 
 ## Verification
 

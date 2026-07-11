@@ -8,7 +8,7 @@ Mac Drag Scroll follows a reliability-first roadmap. Work should make external-m
 - Keep preferences stable across updates, reinstalls, development builds, and malformed stored values.
 - Improve permission recovery and crash diagnostics without collecting telemetry.
 - Keep the visualizer responsive, restrained, and faithful to user animation settings.
-- Publish every release with Sparkle signatures, checksums, and GitHub build provenance.
+- Publish every release with the pinned project signing identity, Sparkle signatures, checksums, and GitHub build provenance.
 - Keep installation, localization, support, privacy, architecture, and release documentation aligned with shipped behavior.
 
 ## Next 12 Months

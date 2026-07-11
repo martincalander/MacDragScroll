@@ -11,6 +11,8 @@ fi
 
 version="${version#v}"
 required_secrets=(
+  MACOS_RELEASE_CERTIFICATE_P12_BASE64
+  MACOS_RELEASE_CERTIFICATE_PASSWORD
   SPARKLE_PRIVATE_KEY
 )
 
@@ -104,5 +106,6 @@ if (( ${#missing[@]} > 0 )); then
 fi
 
 echo "GitHub release secrets: ok"
-echo "Apple Developer ID signing is not required for the current unsigned release flow."
+echo "Stable self-issued release identity: ok"
+echo "Apple Developer ID signing is not required for the current release flow."
 echo "Ready to tag v${version}"

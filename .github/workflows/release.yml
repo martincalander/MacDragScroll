@@ -25,12 +25,13 @@ env:
   SIGNATURE_FILE: "MacDragScroll.zip.sig"
   PROVENANCE_FILE: "MacDragScroll.intoto.jsonl"
   BUNDLE_ID: "com.martincalander.macdragscroll"
+  SIGNING_IDENTITY_NAME: "Mac Drag Scroll Release Signing"
   SPARKLE_VERSION: "2.9.4"
   SPARKLE_ARCHIVE_SHA256: "ce89daf967db1e1893ed3ebd67575ed82d3902563e3191ca92aaec9164fbdef9"
 
 jobs:
   release:
-    name: Build and publish unsigned release
+    name: Build and publish release
     runs-on: macos-26
     timeout-minutes: 45
     permissions:
@@ -97,12 +98,14 @@ jobs:
 
       - name: Verify release secrets
         env:
+          MACOS_RELEASE_CERTIFICATE_P12_BASE64: ${{ secrets.MACOS_RELEASE_CERTIFICATE_P12_BASE64 }}
+          MACOS_RELEASE_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_RELEASE_CERTIFICATE_PASSWORD }}
           SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
         run: |
           set -euo pipefail
 
           missing=()
-          for secret in SPARKLE_PRIVATE_KEY; do
+          for secret in MACOS_RELEASE_CERTIFICATE_P12_BASE64 MACOS_RELEASE_CERTIFICATE_PASSWORD SPARKLE_PRIVATE_KEY; do
             if [ -z "${!secret}" ]; then
               missing+=("$secret")
             fi
@@ -126,7 +129,7 @@ jobs:
             GCC_TREAT_WARNINGS_AS_ERRORS=YES \
             SWIFT_TREAT_WARNINGS_AS_ERRORS=YES
 
-      - name: Build unsigned app
+      - name: Build release app
         run: |
           set -euo pipefail
 
@@ -153,9 +156,6 @@ jobs:
 
           scripts/check-macos-compatibility.sh "$app_path"
 
-          codesign --force --deep --sign - "$app_path"
-          codesign --verify --deep --strict --verbose=2 "$app_path"
-
           actual_version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app_path/Contents/Info.plist")"
           actual_build="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$app_path/Contents/Info.plist")"
           if [ "$actual_version" != "$RELEASE_VERSION" ] || [ "$actual_build" != "$BUILD_NUMBER" ]; then
@@ -164,6 +164,77 @@ jobs:
           fi
 
           echo "APP_PATH=$app_path" >> "$GITHUB_ENV"
+
+      - name: Import stable release identity
+        env:
+          SIGNING_CERTIFICATE_P12_BASE64: ${{ secrets.MACOS_RELEASE_CERTIFICATE_P12_BASE64 }}
+          SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_RELEASE_CERTIFICATE_PASSWORD }}
+        run: |
+          set -euo pipefail
+
+          p12_path="$RUNNER_TEMP/mac-drag-scroll-release-signing.p12"
+          certificate_path="$RUNNER_TEMP/mac-drag-scroll-release-signing.pem"
+          keychain_path="$RUNNER_TEMP/mac-drag-scroll-release.keychain-db"
+          keychain_password="$(openssl rand -hex 32)"
+
+          cleanup_failed_import() {
+            status=$?
+            trap - EXIT
+            if [ "$status" -ne 0 ]; then
+              security delete-keychain "$keychain_path" >/dev/null 2>&1 || true
+              rm -f "$p12_path" "$certificate_path"
+            fi
+            exit "$status"
+          }
+          trap cleanup_failed_import EXIT
+
+          printf '%s' "$SIGNING_CERTIFICATE_P12_BASE64" | /usr/bin/base64 -D > "$p12_path"
+          chmod 600 "$p12_path"
+
+          security create-keychain -p "$keychain_password" "$keychain_path"
+          security set-keychain-settings -lut 21600 "$keychain_path"
+          security unlock-keychain -p "$keychain_password" "$keychain_path"
+
+          default_keychain="$(security default-keychain -d user | sed -E 's/^[[:space:]]*\"//; s/\"[[:space:]]*$//')"
+          security list-keychains -d user -s "$keychain_path" "$default_keychain"
+          security import "$p12_path" \
+            -k "$keychain_path" \
+            -P "$SIGNING_CERTIFICATE_PASSWORD" \
+            -T /usr/bin/codesign >/dev/null
+          security find-certificate -c "$SIGNING_IDENTITY_NAME" -p "$keychain_path" > "$certificate_path"
+          security add-trusted-cert -d -r trustRoot -k "$keychain_path" "$certificate_path"
+          security set-key-partition-list \
+            -S apple-tool:,apple: \
+            -s \
+            -k "$keychain_password" \
+            "$keychain_path" >/dev/null
+
+          identity_hash="$(security find-identity -v -p codesigning "$keychain_path" | awk 'NR == 1 { print $2 }')"
+          expected_hash="$(tr -d '[:space:]' < scripts/release-signing-cert.sha1 | tr '[:lower:]' '[:upper:]')"
+          if [ -z "$identity_hash" ] || [ "$identity_hash" != "$expected_hash" ]; then
+            echo "Imported release identity does not match the pinned certificate fingerprint." >&2
+            exit 65
+          fi
+
+          {
+            echo "SIGNING_IDENTITY_HASH=$identity_hash"
+            echo "SIGNING_KEYCHAIN=$keychain_path"
+            echo "SIGNING_P12_PATH=$p12_path"
+            echo "SIGNING_CERTIFICATE_PATH=$certificate_path"
+          } >> "$GITHUB_ENV"
+          trap - EXIT
+
+      - name: Apply and verify stable release signature
+        run: |
+          scripts/sign-release-app.sh "$APP_PATH" "$SIGNING_IDENTITY_HASH" "$SIGNING_KEYCHAIN"
+
+      - name: Remove release signing material from runner
+        if: always()
+        run: |
+          if [ -n "${SIGNING_KEYCHAIN:-}" ]; then
+            security delete-keychain "$SIGNING_KEYCHAIN" >/dev/null 2>&1 || true
+          fi
+          rm -f "${SIGNING_P12_PATH:-}" "${SIGNING_CERTIFICATE_PATH:-}"
 
       - name: Package app
         run: |
@@ -190,6 +261,26 @@ jobs:
             echo "ZIP_PATH=$artifacts/$APP_ZIP"
             echo "DMG_PATH=$artifacts/$APP_DMG"
           } >> "$GITHUB_ENV"
+
+      - name: Verify packaged app identity
+        run: |
+          set -euo pipefail
+
+          zip_root="$RUNNER_TEMP/verify-zip"
+          mount_point="$RUNNER_TEMP/verify-dmg"
+          mkdir -p "$zip_root" "$mount_point"
+
+          ditto -x -k "$ZIP_PATH" "$zip_root"
+          scripts/verify-release-signature.sh "$zip_root/$APP_BUNDLE"
+
+          cleanup_mount() {
+            hdiutil detach "$mount_point" >/dev/null 2>&1 || true
+          }
+          trap cleanup_mount EXIT
+          hdiutil attach -nobrowse -readonly -mountpoint "$mount_point" "$DMG_PATH" >/dev/null
+          scripts/verify-release-signature.sh "$mount_point/$APP_BUNDLE"
+          cleanup_mount
+          trap - EXIT
 
       - name: Download verified Sparkle tools
         run: |

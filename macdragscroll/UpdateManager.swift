@@ -104,6 +104,16 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
     static let websiteURL = URL(string: "https://martincalander.com")!
     static let versionHistory: [VersionHistoryEntry] = [
         VersionHistoryEntry(
+            version: "1.1.1",
+            build: "111",
+            releaseDate: "2026-07-11",
+            changes: [
+                "Updates now preserve Accessibility and Input Monitoring through a pinned project signing identity.",
+                "Development builds now use a separate identity so local testing cannot disturb production permissions.",
+                "Release archives verify the app and nested Sparkle signatures before publication."
+            ]
+        ),
+        VersionHistoryEntry(
             version: "1.1.0",
             build: "110",
             releaseDate: "2026-07-10",

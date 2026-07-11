@@ -16,6 +16,8 @@ If Mac Drag Scroll is not working as expected, check these first:
 - Try a lower speed or larger dead zone if scrolling starts too aggressively.
 - Disable the visualizer if a specific full-screen app does not like overlays.
 
+The first update from `1.1.0` or earlier to `1.1.1` requires one final Accessibility and Input Monitoring grant. Normal updates after that retain the same macOS code identity and should not reset either permission.
+
 ## Settings Or Updates
 
 User settings are stored here:

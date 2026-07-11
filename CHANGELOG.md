@@ -6,6 +6,17 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-07-11
+
+### Changed
+
+- Release builds now use one pinned, long-lived project code-signing identity so macOS can recognize later binaries as the same app.
+- Development builds now use a separate bundle identifier and display name so local testing cannot disturb production permissions or app-instance state.
+
+### Fixed
+
+- Prevent repeated Accessibility and Input Monitoring resets after normal updates by replacing per-build ad-hoc identities with a stable designated requirement.
+
 ## [1.1.0] - 2026-07-10
 
 ### Changed

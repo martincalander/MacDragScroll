@@ -77,9 +77,9 @@ brew install --cask martincalander/tap/mac-drag-scroll
 <details>
 <summary><strong>初回起動で「右クリック → 開く」が必要な理由</strong></summary>
 
-現在のリリースはAppleの公証を受けていません。公証には有料のApple Developerメンバーシップが必要なためです。そのため、新しくダウンロードしたビルドを通常どおりダブルクリックすると、macOSがブロックする場合があります。Finderで**Mac Drag Scroll**を右クリックし、**開く**を選んで確認してください。ダウンロードしたビルドごとに1回だけ必要です。
+現在のリリースには固定されたプロジェクト用コード署名がありますが、有料のApple Developerメンバーシップが必要なDeveloper ID署名と公証は行っていません。そのため、新しくダウンロードしたビルドを通常どおりダブルクリックすると、macOSがブロックする場合があります。Finderで**Mac Drag Scroll**を右クリックし、**開く**を選んで確認してください。手動でダウンロードしたビルドごとに1回だけ必要です。
 
-リリースファイルを独立して検証できるよう、Sparkle署名とGitHubのビルド来歴は引き続き公開しています。詳しくは[セキュリティ](SECURITY.md)と[リリース手順](docs/RELEASING.md)を参照してください。
+固定されたプロジェクトIDにより、アップデート後もアクセシビリティと入力監視の許可が維持されます。リリースファイルを独立して検証できるよう、Sparkle署名とGitHubのビルド来歴も公開しています。詳しくは[セキュリティ](SECURITY.md)と[リリース手順](docs/RELEASING.md)を参照してください。
 </details>
 
 <details>

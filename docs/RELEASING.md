@@ -1,8 +1,8 @@
 # Releasing Mac Drag Scroll
 
-Mac Drag Scroll currently ships as an unsigned macOS app with Sparkle-verified updates.
+Mac Drag Scroll ships with Sparkle-verified updates and a pinned, self-issued app code-signing identity.
 
-This release flow does not require a paid Apple Developer Program account. Because the app is not Developer ID signed or notarized, macOS may block the first launch for most users. The install instructions document the standard Finder bypass: right-click the app, choose **Open**, then confirm.
+This release flow does not require a paid Apple Developer Program account. The stable project identity lets macOS recognize later releases as the same app, preserving Accessibility and Input Monitoring grants. Because the app is not Developer ID signed or notarized, macOS may still block the first launch for most users. The install instructions document the standard Finder bypass: right-click the app, choose **Open**, then confirm.
 
 ## Strategy
 
@@ -10,6 +10,7 @@ This release flow does not require a paid Apple Developer Program account. Becau
 - **Manual installer:** each release publishes `MacDragScroll.dmg` with the app and an Applications shortcut.
 - **CLI install:** `install.sh` downloads the latest `MacDragScroll.zip` release asset, verifies its published checksum, stages the app, and installs it into `/Applications`.
 - **Homebrew:** publish `packaging/homebrew/Casks/mac-drag-scroll.rb` to `martincalander/homebrew-tap`. The cask downloads the same `MacDragScroll.zip` asset and sets `auto_updates true`.
+- **App identity:** every production bundle is signed with the same self-issued certificate and verified against its committed SHA-1 fingerprint. Debug builds use a separate bundle identifier.
 - **Release integrity:** each release publishes a detached Sparkle EdDSA signature and GitHub build-provenance bundle alongside the app archives.
 
 GitHub Releases is the source of truth. The appcast URL embedded in the app is:
@@ -25,7 +26,7 @@ User preferences live in:
 ~/Library/Application Support/Mac Drag Scroll/Preferences.plist
 ```
 
-Installers, Sparkle updates, and the Homebrew cask intentionally leave these files alone so settings survive uninstall, reinstall, and app updates. Debug builds use a separate development domain, and tests use per-process domains.
+Installers, Sparkle updates, and the Homebrew cask intentionally leave these files alone so settings survive uninstall, reinstall, and app updates. Debug builds use the separate `com.martincalander.macdragscroll.development` identity and development preference domain, while tests use per-process domains.
 
 ## Versioning
 
@@ -48,11 +49,11 @@ The app has two version fields:
 
 For `1.0.0`, the build number starts at `100`. The current public line is:
 
-- `1.1.0` -> build `110`
+- `1.1.1` -> build `111`
 
 A practical next sequence is:
 
-- `1.1.1` -> build `111`
+- `1.1.2` -> build `112`
 - `2.0.0` -> build `200`
 
 ## Changelog
@@ -81,13 +82,23 @@ Before tagging a release:
 4. Update `UpdateManager.versionHistory` so the latest row matches the shipped app build.
 5. Run `scripts/extract-release-notes.sh <version>` and confirm it prints useful notes.
 
-## Required GitHub Secret
+## Required GitHub Secrets
 
-The release workflow only needs the Sparkle EdDSA private key:
+The release workflow needs these secrets:
 
 ```text
+MACOS_RELEASE_CERTIFICATE_P12_BASE64
+MACOS_RELEASE_CERTIFICATE_PASSWORD
 SPARKLE_PRIVATE_KEY
 ```
+
+`MACOS_RELEASE_CERTIFICATE_P12_BASE64` is the base64-encoded encrypted PKCS#12 archive for the long-lived self-issued release identity. `MACOS_RELEASE_CERTIFICATE_PASSWORD` decrypts that archive. The corresponding public SHA-1 fingerprint is committed in `scripts/release-signing-cert.sha1`:
+
+```text
+8496d972dae09a9b540399562e9d2385f16bd8bd
+```
+
+The workflow imports the identity into an ephemeral keychain, temporarily authorizes its root in the runner's admin trust store, validates the fingerprint, signs nested Sparkle code in dependency order, and verifies the final designated requirement. It removes the temporary trust record and keychain before packaging continues. Keep at least one encrypted private-key backup outside GitHub. Replacing this identity breaks TCC continuity and forces users to grant protected permissions again.
 
 `SPARKLE_PRIVATE_KEY` is the exported Sparkle EdDSA private key. The public key embedded in the app is:
 
@@ -105,7 +116,7 @@ rm sparkle_private_key.txt
 
 Use Sparkle `2.9.4` for that command, matching the app package dependency and release workflow.
 
-Never commit the private key, exported key files, or workflow logs containing the private key.
+Never commit either private key, PKCS#12 archives, passwords, exported key files, or workflow logs containing private material.
 
 Apple Developer ID signing and notarization can be added later, but they are intentionally not required by the current workflow.
 
@@ -154,7 +165,9 @@ scripts/publish-release.sh <version>
 - verify the tag matches `MARKETING_VERSION`;
 - run tests;
 - build the Release app;
-- apply an ad-hoc local code signature for bundle consistency;
+- import the encrypted project signing identity into an ephemeral keychain;
+- sign the app and nested Sparkle components without `--deep` metadata loss;
+- verify the pinned designated requirement before and after ZIP/DMG packaging;
 - create `MacDragScroll.zip`;
 - create `MacDragScroll.dmg`;
 - generate the Sparkle appcast;
@@ -179,7 +192,7 @@ gh release download --repo martincalander/MacDragScroll --dir "$release_dir"
 gh attestation verify "$release_dir/MacDragScroll.zip" --repo martincalander/MacDragScroll
 ```
 
-The detached `.sig` contains the same Sparkle EdDSA signature embedded in `appcast.xml`. The `.intoto.jsonl` file is the portable GitHub attestation bundle. These supply-chain signatures do not replace Apple Developer ID signing or notarization, so Gatekeeper can still require the documented first-launch bypass.
+The detached `.sig` contains the same Sparkle EdDSA signature embedded in `appcast.xml`. The `.intoto.jsonl` file is the portable GitHub attestation bundle. The app's self-issued signature supplies stable local identity but does not replace Apple Developer ID signing or notarization, so Gatekeeper can still require the documented first-launch bypass.
 
 Install from CLI:
 

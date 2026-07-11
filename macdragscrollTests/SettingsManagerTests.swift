@@ -504,16 +504,22 @@ final class SettingsManagerTests: XCTestCase {
         let appBundle = Bundle(for: AppDelegate.self)
 
         XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleName") as? String, "Mac Drag Scroll")
+        #if DEBUG
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String, "Mac Drag Scroll Dev")
+        XCTAssertEqual(appBundle.bundleIdentifier, "com.martincalander.macdragscroll.development")
+        #else
         XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String, "Mac Drag Scroll")
+        XCTAssertEqual(appBundle.bundleIdentifier, "com.martincalander.macdragscroll")
+        #endif
     }
 
     func testAppBundleVersionMetadataUsesStableReleaseValues() {
         let appBundle = Bundle(for: AppDelegate.self)
 
-        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "1.1.0")
-        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String, "110")
-        XCTAssertEqual(AppDelegate.appVersion, "1.1.0")
-        XCTAssertEqual(AppDelegate.appBuild, "110")
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "1.1.1")
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String, "111")
+        XCTAssertEqual(AppDelegate.appVersion, "1.1.1")
+        XCTAssertEqual(AppDelegate.appBuild, "111")
     }
 
     func testAppBundleSupportsMacOS14AndLater() {
@@ -616,7 +622,7 @@ final class SettingsManagerTests: XCTestCase {
 
         XCTAssertEqual(latest?.version, AppDelegate.appVersion)
         XCTAssertEqual(latest?.build, AppDelegate.appBuild)
-        XCTAssertEqual(latest?.releaseDate, "2026-07-10")
+        XCTAssertEqual(latest?.releaseDate, "2026-07-11")
         XCTAssertEqual(latest?.isCurrent, true)
         XCTAssertFalse(latest?.changes.isEmpty ?? true)
     }

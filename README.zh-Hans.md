@@ -77,9 +77,9 @@ brew install --cask martincalander/tap/mac-drag-scroll
 <details>
 <summary><strong>为什么首次启动需要“右键 → 打开”？</strong></summary>
 
-当前版本尚未经过 Apple 公证，因为公证需要付费的 Apple Developer 会员资格。因此，macOS 可能会阻止直接双击新下载的构建版本。请在 Finder 中右键点击 **Mac Drag Scroll**，选择**打开**并确认。每个下载的构建版本只需执行一次。
+当前版本带有固定的项目代码签名，但没有使用需要付费 Apple Developer 会员资格的 Developer ID 签名或公证。因此，macOS 可能会阻止直接双击新下载的构建版本。请在 Finder 中右键点击 **Mac Drag Scroll**，选择**打开**并确认。每个手动下载的构建版本只需执行一次。
 
-项目仍会发布 Sparkle 签名和 GitHub 构建来源证明，方便独立验证发布文件。详情请参阅[安全说明](SECURITY.md)和[发布流程](docs/RELEASING.md)。
+固定的项目身份可让辅助功能和输入监控权限在更新后继续有效。项目也会发布 Sparkle 签名和 GitHub 构建来源证明，方便独立验证发布文件。详情请参阅[安全说明](SECURITY.md)和[发布流程](docs/RELEASING.md)。
 </details>
 
 <details>

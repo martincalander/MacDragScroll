@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
 bash -n install.sh scripts/*.sh
+scripts/check-build-identities.sh
 jq -e . .bestpractices.json >/dev/null
 
 while IFS= read -r plist; do

@@ -77,9 +77,9 @@ brew install --cask martincalander/tap/mac-drag-scroll
 <details>
 <summary><strong>Why does the first launch require right-click → Open?</strong></summary>
 
-Current releases are not Apple-notarized because notarization requires a paid Apple Developer membership. macOS may therefore block a normal double-click on a newly downloaded build. In Finder, right-click **Mac Drag Scroll**, choose **Open**, and confirm. This is required once for each downloaded build.
+Current releases carry a stable project code signature but are not Apple Developer ID signed or notarized because that requires a paid Apple Developer membership. macOS may therefore block a normal double-click on a newly downloaded build. In Finder, right-click **Mac Drag Scroll**, choose **Open**, and confirm. This is required once for each manually downloaded build.
 
-The project still publishes Sparkle signatures and GitHub build provenance so release files can be verified independently. See [Security](SECURITY.md) and [Releasing](docs/RELEASING.md).
+The pinned project identity keeps Accessibility and Input Monitoring grants stable across updates. Sparkle signatures and GitHub build provenance independently protect and document release files. See [Security](SECURITY.md) and [Releasing](docs/RELEASING.md).
 </details>
 
 <details>
@@ -99,6 +99,8 @@ Mac Drag Scroll needs two macOS permissions: **Input Monitoring** detects the ex
 </p>
 
 Open **System Settings → Privacy & Security**, enable Mac Drag Scroll under both **Accessibility** and **Input Monitoring**, then reopen the app if macOS requests it. The Permissions tab shows live status and provides repair shortcuts.
+
+When upgrading from `1.1.0` or earlier to `1.1.1`, macOS requires one final permission grant because the earlier builds used changing ad-hoc identities. Later updates retain the pinned identity and should not require permissions again.
 
 ## Tune the Feel
 

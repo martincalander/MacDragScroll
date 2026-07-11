@@ -144,6 +144,7 @@
 "menu_ignore_current_app" = "현재 앱 무시";
 "menu_ignore_app" = "%@ 무시";
 "menu_ignored_app" = "%@이 무시되었습니다.";
+"menu_enable_in_app" = "%@에서 활성화";
 "current_app" = "현재 앱";
 "quit" = "그만두다";
 "trigger_middle_click" = "가운데 클릭";

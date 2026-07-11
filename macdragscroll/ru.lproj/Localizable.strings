@@ -144,6 +144,7 @@
 "menu_ignore_current_app" = "Игнорировать текущее приложение";
 "menu_ignore_app" = "Игнорировать %@";
 "menu_ignored_app" = "%@ игнорируется";
+"menu_enable_in_app" = "Включить в %@";
 "current_app" = "Текущее приложение";
 "quit" = "Выйти";
 "trigger_middle_click" = "Средний щелчок";

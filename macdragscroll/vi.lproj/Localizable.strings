@@ -144,6 +144,7 @@
 "menu_ignore_current_app" = "Bỏ qua ứng dụng hiện tại";
 "menu_ignore_app" = "Bỏ qua %@";
 "menu_ignored_app" = "%@ Đã bỏ qua";
+"menu_enable_in_app" = "Bật trong %@";
 "current_app" = "Ứng dụng hiện tại";
 "quit" = "Thoát";
 "trigger_middle_click" = "Nhấp chuột giữa";

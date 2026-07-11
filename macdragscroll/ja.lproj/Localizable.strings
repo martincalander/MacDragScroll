@@ -144,6 +144,7 @@
 "menu_ignore_current_app" = "現在のアプリを無視する";
 "menu_ignore_app" = "%@ を無視する";
 "menu_ignored_app" = "%@ は無視されました";
+"menu_enable_in_app" = "%@ で有効にする";
 "current_app" = "現在のアプリ";
 "quit" = "やめる";
 "trigger_middle_click" = "中クリック";

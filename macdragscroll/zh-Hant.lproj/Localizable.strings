@@ -144,6 +144,7 @@
 "menu_ignore_current_app" = "忽略當前應用程式";
 "menu_ignore_app" = "忽略 %@";
 "menu_ignored_app" = "忽略 %@";
+"menu_enable_in_app" = "在 %@ 中啟用";
 "current_app" = "目前應用程式";
 "quit" = "辭職";
 "trigger_middle_click" = "中鍵點選";

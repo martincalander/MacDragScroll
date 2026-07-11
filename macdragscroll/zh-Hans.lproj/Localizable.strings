@@ -144,6 +144,7 @@
 "menu_ignore_current_app" = "忽略当前应用程序";
 "menu_ignore_app" = "忽略 %@";
 "menu_ignored_app" = "忽略 %@";
+"menu_enable_in_app" = "在 %@ 中启用";
 "current_app" = "当前应用程序";
 "quit" = "辞职";
 "trigger_middle_click" = "中键单击";

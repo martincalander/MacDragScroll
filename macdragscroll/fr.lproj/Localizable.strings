@@ -144,6 +144,7 @@
 "menu_ignore_current_app" = "Ignorer l'application actuelle";
 "menu_ignore_app" = "Ignorer %@";
 "menu_ignored_app" = "%@ ignoré";
+"menu_enable_in_app" = "Activer dans %@";
 "current_app" = "Application actuelle";
 "quit" = "Quitter";
 "trigger_middle_click" = "Clic du milieu";

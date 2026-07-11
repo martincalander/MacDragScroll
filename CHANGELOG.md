@@ -11,6 +11,7 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 ### Added
 
 - Added an optional, off-by-default Keep Cursor in Place mode for middle-button drag scrolling, with virtual visualizer movement and automatic release safeguards.
+- Added a menu-bar command to immediately re-enable drag scrolling in the currently ignored app.
 
 ### Changed
 

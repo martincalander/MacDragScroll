@@ -656,6 +656,20 @@ class SettingsManager: ObservableObject {
         excludedApps.removeAll { $0 == bundleId }
     }
 
+    @discardableResult
+    func toggleExcludedApp(_ bundleId: String) -> Bool {
+        let normalizedBundleId = Self.normalizedBundleIdentifier(bundleId)
+        guard !normalizedBundleId.isEmpty else { return false }
+
+        if excludedApps.contains(normalizedBundleId) {
+            removeExcludedApp(normalizedBundleId)
+            return false
+        }
+
+        addExcludedApp(normalizedBundleId)
+        return true
+    }
+
     static func normalizedBundleIdentifier(_ bundleId: String) -> String {
         bundleId.trimmingCharacters(in: .whitespacesAndNewlines)
     }

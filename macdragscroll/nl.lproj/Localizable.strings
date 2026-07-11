@@ -144,6 +144,7 @@
 "menu_ignore_current_app" = "Negeer de huidige app";
 "menu_ignore_app" = "Negeer %@";
 "menu_ignored_app" = "%@ Genegeerd";
+"menu_enable_in_app" = "Inschakelen in %@";
 "current_app" = "Huidige app";
 "quit" = "Stoppen";
 "trigger_middle_click" = "Middelste klik";

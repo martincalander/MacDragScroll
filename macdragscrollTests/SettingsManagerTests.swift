@@ -139,6 +139,23 @@ final class SettingsManagerTests: XCTestCase {
         
         XCTAssertEqual(settings.excludedApps.count, initialCount, "Removing non-existent app should not change list")
     }
+
+    func testToggleExcludedAppAddsThenRemovesNormalizedIdentifier() {
+        settings.excludedApps = []
+
+        XCTAssertTrue(settings.toggleExcludedApp("  com.example.toggle\n"))
+        XCTAssertEqual(settings.excludedApps, ["com.example.toggle"])
+
+        XCTAssertFalse(settings.toggleExcludedApp("com.example.toggle"))
+        XCTAssertTrue(settings.excludedApps.isEmpty)
+    }
+
+    func testToggleExcludedAppRejectsEmptyIdentifier() {
+        settings.excludedApps = ["com.example.existing"]
+
+        XCTAssertFalse(settings.toggleExcludedApp(" \n "))
+        XCTAssertEqual(settings.excludedApps, ["com.example.existing"])
+    }
     
     // MARK: - Default Settings Tests
 

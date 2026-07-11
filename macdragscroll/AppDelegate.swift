@@ -60,6 +60,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     private weak var activeMenuItem: NSMenuItem?
     private weak var updateMenuItem: NSMenuItem?
     private weak var ignoreCurrentAppMenuItem: NSMenuItem?
+    private var currentMenuTargetBundleIdentifier: String?
     private var permissionMenuItem: NSMenuItem?
     private var duplicateInstanceMenuItem: NSMenuItem?
     private var permissionCheckTimer: Timer?
@@ -358,7 +359,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
 
         let ignoreItem = NSMenuItem(
             title: localized("menu_ignore_current_app", value: "Ignore Current App", comment: "Ignore current app menu item"),
-            action: #selector(ignoreCurrentApp(_:)),
+            action: #selector(toggleCurrentAppIgnoredState(_:)),
             keyEquivalent: ""
         )
         ignoreItem.target = self
@@ -474,13 +475,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         UpdateManager.shared.checkForUpdates()
     }
 
-    @objc private func ignoreCurrentApp(_ sender: Any?) {
-        guard let bundleId = SettingsManager.shared.getFrontmostAppBundleId(),
-              !SettingsManager.shared.isAppExcluded(bundleIdentifier: bundleId) else {
-            return
-        }
+    @objc private func toggleCurrentAppIgnoredState(_ sender: Any?) {
+        guard let bundleId = currentMenuTargetBundleIdentifier else { return }
 
-        SettingsManager.shared.addExcludedApp(bundleId)
+        SettingsManager.shared.toggleExcludedApp(bundleId)
         refreshIgnoreCurrentAppMenuItem()
     }
 
@@ -821,19 +819,20 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     private func refreshIgnoreCurrentAppMenuItem() {
         guard let item = ignoreCurrentAppMenuItem else { return }
         guard let bundleId = SettingsManager.shared.getFrontmostAppBundleId() else {
+            currentMenuTargetBundleIdentifier = nil
             item.title = localized("menu_ignore_current_app", value: "Ignore Current App", comment: "Ignore current app menu item")
             item.isEnabled = false
             return
         }
 
+        currentMenuTargetBundleIdentifier = bundleId
         let appName = displayName(forBundleIdentifier: bundleId) ?? localized("current_app", value: "Current App", comment: "Current app fallback")
         if SettingsManager.shared.isAppExcluded(bundleIdentifier: bundleId) {
-            item.title = String(format: localized("menu_ignored_app", value: "%@ Ignored", comment: "Ignored app menu item"), appName)
-            item.isEnabled = false
+            item.title = String(format: localized("menu_enable_in_app", value: "Enable in %@", comment: "Enable in ignored app menu item"), appName)
         } else {
             item.title = String(format: localized("menu_ignore_app", value: "Ignore %@", comment: "Ignore app menu item"), appName)
-            item.isEnabled = true
         }
+        item.isEnabled = true
     }
 
     private func displayName(forBundleIdentifier bundleId: String) -> String? {

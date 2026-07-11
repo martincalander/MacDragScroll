@@ -144,6 +144,7 @@
 "menu_ignore_current_app" = "Ignorar la aplicación actual";
 "menu_ignore_app" = "Ignorar %@";
 "menu_ignored_app" = "%@ Ignorado";
+"menu_enable_in_app" = "Activar en %@";
 "current_app" = "Aplicación actual";
 "quit" = "dejar de fumar";
 "trigger_middle_click" = "Clic medio";

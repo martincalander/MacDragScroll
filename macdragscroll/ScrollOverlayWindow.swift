@@ -95,6 +95,22 @@ enum ScrollOverlayMotion {
             return CGSize(width: max(1 - squash.amount, 0.72), height: 1 + squash.amount * 0.86)
         }
     }
+
+    static func glassScale(for squash: ScrollOverlaySquash) -> CGSize {
+        guard squash.amount > 0 else {
+            return CGSize(width: 1, height: 1)
+        }
+
+        let stretched = 1 + squash.amount * 0.32
+        let compressed = max(1 - squash.amount * 0.24, 0.90)
+
+        switch squash.axis {
+        case .vertical:
+            return CGSize(width: stretched, height: compressed)
+        case .horizontal:
+            return CGSize(width: compressed, height: stretched)
+        }
+    }
 }
 
 final class ScrollOverlayWindow: NSWindow {
@@ -105,6 +121,7 @@ final class ScrollOverlayWindow: NSWindow {
     private let animationPosition: CGPoint
     private var currentScale: CGFloat = 1.0
     private var currentTilt: CGPoint = .zero
+    private var currentSquash = ScrollOverlaySquash.none
 
     init(origin: CGPoint) {
         let frame = Self.windowFrame(for: origin)
@@ -177,6 +194,10 @@ final class ScrollOverlayWindow: NSWindow {
         glassView.wantsLayer = true
         containerView.addSubview(glassView)
         contentView = containerView
+
+        overlayView.squashDidChange = { [weak self] squash in
+            self?.updateGlassSquash(squash)
+        }
 
         setScale(1.0)
     }
@@ -303,6 +324,11 @@ final class ScrollOverlayWindow: NSWindow {
         applyGlassTransform(animated: SettingsManager.shared.visualizerAnimationsEnabled)
     }
 
+    private func updateGlassSquash(_ squash: ScrollOverlaySquash) {
+        currentSquash = SettingsManager.shared.visualizerAnimationsEnabled ? squash : .none
+        applyGlassTransform(animated: false)
+    }
+
     private func applyGlassTransform(animated: Bool) {
         CATransaction.begin()
         if animated {
@@ -318,9 +344,15 @@ final class ScrollOverlayWindow: NSWindow {
         let intensity = CGFloat(SettingsManager.shared.liquidGlassIntensity)
         let maxTiltAngle = CGFloat.pi / 180 * (4.5 + intensity * 1.4)
         let reactiveScale = 1 + min(abs(currentTilt.x) + abs(currentTilt.y), 1) * (0.010 + intensity * 0.004)
+        let squashScale = ScrollOverlayMotion.glassScale(for: currentSquash)
         var transform = CATransform3DIdentity
         transform.m34 = -1 / 650
-        transform = CATransform3DScale(transform, currentScale * reactiveScale, currentScale * reactiveScale, 1)
+        transform = CATransform3DScale(
+            transform,
+            currentScale * reactiveScale * squashScale.width,
+            currentScale * reactiveScale * squashScale.height,
+            1
+        )
         transform = CATransform3DRotate(transform, currentTilt.y * maxTiltAngle, 1, 0, 0)
         transform = CATransform3DRotate(transform, -currentTilt.x * maxTiltAngle, 0, 1, 0)
         glassView.layer?.transform = transform
@@ -343,7 +375,7 @@ final class ScrollOverlayView: NSView {
     private var currentScreenPoint: CGPoint
     private var lastMotionTime: CFTimeInterval?
     private var lastVelocity: CGPoint = .zero
-    private var dotSquash = ScrollOverlaySquash.none
+    private var motionSquash = ScrollOverlaySquash.none
     private var squashDecayTimer: Timer?
     private var clickRippleStartTime: CFTimeInterval?
     private var clickRippleTimer: Timer?
@@ -357,6 +389,8 @@ final class ScrollOverlayView: NSView {
     private var deadZoneRadius: CGFloat {
         CGFloat(SettingsManager.shared.deadZoneRadius)
     }
+
+    var squashDidChange: ((ScrollOverlaySquash) -> Void)?
 
     init(origin: CGPoint, screenOrigin: CGPoint, frame: CGRect) {
         originPoint = origin
@@ -539,7 +573,7 @@ final class ScrollOverlayView: NSView {
             y: originPoint.y + unitY * travel
         )
         let dotRadius = min(max(bounds.width * 0.074, 4.0), 10.0)
-        let squash = SettingsManager.shared.visualizerAnimationsEnabled ? dotSquash : .none
+        let squash = SettingsManager.shared.visualizerAnimationsEnabled ? motionSquash : .none
         let dotScale = ScrollOverlayMotion.dotScale(for: squash)
         let dotRect = CGRect(
             x: dot.x - dotRadius * dotScale.width,
@@ -661,8 +695,9 @@ final class ScrollOverlayView: NSView {
             liquidGlassIntensity: CGFloat(SettingsManager.shared.liquidGlassIntensity)
         )
 
-        if squash.amount > dotSquash.amount {
-            dotSquash = squash
+        if squash.amount > motionSquash.amount {
+            motionSquash = squash
+            squashDidChange?(squash)
             startSquashDecayTimer()
         }
 
@@ -672,7 +707,10 @@ final class ScrollOverlayView: NSView {
     private func resetMotionEffects() {
         lastMotionTime = nil
         lastVelocity = .zero
-        dotSquash = .none
+        if motionSquash != .none {
+            motionSquash = .none
+            squashDidChange?(.none)
+        }
         squashDecayTimer?.invalidate()
         squashDecayTimer = nil
     }
@@ -693,17 +731,18 @@ final class ScrollOverlayView: NSView {
                     return
                 }
 
-                self.dotSquash = ScrollOverlaySquash(
-                    amount: self.dotSquash.amount * 0.82,
-                    axis: self.dotSquash.axis
+                self.motionSquash = ScrollOverlaySquash(
+                    amount: self.motionSquash.amount * 0.82,
+                    axis: self.motionSquash.axis
                 )
 
-                if self.dotSquash.amount < 0.006 {
-                    self.dotSquash = .none
+                if self.motionSquash.amount < 0.006 {
+                    self.motionSquash = .none
                     self.squashDecayTimer?.invalidate()
                     self.squashDecayTimer = nil
                 }
 
+                self.squashDidChange?(self.motionSquash)
                 self.needsDisplay = true
             }
         }

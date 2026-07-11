@@ -675,6 +675,12 @@ final class ScrollOverlayMotionTests: XCTestCase {
         let scale = ScrollOverlayMotion.dotScale(for: squash)
         XCTAssertGreaterThan(scale.width, 1)
         XCTAssertLessThan(scale.height, 1)
+
+        let glassScale = ScrollOverlayMotion.glassScale(for: squash)
+        XCTAssertGreaterThan(glassScale.width, 1)
+        XCTAssertLessThan(glassScale.height, 1)
+        XCTAssertLessThan(glassScale.width, scale.width)
+        XCTAssertGreaterThan(glassScale.height, scale.height)
     }
 
     func testHorizontalFlickSquashesAcrossHorizontalAxis() {
@@ -690,6 +696,12 @@ final class ScrollOverlayMotionTests: XCTestCase {
         let scale = ScrollOverlayMotion.dotScale(for: squash)
         XCTAssertLessThan(scale.width, 1)
         XCTAssertGreaterThan(scale.height, 1)
+
+        let glassScale = ScrollOverlayMotion.glassScale(for: squash)
+        XCTAssertLessThan(glassScale.width, 1)
+        XCTAssertGreaterThan(glassScale.height, 1)
+        XCTAssertGreaterThan(glassScale.width, scale.width)
+        XCTAssertLessThan(glassScale.height, scale.height)
     }
 }
 

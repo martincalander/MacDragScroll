@@ -920,44 +920,66 @@ final class CursorHoldBehaviorTests: XCTestCase {
 
 final class ScrollDeliveryBehaviorTests: XCTestCase {
     private let targetBounds = CGRect(x: 100, y: 100, width: 800, height: 600)
+    private let targetProcessIdentifier: pid_t = 42
 
-    func testNormalDragAlwaysUsesLivePointerLocation() {
+    func testNormalDragInsideTargetUsesLivePointerAndGlobalDelivery() {
         let origin = CGPoint(x: 500, y: 400)
         let current = CGPoint(x: 500, y: 101)
 
         XCTAssertEqual(
-            ScrollDeliveryBehavior.location(
+            ScrollDeliveryBehavior.delivery(
                 cursorHoldActive: false,
                 origin: origin,
                 current: current,
-                targetBounds: targetBounds
+                targetBounds: targetBounds,
+                targetProcessIdentifier: targetProcessIdentifier
             ),
-            current
+            ScrollDelivery(location: current, destination: .global)
         )
     }
 
-    func testNormalDragNeverFallsBackToOriginOutsideTargetWindow() {
-        XCTAssertNil(
-            ScrollDeliveryBehavior.location(
+    func testNormalDragOutsideTargetContinuesInOriginalApplication() {
+        let origin = CGPoint(x: 500, y: 400)
+
+        XCTAssertEqual(
+            ScrollDeliveryBehavior.delivery(
                 cursorHoldActive: false,
-                origin: CGPoint(x: 500, y: 400),
+                origin: origin,
                 current: CGPoint(x: 500, y: 99),
-                targetBounds: targetBounds
+                targetBounds: targetBounds,
+                targetProcessIdentifier: targetProcessIdentifier
+            ),
+            ScrollDelivery(
+                location: origin,
+                destination: .application(processIdentifier: targetProcessIdentifier)
             )
         )
     }
 
-    func testCursorHoldDeliversAtOrigin() {
+    func testCursorHoldDeliversGloballyAtOrigin() {
         let origin = CGPoint(x: 500, y: 400)
 
         XCTAssertEqual(
-            ScrollDeliveryBehavior.location(
+            ScrollDeliveryBehavior.delivery(
                 cursorHoldActive: true,
                 origin: origin,
                 current: CGPoint(x: 500, y: 101),
-                targetBounds: targetBounds
+                targetBounds: targetBounds,
+                targetProcessIdentifier: targetProcessIdentifier
             ),
-            origin
+            ScrollDelivery(location: origin, destination: .global)
+        )
+    }
+
+    func testDeliveryStopsWhenOriginalWindowNoLongerContainsOrigin() {
+        XCTAssertNil(
+            ScrollDeliveryBehavior.delivery(
+                cursorHoldActive: false,
+                origin: CGPoint(x: 50, y: 50),
+                current: CGPoint(x: 500, y: 99),
+                targetBounds: targetBounds,
+                targetProcessIdentifier: targetProcessIdentifier
+            )
         )
     }
 }

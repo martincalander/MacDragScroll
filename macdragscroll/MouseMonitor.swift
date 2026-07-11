@@ -108,15 +108,38 @@ enum CursorHoldBehavior {
     }
 }
 
+enum ScrollDeliveryDestination: Equatable {
+    case global
+    case application(processIdentifier: pid_t)
+}
+
+struct ScrollDelivery: Equatable {
+    let location: CGPoint
+    let destination: ScrollDeliveryDestination
+}
+
 enum ScrollDeliveryBehavior {
-    static func location(
+    static func delivery(
         cursorHoldActive: Bool,
         origin: CGPoint,
         current: CGPoint,
-        targetBounds: CGRect
-    ) -> CGPoint? {
-        let location = cursorHoldActive ? origin : current
-        return targetBounds.contains(location) ? location : nil
+        targetBounds: CGRect,
+        targetProcessIdentifier: pid_t
+    ) -> ScrollDelivery? {
+        guard targetBounds.contains(origin) else { return nil }
+
+        if cursorHoldActive {
+            return ScrollDelivery(location: origin, destination: .global)
+        }
+
+        if targetBounds.contains(current) {
+            return ScrollDelivery(location: current, destination: .global)
+        }
+
+        return ScrollDelivery(
+            location: origin,
+            destination: .application(processIdentifier: targetProcessIdentifier)
+        )
     }
 }
 
@@ -916,16 +939,21 @@ final class MouseMonitor {
 
         guard deltas.horizontal != 0 || deltas.vertical != 0 else { return }
 
-        guard let scrollLocation = scrollDeliveryQuartzPoint(),
+        guard let delivery = scrollDelivery(),
               let scrollEvent = ScrollEventFactory.makeScrollEvent(
                   deltas: deltas,
-                  location: scrollLocation,
+                  location: delivery.location,
                   source: syntheticEventSource
               ) else {
             return
         }
 
-        scrollEvent.post(tap: .cghidEventTap)
+        switch delivery.destination {
+        case .global:
+            scrollEvent.post(tap: .cghidEventTap)
+        case .application(let processIdentifier):
+            scrollEvent.postToPid(processIdentifier)
+        }
     }
 
     private func updateOriginWindowAvailability(force: Bool = false) {
@@ -953,12 +981,12 @@ final class MouseMonitor {
             return
         }
 
-        guard let deliveryPoint = scrollDeliveryQuartzPoint() else {
+        guard let delivery = scrollDelivery() else {
             setOriginWindowAvailable(false)
             return
         }
 
-        let frontmostWindow = snapshots.first { $0.bounds.contains(deliveryPoint) }
+        let frontmostWindow = snapshots.first { $0.bounds.contains(delivery.location) }
         setOriginWindowAvailable(frontmostWindow?.identity == refreshedWindow.identity)
     }
 
@@ -968,13 +996,14 @@ final class MouseMonitor {
         isOriginWindowAvailable = available
     }
 
-    private func scrollDeliveryQuartzPoint() -> CGPoint? {
+    private func scrollDelivery() -> ScrollDelivery? {
         guard let originWindow else { return nil }
-        return ScrollDeliveryBehavior.location(
+        return ScrollDeliveryBehavior.delivery(
             cursorHoldActive: isCursorHoldActive,
             origin: originQuartzPoint,
             current: currentQuartzPoint,
-            targetBounds: originWindow.bounds
+            targetBounds: originWindow.bounds,
+            targetProcessIdentifier: originWindow.identity.ownerPID
         )
     }
 

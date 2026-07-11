@@ -588,8 +588,8 @@ final class MouseMonitor {
         }
 
         if Self.isMouseDragged(type) {
-            let shouldSuppressEvent = handlePointerEvent(event)
-            return shouldSuppressEvent ? nil : pass(event)
+            handlePointerEvent(event)
+            return nil
         }
 
         return pass(event)

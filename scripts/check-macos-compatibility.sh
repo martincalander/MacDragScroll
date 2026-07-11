@@ -29,8 +29,27 @@ if [[ "$minimum_system" != "$EXPECTED_MINIMUM" ]]; then
   exit 65
 fi
 
-if ! lipo "$binary" -verify_arch arm64 x86_64; then
-  echo "Release executable must contain arm64 and x86_64 slices." >&2
+mach_o_count=0
+architecture_failures=()
+while IFS= read -r -d '' candidate; do
+  if ! file -b "$candidate" | grep -q 'Mach-O'; then
+    continue
+  fi
+
+  mach_o_count=$((mach_o_count + 1))
+  if ! lipo "$candidate" -verify_arch arm64 x86_64 >/dev/null 2>&1; then
+    architecture_failures+=("${candidate#"$APP_PATH"/}")
+  fi
+done < <(find "$APP_PATH" -type f -print0)
+
+if [[ "$mach_o_count" -eq 0 ]]; then
+  echo "App bundle contains no Mach-O binaries." >&2
+  exit 65
+fi
+
+if [[ "${#architecture_failures[@]}" -gt 0 ]]; then
+  echo "Every executable component must contain arm64 and x86_64 slices:" >&2
+  printf '  - %s\n' "${architecture_failures[@]}" >&2
   exit 65
 fi
 
@@ -46,4 +65,4 @@ if otool -L "$binary" | grep -E '^[[:space:]]+/(Applications/Xcode|Users|opt/hom
   exit 65
 fi
 
-echo "Compatibility passed: macOS $EXPECTED_MINIMUM+, arm64 and x86_64."
+echo "Compatibility passed: macOS $EXPECTED_MINIMUM+, $mach_o_count universal Mach-O components."

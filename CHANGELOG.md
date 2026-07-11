@@ -15,6 +15,7 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 ### Changed
 
 - Extended fast-reversal squash and stretch feedback from the moving dot to the surrounding glass surface.
+- Expanded release compatibility checks to reject Intel-only or Apple-silicon-only embedded components.
 - Release builds now use one pinned, long-lived project code-signing identity so macOS can recognize later binaries as the same app.
 - Development builds now use a separate bundle identifier and display name so local testing cannot disturb production permissions or app-instance state.
 - Reduced idle mouse-monitor overhead and capped visualizer rendering work to the existing 60 Hz scroll loop.

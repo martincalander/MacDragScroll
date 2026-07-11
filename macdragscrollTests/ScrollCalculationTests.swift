@@ -956,6 +956,32 @@ final class ScrollDeliveryBehaviorTests: XCTestCase {
         )
     }
 
+    func testNormalDragContinuesPastEveryTargetEdge() {
+        let origin = CGPoint(x: 500, y: 400)
+        let outsidePoints = [
+            CGPoint(x: targetBounds.minX - 1, y: origin.y),
+            CGPoint(x: targetBounds.maxX + 1, y: origin.y),
+            CGPoint(x: origin.x, y: targetBounds.minY - 1),
+            CGPoint(x: origin.x, y: targetBounds.maxY + 1)
+        ]
+
+        for current in outsidePoints {
+            XCTAssertEqual(
+                ScrollDeliveryBehavior.delivery(
+                    cursorHoldActive: false,
+                    origin: origin,
+                    current: current,
+                    targetBounds: targetBounds,
+                    targetProcessIdentifier: targetProcessIdentifier
+                ),
+                ScrollDelivery(
+                    location: origin,
+                    destination: .application(processIdentifier: targetProcessIdentifier)
+                )
+            )
+        }
+    }
+
     func testCursorHoldDeliversGloballyAtOrigin() {
         let origin = CGPoint(x: 500, y: 400)
 
@@ -981,6 +1007,56 @@ final class ScrollDeliveryBehaviorTests: XCTestCase {
                 targetProcessIdentifier: targetProcessIdentifier
             )
         )
+    }
+
+    func testDeliveryRejectsInvalidTargetProcess() {
+        XCTAssertNil(
+            ScrollDeliveryBehavior.delivery(
+                cursorHoldActive: false,
+                origin: CGPoint(x: 500, y: 400),
+                current: CGPoint(x: 500, y: 99),
+                targetBounds: targetBounds,
+                targetProcessIdentifier: 0
+            )
+        )
+    }
+
+    func testDeliveryRejectsNonFiniteCoordinates() {
+        XCTAssertNil(
+            ScrollDeliveryBehavior.delivery(
+                cursorHoldActive: false,
+                origin: CGPoint(x: CGFloat.nan, y: 400),
+                current: CGPoint(x: 500, y: 99),
+                targetBounds: targetBounds,
+                targetProcessIdentifier: targetProcessIdentifier
+            )
+        )
+        XCTAssertNil(
+            ScrollDeliveryBehavior.delivery(
+                cursorHoldActive: false,
+                origin: CGPoint(x: 500, y: 400),
+                current: CGPoint(x: 500, y: CGFloat.infinity),
+                targetBounds: targetBounds,
+                targetProcessIdentifier: targetProcessIdentifier
+            )
+        )
+    }
+
+    func testDeliveryRejectsInvalidTargetBounds() {
+        let origin = CGPoint(x: 500, y: 400)
+        let current = CGPoint(x: 500, y: 99)
+
+        for invalidBounds in [CGRect.null, CGRect(x: 100, y: 100, width: 0, height: 600)] {
+            XCTAssertNil(
+                ScrollDeliveryBehavior.delivery(
+                    cursorHoldActive: false,
+                    origin: origin,
+                    current: current,
+                    targetBounds: invalidBounds,
+                    targetProcessIdentifier: targetProcessIdentifier
+                )
+            )
+        }
     }
 }
 

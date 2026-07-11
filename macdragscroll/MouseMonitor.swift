@@ -126,6 +126,19 @@ enum ScrollDeliveryBehavior {
         targetBounds: CGRect,
         targetProcessIdentifier: pid_t
     ) -> ScrollDelivery? {
+        guard targetProcessIdentifier > 0,
+              origin.x.isFinite,
+              origin.y.isFinite,
+              current.x.isFinite,
+              current.y.isFinite,
+              targetBounds.origin.x.isFinite,
+              targetBounds.origin.y.isFinite,
+              targetBounds.width.isFinite,
+              targetBounds.height.isFinite,
+              !targetBounds.isEmpty,
+              !targetBounds.isNull else {
+            return nil
+        }
         guard targetBounds.contains(origin) else { return nil }
 
         if cursorHoldActive {

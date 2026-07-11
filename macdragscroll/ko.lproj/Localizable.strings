@@ -21,6 +21,7 @@
 "reverse_direction" = "역방향";
 "horizontal_scrolling" = "수평 스크롤";
 "invert_horizontal" = "수평 반전";
+"keep_cursor_in_place" = "커서를 제자리에 유지";
 "acceleration_low" = "낮은";
 "acceleration_med" = "메드";
 "acceleration_high" = "높은";
@@ -62,16 +63,13 @@
 "permission_required_message" = "Mac Drag Scroll은 마우스 이벤트를 전 세계적으로 모니터링하려면 접근성 권한이 필요합니다.";
 "permission_lost_title" = "접근성 권한 상실";
 "permission_lost_message" = "Mac Drag Scroll은 더 이상 마우스 이벤트를 모니터링할 수 없습니다. 드래그 스크롤을 계속 사용하려면 접근성 권한을 다시 활성화하세요.";
-"permissions_required_title" = "권한 필요";
-"permissions_required_message" = "Mac Drag Scroll에서 마우스 트리거를 감지하려면 손쉬운 사용 및 입력 모니터링 권한이 필요합니다.";
-"permission_input_monitoring" = "입력 모니터링";
-"permission_input_monitoring_granted_detail" = "Mac Drag Scroll에서 설정된 마우스 트리거를 감지할 수 있습니다.";
-"permission_input_monitoring_missing_detail" = "마우스 트리거를 안정적으로 감지할 수 있도록 입력 모니터링을 허용하세요.";
-"permission_ready_title" = "권한 준비 완료";
+"permissions_required_title" = "손쉬운 사용 필요";
+"permissions_required_message" = "Mac Drag Scroll에서 마우스 트리거를 감지하고 스크롤 이벤트를 보내려면 손쉬운 사용 권한이 필요합니다.";
+"permission_ready_title" = "손쉬운 사용 준비 완료";
 "permission_ready_detail" = "Mac Drag Scroll에서 마우스 트리거를 감지하고 스크롤 이벤트를 보낼 수 있습니다.";
-"permission_setup_title" = "권한 설정 완료";
-"permission_setup_detail" = "이 앱 복사본에 두 권한을 모두 허용하세요. 권한을 켜면 Mac Drag Scroll에서 자동으로 확인합니다.";
-"grant_permissions" = "권한 허용";
+"permission_setup_title" = "손쉬운 사용 활성화";
+"permission_setup_detail" = "이 앱에 손쉬운 사용 권한을 허용하세요. 접근이 활성화되면 Mac Drag Scroll이 자동으로 시작됩니다.";
+"grant_permissions" = "손쉬운 사용 허용";
 "check_again" = "다시 확인";
 "this_app_copy" = "이 앱 복사본";
 "reveal_this_app" = "이 앱 보기";
@@ -146,6 +144,7 @@
 "menu_ignore_current_app" = "현재 앱 무시";
 "menu_ignore_app" = "%@ 무시";
 "menu_ignored_app" = "%@이 무시되었습니다.";
+"menu_enable_in_app" = "%@에서 활성화";
 "current_app" = "현재 앱";
 "quit" = "그만두다";
 "trigger_middle_click" = "가운데 클릭";
@@ -174,6 +173,7 @@
 "tooltip_reverse_direction" = "방향이 반대로 느껴지면 드래그 스크롤 방향을 바꿉니다.";
 "tooltip_horizontal_scrolling" = "가로 스크롤 이벤트를 보내려면 옆으로 드래그 이동을 허용하세요.";
 "tooltip_invert_horizontal" = "가로 스크롤 방향만 뒤집습니다.";
+"tooltip_keep_cursor_in_place" = "가운데 클릭으로 드래그하는 동안 포인터를 시작 위치에 유지합니다. 버튼을 놓거나 작업이 중단되면 즉시 일반 포인터 이동으로 돌아갑니다.";
 "tooltip_show_indicator" = "드래그 스크롤하는 동안 시각적 표시기를 표시합니다.";
 "tooltip_visualizer_animation" = "시각화 장치가 나타나고 사라지고 드래그 방향에 반응할 때 애니메이션을 적용합니다.";
 "tooltip_visualizer_size" = "드래그 시각화 도우미의 크기를 제어합니다.";
@@ -194,7 +194,7 @@
 "settings_visualizer_subtitle" = "드래그 시각화 도우미를 조정하고 즉시 미리 보세요.";
 "settings_scrolling_subtitle" = "속도, 가속도, 데드존을 조정합니다.";
 "settings_apps_subtitle" = "선택한 앱에서 드래그 스크롤을 비활성화합니다.";
-"settings_permissions_subtitle" = "필요한 macOS 권한과 런타임 상태를 확인하세요.";
+"settings_permissions_subtitle" = "손쉬운 사용 권한과 런타임 상태를 확인하세요.";
 "settings_updates_subtitle" = "검증된 업데이트, 자동 업데이트 상태 및 버전 기록을 확인합니다.";
 "settings_about_subtitle" = "제품 ID, 링크 및 크레딧.";
 "crash_detected_title" = "Mac Drag Scroll이 다운되었습니다.";

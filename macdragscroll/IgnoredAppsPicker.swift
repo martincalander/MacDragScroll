@@ -11,6 +11,87 @@ import SwiftUI
 private func localized(_ key: String, value: String, comment: String) -> String {
     AppLocalization.shared.localizedString(key, value: value, comment: comment)
 }
+
+struct InstalledAppRecord: Sendable {
+    let name: String
+    let bundleId: String
+    let path: String
+}
+
+enum InstalledAppDiscovery {
+    nonisolated static func load(
+        frontmostBundleId: String? = nil,
+        directories: [String]? = nil
+    ) -> [InstalledAppRecord] {
+        let appDirectories = directories ?? [
+            "/Applications",
+            "/System/Applications",
+            NSHomeDirectory() + "/Applications"
+        ]
+        let fileManager = FileManager.default
+        var appsByBundleIdentifier: [String: InstalledAppRecord] = [:]
+        var seenBundleIdentifiers: Set<String> = []
+
+        for directory in appDirectories {
+            guard let contents = try? fileManager.contentsOfDirectory(atPath: directory) else {
+                continue
+            }
+
+            for item in contents where (item as NSString).pathExtension.caseInsensitiveCompare("app") == .orderedSame {
+                let appPath = (directory as NSString).appendingPathComponent(item)
+                let plistPath = (appPath as NSString).appendingPathComponent("Contents/Info.plist")
+                guard let plistData = try? Data(contentsOf: URL(fileURLWithPath: plistPath)),
+                      let propertyList = try? PropertyListSerialization.propertyList(
+                        from: plistData,
+                        options: [],
+                        format: nil
+                      ),
+                      let plist = propertyList as? [String: Any],
+                      let rawBundleId = plist["CFBundleIdentifier"] as? String else {
+                    continue
+                }
+
+                let bundleId = rawBundleId.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !bundleId.isEmpty,
+                      seenBundleIdentifiers.insert(bundleId).inserted else {
+                    continue
+                }
+
+                appsByBundleIdentifier[bundleId] = InstalledAppRecord(
+                    name: (item as NSString).deletingPathExtension,
+                    bundleId: bundleId,
+                    path: appPath
+                )
+            }
+        }
+
+        return orderedApps(
+            Array(appsByBundleIdentifier.values),
+            frontmostBundleId: frontmostBundleId
+        )
+    }
+
+    nonisolated static func orderedApps(
+        _ apps: [InstalledAppRecord],
+        frontmostBundleId: String?
+    ) -> [InstalledAppRecord] {
+        var ordered = apps.sorted { lhs, rhs in
+            let nameOrder = lhs.name.localizedCaseInsensitiveCompare(rhs.name)
+            if nameOrder == .orderedSame {
+                return lhs.bundleId < rhs.bundleId
+            }
+            return nameOrder == .orderedAscending
+        }
+
+        if let frontmostBundleId,
+           let index = ordered.firstIndex(where: { $0.bundleId == frontmostBundleId }) {
+            ordered.insert(ordered.remove(at: index), at: 0)
+        }
+
+        return ordered
+    }
+}
+
 struct CompactAppRow: View {
     let bundleId: String
     let onRemove: () -> Void
@@ -76,12 +157,12 @@ struct InlineAppPickerView: View {
     let frontmostBundleId: String?
     let onAdd: (String) -> Void
 
-    @State private var apps: [(name: String, bundleId: String, icon: NSImage?)] = []
+    @State private var apps: [InstalledAppRecord] = []
     @State private var searchText = ""
     @State private var customBundleId = ""
     @State private var isLoading = true
 
-    private var filteredApps: [(name: String, bundleId: String, icon: NSImage?)] {
+    private var filteredApps: [InstalledAppRecord] {
         let available = apps.filter { !excludedApps.contains($0.bundleId) }
 
         guard !searchText.isEmpty else {
@@ -125,9 +206,7 @@ struct InlineAppPickerView: View {
                 VStack(spacing: 2) {
                     ForEach(filteredApps, id: \.bundleId) { app in
                         InlineAppPickerRow(
-                            name: app.name,
-                            bundleId: app.bundleId,
-                            icon: app.icon,
+                            app: app,
                             isFrontmost: app.bundleId == frontmostBundleId,
                             onAdd: { onAdd(app.bundleId) }
                         )
@@ -203,7 +282,7 @@ struct InlineAppPickerView: View {
         isLoading = true
 
         DispatchQueue.global(qos: .userInitiated).async {
-            let loadedApps = SettingsManager.shared.getInstalledApps(frontmostBundleId: frontmostBundleId)
+            let loadedApps = InstalledAppDiscovery.load(frontmostBundleId: frontmostBundleId)
 
             DispatchQueue.main.async {
                 apps = loadedApps
@@ -217,13 +296,12 @@ struct InlineAppPickerView: View {
 
 
 private struct InlineAppPickerRow: View {
-    let name: String
-    let bundleId: String
-    let icon: NSImage?
+    let app: InstalledAppRecord
     let isFrontmost: Bool
     let onAdd: () -> Void
 
     @State private var isHovered = false
+    @State private var icon: NSImage?
 
     var body: some View {
         HStack(spacing: 8) {
@@ -239,7 +317,7 @@ private struct InlineAppPickerRow: View {
             }
             .frame(width: 16, height: 16)
 
-            Text(name)
+            Text(app.name)
                 .font(.system(size: 11))
                 .lineLimit(1)
 
@@ -271,6 +349,9 @@ private struct InlineAppPickerRow: View {
             withAnimation(.easeOut(duration: 0.1)) {
                 isHovered = hovering
             }
+        }
+        .onAppear {
+            icon = NSWorkspace.shared.icon(forFile: app.path)
         }
     }
 }

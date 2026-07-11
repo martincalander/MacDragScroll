@@ -22,13 +22,16 @@ if [[ ! -f "$ENTITLEMENTS_PATH" ]]; then
   exit 66
 fi
 
-keychain_arguments=()
+signing_arguments=(
+  --force
+  --sign "$SIGNING_IDENTITY"
+)
 if [[ -n "$SIGNING_KEYCHAIN" ]]; then
   if [[ ! -f "$SIGNING_KEYCHAIN" ]]; then
     echo "Signing keychain not found: $SIGNING_KEYCHAIN" >&2
     exit 66
   fi
-  keychain_arguments=(--keychain "$SIGNING_KEYCHAIN")
+  signing_arguments+=(--keychain "$SIGNING_KEYCHAIN")
 fi
 
 sparkle_root="$APP_PATH/Contents/Frameworks/Sparkle.framework/Versions/B"
@@ -47,9 +50,7 @@ for code_path in "${nested_code[@]}"; do
   fi
 
   /usr/bin/codesign \
-    --force \
-    --sign "$SIGNING_IDENTITY" \
-    "${keychain_arguments[@]}" \
+    "${signing_arguments[@]}" \
     --timestamp=none \
     --generate-entitlement-der \
     --preserve-metadata=identifier,entitlements,flags,runtime \
@@ -57,9 +58,7 @@ for code_path in "${nested_code[@]}"; do
 done
 
 /usr/bin/codesign \
-  --force \
-  --sign "$SIGNING_IDENTITY" \
-  "${keychain_arguments[@]}" \
+  "${signing_arguments[@]}" \
   --timestamp=none \
   --options runtime \
   --generate-entitlement-der \

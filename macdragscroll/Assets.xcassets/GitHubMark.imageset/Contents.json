@@ -1,14 +1,8 @@
 {
   "images" : [
     {
-      "filename" : "GitHubMark.png",
-      "idiom" : "universal",
-      "scale" : "1x"
-    },
-    {
-      "filename" : "GitHubMark@2x.png",
-      "idiom" : "universal",
-      "scale" : "2x"
+      "filename" : "GitHub_Invertocat_Black.pdf",
+      "idiom" : "universal"
     }
   ],
   "info" : {
@@ -16,6 +10,7 @@
     "version" : 1
   },
   "properties" : {
+    "preserves-vector-representation" : true,
     "template-rendering-intent" : "template"
   }
 }

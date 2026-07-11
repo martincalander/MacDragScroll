@@ -21,6 +21,7 @@
 "reverse_direction" = "Richtung umkehren";
 "horizontal_scrolling" = "Horizontales Scrollen";
 "invert_horizontal" = "Horizontal umkehren";
+"keep_cursor_in_place" = "Mauszeiger an Position halten";
 "acceleration_low" = "Niedrig";
 "acceleration_med" = "Med";
 "acceleration_high" = "Hoch";
@@ -62,16 +63,13 @@
 "permission_required_message" = "Mac Drag Scroll benötigt die Berechtigung „Barrierefreiheit“, um Mausereignisse global zu überwachen.";
 "permission_lost_title" = "Zugriffsberechtigung verloren";
 "permission_lost_message" = "Mac Drag Scroll kann Mausereignisse nicht mehr überwachen. Aktivieren Sie die Barrierefreiheitsberechtigung erneut, um weiterhin Drag-Scrolling zu verwenden.";
-"permissions_required_title" = "Berechtigungen erforderlich";
-"permissions_required_message" = "Mac Drag Scroll benötigt Bedienungshilfen und Eingabeüberwachung, um den Mausauslöser zu erkennen.";
-"permission_input_monitoring" = "Eingabeüberwachung";
-"permission_input_monitoring_granted_detail" = "Mac Drag Scroll kann den konfigurierten Mausauslöser erkennen.";
-"permission_input_monitoring_missing_detail" = "Erlaube die Eingabeüberwachung, damit der Mausauslöser zuverlässig erkannt werden kann.";
-"permission_ready_title" = "Berechtigungen erteilt";
+"permissions_required_title" = "Bedienungshilfen erforderlich";
+"permissions_required_message" = "Mac Drag Scroll benötigt Bedienungshilfen, um den Mausauslöser zu erkennen und Scroll-Ereignisse zu senden.";
+"permission_ready_title" = "Bedienungshilfen bereit";
 "permission_ready_detail" = "Mac Drag Scroll kann den Mausauslöser erkennen und Scroll-Ereignisse senden.";
-"permission_setup_title" = "Berechtigungseinrichtung abschließen";
-"permission_setup_detail" = "Erteile genau dieser App-Kopie beide Berechtigungen. Mac Drag Scroll prüft automatisch, nachdem du sie aktiviert hast.";
-"grant_permissions" = "Berechtigungen erteilen";
+"permission_setup_title" = "Bedienungshilfen aktivieren";
+"permission_setup_detail" = "Erteile dieser App-Kopie die Berechtigung „Bedienungshilfen“. Mac Drag Scroll startet automatisch, sobald der Zugriff aktiviert ist.";
+"grant_permissions" = "Bedienungshilfen erlauben";
 "check_again" = "Erneut prüfen";
 "this_app_copy" = "Diese App-Kopie";
 "reveal_this_app" = "Diese App anzeigen";
@@ -146,6 +144,7 @@
 "menu_ignore_current_app" = "Aktuelle App ignorieren";
 "menu_ignore_app" = "%@ ignorieren";
 "menu_ignored_app" = "%@ wird ignoriert";
+"menu_enable_in_app" = "In %@ aktivieren";
 "current_app" = "Aktuelle App";
 "quit" = "Hör auf";
 "trigger_middle_click" = "Mittlerer Klick";
@@ -174,6 +173,7 @@
 "tooltip_reverse_direction" = "Kehrt die Scrollrichtung um, wenn sie sich falsch herum anfühlt.";
 "tooltip_horizontal_scrolling" = "Lassen Sie eine seitliche Ziehbewegung zu, um horizontale Bildlaufereignisse zu senden.";
 "tooltip_invert_horizontal" = "Kehrt nur die horizontale Bildlaufrichtung um.";
+"tooltip_keep_cursor_in_place" = "Hält den Mauszeiger beim Ziehen mit der mittleren Maustaste am Ausgangspunkt. Beim Loslassen der Taste oder bei einer Unterbrechung bewegt er sich sofort wieder normal.";
 "tooltip_show_indicator" = "Zeigt beim Scrollen per Drag-and-Drop die visuelle Anzeige an.";
 "tooltip_visualizer_animation" = "Animiert den Visualizer, wenn er erscheint, verschwindet und auf die Ziehrichtung reagiert.";
 "tooltip_visualizer_size" = "Steuert die Größe des Drag-Visualizers.";
@@ -194,7 +194,7 @@
 "settings_visualizer_subtitle" = "Optimieren Sie den Drag-Visualizer und zeigen Sie ihn sofort in der Vorschau an.";
 "settings_scrolling_subtitle" = "Passen Sie Geschwindigkeit, Beschleunigung und Totzone an.";
 "settings_apps_subtitle" = "Deaktivieren Sie Drag-Scrolling in ausgewählten Apps.";
-"settings_permissions_subtitle" = "Überprüfen Sie die erforderlichen macOS-Berechtigungen und den Laufzeitstatus.";
+"settings_permissions_subtitle" = "Überprüfen Sie den Bedienungshilfen-Zugriff und den Laufzeitstatus.";
 "settings_updates_subtitle" = "Verifizierte Updates, den Status automatischer Updates und den Versionsverlauf prüfen.";
 "settings_about_subtitle" = "Produktidentität, Links und Credits.";
 "crash_detected_title" = "Mac Drag Scroll ist abgestürzt";

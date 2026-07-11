@@ -378,17 +378,12 @@
           </aside>
           <div class="permission-pane">
             <div class="pane-heading">Allow Mac Drag Scroll</div>
-            <div class="pane-subtitle">Both permissions are required for global mouse input and scrolling.</div>
+            <div class="pane-subtitle">Accessibility enables global mouse input and scrolling.</div>
             <div class="permission-list">
               <div class="permission-row">
                 <img src="../mac-drag-scroll-icon.png" alt="">
                 <div><div class="permission-name">Accessibility</div><div class="permission-detail">Send scroll events to the active window</div></div>
                 <i class="toggle" data-toggle="accessibility"></i>
-              </div>
-              <div class="permission-row">
-                <img src="../mac-drag-scroll-icon.png" alt="">
-                <div><div class="permission-name">Input Monitoring</div><div class="permission-detail">Detect the external mouse middle button</div></div>
-                <i class="toggle" data-toggle="input"></i>
               </div>
             </div>
             <div class="permission-status"><i class="status-check">✓</i>Ready to scroll</div>
@@ -459,15 +454,13 @@
     }
 
     function renderPermissions(progress) {
-      const firstOn = progress > 0.28;
-      const secondOn = progress > 0.58;
-      document.querySelector('[data-toggle="accessibility"]').classList.toggle('on', firstOn);
-      document.querySelector('[data-toggle="input"]').classList.toggle('on', secondOn);
+      const accessibilityOn = progress > 0.34;
+      document.querySelector('[data-toggle="accessibility"]').classList.toggle('on', accessibilityOn);
       const status = document.querySelector('.permission-status');
-      const reveal = ease((progress - 0.66) / 0.16);
+      const reveal = ease((progress - 0.56) / 0.16);
       status.style.opacity = `${reveal}`;
       status.style.transform = `translateY(${mix(5, 0, reveal)}px)`;
-      setSteps(progress < 0.28 ? 0 : progress < 0.58 ? 1 : 2);
+      setSteps(progress < 0.34 ? 0 : progress < 0.56 ? 1 : 2);
     }
 
     function renderUsage(progress) {

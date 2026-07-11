@@ -21,6 +21,7 @@
 "reverse_direction" = "逆方向";
 "horizontal_scrolling" = "横スクロール";
 "invert_horizontal" = "水平方向を反転";
+"keep_cursor_in_place" = "カーソルをその場に固定";
 "acceleration_low" = "低い";
 "acceleration_med" = "メッド";
 "acceleration_high" = "高い";
@@ -62,16 +63,13 @@
 "permission_required_message" = "Mac Drag Scroll には、マウス イベントをグローバルに監視するためのアクセシビリティ権限が必要です。";
 "permission_lost_title" = "アクセシビリティ許可が失われました";
 "permission_lost_message" = "Mac Drag Scroll はマウス イベントを監視できなくなりました。ドラッグ スクロールを引き続き使用するには、アクセシビリティ権限を再度有効にします。";
-"permissions_required_title" = "権限が必要です";
-"permissions_required_message" = "Mac Drag Scroll がマウストリガーを検出するには、アクセシビリティと入力監視の権限が必要です。";
-"permission_input_monitoring" = "入力監視";
-"permission_input_monitoring_granted_detail" = "Mac Drag Scroll は設定されたマウストリガーを検出できます。";
-"permission_input_monitoring_missing_detail" = "マウストリガーを確実に検出できるよう、入力監視を許可してください。";
-"permission_ready_title" = "権限の準備完了";
+"permissions_required_title" = "アクセシビリティが必要です";
+"permissions_required_message" = "Mac Drag Scroll がマウストリガーを検出してスクロールイベントを送信するには、アクセシビリティ権限が必要です。";
+"permission_ready_title" = "アクセシビリティ準備完了";
 "permission_ready_detail" = "Mac Drag Scroll はマウストリガーを検出し、スクロールイベントを送信できます。";
-"permission_setup_title" = "権限設定を完了";
-"permission_setup_detail" = "このアプリのコピーに両方の権限を付与してください。有効にすると Mac Drag Scroll が自動的に確認します。";
-"grant_permissions" = "権限を付与";
+"permission_setup_title" = "アクセシビリティを有効化";
+"permission_setup_detail" = "このアプリにアクセシビリティ権限を付与してください。アクセスを有効にすると、Mac Drag Scroll は自動的に開始します。";
+"grant_permissions" = "アクセシビリティを許可";
 "check_again" = "再確認";
 "this_app_copy" = "このアプリのコピー";
 "reveal_this_app" = "このアプリを表示";
@@ -146,6 +144,7 @@
 "menu_ignore_current_app" = "現在のアプリを無視する";
 "menu_ignore_app" = "%@ を無視する";
 "menu_ignored_app" = "%@ は無視されました";
+"menu_enable_in_app" = "%@ で有効にする";
 "current_app" = "現在のアプリ";
 "quit" = "やめる";
 "trigger_middle_click" = "中クリック";
@@ -174,6 +173,7 @@
 "tooltip_reverse_direction" = "方向が逆に感じられる場合は、ドラッグしてスクロールを反転してください。";
 "tooltip_horizontal_scrolling" = "横方向のドラッグ移動で水平スクロール イベントを送信できるようにします。";
 "tooltip_invert_horizontal" = "水平スクロール方向のみを反転します。";
+"tooltip_keep_cursor_in_place" = "中クリックでドラッグしている間、ポインタを開始位置に保ちます。ボタンを離すか操作が中断されると、通常のポインタ移動にすぐ戻ります。";
 "tooltip_show_indicator" = "ドラッグスクロール中に視覚的なインジケーターを表示します。";
 "tooltip_visualizer_animation" = "ビジュアライザーの表示、非表示、ドラッグ方向への反応をアニメーションします。";
 "tooltip_visualizer_size" = "ドラッグ ビジュアライザのサイズを制御します。";
@@ -194,7 +194,7 @@
 "settings_visualizer_subtitle" = "ドラッグ ビジュアライザを調整して、すぐにプレビューします。";
 "settings_scrolling_subtitle" = "速度、加速度、デッドゾーンを調整します。";
 "settings_apps_subtitle" = "選択したアプリでドラッグ スクロールを無効にします。";
-"settings_permissions_subtitle" = "必要な macOS 権限と実行時のステータスを確認します。";
+"settings_permissions_subtitle" = "アクセシビリティ権限と実行時のステータスを確認します。";
 "settings_updates_subtitle" = "検証済みアップデート、自動更新の状態、バージョン履歴を確認します。";
 "settings_about_subtitle" = "製品のアイデンティティ、リンク、クレジット。";
 "crash_detected_title" = "Mac Drag Scroll がクラッシュしました";

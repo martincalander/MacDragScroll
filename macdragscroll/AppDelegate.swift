@@ -8,7 +8,7 @@
 import AppKit
 import SwiftUI
 import Combine
-import ApplicationServices
+@preconcurrency import ApplicationServices
 
 class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDelegate {
     private static let showWelcomeNotification = Notification.Name("MacDragScrollShowWelcomeWindow")
@@ -60,6 +60,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     private weak var activeMenuItem: NSMenuItem?
     private weak var updateMenuItem: NSMenuItem?
     private weak var ignoreCurrentAppMenuItem: NSMenuItem?
+    private var currentMenuTargetBundleIdentifier: String?
+    private var permissionMenuItem: NSMenuItem?
     private var duplicateInstanceMenuItem: NSMenuItem?
     private var permissionCheckTimer: Timer?
     private var hadPermissionPreviously = false
@@ -70,11 +72,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     // Observable permission state for SwiftUI
     static let permissionState = PermissionState()
 
-    deinit {
-        DistributedNotificationCenter.default().removeObserver(self)
-        permissionCheckTimer?.invalidate()
-    }
-    
     enum EventMonitoringState: Equatable {
         case waiting
         case active
@@ -82,54 +79,52 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     }
 
     class PermissionState: ObservableObject {
-        private let accessibilityPermissionChecker: () -> Bool
-        private let accessibilityPermissionRequester: (Bool) -> Bool
-        private let inputMonitoringPermissionChecker: () -> Bool
-        private let inputMonitoringPermissionRequester: () -> Bool
+        private let accessibilityPermissionChecker: @MainActor () -> Bool
+        private let accessibilityPermissionRequester: @MainActor (Bool) -> Bool
 
         @Published private(set) var hasAccessibilityPermission: Bool
-        @Published private(set) var hasInputMonitoringPermission: Bool
         @Published private(set) var eventMonitoringState: EventMonitoringState = .waiting
 
         var hasRequiredPermissions: Bool {
-            hasAccessibilityPermission && hasInputMonitoringPermission
+            hasAccessibilityPermission
         }
 
         init(
-            accessibilityPermissionChecker: @escaping () -> Bool = AXIsProcessTrusted,
-            accessibilityPermissionRequester: @escaping (Bool) -> Bool = AppDelegate.checkAccessibilityPermission(prompt:),
-            inputMonitoringPermissionChecker: @escaping () -> Bool = AppDelegate.checkInputMonitoringPermission,
-            inputMonitoringPermissionRequester: @escaping () -> Bool = AppDelegate.requestInputMonitoringPermission
+            accessibilityPermissionChecker: @escaping @MainActor () -> Bool = AXIsProcessTrusted,
+            accessibilityPermissionRequester: @escaping @MainActor (Bool) -> Bool = AppDelegate.checkAccessibilityPermission(prompt:)
         ) {
             self.accessibilityPermissionChecker = accessibilityPermissionChecker
             self.accessibilityPermissionRequester = accessibilityPermissionRequester
-            self.inputMonitoringPermissionChecker = inputMonitoringPermissionChecker
-            self.inputMonitoringPermissionRequester = inputMonitoringPermissionRequester
             self.hasAccessibilityPermission = accessibilityPermissionChecker()
-            self.hasInputMonitoringPermission = inputMonitoringPermissionChecker()
         }
         
         @discardableResult
         func refresh() -> Bool {
-            hasAccessibilityPermission = accessibilityPermissionChecker()
-            hasInputMonitoringPermission = inputMonitoringPermissionChecker()
-            if !hasRequiredPermissions {
+            let accessibilityPermission = accessibilityPermissionChecker()
+
+            if hasAccessibilityPermission != accessibilityPermission {
+                hasAccessibilityPermission = accessibilityPermission
+            }
+            if !hasRequiredPermissions, eventMonitoringState != .waiting {
                 eventMonitoringState = .waiting
             }
             return hasRequiredPermissions
         }
 
         @discardableResult
-        func request() -> Bool {
-            hasAccessibilityPermission = hasAccessibilityPermission || accessibilityPermissionRequester(true)
-            hasInputMonitoringPermission = hasInputMonitoringPermission || inputMonitoringPermissionRequester()
-            if !hasRequiredPermissions {
+        func requestAccessibilityPermission() -> Bool {
+            guard !hasAccessibilityPermission else { return true }
+
+            hasAccessibilityPermission = accessibilityPermissionRequester(true)
+
+            if !hasRequiredPermissions, eventMonitoringState != .waiting {
                 eventMonitoringState = .waiting
             }
-            return hasRequiredPermissions
+            return hasAccessibilityPermission
         }
 
         func setEventMonitoringState(_ state: EventMonitoringState) {
+            guard eventMonitoringState != state else { return }
             eventMonitoringState = state
         }
     }
@@ -159,15 +154,24 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         
         NSApp.setActivationPolicy(.accessory)
         
-        // Check accessibility permissions
+        // Permission checks are passive at launch. Setup is always user initiated.
         synchronizeAccessibilityState()
 
         DispatchQueue.main.async { [weak self] in
             self?.presentWelcomeIfNeeded()
         }
     }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        DistributedNotificationCenter.default().removeObserver(self)
+        permissionCheckTimer?.invalidate()
+        permissionCheckTimer = nil
+        mouseMonitor?.stop()
+        AppInstanceMonitor.shared.stopMonitoring()
+        PersistentPreferences.flushPendingWrites()
+    }
     
-    private nonisolated static func checkAccessibilityPermission(prompt: Bool) -> Bool {
+    private static func checkAccessibilityPermission(prompt: Bool) -> Bool {
         guard prompt else {
             return AXIsProcessTrusted()
         }
@@ -176,15 +180,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         return AXIsProcessTrustedWithOptions(options)
     }
 
-    private nonisolated static func checkInputMonitoringPermission() -> Bool {
-        CGPreflightListenEventAccess()
-    }
-
-    private nonisolated static func requestInputMonitoringPermission() -> Bool {
-        CGRequestListenEventAccess()
-    }
-
-    private func synchronizeAccessibilityState(showMissingPermissionDialog: Bool = true) {
+    private func synchronizeAccessibilityState() {
         let hasPermission = AppDelegate.permissionState.refresh()
 
         if hasPermission {
@@ -194,10 +190,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             hadPermissionPreviously = false
             stopMouseMonitor(eventMonitoringState: .waiting)
             NSLog("[MacDragScroll] Accessibility permission is missing; event monitoring is waiting.")
-
-            if showMissingPermissionDialog && SettingsManager.shared.hasCompletedWelcome {
-                showPermissionDialog()
-            }
         }
 
         startPermissionMonitoring()
@@ -207,54 +199,27 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         // Continuously monitor permission status (every 1 second)
         permissionCheckTimer?.invalidate()
         permissionCheckTimer = Timer(timeInterval: 1.0, repeats: true) { [weak self] _ in
-            guard let self = self else { return }
-            
-            let currentPermission = AppDelegate.permissionState.refresh()
-            
-            if currentPermission && !self.hadPermissionPreviously {
-                // Permission was just granted
-                self.hadPermissionPreviously = true
-                self.startMouseMonitor()
-            } else if !currentPermission && self.hadPermissionPreviously {
-                // Permission was revoked while app was running
-                self.hadPermissionPreviously = false
-                self.stopMouseMonitor(eventMonitoringState: .waiting)
-                self.showPermissionRevokedDialog()
-            } else if currentPermission, self.mouseMonitor?.isRunning != true {
-                self.startMouseMonitor()
+            MainActor.assumeIsolated {
+                guard let self else { return }
+
+                let currentPermission = AppDelegate.permissionState.refresh()
+
+                if currentPermission && !self.hadPermissionPreviously {
+                    // Permission was just granted
+                    self.hadPermissionPreviously = true
+                    self.startMouseMonitor()
+                } else if !currentPermission && self.hadPermissionPreviously {
+                    // Permission was revoked while app was running
+                    self.hadPermissionPreviously = false
+                    self.stopMouseMonitor(eventMonitoringState: .waiting)
+                } else if currentPermission, self.mouseMonitor?.isRunning != true {
+                    self.startMouseMonitor()
+                }
             }
         }
 
         if let permissionCheckTimer {
             RunLoop.main.add(permissionCheckTimer, forMode: .common)
-        }
-    }
-    
-    private func showPermissionDialog() {
-        let alert = NSAlert()
-            alert.messageText = localized("permissions_required_title", value: "Permissions Required", comment: "Permission required alert title")
-            alert.informativeText = localized("permissions_required_message", value: "Mac Drag Scroll needs Accessibility and Input Monitoring to listen for the mouse trigger.", comment: "Permission required alert message")
-            alert.alertStyle = .warning
-            alert.addButton(withTitle: localized("grant_permissions", value: "Grant Permissions", comment: "Grant permissions button"))
-            alert.addButton(withTitle: localized("later", value: "Later", comment: "Later button"))
-        
-        let response = alert.runModal()
-        if response == .alertFirstButtonReturn {
-            requestAccessibilityPermissionFromUser()
-        }
-    }
-    
-    private func showPermissionRevokedDialog() {
-        let alert = NSAlert()
-        alert.messageText = localized("permission_lost_title", value: "Accessibility Permission Lost", comment: "Permission lost alert title")
-        alert.informativeText = localized("permission_lost_message", value: "Mac Drag Scroll can no longer monitor mouse events. Re-enable Accessibility permission to keep using drag scrolling.", comment: "Permission lost alert message")
-        alert.alertStyle = .warning
-        alert.addButton(withTitle: localized("open_system_settings", value: "Open System Settings", comment: "Open System Settings button"))
-        alert.addButton(withTitle: localized("ok", value: "OK", comment: "OK button"))
-        
-        let response = alert.runModal()
-        if response == .alertFirstButtonReturn {
-            requestAccessibilityPermissionFromUser()
         }
     }
     
@@ -286,14 +251,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     }
 
     private func requestAccessibilityPermissionFromUser() {
-        let hasPermission = AppDelegate.permissionState.request()
-
-        if hasPermission {
+        if AppDelegate.permissionState.requestAccessibilityPermission() {
             hadPermissionPreviously = true
             startMouseMonitor()
         } else {
             stopMouseMonitor(eventMonitoringState: .waiting)
-            AppDelegate.openPrivacySettingsForMissingPermission()
         }
     }
 
@@ -313,6 +275,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             try process.run()
         } catch {
             NSLog("[MacDragScroll] Failed to schedule application restart: \(error.localizedDescription)")
+            allowsImmediateTermination = false
+            return
         }
 
         NSApplication.shared.terminate(nil)
@@ -322,16 +286,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         openPrivacySettings(anchor: "Privacy_Accessibility")
     }
 
-    static func openInputMonitoringSettings() {
-        openPrivacySettings(anchor: "Privacy_ListenEvent")
-    }
-
     static func openPrivacySettingsForMissingPermission() {
-        if !permissionState.hasAccessibilityPermission {
-            openAccessibilitySettings()
-        } else {
-            openInputMonitoringSettings()
-        }
+        openAccessibilitySettings()
     }
 
     private static func openPrivacySettings(anchor: String) {
@@ -361,7 +317,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         if let button = statusItem.button {
             button.toolTip = AppDelegate.appName
             button.setAccessibilityLabel(AppDelegate.appName)
-            button.image = statusBarImage(isEnabled: SettingsManager.shared.isEnabled)
+            button.image = statusBarImage(
+                isEnabled: SettingsManager.shared.isEnabled,
+                needsPermission: !AppDelegate.permissionState.hasRequiredPermissions
+            )
         }
 
         let menu = NSMenu()
@@ -400,7 +359,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
 
         let ignoreItem = NSMenuItem(
             title: localized("menu_ignore_current_app", value: "Ignore Current App", comment: "Ignore current app menu item"),
-            action: #selector(ignoreCurrentApp(_:)),
+            action: #selector(toggleCurrentAppIgnoredState(_:)),
             keyEquivalent: ""
         )
         ignoreItem.target = self
@@ -418,7 +377,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         menu.addItem(quitItem)
 
         statusItem.menu = menu
-        refreshStatusItem()
+        refreshPermissionPresentation()
     }
 
     private func observeSettings() {
@@ -442,6 +401,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             .sink { [weak self] _ in self?.applyAppearanceMode() }
             .store(in: &cancellables)
 
+        AppDelegate.permissionState.$hasAccessibilityPermission
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.refreshPermissionPresentation() }
+            .store(in: &cancellables)
+
         AppInstanceMonitor.shared.$duplicateInstanceCount
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.refreshDuplicateInstanceMenuItem() }
@@ -459,7 +423,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
 
         NotificationCenter.default.publisher(for: Self.refreshAccessibilityPermissionNotification)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in self?.synchronizeAccessibilityState(showMissingPermissionDialog: false) }
+            .sink { [weak self] _ in self?.synchronizeAccessibilityState() }
             .store(in: &cancellables)
 
         NotificationCenter.default.publisher(for: Self.revealApplicationNotification)
@@ -483,7 +447,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     }
 
     func menuNeedsUpdate(_ menu: NSMenu) {
-        refreshStatusItem()
+        refreshPermissionPresentation()
         AppInstanceMonitor.shared.refreshDuplicateInstances()
         refreshDuplicateInstanceMenuItem()
         refreshUpdateMenuItem()
@@ -503,17 +467,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         showSettingsWindow(selectedTab: .general)
     }
 
+    @objc private func openPermissions(_ sender: Any?) {
+        showSettingsWindow(selectedTab: .permissions)
+    }
+
     @objc private func openUpdates(_ sender: Any?) {
         UpdateManager.shared.checkForUpdates()
     }
 
-    @objc private func ignoreCurrentApp(_ sender: Any?) {
-        guard let bundleId = SettingsManager.shared.getFrontmostAppBundleId(),
-              !SettingsManager.shared.isAppExcluded(bundleIdentifier: bundleId) else {
-            return
-        }
+    @objc private func toggleCurrentAppIgnoredState(_ sender: Any?) {
+        guard let bundleId = currentMenuTargetBundleIdentifier else { return }
 
-        SettingsManager.shared.addExcludedApp(bundleId)
+        SettingsManager.shared.toggleExcludedApp(bundleId)
         refreshIgnoreCurrentAppMenuItem()
     }
 
@@ -695,11 +660,78 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         }
     }
 
+    private func refreshPermissionPresentation() {
+        refreshStatusItem()
+        refreshPermissionMenuItem()
+    }
+
     private func refreshStatusItem() {
         let isEnabled = SettingsManager.shared.isEnabled
+        let needsPermission = !AppDelegate.permissionState.hasRequiredPermissions
         activeMenuItem?.title = activeMenuTitle(isEnabled: isEnabled)
         activeMenuItem?.state = .off
-        statusItem.button?.image = statusBarImage(isEnabled: isEnabled)
+        statusItem.button?.image = statusBarImage(
+            isEnabled: isEnabled,
+            needsPermission: needsPermission
+        )
+
+        let permissionTitle = localized(
+            "permissions_required_title",
+            value: "Accessibility Required",
+            comment: "Permissions required title"
+        )
+        let statusDescription = needsPermission
+            ? "\(AppDelegate.appName) - \(permissionTitle)"
+            : AppDelegate.appName
+        statusItem.button?.toolTip = statusDescription
+        statusItem.button?.setAccessibilityLabel(statusDescription)
+    }
+
+    private func refreshPermissionMenuItem() {
+        guard let menu = statusItem?.menu else { return }
+
+        if !AppDelegate.permissionState.hasRequiredPermissions {
+            let item: NSMenuItem
+            if let existingItem = permissionMenuItem {
+                item = existingItem
+            } else {
+                item = NSMenuItem(
+                    title: "",
+                    action: #selector(openPermissions(_:)),
+                    keyEquivalent: ""
+                )
+                item.target = self
+                item.image = NSImage(
+                    systemSymbolName: "exclamationmark.triangle.fill",
+                    accessibilityDescription: localized(
+                        "permissions_required_title",
+                        value: "Accessibility Required",
+                        comment: "Permissions required title"
+                    )
+                )
+
+                let activeIndex = activeMenuItem.map { menu.index(of: $0) } ?? -1
+                let insertionIndex = activeIndex >= 0 ? activeIndex + 1 : 0
+                menu.insertItem(item, at: insertionIndex)
+                permissionMenuItem = item
+            }
+
+            let permissionTitle = localized(
+                "permissions_required_title",
+                value: "Accessibility Required",
+                comment: "Permissions required title"
+            )
+            item.title = "\(permissionTitle)..."
+            item.toolTip = localized(
+                "permissions_required_message",
+                value: "Mac Drag Scroll needs Accessibility to listen for the mouse trigger and send scroll events.",
+                comment: "Permissions required message"
+            )
+            item.isEnabled = true
+        } else if let item = permissionMenuItem {
+            menu.removeItem(item)
+            permissionMenuItem = nil
+        }
     }
 
     private func activeMenuTitle(isEnabled: Bool) -> String {
@@ -730,7 +762,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
                 )
 
                 let activeIndex = activeMenuItem.map { menu.index(of: $0) } ?? -1
-                let insertionIndex = activeIndex >= 0 ? activeIndex + 1 : 0
+                let permissionOffset = permissionMenuItem == nil ? 0 : 1
+                let insertionIndex = activeIndex >= 0 ? activeIndex + 1 + permissionOffset : 0
                 menu.insertItem(item, at: insertionIndex)
                 duplicateInstanceMenuItem = item
             }
@@ -786,19 +819,20 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     private func refreshIgnoreCurrentAppMenuItem() {
         guard let item = ignoreCurrentAppMenuItem else { return }
         guard let bundleId = SettingsManager.shared.getFrontmostAppBundleId() else {
+            currentMenuTargetBundleIdentifier = nil
             item.title = localized("menu_ignore_current_app", value: "Ignore Current App", comment: "Ignore current app menu item")
             item.isEnabled = false
             return
         }
 
+        currentMenuTargetBundleIdentifier = bundleId
         let appName = displayName(forBundleIdentifier: bundleId) ?? localized("current_app", value: "Current App", comment: "Current app fallback")
         if SettingsManager.shared.isAppExcluded(bundleIdentifier: bundleId) {
-            item.title = String(format: localized("menu_ignored_app", value: "%@ Ignored", comment: "Ignored app menu item"), appName)
-            item.isEnabled = false
+            item.title = String(format: localized("menu_enable_in_app", value: "Enable in %@", comment: "Enable in ignored app menu item"), appName)
         } else {
             item.title = String(format: localized("menu_ignore_app", value: "Ignore %@", comment: "Ignore app menu item"), appName)
-            item.isEnabled = true
         }
+        item.isEnabled = true
     }
 
     private func displayName(forBundleIdentifier bundleId: String) -> String? {
@@ -818,13 +852,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         statusItem.button?.setAccessibilityLabel(AppDelegate.appName)
         settingsWindow?.title = AppDelegate.appName
         welcomeWindow?.title = localized("welcome_window_title", value: "Welcome to Mac Drag Scroll", comment: "Welcome window title")
-        refreshStatusItem()
+        refreshPermissionPresentation()
         refreshDuplicateInstanceMenuItem()
         refreshUpdateMenuItem()
         refreshIgnoreCurrentAppMenuItem()
     }
 
-    private func statusBarImage(isEnabled: Bool) -> NSImage {
+    private func statusBarImage(isEnabled: Bool, needsPermission: Bool) -> NSImage {
         let size = NSSize(width: 18, height: 18)
         let image = NSImage(size: size)
 
@@ -851,9 +885,25 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             path.stroke()
         }
 
-        drawTrail(y: 12.2, alpha: 0.72, width: 1.28, endX: 10.4)
-        drawTrail(y: 9.0, alpha: 0.56, width: 1.12, endX: 10.0)
-        drawTrail(y: 5.9, alpha: 0.40, width: 1.0, endX: 9.6)
+        if needsPermission {
+            let exclamationStem = NSBezierPath()
+            exclamationStem.lineWidth = 1.65
+            exclamationStem.lineCapStyle = .round
+            exclamationStem.move(to: NSPoint(x: 4.6, y: 13.0))
+            exclamationStem.line(to: NSPoint(x: 4.6, y: 8.3))
+            NSColor.black.withAlphaComponent(0.90).setStroke()
+            exclamationStem.stroke()
+
+            let exclamationDot = NSBezierPath(
+                ovalIn: NSRect(x: 3.7, y: 5.3, width: 1.8, height: 1.8)
+            )
+            NSColor.black.withAlphaComponent(0.90).setFill()
+            exclamationDot.fill()
+        } else {
+            drawTrail(y: 12.2, alpha: 0.72, width: 1.28, endX: 10.4)
+            drawTrail(y: 9.0, alpha: 0.56, width: 1.12, endX: 10.0)
+            drawTrail(y: 5.9, alpha: 0.40, width: 1.0, endX: 9.6)
+        }
 
         let mouseTop = NSBezierPath()
         mouseTop.move(to: NSPoint(x: 13.0, y: 15.0))
@@ -921,7 +971,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         NSColor.black.withAlphaComponent(0.24).setStroke()
         buttonCurve.stroke()
 
-        if !isEnabled {
+        if !isEnabled && !needsPermission {
             let slash = NSBezierPath()
             slash.lineWidth = 2.0
             slash.lineCapStyle = .round

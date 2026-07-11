@@ -675,6 +675,12 @@ final class ScrollOverlayMotionTests: XCTestCase {
         let scale = ScrollOverlayMotion.dotScale(for: squash)
         XCTAssertGreaterThan(scale.width, 1)
         XCTAssertLessThan(scale.height, 1)
+
+        let glassScale = ScrollOverlayMotion.glassScale(for: squash)
+        XCTAssertGreaterThan(glassScale.width, 1)
+        XCTAssertLessThan(glassScale.height, 1)
+        XCTAssertLessThan(glassScale.width, scale.width)
+        XCTAssertGreaterThan(glassScale.height, scale.height)
     }
 
     func testHorizontalFlickSquashesAcrossHorizontalAxis() {
@@ -690,6 +696,12 @@ final class ScrollOverlayMotionTests: XCTestCase {
         let scale = ScrollOverlayMotion.dotScale(for: squash)
         XCTAssertLessThan(scale.width, 1)
         XCTAssertGreaterThan(scale.height, 1)
+
+        let glassScale = ScrollOverlayMotion.glassScale(for: squash)
+        XCTAssertLessThan(glassScale.width, 1)
+        XCTAssertGreaterThan(glassScale.height, 1)
+        XCTAssertGreaterThan(glassScale.width, scale.width)
+        XCTAssertLessThan(glassScale.height, scale.height)
     }
 }
 
@@ -822,6 +834,229 @@ final class TriggerInputSourceTests: XCTestCase {
     func testTabletMouseSubtypesCannotStartDragScroll() {
         XCTAssertFalse(TriggerInputSource.canStartDragScroll(mouseSubtype: 1))
         XCTAssertFalse(TriggerInputSource.canStartDragScroll(mouseSubtype: 2))
+    }
+}
+
+final class CursorHoldBehaviorTests: XCTestCase {
+    func testCursorHoldOnlyActivatesForEnabledMiddleClick() {
+        XCTAssertTrue(CursorHoldBehavior.shouldActivate(isEnabled: true, mouseButton: 2))
+        XCTAssertFalse(CursorHoldBehavior.shouldActivate(isEnabled: false, mouseButton: 2))
+        XCTAssertFalse(CursorHoldBehavior.shouldActivate(isEnabled: true, mouseButton: 3))
+        XCTAssertFalse(CursorHoldBehavior.shouldActivate(isEnabled: true, mouseButton: 0))
+    }
+
+    func testVirtualPointAccumulatesMouseDeltasInAppKitCoordinates() {
+        let origin = CGPoint(x: 100, y: 100)
+        let first = CursorHoldBehavior.nextVirtualPoint(
+            current: origin,
+            origin: origin,
+            deltaX: 12,
+            deltaY: 8
+        )
+        let second = CursorHoldBehavior.nextVirtualPoint(
+            current: first,
+            origin: origin,
+            deltaX: -2,
+            deltaY: -5
+        )
+
+        XCTAssertEqual(first.x, 112, accuracy: 0.001)
+        XCTAssertEqual(first.y, 92, accuracy: 0.001)
+        XCTAssertEqual(second.x, 110, accuracy: 0.001)
+        XCTAssertEqual(second.y, 97, accuracy: 0.001)
+    }
+
+    func testVirtualPointIsClampedToSafeMaximumDistance() {
+        let origin = CGPoint(x: 20, y: 30)
+        let point = CursorHoldBehavior.nextVirtualPoint(
+            current: origin,
+            origin: origin,
+            deltaX: CursorHoldBehavior.maximumVirtualDistance * 4,
+            deltaY: 0
+        )
+
+        XCTAssertEqual(
+            ScrollPhysics.distance(from: origin, to: point),
+            CursorHoldBehavior.maximumVirtualDistance,
+            accuracy: 0.001
+        )
+    }
+
+    func testInvalidDeltasDoNotMoveVirtualPoint() {
+        let current = CGPoint(x: 120, y: 80)
+
+        XCTAssertEqual(
+            CursorHoldBehavior.nextVirtualPoint(
+                current: current,
+                origin: .zero,
+                deltaX: .infinity,
+                deltaY: 0
+            ),
+            current
+        )
+    }
+
+    func testButtonWatchdogRequiresTwoConsecutiveReleaseSamples() {
+        let firstMiss = CursorHoldBehavior.releaseMissCount(
+            afterButtonState: false,
+            previousCount: 0
+        )
+        XCTAssertEqual(firstMiss, 1)
+        XCTAssertFalse(CursorHoldBehavior.shouldCancelForMissingButton(releaseMissCount: firstMiss))
+
+        XCTAssertEqual(
+            CursorHoldBehavior.releaseMissCount(afterButtonState: true, previousCount: firstMiss),
+            0
+        )
+
+        let secondMiss = CursorHoldBehavior.releaseMissCount(
+            afterButtonState: false,
+            previousCount: firstMiss
+        )
+        XCTAssertEqual(secondMiss, 2)
+        XCTAssertTrue(CursorHoldBehavior.shouldCancelForMissingButton(releaseMissCount: secondMiss))
+    }
+}
+
+final class ScrollDeliveryBehaviorTests: XCTestCase {
+    private let targetBounds = CGRect(x: 100, y: 100, width: 800, height: 600)
+    private let targetProcessIdentifier: pid_t = 42
+
+    func testNormalDragInsideTargetUsesLivePointerAndGlobalDelivery() {
+        let origin = CGPoint(x: 500, y: 400)
+        let current = CGPoint(x: 500, y: 101)
+
+        XCTAssertEqual(
+            ScrollDeliveryBehavior.delivery(
+                cursorHoldActive: false,
+                origin: origin,
+                current: current,
+                targetBounds: targetBounds,
+                targetProcessIdentifier: targetProcessIdentifier
+            ),
+            ScrollDelivery(location: current, destination: .global)
+        )
+    }
+
+    func testNormalDragOutsideTargetContinuesInOriginalApplication() {
+        let origin = CGPoint(x: 500, y: 400)
+
+        XCTAssertEqual(
+            ScrollDeliveryBehavior.delivery(
+                cursorHoldActive: false,
+                origin: origin,
+                current: CGPoint(x: 500, y: 99),
+                targetBounds: targetBounds,
+                targetProcessIdentifier: targetProcessIdentifier
+            ),
+            ScrollDelivery(
+                location: origin,
+                destination: .application(processIdentifier: targetProcessIdentifier)
+            )
+        )
+    }
+
+    func testNormalDragContinuesPastEveryTargetEdge() {
+        let origin = CGPoint(x: 500, y: 400)
+        let outsidePoints = [
+            CGPoint(x: targetBounds.minX - 1, y: origin.y),
+            CGPoint(x: targetBounds.maxX + 1, y: origin.y),
+            CGPoint(x: origin.x, y: targetBounds.minY - 1),
+            CGPoint(x: origin.x, y: targetBounds.maxY + 1)
+        ]
+
+        for current in outsidePoints {
+            XCTAssertEqual(
+                ScrollDeliveryBehavior.delivery(
+                    cursorHoldActive: false,
+                    origin: origin,
+                    current: current,
+                    targetBounds: targetBounds,
+                    targetProcessIdentifier: targetProcessIdentifier
+                ),
+                ScrollDelivery(
+                    location: origin,
+                    destination: .application(processIdentifier: targetProcessIdentifier)
+                )
+            )
+        }
+    }
+
+    func testCursorHoldDeliversGloballyAtOrigin() {
+        let origin = CGPoint(x: 500, y: 400)
+
+        XCTAssertEqual(
+            ScrollDeliveryBehavior.delivery(
+                cursorHoldActive: true,
+                origin: origin,
+                current: CGPoint(x: 500, y: 101),
+                targetBounds: targetBounds,
+                targetProcessIdentifier: targetProcessIdentifier
+            ),
+            ScrollDelivery(location: origin, destination: .global)
+        )
+    }
+
+    func testDeliveryStopsWhenOriginalWindowNoLongerContainsOrigin() {
+        XCTAssertNil(
+            ScrollDeliveryBehavior.delivery(
+                cursorHoldActive: false,
+                origin: CGPoint(x: 50, y: 50),
+                current: CGPoint(x: 500, y: 99),
+                targetBounds: targetBounds,
+                targetProcessIdentifier: targetProcessIdentifier
+            )
+        )
+    }
+
+    func testDeliveryRejectsInvalidTargetProcess() {
+        XCTAssertNil(
+            ScrollDeliveryBehavior.delivery(
+                cursorHoldActive: false,
+                origin: CGPoint(x: 500, y: 400),
+                current: CGPoint(x: 500, y: 99),
+                targetBounds: targetBounds,
+                targetProcessIdentifier: 0
+            )
+        )
+    }
+
+    func testDeliveryRejectsNonFiniteCoordinates() {
+        XCTAssertNil(
+            ScrollDeliveryBehavior.delivery(
+                cursorHoldActive: false,
+                origin: CGPoint(x: CGFloat.nan, y: 400),
+                current: CGPoint(x: 500, y: 99),
+                targetBounds: targetBounds,
+                targetProcessIdentifier: targetProcessIdentifier
+            )
+        )
+        XCTAssertNil(
+            ScrollDeliveryBehavior.delivery(
+                cursorHoldActive: false,
+                origin: CGPoint(x: 500, y: 400),
+                current: CGPoint(x: 500, y: CGFloat.infinity),
+                targetBounds: targetBounds,
+                targetProcessIdentifier: targetProcessIdentifier
+            )
+        )
+    }
+
+    func testDeliveryRejectsInvalidTargetBounds() {
+        let origin = CGPoint(x: 500, y: 400)
+        let current = CGPoint(x: 500, y: 99)
+
+        for invalidBounds in [CGRect.null, CGRect(x: 100, y: 100, width: 0, height: 600)] {
+            XCTAssertNil(
+                ScrollDeliveryBehavior.delivery(
+                    cursorHoldActive: false,
+                    origin: origin,
+                    current: current,
+                    targetBounds: invalidBounds,
+                    targetProcessIdentifier: targetProcessIdentifier
+                )
+            )
+        }
     }
 }
 

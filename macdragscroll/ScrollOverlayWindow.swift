@@ -95,6 +95,22 @@ enum ScrollOverlayMotion {
             return CGSize(width: max(1 - squash.amount, 0.72), height: 1 + squash.amount * 0.86)
         }
     }
+
+    static func glassScale(for squash: ScrollOverlaySquash) -> CGSize {
+        guard squash.amount > 0 else {
+            return CGSize(width: 1, height: 1)
+        }
+
+        let stretched = 1 + squash.amount * 0.32
+        let compressed = max(1 - squash.amount * 0.24, 0.90)
+
+        switch squash.axis {
+        case .vertical:
+            return CGSize(width: stretched, height: compressed)
+        case .horizontal:
+            return CGSize(width: compressed, height: stretched)
+        }
+    }
 }
 
 final class ScrollOverlayWindow: NSWindow {
@@ -105,6 +121,7 @@ final class ScrollOverlayWindow: NSWindow {
     private let animationPosition: CGPoint
     private var currentScale: CGFloat = 1.0
     private var currentTilt: CGPoint = .zero
+    private var currentSquash = ScrollOverlaySquash.none
 
     init(origin: CGPoint) {
         let frame = Self.windowFrame(for: origin)
@@ -178,6 +195,10 @@ final class ScrollOverlayWindow: NSWindow {
         containerView.addSubview(glassView)
         contentView = containerView
 
+        overlayView.squashDidChange = { [weak self] squash in
+            self?.updateGlassSquash(squash)
+        }
+
         setScale(1.0)
     }
 
@@ -221,7 +242,9 @@ final class ScrollOverlayWindow: NSWindow {
             context.timingFunction = CAMediaTimingFunction(name: .easeIn)
             animator().alphaValue = 0
         } completionHandler: {
-            self.orderOut(nil)
+            MainActor.assumeIsolated {
+                self.orderOut(nil)
+            }
         }
 
         let animation = CABasicAnimation(keyPath: "transform.scale")
@@ -301,6 +324,11 @@ final class ScrollOverlayWindow: NSWindow {
         applyGlassTransform(animated: SettingsManager.shared.visualizerAnimationsEnabled)
     }
 
+    private func updateGlassSquash(_ squash: ScrollOverlaySquash) {
+        currentSquash = SettingsManager.shared.visualizerAnimationsEnabled ? squash : .none
+        applyGlassTransform(animated: false)
+    }
+
     private func applyGlassTransform(animated: Bool) {
         CATransaction.begin()
         if animated {
@@ -316,9 +344,15 @@ final class ScrollOverlayWindow: NSWindow {
         let intensity = CGFloat(SettingsManager.shared.liquidGlassIntensity)
         let maxTiltAngle = CGFloat.pi / 180 * (4.5 + intensity * 1.4)
         let reactiveScale = 1 + min(abs(currentTilt.x) + abs(currentTilt.y), 1) * (0.010 + intensity * 0.004)
+        let squashScale = ScrollOverlayMotion.glassScale(for: currentSquash)
         var transform = CATransform3DIdentity
         transform.m34 = -1 / 650
-        transform = CATransform3DScale(transform, currentScale * reactiveScale, currentScale * reactiveScale, 1)
+        transform = CATransform3DScale(
+            transform,
+            currentScale * reactiveScale * squashScale.width,
+            currentScale * reactiveScale * squashScale.height,
+            1
+        )
         transform = CATransform3DRotate(transform, currentTilt.y * maxTiltAngle, 1, 0, 0)
         transform = CATransform3DRotate(transform, -currentTilt.x * maxTiltAngle, 0, 1, 0)
         glassView.layer?.transform = transform
@@ -341,7 +375,7 @@ final class ScrollOverlayView: NSView {
     private var currentScreenPoint: CGPoint
     private var lastMotionTime: CFTimeInterval?
     private var lastVelocity: CGPoint = .zero
-    private var dotSquash = ScrollOverlaySquash.none
+    private var motionSquash = ScrollOverlaySquash.none
     private var squashDecayTimer: Timer?
     private var clickRippleStartTime: CFTimeInterval?
     private var clickRippleTimer: Timer?
@@ -349,11 +383,14 @@ final class ScrollOverlayView: NSView {
     private struct Style {
         static let reflectionInset: CGFloat = 1.5
         static let clickRippleDuration: CFTimeInterval = 0.42
+        static let colorSpace = CGColorSpaceCreateDeviceRGB()
     }
 
     private var deadZoneRadius: CGFloat {
         CGFloat(SettingsManager.shared.deadZoneRadius)
     }
+
+    var squashDidChange: ((ScrollOverlaySquash) -> Void)?
 
     init(origin: CGPoint, screenOrigin: CGPoint, frame: CGRect) {
         originPoint = origin
@@ -381,11 +418,6 @@ final class ScrollOverlayView: NSView {
         clickRippleStartTime = CACurrentMediaTime()
         startClickRippleTimer()
         needsDisplay = true
-    }
-
-    deinit {
-        squashDecayTimer?.invalidate()
-        clickRippleTimer?.invalidate()
     }
 
     override func draw(_ dirtyRect: NSRect) {
@@ -471,7 +503,6 @@ final class ScrollOverlayView: NSView {
     }
 
     private func drawFrostedFill(in context: CGContext, rect: CGRect, center: CGPoint, radius: CGFloat, lightVector: CGPoint, opacity: CGFloat, activation: CGFloat, intensity: CGFloat) {
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
         let colors = [
             glassHighlight(alpha: min((0.16 + activation * 0.040) * opacity * (0.92 + intensity * 0.12), 0.31)).cgColor,
             glassHighlight(alpha: min((0.070 + activation * 0.018) * opacity * (0.90 + intensity * 0.10), 0.16)).cgColor,
@@ -479,7 +510,7 @@ final class ScrollOverlayView: NSView {
         ] as CFArray
         let locations: [CGFloat] = [0, 0.58, 1]
 
-        guard let gradient = CGGradient(colorsSpace: colorSpace, colors: colors, locations: locations) else {
+        guard let gradient = CGGradient(colorsSpace: Style.colorSpace, colors: colors, locations: locations) else {
             return
         }
 
@@ -502,7 +533,6 @@ final class ScrollOverlayView: NSView {
     }
 
     private func drawGlassSheen(in context: CGContext, rect: CGRect, center: CGPoint, radius: CGFloat, lightVector: CGPoint, opacity: CGFloat, activation: CGFloat, intensity: CGFloat) {
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
         let colors = [
             glassHighlight(alpha: min((0.24 + activation * 0.08) * opacity * (0.86 + intensity * 0.18), 0.52)).cgColor,
             glassHighlight(alpha: min((0.080 + activation * 0.035) * opacity * (0.86 + intensity * 0.16), 0.24)).cgColor,
@@ -510,7 +540,7 @@ final class ScrollOverlayView: NSView {
         ] as CFArray
         let locations: [CGFloat] = [0, 0.46, 1]
 
-        guard let gradient = CGGradient(colorsSpace: colorSpace, colors: colors, locations: locations) else {
+        guard let gradient = CGGradient(colorsSpace: Style.colorSpace, colors: colors, locations: locations) else {
             return
         }
 
@@ -543,7 +573,7 @@ final class ScrollOverlayView: NSView {
             y: originPoint.y + unitY * travel
         )
         let dotRadius = min(max(bounds.width * 0.074, 4.0), 10.0)
-        let squash = SettingsManager.shared.visualizerAnimationsEnabled ? dotSquash : .none
+        let squash = SettingsManager.shared.visualizerAnimationsEnabled ? motionSquash : .none
         let dotScale = ScrollOverlayMotion.dotScale(for: squash)
         let dotRect = CGRect(
             x: dot.x - dotRadius * dotScale.width,
@@ -564,7 +594,6 @@ final class ScrollOverlayView: NSView {
         context.addEllipse(in: dotRect)
         context.clip()
 
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
         let colors = [
             glassFill(alpha: min(0.82 * opacity * (0.96 + intensity * 0.06), 0.92)).cgColor,
             glassFill(alpha: min(0.54 * opacity * (0.92 + intensity * 0.08), 0.76)).cgColor,
@@ -572,7 +601,7 @@ final class ScrollOverlayView: NSView {
         ] as CFArray
         let locations: [CGFloat] = [0, 0.62, 1]
 
-        if let gradient = CGGradient(colorsSpace: colorSpace, colors: colors, locations: locations) {
+        if let gradient = CGGradient(colorsSpace: Style.colorSpace, colors: colors, locations: locations) {
             context.drawRadialGradient(
                 gradient,
                 startCenter: CGPoint(x: dot.x - gradientRadius * 0.28, y: dot.y + gradientRadius * 0.32),
@@ -666,8 +695,9 @@ final class ScrollOverlayView: NSView {
             liquidGlassIntensity: CGFloat(SettingsManager.shared.liquidGlassIntensity)
         )
 
-        if squash.amount > dotSquash.amount {
-            dotSquash = squash
+        if squash.amount > motionSquash.amount {
+            motionSquash = squash
+            squashDidChange?(squash)
             startSquashDecayTimer()
         }
 
@@ -677,7 +707,10 @@ final class ScrollOverlayView: NSView {
     private func resetMotionEffects() {
         lastMotionTime = nil
         lastVelocity = .zero
-        dotSquash = .none
+        if motionSquash != .none {
+            motionSquash = .none
+            squashDidChange?(.none)
+        }
         squashDecayTimer?.invalidate()
         squashDecayTimer = nil
     }
@@ -685,30 +718,33 @@ final class ScrollOverlayView: NSView {
     private func startSquashDecayTimer() {
         guard squashDecayTimer == nil else { return }
 
-        let timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [weak self] timer in
+        let timer = Timer(timeInterval: 1.0 / 60.0, repeats: true) { [weak self] timer in
             guard let self else {
                 timer.invalidate()
                 return
             }
 
-            guard SettingsManager.shared.visualizerAnimationsEnabled else {
-                self.resetMotionEffects()
+            MainActor.assumeIsolated {
+                guard SettingsManager.shared.visualizerAnimationsEnabled else {
+                    self.resetMotionEffects()
+                    self.needsDisplay = true
+                    return
+                }
+
+                self.motionSquash = ScrollOverlaySquash(
+                    amount: self.motionSquash.amount * 0.82,
+                    axis: self.motionSquash.axis
+                )
+
+                if self.motionSquash.amount < 0.006 {
+                    self.motionSquash = .none
+                    self.squashDecayTimer?.invalidate()
+                    self.squashDecayTimer = nil
+                }
+
+                self.squashDidChange?(self.motionSquash)
                 self.needsDisplay = true
-                return
             }
-
-            self.dotSquash = ScrollOverlaySquash(
-                amount: self.dotSquash.amount * 0.82,
-                axis: self.dotSquash.axis
-            )
-
-            if self.dotSquash.amount < 0.006 {
-                self.dotSquash = .none
-                timer.invalidate()
-                self.squashDecayTimer = nil
-            }
-
-            self.needsDisplay = true
         }
 
         squashDecayTimer = timer
@@ -718,28 +754,30 @@ final class ScrollOverlayView: NSView {
     private func startClickRippleTimer() {
         clickRippleTimer?.invalidate()
 
-        let timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [weak self] timer in
+        let timer = Timer(timeInterval: 1.0 / 60.0, repeats: true) { [weak self] timer in
             guard let self else {
                 timer.invalidate()
                 return
             }
 
-            guard let clickRippleStartTime = self.clickRippleStartTime,
-                  SettingsManager.shared.visualizerAnimationsEnabled else {
-                self.clickRippleStartTime = nil
-                timer.invalidate()
-                self.clickRippleTimer = nil
+            MainActor.assumeIsolated {
+                guard let clickRippleStartTime = self.clickRippleStartTime,
+                      SettingsManager.shared.visualizerAnimationsEnabled else {
+                    self.clickRippleStartTime = nil
+                    self.clickRippleTimer?.invalidate()
+                    self.clickRippleTimer = nil
+                    self.needsDisplay = true
+                    return
+                }
+
+                if CACurrentMediaTime() - clickRippleStartTime >= Style.clickRippleDuration {
+                    self.clickRippleStartTime = nil
+                    self.clickRippleTimer?.invalidate()
+                    self.clickRippleTimer = nil
+                }
+
                 self.needsDisplay = true
-                return
             }
-
-            if CACurrentMediaTime() - clickRippleStartTime >= Style.clickRippleDuration {
-                self.clickRippleStartTime = nil
-                timer.invalidate()
-                self.clickRippleTimer = nil
-            }
-
-            self.needsDisplay = true
         }
 
         clickRippleTimer = timer

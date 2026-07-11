@@ -29,21 +29,64 @@ if [[ "$minimum_system" != "$EXPECTED_MINIMUM" ]]; then
   exit 65
 fi
 
-if ! lipo "$binary" -verify_arch arm64 x86_64; then
-  echo "Release executable must contain arm64 and x86_64 slices." >&2
+mach_o_count=0
+architecture_failures=()
+deployment_target_failures=()
+local_library_failures=()
+while IFS= read -r -d '' candidate; do
+  if ! file -b "$candidate" | grep -q 'Mach-O'; then
+    continue
+  fi
+
+  mach_o_count=$((mach_o_count + 1))
+  if ! lipo "$candidate" -verify_arch arm64 x86_64 >/dev/null 2>&1; then
+    architecture_failures+=("${candidate#"$APP_PATH"/}")
+  fi
+
+  declared_minimums="$(vtool -show-build "$candidate" | awk '$1 == "minos" { print $2 }' | sort -u)"
+  while IFS= read -r declared_minimum; do
+    [[ -n "$declared_minimum" ]] || continue
+    if ! awk -v actual="$declared_minimum" -v maximum="$EXPECTED_MINIMUM" 'BEGIN {
+      split(actual, a, ".")
+      split(maximum, m, ".")
+      for (i = 1; i <= 3; i++) {
+        av = (a[i] == "" ? 0 : a[i] + 0)
+        mv = (m[i] == "" ? 0 : m[i] + 0)
+        if (av < mv) exit 0
+        if (av > mv) exit 1
+      }
+      exit 0
+    }'; then
+      deployment_target_failures+=("${candidate#"$APP_PATH"/} (macOS $declared_minimum)")
+    fi
+  done <<< "$declared_minimums"
+
+  if otool -L "$candidate" | grep -Eq '^[[:space:]]+/(Applications/Xcode|Users|opt/homebrew|usr/local)/'; then
+    local_library_failures+=("${candidate#"$APP_PATH"/}")
+  fi
+done < <(find "$APP_PATH" -type f -print0)
+
+if [[ "$mach_o_count" -eq 0 ]]; then
+  echo "App bundle contains no Mach-O binaries." >&2
   exit 65
 fi
 
-declared_minimums="$(vtool -show-build "$binary" | awk '$1 == "minos" { print $2 }' | sort -u)"
-if [[ "$declared_minimums" != "$EXPECTED_MINIMUM" ]]; then
-  echo "Expected every Mach-O slice to target macOS $EXPECTED_MINIMUM; got:" >&2
-  echo "$declared_minimums" >&2
+if [[ "${#architecture_failures[@]}" -gt 0 ]]; then
+  echo "Every executable component must contain arm64 and x86_64 slices:" >&2
+  printf '  - %s\n' "${architecture_failures[@]}" >&2
   exit 65
 fi
 
-if otool -L "$binary" | grep -E '^[[:space:]]+/(Applications/Xcode|Users|opt/homebrew|usr/local)/'; then
-  echo "Release executable links a machine-local library path." >&2
+if [[ "${#deployment_target_failures[@]}" -gt 0 ]]; then
+  echo "Mach-O components must not require a macOS version newer than $EXPECTED_MINIMUM:" >&2
+  printf '  - %s\n' "${deployment_target_failures[@]}" >&2
   exit 65
 fi
 
-echo "Compatibility passed: macOS $EXPECTED_MINIMUM+, arm64 and x86_64."
+if [[ "${#local_library_failures[@]}" -gt 0 ]]; then
+  echo "Mach-O components link machine-local library paths:" >&2
+  printf '  - %s\n' "${local_library_failures[@]}" >&2
+  exit 65
+fi
+
+echo "Compatibility passed: macOS $EXPECTED_MINIMUM+, $mach_o_count universal Mach-O components."

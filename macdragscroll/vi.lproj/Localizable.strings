@@ -21,6 +21,7 @@
 "reverse_direction" = "Hướng ngược lại";
 "horizontal_scrolling" = "Cuộn ngang";
 "invert_horizontal" = "Đảo ngược theo chiều ngang";
+"keep_cursor_in_place" = "Giữ con trỏ tại chỗ";
 "acceleration_low" = "Thấp";
 "acceleration_med" = "Địa Trung Hải";
 "acceleration_high" = "Cao";
@@ -62,16 +63,13 @@
 "permission_required_message" = "Mac Drag Scroll cần có quyền Trợ năng để theo dõi các sự kiện chuột trên toàn cầu.";
 "permission_lost_title" = "Mất quyền truy cập";
 "permission_lost_message" = "Mac Drag Scroll không thể theo dõi các sự kiện chuột nữa. Bật lại quyền Trợ năng để tiếp tục sử dụng thao tác kéo cuộn.";
-"permissions_required_title" = "Cần cấp quyền";
-"permissions_required_message" = "Mac Drag Scroll cần quyền Trợ năng và Giám sát đầu vào để nhận biết thao tác kích hoạt bằng chuột.";
-"permission_input_monitoring" = "Giám sát đầu vào";
-"permission_input_monitoring_granted_detail" = "Mac Drag Scroll có thể nhận biết thao tác kích hoạt bằng chuột đã cấu hình.";
-"permission_input_monitoring_missing_detail" = "Hãy cho phép Giám sát đầu vào để thao tác kích hoạt bằng chuột được nhận biết ổn định.";
-"permission_ready_title" = "Quyền đã sẵn sàng";
+"permissions_required_title" = "Cần quyền Trợ năng";
+"permissions_required_message" = "Mac Drag Scroll cần quyền Trợ năng để nhận biết thao tác kích hoạt bằng chuột và gửi sự kiện cuộn.";
+"permission_ready_title" = "Trợ năng đã sẵn sàng";
 "permission_ready_detail" = "Mac Drag Scroll có thể nhận biết thao tác kích hoạt bằng chuột và gửi sự kiện cuộn.";
-"permission_setup_title" = "Hoàn tất thiết lập quyền";
-"permission_setup_detail" = "Hãy cấp cả hai quyền cho đúng bản sao ứng dụng này. Mac Drag Scroll sẽ tự động kiểm tra sau khi bạn bật chúng.";
-"grant_permissions" = "Cấp quyền";
+"permission_setup_title" = "Bật Trợ năng";
+"permission_setup_detail" = "Hãy cấp quyền Trợ năng cho bản sao ứng dụng này. Mac Drag Scroll sẽ tự động khởi động khi quyền truy cập được bật.";
+"grant_permissions" = "Cấp quyền Trợ năng";
 "check_again" = "Kiểm tra lại";
 "this_app_copy" = "Bản sao ứng dụng này";
 "reveal_this_app" = "Hiển thị ứng dụng này";
@@ -146,6 +144,7 @@
 "menu_ignore_current_app" = "Bỏ qua ứng dụng hiện tại";
 "menu_ignore_app" = "Bỏ qua %@";
 "menu_ignored_app" = "%@ Đã bỏ qua";
+"menu_enable_in_app" = "Bật trong %@";
 "current_app" = "Ứng dụng hiện tại";
 "quit" = "Thoát";
 "trigger_middle_click" = "Nhấp chuột giữa";
@@ -174,6 +173,7 @@
 "tooltip_reverse_direction" = "Đảo hướng cuộn kéo nếu hướng bị ngược.";
 "tooltip_horizontal_scrolling" = "Cho phép chuyển động kéo sang một bên để gửi các sự kiện cuộn ngang.";
 "tooltip_invert_horizontal" = "Chỉ lật theo hướng cuộn ngang.";
+"tooltip_keep_cursor_in_place" = "Giữ con trỏ tại điểm bắt đầu kéo khi dùng nút chuột giữa. Khi nhả nút hoặc có gián đoạn, con trỏ sẽ lập tức trở lại cách di chuyển bình thường.";
 "tooltip_show_indicator" = "Hiển thị chỉ báo trực quan trong khi kéo cuộn.";
 "tooltip_visualizer_animation" = "Tạo hoạt ảnh cho trình hiển thị khi xuất hiện, biến mất và phản ứng với hướng kéo.";
 "tooltip_visualizer_size" = "Kiểm soát kích thước của trình hiển thị kéo.";
@@ -194,7 +194,7 @@
 "settings_visualizer_subtitle" = "Điều chỉnh trình hiển thị kéo và xem trước nó ngay lập tức.";
 "settings_scrolling_subtitle" = "Điều chỉnh tốc độ, khả năng tăng tốc và vùng chết.";
 "settings_apps_subtitle" = "Tắt tính năng kéo cuộn trong các ứng dụng đã chọn.";
-"settings_permissions_subtitle" = "Kiểm tra các quyền macOS cần thiết và trạng thái thời gian chạy.";
+"settings_permissions_subtitle" = "Kiểm tra quyền Trợ năng và trạng thái thời gian chạy.";
 "settings_updates_subtitle" = "Kiểm tra bản cập nhật đã xác minh, trạng thái cập nhật tự động và lịch sử phiên bản.";
 "settings_about_subtitle" = "Nhận dạng sản phẩm, liên kết và tín dụng.";
 "crash_detected_title" = "Mac Drag Scroll bị lỗi";

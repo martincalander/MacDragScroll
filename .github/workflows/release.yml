@@ -229,6 +229,9 @@ jobs:
         run: |
           scripts/sign-release-app.sh "$APP_PATH" "$SIGNING_IDENTITY_HASH" "$SIGNING_KEYCHAIN"
 
+      - name: Launch signed app
+        run: scripts/check-app-launch.sh "$APP_PATH"
+
       - name: Remove release signing material from runner
         if: always()
         run: |

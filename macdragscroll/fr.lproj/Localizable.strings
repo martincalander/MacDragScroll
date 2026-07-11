@@ -21,6 +21,7 @@
 "reverse_direction" = "Inverser la direction";
 "horizontal_scrolling" = "Défilement horizontal";
 "invert_horizontal" = "Inverser horizontalement";
+"keep_cursor_in_place" = "Maintenir le pointeur en place";
 "acceleration_low" = "Faible";
 "acceleration_med" = "Médical";
 "acceleration_high" = "Élevé";
@@ -62,16 +63,13 @@
 "permission_required_message" = "Mac Drag Scroll a besoin d'une autorisation d'accessibilité pour surveiller les événements de la souris à l'échelle mondiale.";
 "permission_lost_title" = "Autorisation d'accessibilité perdue";
 "permission_lost_message" = "Mac Drag Scroll ne peut plus surveiller les événements de la souris. Réactivez l’autorisation d’accessibilité pour continuer à utiliser le défilement par glissement.";
-"permissions_required_title" = "Autorisations requises";
-"permissions_required_message" = "Mac Drag Scroll a besoin des autorisations Accessibilité et Surveillance de l’entrée pour détecter le déclencheur de la souris.";
-"permission_input_monitoring" = "Surveillance de l’entrée";
-"permission_input_monitoring_granted_detail" = "Mac Drag Scroll peut détecter le déclencheur de souris configuré.";
-"permission_input_monitoring_missing_detail" = "Autorisez la Surveillance de l’entrée afin que le déclencheur de la souris soit détecté de façon fiable.";
-"permission_ready_title" = "Autorisations accordées";
+"permissions_required_title" = "Accessibilité requise";
+"permissions_required_message" = "Mac Drag Scroll a besoin de l’autorisation Accessibilité pour détecter le déclencheur de la souris et envoyer des événements de défilement.";
+"permission_ready_title" = "Accessibilité prête";
 "permission_ready_detail" = "Mac Drag Scroll peut détecter le déclencheur de la souris et envoyer des événements de défilement.";
-"permission_setup_title" = "Terminer la configuration des autorisations";
-"permission_setup_detail" = "Accordez les deux autorisations à cette copie précise de l’app. Mac Drag Scroll les vérifie automatiquement après leur activation.";
-"grant_permissions" = "Accorder les autorisations";
+"permission_setup_title" = "Activer l’accessibilité";
+"permission_setup_detail" = "Accordez l’autorisation Accessibilité à cette copie de l’app. Mac Drag Scroll démarre automatiquement dès que l’accès est activé.";
+"grant_permissions" = "Accorder l’accessibilité";
 "check_again" = "Vérifier à nouveau";
 "this_app_copy" = "Cette copie de l’app";
 "reveal_this_app" = "Afficher cette app";
@@ -146,6 +144,7 @@
 "menu_ignore_current_app" = "Ignorer l'application actuelle";
 "menu_ignore_app" = "Ignorer %@";
 "menu_ignored_app" = "%@ ignoré";
+"menu_enable_in_app" = "Activer dans %@";
 "current_app" = "Application actuelle";
 "quit" = "Quitter";
 "trigger_middle_click" = "Clic du milieu";
@@ -174,6 +173,7 @@
 "tooltip_reverse_direction" = "Inversez le défilement par glisser-déposer si la direction semble être inversée.";
 "tooltip_horizontal_scrolling" = "Autorisez le mouvement de glissement latéral pour envoyer des événements de défilement horizontal.";
 "tooltip_invert_horizontal" = "Inversez uniquement la direction de défilement horizontal.";
+"tooltip_keep_cursor_in_place" = "Maintient le pointeur au point d’origine du glissement lors d’un clic central. Relâcher le bouton ou toute interruption rétablit immédiatement son mouvement normal.";
 "tooltip_show_indicator" = "Afficher l'indicateur visuel pendant le défilement par glisser-déplacer.";
 "tooltip_visualizer_animation" = "Anime le visualiseur lorsqu'il apparaît, disparaît et réagit à la direction du glissement.";
 "tooltip_visualizer_size" = "Contrôle la taille du visualiseur de glissement.";
@@ -194,7 +194,7 @@
 "settings_visualizer_subtitle" = "Ajustez le visualiseur de glisser et prévisualisez-le instantanément.";
 "settings_scrolling_subtitle" = "Ajustez la vitesse, l’accélération et la zone morte.";
 "settings_apps_subtitle" = "Désactivez le défilement par glisser-déposer dans les applications sélectionnées.";
-"settings_permissions_subtitle" = "Vérifiez les autorisations macOS requises et l'état d'exécution.";
+"settings_permissions_subtitle" = "Vérifiez l’accès Accessibilité et l’état d’exécution.";
 "settings_updates_subtitle" = "Vérifiez les mises à jour validées, l’état des mises à jour automatiques et l’historique des versions.";
 "settings_about_subtitle" = "Identité du produit, liens et crédits.";
 "crash_detected_title" = "Mac Drag Scroll crashé";

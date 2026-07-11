@@ -21,6 +21,7 @@
 "reverse_direction" = "Direzione inversa";
 "horizontal_scrolling" = "Scorrimento orizzontale";
 "invert_horizontal" = "Inverti orizzontale";
+"keep_cursor_in_place" = "Mantieni il cursore in posizione";
 "acceleration_low" = "Basso";
 "acceleration_med" = "Med";
 "acceleration_high" = "Alto";
@@ -62,16 +63,13 @@
 "permission_required_message" = "Mac Drag Scroll necessita dell'autorizzazione di accessibilità per monitorare gli eventi del mouse a livello globale.";
 "permission_lost_title" = "Permesso di accessibilità perso";
 "permission_lost_message" = "Mac Drag Scroll non può più monitorare gli eventi del mouse. Riattiva l'autorizzazione Accessibilità per continuare a utilizzare lo scorrimento tramite trascinamento.";
-"permissions_required_title" = "Autorizzazioni richieste";
-"permissions_required_message" = "Mac Drag Scroll richiede Accessibilità e Monitoraggio input per rilevare il comando del mouse.";
-"permission_input_monitoring" = "Monitoraggio input";
-"permission_input_monitoring_granted_detail" = "Mac Drag Scroll può rilevare il comando del mouse configurato.";
-"permission_input_monitoring_missing_detail" = "Consenti il Monitoraggio input affinché il comando del mouse venga rilevato in modo affidabile.";
-"permission_ready_title" = "Autorizzazioni concesse";
+"permissions_required_title" = "Accessibilità richiesta";
+"permissions_required_message" = "Mac Drag Scroll richiede Accessibilità per rilevare il comando del mouse e inviare eventi di scorrimento.";
+"permission_ready_title" = "Accessibilità pronta";
 "permission_ready_detail" = "Mac Drag Scroll può rilevare il comando del mouse e inviare eventi di scorrimento.";
-"permission_setup_title" = "Completa la configurazione delle autorizzazioni";
-"permission_setup_detail" = "Concedi entrambe le autorizzazioni a questa esatta copia dell’app. Mac Drag Scroll le verifica automaticamente dopo che le hai attivate.";
-"grant_permissions" = "Concedi autorizzazioni";
+"permission_setup_title" = "Attiva Accessibilità";
+"permission_setup_detail" = "Concedi Accessibilità a questa copia dell’app. Mac Drag Scroll si avvia automaticamente quando l’accesso è abilitato.";
+"grant_permissions" = "Concedi Accessibilità";
 "check_again" = "Controlla di nuovo";
 "this_app_copy" = "Questa copia dell’app";
 "reveal_this_app" = "Mostra questa app";
@@ -146,6 +144,7 @@
 "menu_ignore_current_app" = "Ignora l'app corrente";
 "menu_ignore_app" = "Ignora %@";
 "menu_ignored_app" = "%@ Ignorato";
+"menu_enable_in_app" = "Attiva in %@";
 "current_app" = "Applicazione attuale";
 "quit" = "Esci";
 "trigger_middle_click" = "Clic centrale";
@@ -174,6 +173,7 @@
 "tooltip_reverse_direction" = "Inverti lo scorrimento tramite trascinamento se la direzione sembra al contrario.";
 "tooltip_horizontal_scrolling" = "Consenti il ​​movimento di trascinamento laterale per inviare eventi di scorrimento orizzontale.";
 "tooltip_invert_horizontal" = "Inverte solo la direzione di scorrimento orizzontale.";
+"tooltip_keep_cursor_in_place" = "Mantiene il puntatore nel punto di origine del trascinamento usando il clic centrale. Rilasciando il pulsante o in caso di interruzione, il movimento normale viene ripristinato subito.";
 "tooltip_show_indicator" = "Mostra l'indicatore visivo durante lo scorrimento del trascinamento.";
 "tooltip_visualizer_animation" = "Anima il visualizzatore quando appare, scompare e reagisce alla direzione del trascinamento.";
 "tooltip_visualizer_size" = "Controlla la dimensione del visualizzatore di trascinamento.";
@@ -194,7 +194,7 @@
 "settings_visualizer_subtitle" = "Sintonizza il visualizzatore di trascinamento e visualizzane l'anteprima istantaneamente.";
 "settings_scrolling_subtitle" = "Regola velocità, accelerazione e zona morta.";
 "settings_apps_subtitle" = "Disattiva lo scorrimento tramite trascinamento nelle app selezionate.";
-"settings_permissions_subtitle" = "Controlla le autorizzazioni macOS richieste e lo stato di runtime.";
+"settings_permissions_subtitle" = "Controlla l’accesso di Accessibilità e lo stato di runtime.";
 "settings_updates_subtitle" = "Controlla gli aggiornamenti verificati, lo stato degli aggiornamenti automatici e la cronologia delle versioni.";
 "settings_about_subtitle" = "Identità del prodotto, collegamenti e crediti.";
 "crash_detected_title" = "Mac Drag Scroll si è bloccato";

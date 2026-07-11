@@ -21,6 +21,7 @@
 "reverse_direction" = "Omvänd riktning";
 "horizontal_scrolling" = "Horisontell rullning";
 "invert_horizontal" = "Invertera horisontellt";
+"keep_cursor_in_place" = "Håll pekaren på plats";
 "acceleration_low" = "Låg";
 "acceleration_med" = "Med";
 "acceleration_high" = "Hög";
@@ -62,16 +63,13 @@
 "permission_required_message" = "Mac Drag Scroll behöver tillgänglighetsbehörighet för att övervaka mushändelser globalt.";
 "permission_lost_title" = "Tillgänglighet förlorad";
 "permission_lost_message" = "Mac Drag Scroll kan inte längre övervaka mushändelser. Återaktivera tillgänglighetsbehörighet för att fortsätta använda dragrullning.";
-"permissions_required_title" = "Behörigheter krävs";
-"permissions_required_message" = "Mac Drag Scroll behöver Hjälpmedel och Inmatningsövervakning för att identifiera musutlösaren.";
-"permission_input_monitoring" = "Inmatningsövervakning";
-"permission_input_monitoring_granted_detail" = "Mac Drag Scroll kan identifiera den konfigurerade musutlösaren.";
-"permission_input_monitoring_missing_detail" = "Tillåt Inmatningsövervakning så att musutlösaren kan identifieras tillförlitligt.";
-"permission_ready_title" = "Behörigheter klara";
+"permissions_required_title" = "Hjälpmedel krävs";
+"permissions_required_message" = "Mac Drag Scroll behöver Hjälpmedel för att identifiera musutlösaren och skicka rullningshändelser.";
+"permission_ready_title" = "Hjälpmedel klart";
 "permission_ready_detail" = "Mac Drag Scroll kan identifiera musutlösaren och skicka rullningshändelser.";
-"permission_setup_title" = "Slutför behörighetsinställningen";
-"permission_setup_detail" = "Ge båda behörigheterna till just den här appkopian. Mac Drag Scroll kontrollerar automatiskt när du har aktiverat dem.";
-"grant_permissions" = "Bevilja behörigheter";
+"permission_setup_title" = "Aktivera Hjälpmedel";
+"permission_setup_detail" = "Ge den här appkopian behörighet för Hjälpmedel. Mac Drag Scroll startar automatiskt när åtkomsten aktiveras.";
+"grant_permissions" = "Tillåt Hjälpmedel";
 "check_again" = "Kontrollera igen";
 "this_app_copy" = "Den här appkopian";
 "reveal_this_app" = "Visa den här appen";
@@ -146,6 +144,7 @@
 "menu_ignore_current_app" = "Ignorera aktuell app";
 "menu_ignore_app" = "Ignorera %@";
 "menu_ignored_app" = "%@ Ignoreras";
+"menu_enable_in_app" = "Aktivera i %@";
 "current_app" = "Aktuell app";
 "quit" = "Avsluta";
 "trigger_middle_click" = "Mellanklick";
@@ -174,6 +173,7 @@
 "tooltip_reverse_direction" = "Vänd rullningsriktningen om den känns bakvänd.";
 "tooltip_horizontal_scrolling" = "Tillåt sidledes dragrörelse för att skicka horisontella rullningshändelser.";
 "tooltip_invert_horizontal" = "Vänd endast den horisontella rullningsriktningen.";
+"tooltip_keep_cursor_in_place" = "Håll pekaren vid dragningens startpunkt när du använder mittenklick. När du släpper knappen eller om åtgärden avbryts återgår pekaren omedelbart till normal rörelse.";
 "tooltip_show_indicator" = "Visa den visuella indikatorn medan du drar rullar.";
 "tooltip_visualizer_animation" = "Animera visualiseraren när den visas, döljs och reagerar på dragriktningen.";
 "tooltip_visualizer_size" = "Styr storleken på dragvisualiseraren.";
@@ -194,7 +194,7 @@
 "settings_visualizer_subtitle" = "Ställ in dragvisualiseraren och förhandsgranska den direkt.";
 "settings_scrolling_subtitle" = "Justera hastighet, acceleration och dödzon.";
 "settings_apps_subtitle" = "Inaktivera dragrullning i valda appar.";
-"settings_permissions_subtitle" = "Kontrollera nödvändiga macOS-behörigheter och körtidsstatus.";
+"settings_permissions_subtitle" = "Kontrollera åtkomst till Hjälpmedel och körtidsstatus.";
 "settings_updates_subtitle" = "Kontrollera verifierade uppdateringar, status för automatiska uppdateringar och versionshistorik.";
 "settings_about_subtitle" = "Produktidentitet, länkar och krediter.";
 "crash_detected_title" = "Mac Drag Scroll kraschade";

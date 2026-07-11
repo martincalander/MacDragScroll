@@ -21,6 +21,7 @@
 "reverse_direction" = "反向";
 "horizontal_scrolling" = "水平捲動";
 "invert_horizontal" = "水平反轉";
+"keep_cursor_in_place" = "保持游標位置";
 "acceleration_low" = "低的";
 "acceleration_med" = "醫學";
 "acceleration_high" = "高的";
@@ -62,16 +63,13 @@
 "permission_required_message" = "Mac Drag Scroll 需要輔助權限才能全域監控滑鼠事件。";
 "permission_lost_title" = "輔助功能權限遺失";
 "permission_lost_message" = "Mac Drag Scroll 無法再監視滑鼠事件。重新啟用輔助功能權限以繼續使用拖曳滾動。";
-"permissions_required_title" = "需要權限";
-"permissions_required_message" = "Mac Drag Scroll 需要「輔助使用」和「輸入監控」權限才能偵測滑鼠觸發操作。";
-"permission_input_monitoring" = "輸入監控";
-"permission_input_monitoring_granted_detail" = "Mac Drag Scroll 可以偵測已設定的滑鼠觸發操作。";
-"permission_input_monitoring_missing_detail" = "請允許輸入監控，以便可靠地偵測滑鼠觸發操作。";
-"permission_ready_title" = "權限已就緒";
+"permissions_required_title" = "需要輔助使用權限";
+"permissions_required_message" = "Mac Drag Scroll 需要「輔助使用」權限才能偵測滑鼠觸發操作並傳送捲動事件。";
+"permission_ready_title" = "輔助使用已就緒";
 "permission_ready_detail" = "Mac Drag Scroll 可以偵測滑鼠觸發操作並傳送捲動事件。";
-"permission_setup_title" = "完成權限設定";
-"permission_setup_detail" = "請為目前這份 App 副本授予兩項權限。啟用後，Mac Drag Scroll 會自動檢查。";
-"grant_permissions" = "授予權限";
+"permission_setup_title" = "啟用輔助使用";
+"permission_setup_detail" = "請為目前這份 App 授予「輔助使用」權限。啟用存取後，Mac Drag Scroll 會自動啟動。";
+"grant_permissions" = "授予輔助使用權限";
 "check_again" = "再次檢查";
 "this_app_copy" = "目前的 App 副本";
 "reveal_this_app" = "顯示此 App";
@@ -146,6 +144,7 @@
 "menu_ignore_current_app" = "忽略當前應用程式";
 "menu_ignore_app" = "忽略 %@";
 "menu_ignored_app" = "忽略 %@";
+"menu_enable_in_app" = "在 %@ 中啟用";
 "current_app" = "目前應用程式";
 "quit" = "辭職";
 "trigger_middle_click" = "中鍵點選";
@@ -174,6 +173,7 @@
 "tooltip_reverse_direction" = "如果方向感覺相反，則反轉拖曳捲動方向。";
 "tooltip_horizontal_scrolling" = "允許側向拖曳移動以發送水平滾動事件。";
 "tooltip_invert_horizontal" = "僅翻轉水平滾動方向。";
+"tooltip_keep_cursor_in_place" = "使用中鍵拖移時，將指標保持在拖移起點。放開按鍵或發生任何中斷後，指標會立即恢復正常移動。";
 "tooltip_show_indicator" = "拖曳滾動時顯示視覺指示器。";
 "tooltip_visualizer_animation" = "在視覺化工具出現、消失並回應拖曳方向時啟用動畫。";
 "tooltip_visualizer_size" = "控制拖曳可視化工具的大小。";
@@ -194,7 +194,7 @@
 "settings_visualizer_subtitle" = "調整拖曳視覺化工具並立即預覽。";
 "settings_scrolling_subtitle" = "調整速度、加速度和死區。";
 "settings_apps_subtitle" = "在選定的應用程式中停用拖曳滾動。";
-"settings_permissions_subtitle" = "檢查所需的 macOS 權限和執行時間狀態。";
+"settings_permissions_subtitle" = "檢查輔助使用權限和執行時間狀態。";
 "settings_updates_subtitle" = "檢查已驗證的更新、自動更新狀態與版本記錄。";
 "settings_about_subtitle" = "產品標識、連結和信用。";
 "crash_detected_title" = "Mac Drag Scroll 崩潰";

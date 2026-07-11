@@ -21,6 +21,7 @@
 "reverse_direction" = "Reverse Direction";
 "horizontal_scrolling" = "Horizontal Scrolling";
 "invert_horizontal" = "Invert Horizontal";
+"keep_cursor_in_place" = "Keep Cursor in Place";
 "acceleration_low" = "Low";
 "acceleration_med" = "Med";
 "acceleration_high" = "High";
@@ -62,16 +63,13 @@
 "permission_required_message" = "Mac Drag Scroll needs Accessibility permission to monitor mouse events globally.";
 "permission_lost_title" = "Accessibility Permission Lost";
 "permission_lost_message" = "Mac Drag Scroll can no longer monitor mouse events. Re-enable Accessibility permission to keep using drag scrolling.";
-"permissions_required_title" = "Permissions Required";
-"permissions_required_message" = "Mac Drag Scroll needs Accessibility and Input Monitoring to listen for the mouse trigger.";
-"permission_input_monitoring" = "Input Monitoring";
-"permission_input_monitoring_granted_detail" = "Mac Drag Scroll can listen for the configured mouse trigger.";
-"permission_input_monitoring_missing_detail" = "Allow Input Monitoring so the mouse trigger can be detected reliably.";
-"permission_ready_title" = "Permissions Ready";
+"permissions_required_title" = "Accessibility Required";
+"permissions_required_message" = "Mac Drag Scroll needs Accessibility to listen for the mouse trigger and send scroll events.";
+"permission_ready_title" = "Accessibility Ready";
 "permission_ready_detail" = "Mac Drag Scroll can listen for the mouse trigger and send scroll events.";
-"permission_setup_title" = "Finish Permission Setup";
-"permission_setup_detail" = "Grant both permissions to this exact app copy. Mac Drag Scroll checks automatically after you switch them on.";
-"grant_permissions" = "Grant Permissions";
+"permission_setup_title" = "Enable Accessibility";
+"permission_setup_detail" = "Grant Accessibility to this app copy. Mac Drag Scroll starts automatically when access is enabled.";
+"grant_permissions" = "Grant Accessibility";
 "check_again" = "Check Again";
 "this_app_copy" = "This App Copy";
 "reveal_this_app" = "Reveal This App";
@@ -146,6 +144,7 @@
 "menu_ignore_current_app" = "Ignore Current App";
 "menu_ignore_app" = "Ignore %@";
 "menu_ignored_app" = "%@ Ignored";
+"menu_enable_in_app" = "Enable in %@";
 "current_app" = "Current App";
 "quit" = "Quit";
 "trigger_middle_click" = "Middle Click";
@@ -174,6 +173,7 @@
 "tooltip_reverse_direction" = "Flip drag scrolling if the direction feels backwards.";
 "tooltip_horizontal_scrolling" = "Allow sideways drag movement to send horizontal scroll events.";
 "tooltip_invert_horizontal" = "Flip only the horizontal scroll direction.";
+"tooltip_keep_cursor_in_place" = "Keep the pointer at the drag origin while using Middle Click. Releasing the button or any interruption restores normal pointer movement immediately.";
 "tooltip_show_indicator" = "Show the visual indicator while drag scrolling.";
 "tooltip_visualizer_animation" = "Animate the visualizer when it appears, disappears, and reacts to drag direction.";
 "tooltip_visualizer_size" = "Controls the size of the drag visualizer.";
@@ -194,7 +194,7 @@
 "settings_visualizer_subtitle" = "Tune the drag visualizer and preview it instantly.";
 "settings_scrolling_subtitle" = "Adjust speed, acceleration, and dead zone.";
 "settings_apps_subtitle" = "Disable drag scrolling in selected apps.";
-"settings_permissions_subtitle" = "Check required macOS permissions and runtime status.";
+"settings_permissions_subtitle" = "Check Accessibility access and runtime status.";
 "settings_updates_subtitle" = "Check verified updates, automatic update status, and version history.";
 "settings_about_subtitle" = "Product identity, links, and credits.";
 "crash_detected_title" = "Mac Drag Scroll Crashed";

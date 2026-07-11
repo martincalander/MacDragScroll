@@ -21,6 +21,7 @@
 "reverse_direction" = "Omgekeerde richting";
 "horizontal_scrolling" = "Horizontaal scrollen";
 "invert_horizontal" = "Horizontaal omkeren";
+"keep_cursor_in_place" = "Cursor op zijn plaats houden";
 "acceleration_low" = "Laag";
 "acceleration_med" = "Med";
 "acceleration_high" = "Hoog";
@@ -62,16 +63,13 @@
 "permission_required_message" = "Mac Drag Scroll heeft toegankelijkheidstoestemming nodig om muisgebeurtenissen wereldwijd te monitoren.";
 "permission_lost_title" = "Toegankelijkheidstoestemming verloren";
 "permission_lost_message" = "Mac Drag Scroll kan muisgebeurtenissen niet langer volgen. Schakel de toegankelijkheidsmachtiging opnieuw in om slepen-scrollen te blijven gebruiken.";
-"permissions_required_title" = "Machtigingen vereist";
-"permissions_required_message" = "Mac Drag Scroll heeft Toegankelijkheid en Invoercontrole nodig om de muisactivator te detecteren.";
-"permission_input_monitoring" = "Invoercontrole";
-"permission_input_monitoring_granted_detail" = "Mac Drag Scroll kan de ingestelde muisactivator detecteren.";
-"permission_input_monitoring_missing_detail" = "Sta Invoercontrole toe zodat de muisactivator betrouwbaar kan worden gedetecteerd.";
-"permission_ready_title" = "Machtigingen gereed";
+"permissions_required_title" = "Toegankelijkheid vereist";
+"permissions_required_message" = "Mac Drag Scroll heeft Toegankelijkheid nodig om de muisactivator te detecteren en scrollgebeurtenissen te versturen.";
+"permission_ready_title" = "Toegankelijkheid gereed";
 "permission_ready_detail" = "Mac Drag Scroll kan de muisactivator detecteren en scrolgebeurtenissen versturen.";
-"permission_setup_title" = "Machtigingen instellen";
-"permission_setup_detail" = "Geef beide machtigingen aan precies dit exemplaar van de app. Mac Drag Scroll controleert ze automatisch nadat je ze inschakelt.";
-"grant_permissions" = "Machtigingen verlenen";
+"permission_setup_title" = "Toegankelijkheid inschakelen";
+"permission_setup_detail" = "Geef dit exemplaar van de app toegang tot Toegankelijkheid. Mac Drag Scroll start automatisch zodra de toegang is ingeschakeld.";
+"grant_permissions" = "Toegankelijkheid toestaan";
 "check_again" = "Opnieuw controleren";
 "this_app_copy" = "Dit exemplaar van de app";
 "reveal_this_app" = "Deze app tonen";
@@ -146,6 +144,7 @@
 "menu_ignore_current_app" = "Negeer de huidige app";
 "menu_ignore_app" = "Negeer %@";
 "menu_ignored_app" = "%@ Genegeerd";
+"menu_enable_in_app" = "Inschakelen in %@";
 "current_app" = "Huidige app";
 "quit" = "Stoppen";
 "trigger_middle_click" = "Middelste klik";
@@ -174,6 +173,7 @@
 "tooltip_reverse_direction" = "Keer de sleeprichting om als deze verkeerd aanvoelt.";
 "tooltip_horizontal_scrolling" = "Sta zijwaartse sleepbewegingen toe om horizontale schuifgebeurtenissen te verzenden.";
 "tooltip_invert_horizontal" = "Draai alleen de horizontale schuifrichting om.";
+"tooltip_keep_cursor_in_place" = "Houdt de aanwijzer bij het beginpunt van de sleepbeweging wanneer je de middelste muisknop gebruikt. Zodra je de knop loslaat of de actie wordt onderbroken, beweegt de aanwijzer direct weer normaal.";
 "tooltip_show_indicator" = "Toon de visuele indicator tijdens het slepen en scrollen.";
 "tooltip_visualizer_animation" = "Animeert de visualisator wanneer deze verschijnt, verdwijnt en reageert op de sleeprichting.";
 "tooltip_visualizer_size" = "Bepaalt de grootte van de drag-visualizer.";
@@ -194,7 +194,7 @@
 "settings_visualizer_subtitle" = "Stem de drag-visualisator af en bekijk er direct een voorbeeld van.";
 "settings_scrolling_subtitle" = "Pas de snelheid, acceleratie en dode zone aan.";
 "settings_apps_subtitle" = "Schakel slepen-scrollen uit in geselecteerde apps.";
-"settings_permissions_subtitle" = "Controleer de vereiste macOS-machtigingen en runtime-status.";
+"settings_permissions_subtitle" = "Controleer de Toegankelijkheidstoegang en runtime-status.";
 "settings_updates_subtitle" = "Controleer geverifieerde updates, de status van automatische updates en de versiegeschiedenis.";
 "settings_about_subtitle" = "Productidentiteit, links en credits.";
 "crash_detected_title" = "Mac Drag Scroll Gecrasht";

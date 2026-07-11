@@ -304,7 +304,7 @@ final class CrashHandler: ObservableObject {
     ) -> Int {
         guard let urls = try? fileManager.contentsOfDirectory(
             at: sourceDirectory,
-            includingPropertiesForKeys: [.creationDateKey, .contentModificationDateKey, .isRegularFileKey],
+            includingPropertiesForKeys: nil,
             options: [.skipsHiddenFiles]
         ) else {
             return 0

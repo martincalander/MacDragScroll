@@ -120,12 +120,12 @@ struct WelcomeWindowView: View {
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(permissionState.hasRequiredPermissions
-                         ? localized("permission_ready_title", value: "Permissions Ready", comment: "Permissions ready title")
-                         : localized("permission_setup_title", value: "Finish Permission Setup", comment: "Permission setup title"))
+                         ? localized("permission_ready_title", value: "Accessibility Ready", comment: "Permissions ready title")
+                         : localized("permission_setup_title", value: "Enable Accessibility", comment: "Permission setup title"))
                         .font(.system(size: 13, weight: .semibold))
                     Text(permissionState.hasRequiredPermissions
                          ? localized("permission_ready_detail", value: "Mac Drag Scroll can listen for the mouse trigger and send scroll events.", comment: "Permissions ready detail")
-                         : localized("permission_setup_detail", value: "Grant both permissions to this exact app copy. Mac Drag Scroll checks automatically after you switch them on.", comment: "Permission setup detail"))
+                         : localized("permission_setup_detail", value: "Grant Accessibility to this app copy. Mac Drag Scroll starts automatically when access is enabled.", comment: "Permission setup detail"))
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -143,7 +143,7 @@ struct WelcomeWindowView: View {
                     Button {
                         AppDelegate.requestAccessibilityPermission()
                     } label: {
-                        Label(localized("grant_permissions", value: "Grant Permissions", comment: "Grant permissions button"), systemImage: "lock.open")
+                        Label(localized("grant_permissions", value: "Grant Accessibility", comment: "Grant Accessibility button"), systemImage: "lock.open")
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.small)
@@ -167,8 +167,10 @@ struct WelcomeWindowView: View {
                 Image("GitHubMark")
                     .resizable()
                     .renderingMode(.template)
+                    .scaledToFit()
                     .foregroundStyle(.primary)
                     .frame(width: 22, height: 22)
+                    .accessibilityHidden(true)
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(localized("welcome_star_title", value: "Star Mac Drag Scroll on GitHub", comment: "Welcome GitHub star title"))

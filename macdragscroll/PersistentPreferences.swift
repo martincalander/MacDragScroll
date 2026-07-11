@@ -7,8 +7,23 @@
 
 import Foundation
 
-private func cleanupPersistentPreferencesTestStorage() {
-    PersistentPreferences.cleanupTestStorageIfNeeded()
+nonisolated private func cleanupPersistentPreferencesTestStorage() {
+    let domainIdentifier = "com.martincalander.macdragscroll.tests.\(ProcessInfo.processInfo.processIdentifier)"
+    UserDefaults.standard.removePersistentDomain(forName: domainIdentifier)
+    UserDefaults.standard.synchronize()
+
+    if let testDefaults = UserDefaults(suiteName: domainIdentifier) {
+        testDefaults.removePersistentDomain(forName: domainIdentifier)
+        testDefaults.synchronize()
+    }
+
+    let preferencesFile = FileManager.default.homeDirectoryForCurrentUser
+        .appendingPathComponent("Library/Preferences/\(domainIdentifier).plist")
+    try? FileManager.default.removeItem(at: preferencesFile)
+    try? FileManager.default.removeItem(
+        at: FileManager.default.temporaryDirectory
+            .appendingPathComponent(domainIdentifier, isDirectory: true)
+    )
 }
 
 enum PersistentPreferences {
@@ -27,6 +42,9 @@ enum PersistentPreferences {
     static let legacyAppSettingsKey = "MacDragScroll.AppSettings"
     private static let backupSchemaVersionKey = "_MacDragScrollBackupSchemaVersion"
     private static let backupUpdatedAtKey = "_MacDragScrollBackupUpdatedAt"
+    private static let backupWriteDelay: TimeInterval = 0.25
+    private static var pendingBackupValues: [String: Any] = [:]
+    private static var backupWriteTimer: Timer?
     static let legacyDomainIdentifiers = [
         "com.local.MacDragScroll",
         "com.martincalander.MacDragScroll",
@@ -37,6 +55,12 @@ enum PersistentPreferences {
 
     static let userDefaults: UserDefaults = {
         _ = testCleanupRegistration
+
+        if !isRunningUnitTests,
+           Bundle.main.bundleIdentifier == storageDomainIdentifier {
+            return .standard
+        }
+
         return UserDefaults(suiteName: storageDomainIdentifier) ?? .standard
     }()
 
@@ -167,19 +191,26 @@ enum PersistentPreferences {
 
     static func persist(_ value: Any, forKey key: String) {
         userDefaults.set(value, forKey: key)
-        userDefaults.synchronize()
-        updateBackupValue(value, forKey: key)
+
+        guard let propertyListValue = normalizedPropertyListValue(value) else { return }
+        pendingBackupValues[key] = propertyListValue
+        scheduleBackupWrite()
     }
 
-    fileprivate static func cleanupTestStorageIfNeeded() {
-        guard isRunningUnitTests else { return }
-
-        UserDefaults.standard.removePersistentDomain(forName: storageDomainIdentifier)
-        UserDefaults.standard.synchronize()
-        userDefaults.removePersistentDomain(forName: storageDomainIdentifier)
+    static func flushPendingWrites() {
+        backupWriteTimer?.invalidate()
+        backupWriteTimer = nil
         userDefaults.synchronize()
-        try? FileManager.default.removeItem(atPath: preferencesFilePath)
-        try? FileManager.default.removeItem(at: applicationSupportDirectory)
+
+        guard !pendingBackupValues.isEmpty else { return }
+
+        var backup = loadBackup(from: backupFileURL) ?? [:]
+        for (key, value) in pendingBackupValues {
+            backup[key] = value
+        }
+        if writeBackup(backup, to: backupFileURL) {
+            pendingBackupValues.removeAll()
+        }
     }
 
     private static var applicationSupportDirectory: URL {
@@ -201,12 +232,17 @@ enum PersistentPreferences {
         #endif
     }
 
-    private static func updateBackupValue(_ value: Any, forKey key: String) {
-        guard let propertyListValue = normalizedPropertyListValue(value) else { return }
+    private static func scheduleBackupWrite() {
+        backupWriteTimer?.invalidate()
 
-        var backup = loadBackup(from: backupFileURL) ?? [:]
-        backup[key] = propertyListValue
-        writeBackup(backup, to: backupFileURL)
+        let timer = Timer(timeInterval: backupWriteDelay, repeats: false) { _ in
+            MainActor.assumeIsolated {
+                flushPendingWrites()
+            }
+        }
+        timer.tolerance = 0.05
+        backupWriteTimer = timer
+        RunLoop.main.add(timer, forMode: .common)
     }
 
     private static func loadBackup(from backupFileURL: URL) -> [String: Any]? {
@@ -219,7 +255,8 @@ enum PersistentPreferences {
         return backup
     }
 
-    private static func writeBackup(_ backup: [String: Any], to backupFileURL: URL) {
+    @discardableResult
+    private static func writeBackup(_ backup: [String: Any], to backupFileURL: URL) -> Bool {
         var writableBackup = backup
         writableBackup[backupSchemaVersionKey] = 1
         writableBackup[backupUpdatedAtKey] = Date()
@@ -236,8 +273,10 @@ enum PersistentPreferences {
                 options: 0
             )
             try data.write(to: backupFileURL, options: .atomic)
+            return true
         } catch {
             NSLog("[MacDragScroll] Failed to write preferences backup: \(error.localizedDescription)")
+            return false
         }
     }
 

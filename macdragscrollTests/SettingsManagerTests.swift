@@ -5,6 +5,7 @@
 //  Created by Martin Calander on 2026-01-17.
 //
 
+import AppKit
 import XCTest
 import Sparkle
 @testable import macdragscroll
@@ -29,6 +30,7 @@ final class SettingsManagerTests: XCTestCase {
     private var originalReverseScrollDirection = false
     private var originalHorizontalScrollingEnabled = true
     private var originalInvertHorizontalScroll = false
+    private var originalKeepCursorInPlace = false
     private var originalTriggerConfig = TriggerConfig.default
     
     override func setUp() {
@@ -51,6 +53,7 @@ final class SettingsManagerTests: XCTestCase {
         originalReverseScrollDirection = settings.reverseScrollDirection
         originalHorizontalScrollingEnabled = settings.horizontalScrollingEnabled
         originalInvertHorizontalScroll = settings.invertHorizontalScroll
+        originalKeepCursorInPlace = settings.keepCursorInPlace
         originalTriggerConfig = settings.triggerConfig
     }
     
@@ -66,6 +69,7 @@ final class SettingsManagerTests: XCTestCase {
         settings.reverseScrollDirection = originalReverseScrollDirection
         settings.horizontalScrollingEnabled = originalHorizontalScrollingEnabled
         settings.invertHorizontalScroll = originalInvertHorizontalScroll
+        settings.keepCursorInPlace = originalKeepCursorInPlace
         settings.triggerConfig = originalTriggerConfig
         settings.hasCompletedWelcome = originalHasCompletedWelcome
         settings.appLanguage = originalAppLanguage
@@ -134,6 +138,23 @@ final class SettingsManagerTests: XCTestCase {
         settings.removeExcludedApp("com.nonexistent.app")
         
         XCTAssertEqual(settings.excludedApps.count, initialCount, "Removing non-existent app should not change list")
+    }
+
+    func testToggleExcludedAppAddsThenRemovesNormalizedIdentifier() {
+        settings.excludedApps = []
+
+        XCTAssertTrue(settings.toggleExcludedApp("  com.example.toggle\n"))
+        XCTAssertEqual(settings.excludedApps, ["com.example.toggle"])
+
+        XCTAssertFalse(settings.toggleExcludedApp("com.example.toggle"))
+        XCTAssertTrue(settings.excludedApps.isEmpty)
+    }
+
+    func testToggleExcludedAppRejectsEmptyIdentifier() {
+        settings.excludedApps = ["com.example.existing"]
+
+        XCTAssertFalse(settings.toggleExcludedApp(" \n "))
+        XCTAssertEqual(settings.excludedApps, ["com.example.existing"])
     }
     
     // MARK: - Default Settings Tests
@@ -235,6 +256,21 @@ final class SettingsManagerTests: XCTestCase {
         XCTAssertEqual(numberValue(in: backup, forKey: "visualizerSize"), 0.55)
         XCTAssertEqual(backup["excludedApps"] as? [String], ["com.example.Editor"])
         XCTAssertNil(backup["unrelatedPreference"])
+    }
+
+    func testPendingPreferenceWritesFlushLatestValueToBackup() throws {
+        let originalValue = settings.scrollSpeed
+        defer {
+            settings.scrollSpeed = originalValue
+            PersistentPreferences.flushPendingWrites()
+        }
+
+        settings.scrollSpeed = 1.0
+        settings.scrollSpeed = 4.5
+        PersistentPreferences.flushPendingWrites()
+
+        let backup = try readPropertyList(from: PersistentPreferences.backupFileURL)
+        XCTAssertEqual(numberValue(in: backup, forKey: "scrollSpeed"), 4.5)
     }
 
     func testLegacyPreferenceMigrationCopiesMissingKeysWithoutOverwritingCanonicalValues() {
@@ -432,6 +468,14 @@ final class SettingsManagerTests: XCTestCase {
         XCTAssertTrue(settings.keepRunningInMenuBar)
     }
 
+    func testKeepCursorInPlaceIsOffByDefaultAndCanBePersisted() {
+        settings.keepCursorInPlace = true
+        XCTAssertTrue(settings.keepCursorInPlace)
+
+        settings.resetToDefaults()
+        XCTAssertFalse(settings.keepCursorInPlace)
+    }
+
     func testLanguageSelectionCanBePersisted() {
         settings.appLanguage = .swedish
         XCTAssertEqual(settings.appLanguage, .swedish)
@@ -516,16 +560,37 @@ final class SettingsManagerTests: XCTestCase {
     func testAppBundleVersionMetadataUsesStableReleaseValues() {
         let appBundle = Bundle(for: AppDelegate.self)
 
-        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "1.1.1")
-        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String, "111")
-        XCTAssertEqual(AppDelegate.appVersion, "1.1.1")
-        XCTAssertEqual(AppDelegate.appBuild, "111")
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "1.2.0")
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String, "120")
+        XCTAssertEqual(AppDelegate.appVersion, "1.2.0")
+        XCTAssertEqual(AppDelegate.appBuild, "120")
     }
 
     func testAppBundleSupportsMacOS14AndLater() {
         let appBundle = Bundle(for: AppDelegate.self)
 
         XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "LSMinimumSystemVersion") as? String, "14.0")
+    }
+
+    func testBundledIdentityAssetsResolveAndGitHubMarkKeepsOfficialProportions() throws {
+        let appBundle = Bundle(for: AppDelegate.self)
+        let assetNames = ["BrandMark", "DockIconDark", "DockIconLight", "GitHubMark"]
+
+        for assetName in assetNames {
+            XCTAssertNotNil(
+                appBundle.image(forResource: NSImage.Name(assetName)),
+                "Expected bundled identity asset \(assetName)"
+            )
+        }
+
+        let githubMark = try XCTUnwrap(
+            appBundle.image(forResource: NSImage.Name("GitHubMark"))
+        )
+        XCTAssertEqual(
+            githubMark.size.width / githubMark.size.height,
+            98.0 / 96.0,
+            accuracy: 0.001
+        )
     }
 
     func testSparkleUpdateConfigurationIsPresent() {
@@ -638,68 +703,67 @@ final class SettingsManagerTests: XCTestCase {
         let isTrusted = false
         let state = AppDelegate.PermissionState(
             accessibilityPermissionChecker: { isTrusted },
-            accessibilityPermissionRequester: { _ in isTrusted },
-            inputMonitoringPermissionChecker: { true },
-            inputMonitoringPermissionRequester: { true }
+            accessibilityPermissionRequester: { _ in isTrusted }
         )
 
         state.setEventMonitoringState(.active)
         state.refresh()
 
         XCTAssertFalse(state.hasAccessibilityPermission)
-        XCTAssertTrue(state.hasInputMonitoringPermission)
         XCTAssertFalse(state.hasRequiredPermissions)
         XCTAssertEqual(state.eventMonitoringState, .waiting)
     }
 
-    func testPermissionStateResetsMonitoringWhenInputMonitoringIsMissing() {
+    func testPermissionStateTreatsAccessibilityAsCompleteSetup() {
         let state = AppDelegate.PermissionState(
             accessibilityPermissionChecker: { true },
-            accessibilityPermissionRequester: { _ in true },
-            inputMonitoringPermissionChecker: { false },
-            inputMonitoringPermissionRequester: { false }
+            accessibilityPermissionRequester: { _ in true }
         )
 
         state.setEventMonitoringState(.active)
         state.refresh()
 
         XCTAssertTrue(state.hasAccessibilityPermission)
-        XCTAssertFalse(state.hasInputMonitoringPermission)
-        XCTAssertFalse(state.hasRequiredPermissions)
-        XCTAssertEqual(state.eventMonitoringState, .waiting)
+        XCTAssertTrue(state.hasRequiredPermissions)
+        XCTAssertEqual(state.eventMonitoringState, .active)
     }
 
-    func testPermissionStateCanRequestAccessibilityPermission() {
-        var promptWasRequested = false
-        var inputMonitoringWasRequested = false
+    func testPermissionStateRequestsAccessibilityWhenMissing() {
+        var accessibilityWasRequested = false
         let state = AppDelegate.PermissionState(
             accessibilityPermissionChecker: { false },
             accessibilityPermissionRequester: { shouldPrompt in
-                promptWasRequested = shouldPrompt
-                return true
-            },
-            inputMonitoringPermissionChecker: { false },
-            inputMonitoringPermissionRequester: {
-                inputMonitoringWasRequested = true
+                accessibilityWasRequested = shouldPrompt
+                // Accessibility prompting is asynchronous and initially returns false.
+                return false
+            }
+        )
+
+        XCTAssertFalse(state.requestAccessibilityPermission())
+
+        XCTAssertTrue(accessibilityWasRequested)
+        XCTAssertFalse(state.hasAccessibilityPermission)
+        XCTAssertFalse(state.hasRequiredPermissions)
+    }
+
+    func testPermissionStateDoesNotRequestAnythingWhenSetupIsComplete() {
+        var requestCount = 0
+        let state = AppDelegate.PermissionState(
+            accessibilityPermissionChecker: { true },
+            accessibilityPermissionRequester: { _ in
+                requestCount += 1
                 return true
             }
         )
 
-        XCTAssertTrue(state.request())
-
-        XCTAssertTrue(promptWasRequested)
-        XCTAssertTrue(inputMonitoringWasRequested)
-        XCTAssertTrue(state.hasAccessibilityPermission)
-        XCTAssertTrue(state.hasInputMonitoringPermission)
-        XCTAssertTrue(state.hasRequiredPermissions)
+        XCTAssertTrue(state.requestAccessibilityPermission())
+        XCTAssertEqual(requestCount, 0)
     }
 
     func testPermissionStatePreservesFailedMonitoringStateWhileTrusted() {
         let state = AppDelegate.PermissionState(
             accessibilityPermissionChecker: { true },
-            accessibilityPermissionRequester: { _ in true },
-            inputMonitoringPermissionChecker: { true },
-            inputMonitoringPermissionRequester: { true }
+            accessibilityPermissionRequester: { _ in true }
         )
 
         state.setEventMonitoringState(.failed)
@@ -731,6 +795,7 @@ final class SettingsManagerTests: XCTestCase {
         settings.reverseScrollDirection = true
         settings.horizontalScrollingEnabled = false
         settings.invertHorizontalScroll = true
+        settings.keepCursorInPlace = true
         settings.visualizerSize = 1.4
         settings.visualizerTintStyle = .aqua
         settings.liquidGlassIntensity = 1.9
@@ -744,6 +809,7 @@ final class SettingsManagerTests: XCTestCase {
         XCTAssertFalse(settings.reverseScrollDirection, "Default drag scroll direction should not be reversed")
         XCTAssertTrue(settings.horizontalScrollingEnabled, "Horizontal scrolling should be enabled by default")
         XCTAssertFalse(settings.invertHorizontalScroll, "Horizontal scrolling should not be inverted by default")
+        XCTAssertFalse(settings.keepCursorInPlace, "Cursor holding should be opt-in")
         XCTAssertEqual(settings.visualizerSize, 1.0, accuracy: 0.001)
         XCTAssertEqual(settings.visualizerTintStyle, .clear)
         XCTAssertEqual(settings.liquidGlassIntensity, 1.35, accuracy: 0.001)
@@ -1071,6 +1137,19 @@ final class TriggerConfigTests: XCTestCase {
         XCTAssertFalse(unsafeRightClick.matches(button: 1, modifiers: []))
     }
 
+    func testCapturedPrimaryAndSecondaryButtonsReceiveSafeModifier() {
+        let leftClick = TriggerConfig.captured(button: 0, modifiers: [])
+        let rightClick = TriggerConfig.captured(button: 1, modifiers: [])
+        let middleClick = TriggerConfig.captured(button: 2, modifiers: [])
+
+        XCTAssertTrue(leftClick.requiresCommand)
+        XCTAssertTrue(rightClick.requiresCommand)
+        XCTAssertFalse(middleClick.hasModifiers)
+        XCTAssertTrue(leftClick.matches(button: 0, modifiers: [.command]))
+        XCTAssertTrue(rightClick.matches(button: 1, modifiers: [.command]))
+        XCTAssertTrue(middleClick.matches(button: 2, modifiers: []))
+    }
+
     func testRequiredModifiersMustRemainHeld() {
         let config = TriggerConfig(
             mouseButton: 2,
@@ -1085,5 +1164,50 @@ final class TriggerConfigTests: XCTestCase {
         XCTAssertFalse(config.matches(button: 2, modifiers: [.command, .option, .shift]))
         XCTAssertTrue(config.modifiersStillHeld([.command, .option, .shift]))
         XCTAssertFalse(config.modifiersStillHeld([.option]))
+    }
+}
+
+final class InstalledAppDiscoveryTests: XCTestCase {
+    func testDiscoveryDeduplicatesBundleIdentifiersAndPrioritizesFrontmostApp() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("MacDragScrollInstalledApps-\(UUID().uuidString)", isDirectory: true)
+        let firstDirectory = root.appendingPathComponent("First", isDirectory: true)
+        let secondDirectory = root.appendingPathComponent("Second", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        try createApp(named: "Alpha.app", bundleId: "com.example.alpha", in: firstDirectory)
+        try createApp(named: "Duplicate.app", bundleId: "com.example.duplicate", in: firstDirectory)
+        try createApp(named: "Duplicate Copy.app", bundleId: "com.example.duplicate", in: secondDirectory)
+        try createApp(named: "Beta.APP", bundleId: "com.example.beta", in: secondDirectory)
+
+        let apps = InstalledAppDiscovery.load(
+            frontmostBundleId: "com.example.beta",
+            directories: [firstDirectory.path, secondDirectory.path]
+        )
+
+        XCTAssertEqual(apps.map(\.bundleId), [
+            "com.example.beta",
+            "com.example.alpha",
+            "com.example.duplicate"
+        ])
+        XCTAssertEqual(apps.filter { $0.bundleId == "com.example.duplicate" }.count, 1)
+        XCTAssertTrue(
+            apps.first(where: { $0.bundleId == "com.example.duplicate" })?.path
+                .hasPrefix(firstDirectory.path) == true
+        )
+    }
+
+    private func createApp(named name: String, bundleId: String, in directory: URL) throws {
+        let contentsDirectory = directory
+            .appendingPathComponent(name, isDirectory: true)
+            .appendingPathComponent("Contents", isDirectory: true)
+        try FileManager.default.createDirectory(at: contentsDirectory, withIntermediateDirectories: true)
+
+        let data = try PropertyListSerialization.data(
+            fromPropertyList: ["CFBundleIdentifier": bundleId],
+            format: .xml,
+            options: 0
+        )
+        try data.write(to: contentsDirectory.appendingPathComponent("Info.plist"), options: .atomic)
     }
 }

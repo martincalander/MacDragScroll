@@ -4,7 +4,7 @@ Mac Drag Scroll is a local macOS utility.
 
 ## What The App Needs
 
-Mac Drag Scroll needs Accessibility and Input Monitoring permissions to detect the middle mouse button globally and send scroll events to the active app.
+Mac Drag Scroll needs Accessibility permission to detect the configured mouse button globally and send scroll events to the active app. Input Monitoring is not required.
 
 ## What The App Does Not Do
 

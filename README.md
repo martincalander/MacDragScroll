@@ -68,7 +68,7 @@ brew install --cask martincalander/tap/mac-drag-scroll
 1. Download `MacDragScroll.dmg` from the [latest release](https://github.com/martincalander/MacDragScroll/releases/latest).
 2. Open the disk image and drag **Mac Drag Scroll** into **Applications**.
 3. Right-click the app in Finder, choose **Open**, then confirm the first launch.
-4. Grant Accessibility and Input Monitoring access when macOS asks.
+4. Grant Accessibility access when macOS asks.
 
 <p align="center">
   <img src="docs/assets/mac-drag-scroll-install-demo.gif" width="800" alt="Drag Mac Drag Scroll into the Applications folder">
@@ -79,7 +79,7 @@ brew install --cask martincalander/tap/mac-drag-scroll
 
 Current releases carry a stable project code signature but are not Apple Developer ID signed or notarized because that requires a paid Apple Developer membership. macOS may therefore block a normal double-click on a newly downloaded build. In Finder, right-click **Mac Drag Scroll**, choose **Open**, and confirm. This is required once for each manually downloaded build.
 
-The pinned project identity keeps Accessibility and Input Monitoring grants stable across updates. Sparkle signatures and GitHub build provenance independently protect and document release files. See [Security](SECURITY.md) and [Releasing](docs/RELEASING.md).
+The pinned project identity keeps the Accessibility grant stable across updates. Sparkle signatures and GitHub build provenance independently protect and document release files. See [Security](SECURITY.md) and [Releasing](docs/RELEASING.md).
 </details>
 
 <details>
@@ -92,15 +92,15 @@ curl -fsSL https://github.com/martincalander/MacDragScroll/raw/main/install.sh |
 
 ## Grant Permissions
 
-Mac Drag Scroll needs two macOS permissions: **Input Monitoring** detects the external mouse button globally, and **Accessibility** sends scroll events to the target window. It does not use these permissions to record typing or inspect content.
+Mac Drag Scroll needs **Accessibility** permission to detect the configured mouse button globally and send scroll events to the target window. It does not use this permission to record typing or inspect content. Input Monitoring is not required.
 
 <p align="center">
-  <img src="docs/assets/mac-drag-scroll-permission-demo.gif" width="800" alt="Enable Accessibility and Input Monitoring for Mac Drag Scroll">
+  <img src="docs/assets/mac-drag-scroll-permission-demo.gif" width="800" alt="Enable Accessibility for Mac Drag Scroll">
 </p>
 
-Open **System Settings → Privacy & Security**, enable Mac Drag Scroll under both **Accessibility** and **Input Monitoring**, then reopen the app if macOS requests it. The Permissions tab shows live status and provides repair shortcuts.
+Open **System Settings → Privacy & Security → Accessibility** and enable Mac Drag Scroll. The app checks automatically and starts monitoring as soon as access is active; a restart action appears only if macOS does not activate the event tap immediately.
 
-When upgrading from `1.1.0` or earlier to `1.1.1`, macOS requires one final permission grant because the earlier builds used changing ad-hoc identities. Later updates retain the pinned identity and should not require permissions again.
+When upgrading from `1.1.0` or earlier to `1.2.0`, macOS requires one final Accessibility grant because the earlier builds used changing ad-hoc identities. Later updates retain the pinned identity and should not require permission again.
 
 ## Tune the Feel
 
@@ -110,6 +110,7 @@ Open Settings from the menu bar icon.
 | --- | --- |
 | Speed and acceleration | Base scroll rate and how quickly it increases with drag distance. |
 | Dead zone | The neutral area around the gesture origin. |
+| Cursor hold | Optionally keep the pointer at the middle-click origin so pointer-sensitive content continues scrolling. |
 | Trigger | Middle click by default, with guarded alternatives for primary and secondary buttons. |
 | Visualizer | Size, opacity, tint, glass intensity, and motion effects. |
 | Excluded apps | Applications where drag scrolling should stay disabled. |
@@ -169,7 +170,7 @@ Contributions are welcome. Start with [Contributing](CONTRIBUTING.md), the [Code
 
 - macOS 14 or later
 - An external mouse with a middle button or clickable scroll wheel
-- Accessibility and Input Monitoring permissions
+- Accessibility permission
 
 ## Credits
 

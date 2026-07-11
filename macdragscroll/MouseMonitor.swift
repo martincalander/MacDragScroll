@@ -64,6 +64,50 @@ enum EventTapInterruption {
     }
 }
 
+enum CursorHoldBehavior {
+    static let middleMouseButton = 2
+    static let maximumVirtualDistance: CGFloat = 2_048
+    static let releaseMissThreshold = 2
+
+    static func shouldActivate(isEnabled: Bool, mouseButton: Int) -> Bool {
+        isEnabled && mouseButton == middleMouseButton
+    }
+
+    static func nextVirtualPoint(
+        current: CGPoint,
+        origin: CGPoint,
+        deltaX: CGFloat,
+        deltaY: CGFloat
+    ) -> CGPoint {
+        guard deltaX.isFinite, deltaY.isFinite else { return current }
+
+        // Quartz mouse deltas grow downward; the visualizer uses AppKit's upward-growing Y axis.
+        let proposed = CGPoint(x: current.x + deltaX, y: current.y - deltaY)
+        let offsetX = proposed.x - origin.x
+        let offsetY = proposed.y - origin.y
+        let distance = hypot(offsetX, offsetY)
+
+        guard distance.isFinite else { return current }
+        guard distance > maximumVirtualDistance else { return proposed }
+
+        let scale = maximumVirtualDistance / distance
+        return CGPoint(
+            x: origin.x + offsetX * scale,
+            y: origin.y + offsetY * scale
+        )
+    }
+
+    static func releaseMissCount(afterButtonState isPressed: Bool, previousCount: Int) -> Int {
+        guard !isPressed else { return 0 }
+        guard previousCount < releaseMissThreshold else { return releaseMissThreshold }
+        return max(previousCount, 0) + 1
+    }
+
+    static func shouldCancelForMissingButton(releaseMissCount: Int) -> Bool {
+        releaseMissCount >= releaseMissThreshold
+    }
+}
+
 enum ScrollPhysics {
     private static let minimumAxisDirection = 0.12
 
@@ -144,9 +188,17 @@ enum ScrollPhysics {
 enum ScrollEventFactory {
     static let syntheticEventMarker: Int64 = 0x4D445343524F4C4C
 
-    static func makeScrollEvent(deltas: ScrollDeltas, location: CGPoint) -> CGEvent? {
+    static func makeScrollEvent(
+        deltas: ScrollDeltas,
+        location: CGPoint,
+        source: CGEventSource? = nil
+    ) -> CGEvent? {
+        guard let source = source ?? CGEventSource(stateID: .combinedSessionState) else {
+            return nil
+        }
+
         guard let event = CGEvent(
-            scrollWheelEvent2Source: CGEventSource(stateID: .combinedSessionState),
+            scrollWheelEvent2Source: source,
             units: .pixel,
             wheelCount: 2,
             wheel1: deltas.vertical,
@@ -172,6 +224,7 @@ final class MouseMonitor {
         static let doubleClickReactionMaxTravel: CGFloat = 8
         static let doubleClickReactionDuration: TimeInterval = 0.42
         static let windowValidationInterval: TimeInterval = 0.15
+        static let cursorHoldWatchdogGracePeriod: CFTimeInterval = 0.12
     }
 
     private struct WindowIdentity: Equatable {
@@ -199,6 +252,8 @@ final class MouseMonitor {
     private var overlayWindow: ScrollOverlayWindow?
     private var clickReactionWindow: ScrollOverlayWindow?
     private var clickReactionHideTimer: Timer?
+    private let syntheticEventSource = CGEventSource(stateID: .combinedSessionState)
+    private var userInteractionActivity: NSObjectProtocol?
 
     private var isTriggerActive = false
     private var isActivated = false
@@ -210,12 +265,15 @@ final class MouseMonitor {
     private var originQuartzPoint: CGPoint = .zero
     private var currentQuartzPoint: CGPoint = .zero
     private var originWindow: WindowSnapshot?
+    private var originBundleIdentifier: String?
     private var activeTriggerConfig: TriggerConfig?
     private var pendingClick: PendingClick?
     private var lastQuickClick: TriggerClickSample?
     private var didShowReactionForActivePress = false
+    private var isCursorHoldActive = false
+    private var cursorHoldReleaseMissCount = 0
     private var isOriginWindowAvailable = false
-    private var lastWindowValidation = Date.distantPast
+    private var lastWindowValidation: CFTimeInterval = 0
 
     private var scrollSpeed: Double { SettingsManager.shared.scrollSpeed }
     private var deadZoneRadius: Double { SettingsManager.shared.deadZoneRadius }
@@ -225,14 +283,28 @@ final class MouseMonitor {
     private var invertHorizontalScroll: Bool { SettingsManager.shared.invertHorizontalScroll }
     private var triggerConfig: TriggerConfig { SettingsManager.shared.triggerConfig }
     private var screenParametersObserver: NSObjectProtocol?
+    private var workspaceObservers: [NSObjectProtocol] = []
 
     var isRunning: Bool {
-        eventTap != nil
+        guard let eventTap, eventTapRunLoopSource != nil else { return false }
+        return CFMachPortIsValid(eventTap) && CGEvent.tapIsEnabled(tap: eventTap)
     }
 
     @discardableResult
     func start() -> Bool {
-        guard eventTap == nil else { return true }
+        if let eventTap,
+           CFMachPortIsValid(eventTap),
+           eventTapRunLoopSource != nil {
+            if !CGEvent.tapIsEnabled(tap: eventTap) {
+                CGEvent.tapEnable(tap: eventTap, enable: true)
+            }
+            return CGEvent.tapIsEnabled(tap: eventTap)
+        }
+
+        if eventTap != nil || eventTapRunLoopSource != nil {
+            stop()
+        }
+
         guard AXIsProcessTrusted() else {
             NSLog("[MacDragScroll] Accessibility permission is required before creating the mouse event tap.")
             return false
@@ -263,14 +335,17 @@ final class MouseMonitor {
             return false
         }
 
-        eventTap = tap
-        eventTapRunLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0)
-
-        if let source = eventTapRunLoopSource {
-            CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
+        guard let source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0) else {
+            CFMachPortInvalidate(tap)
+            NSLog("[MacDragScroll] Failed to create the mouse event tap run-loop source.")
+            return false
         }
 
-        installScreenParametersObserver()
+        eventTap = tap
+        eventTapRunLoopSource = source
+        CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
+
+        installInteractionObservers()
         CGEvent.tapEnable(tap: tap, enable: true)
         return true
     }
@@ -290,10 +365,10 @@ final class MouseMonitor {
             eventTapRunLoopSource = nil
         }
 
-        removeScreenParametersObserver()
+        removeInteractionObservers()
     }
 
-    private func installScreenParametersObserver() {
+    private func installInteractionObservers() {
         guard screenParametersObserver == nil else { return }
 
         screenParametersObserver = NotificationCenter.default.addObserver(
@@ -301,20 +376,71 @@ final class MouseMonitor {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            self?.handleScreenParametersChanged()
+            MainActor.assumeIsolated {
+                self?.cancelInteractionForSystemChange()
+            }
         }
+
+        let workspaceCenter = NSWorkspace.shared.notificationCenter
+        let cancellationNotifications: [Notification.Name] = [
+            NSWorkspace.willSleepNotification,
+            NSWorkspace.sessionDidResignActiveNotification,
+            NSWorkspace.screensDidSleepNotification
+        ]
+        workspaceObservers = cancellationNotifications.map { name in
+            workspaceCenter.addObserver(
+                forName: name,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                MainActor.assumeIsolated {
+                    self?.cancelInteractionForSystemChange()
+                }
+            }
+        }
+
+        workspaceObservers.append(
+            workspaceCenter.addObserver(
+                forName: NSWorkspace.didActivateApplicationNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] notification in
+                let activatedProcessIdentifier = (
+                    notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
+                )?.processIdentifier
+                MainActor.assumeIsolated {
+                    self?.handleApplicationActivation(
+                        processIdentifier: activatedProcessIdentifier
+                    )
+                }
+            }
+        )
     }
 
-    private func removeScreenParametersObserver() {
+    private func removeInteractionObservers() {
         if let screenParametersObserver {
             NotificationCenter.default.removeObserver(screenParametersObserver)
             self.screenParametersObserver = nil
         }
+
+        let workspaceCenter = NSWorkspace.shared.notificationCenter
+        for observer in workspaceObservers {
+            workspaceCenter.removeObserver(observer)
+        }
+        workspaceObservers.removeAll()
     }
 
-    private func handleScreenParametersChanged() {
+    private func cancelInteractionForSystemChange() {
         if isTriggerActive || isActivated {
             cancelInteraction()
+        }
+    }
+
+    private func handleApplicationActivation(processIdentifier: pid_t?) {
+        guard isTriggerActive, let originWindow else { return }
+        guard processIdentifier == originWindow.identity.ownerPID else {
+            cancelInteraction()
+            return
         }
     }
 
@@ -353,20 +479,18 @@ final class MouseMonitor {
             return pass(event)
         }
 
-        let quartzPoint = event.location
-        let point = appKitPoint(fromQuartzPoint: quartzPoint)
-        let modifiers = Self.modifierFlags(from: event.flags)
-
         if type == .flagsChanged {
-            handleFlagsChanged(modifiers)
+            if isTriggerActive {
+                handleFlagsChanged(Self.modifierFlags(from: event.flags))
+            }
             return pass(event)
         }
 
         if type == .mouseMoved {
-            if isTriggerActive {
-                handlePointerMoved(to: point, quartzPoint: quartzPoint)
-            }
-            return pass(event)
+            guard isTriggerActive else { return pass(event) }
+
+            let shouldSuppressEvent = handlePointerEvent(event)
+            return shouldSuppressEvent ? nil : pass(event)
         }
 
         guard let buttonNumber = Self.buttonNumber(for: type, event: event) else {
@@ -375,10 +499,22 @@ final class MouseMonitor {
 
         if Self.isMouseDown(type) {
             let config = triggerConfig
+            let modifiers = Self.modifierFlags(from: event.flags)
             guard config.matches(button: buttonNumber, modifiers: modifiers),
-                  Self.canStartDragScroll(from: event),
-                  let targetWindow = windowAtPoint(point),
-                  !isAppExcluded(processIdentifier: targetWindow.identity.ownerPID) else {
+                  Self.canStartDragScroll(from: event) else {
+                return pass(event)
+            }
+
+            let quartzPoint = event.location
+            let point = appKitPoint(fromQuartzPoint: quartzPoint)
+            guard let targetWindow = windowAtQuartzPoint(quartzPoint) else {
+                return pass(event)
+            }
+
+            let targetBundleIdentifier = bundleIdentifier(
+                forProcessIdentifier: targetWindow.identity.ownerPID
+            )
+            guard !SettingsManager.shared.isAppExcluded(bundleIdentifier: targetBundleIdentifier) else {
                 return pass(event)
             }
 
@@ -389,6 +525,7 @@ final class MouseMonitor {
                 modifiers: modifiers,
                 clickState: event.getIntegerValueField(.mouseEventClickState),
                 targetWindow: targetWindow,
+                targetBundleIdentifier: targetBundleIdentifier,
                 config: config
             )
             return nil
@@ -408,7 +545,7 @@ final class MouseMonitor {
         }
 
         if Self.isMouseDragged(type) {
-            handlePointerMoved(to: point, quartzPoint: quartzPoint)
+            handlePointerEvent(event)
             return nil
         }
 
@@ -432,6 +569,7 @@ final class MouseMonitor {
         modifiers: NSEvent.ModifierFlags,
         clickState: Int64,
         targetWindow: WindowSnapshot,
+        targetBundleIdentifier: String?,
         config: TriggerConfig
     ) {
         guard !isTriggerActive else { return }
@@ -442,6 +580,11 @@ final class MouseMonitor {
         isActivated = true
         isOverlayVisible = false
         hasMovedOutsideDeadZone = false
+        isCursorHoldActive = CursorHoldBehavior.shouldActivate(
+            isEnabled: SettingsManager.shared.keepCursorInPlace,
+            mouseButton: button
+        )
+        cursorHoldReleaseMissCount = 0
         activeTriggerConfig = config
         pendingClick = PendingClick(
             button: button,
@@ -455,8 +598,11 @@ final class MouseMonitor {
         originQuartzPoint = quartzPoint
         currentQuartzPoint = quartzPoint
         originWindow = targetWindow
+        originBundleIdentifier = targetBundleIdentifier
         isOriginWindowAvailable = true
-        lastWindowValidation = .distantPast
+        lastWindowValidation = 0
+
+        beginUserInteractionActivity()
 
         if clickState >= 2 {
             lastQuickClick = nil
@@ -512,7 +658,6 @@ final class MouseMonitor {
     private func handlePointerMoved(to point: CGPoint, quartzPoint: CGPoint) {
         currentPoint = point
         currentQuartzPoint = quartzPoint
-        updateOriginWindowAvailability()
 
         let distance = ScrollPhysics.distance(from: originPoint, to: currentPoint)
 
@@ -523,16 +668,71 @@ final class MouseMonitor {
                 overlayWindow?.animateClickBounce()
             }
         }
+    }
 
-        guard isActivated, isOverlayVisible else { return }
-        overlayWindow?.updateDragPoint(to: currentPoint)
+    @discardableResult
+    private func handlePointerEvent(_ event: CGEvent) -> Bool {
+        guard isCursorHoldActive else {
+            let quartzPoint = event.location
+            handlePointerMoved(
+                to: appKitPoint(fromQuartzPoint: quartzPoint),
+                quartzPoint: quartzPoint
+            )
+            return false
+        }
+
+        guard SettingsManager.shared.keepCursorInPlace else {
+            disableCursorHold(resetVirtualPosition: false)
+            let quartzPoint = event.location
+            handlePointerMoved(
+                to: appKitPoint(fromQuartzPoint: quartzPoint),
+                quartzPoint: quartzPoint
+            )
+            return false
+        }
+
+        let deltaX = CGFloat(event.getIntegerValueField(.mouseEventDeltaX))
+        let deltaY = CGFloat(event.getIntegerValueField(.mouseEventDeltaY))
+        let virtualPoint = CursorHoldBehavior.nextVirtualPoint(
+            current: currentPoint,
+            origin: originPoint,
+            deltaX: deltaX,
+            deltaY: deltaY
+        )
+
+        // A warp has no persistent lock state, so a crash or forced quit immediately restores normal movement.
+        guard CGWarpMouseCursorPosition(originQuartzPoint) == .success else {
+            NSLog("[MacDragScroll] Cursor hold failed; continuing the drag with normal pointer movement.")
+            disableCursorHold(resetVirtualPosition: false)
+            let quartzPoint = event.location
+            handlePointerMoved(
+                to: appKitPoint(fromQuartzPoint: quartzPoint),
+                quartzPoint: quartzPoint
+            )
+            return false
+        }
+
+        handlePointerMoved(to: virtualPoint, quartzPoint: originQuartzPoint)
+        return true
+    }
+
+    private func disableCursorHold(resetVirtualPosition: Bool) {
+        isCursorHoldActive = false
+        cursorHoldReleaseMissCount = 0
+
+        if resetVirtualPosition {
+            currentPoint = originPoint
+            currentQuartzPoint = originQuartzPoint
+        }
     }
 
     private func scheduleOverlay() {
         overlayShowTimer?.invalidate()
-        overlayShowTimer = Timer.scheduledTimer(withTimeInterval: Constants.overlayShowDelay, repeats: false) { [weak self] _ in
-            guard let self, self.isTriggerActive, self.isActivated else { return }
-            self.showOverlay()
+        overlayShowTimer = Timer(timeInterval: Constants.overlayShowDelay, repeats: false) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self, self.isTriggerActive, self.isActivated else { return }
+                self.showOverlay()
+            }
         }
         if let overlayShowTimer {
             RunLoop.main.add(overlayShowTimer, forMode: .common)
@@ -544,15 +744,19 @@ final class MouseMonitor {
         guard isActivated, !isOverlayVisible else { return }
 
         isOverlayVisible = true
-        overlayWindow = ScrollOverlayWindow(origin: originPoint)
-        overlayWindow?.show()
+        let window = ScrollOverlayWindow(origin: originPoint)
+        overlayWindow = window
+        window.show()
+        window.updateDragPoint(to: currentPoint)
     }
 
     private func startScrollTimer() {
         guard scrollTimer == nil else { return }
 
-        scrollTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
-            self?.performScroll()
+        scrollTimer = Timer(timeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated {
+                self?.performScroll()
+            }
         }
 
         if let scrollTimer {
@@ -564,11 +768,16 @@ final class MouseMonitor {
         isActivated = false
         isOverlayVisible = false
         hasMovedOutsideDeadZone = false
+        isCursorHoldActive = false
+        cursorHoldReleaseMissCount = 0
         originWindow = nil
+        originBundleIdentifier = nil
         originQuartzPoint = .zero
         currentQuartzPoint = .zero
         isOriginWindowAvailable = false
-        lastWindowValidation = .distantPast
+        lastWindowValidation = 0
+
+        endUserInteractionActivity()
 
         scrollTimer?.invalidate()
         scrollTimer = nil
@@ -611,13 +820,15 @@ final class MouseMonitor {
         clickReactionWindow = window
         window.showDoubleClickReaction()
 
-        clickReactionHideTimer = Timer.scheduledTimer(withTimeInterval: Constants.doubleClickReactionDuration, repeats: false) { [weak self, weak window] _ in
-            guard let self else { return }
+        clickReactionHideTimer = Timer(timeInterval: Constants.doubleClickReactionDuration, repeats: false) { [weak self, weak window] _ in
+            MainActor.assumeIsolated {
+                guard let self else { return }
 
-            window?.hide()
-            if self.clickReactionWindow === window {
-                self.clickReactionWindow = nil
-                self.clickReactionHideTimer = nil
+                window?.hide()
+                if self.clickReactionWindow === window {
+                    self.clickReactionWindow = nil
+                    self.clickReactionHideTimer = nil
+                }
             }
         }
 
@@ -649,10 +860,40 @@ final class MouseMonitor {
             return
         }
 
+        if isCursorHoldActive {
+            guard SettingsManager.shared.keepCursorInPlace else {
+                disableCursorHold(resetVirtualPosition: true)
+                return
+            }
+
+            let holdStartedAt = pendingClick?.startedAt ?? 0
+            if CACurrentMediaTime() - holdStartedAt >= Constants.cursorHoldWatchdogGracePeriod {
+                let isMiddleButtonPressed = CGEventSource.buttonState(
+                    .hidSystemState,
+                    button: .center
+                )
+                cursorHoldReleaseMissCount = CursorHoldBehavior.releaseMissCount(
+                    afterButtonState: isMiddleButtonPressed,
+                    previousCount: cursorHoldReleaseMissCount
+                )
+
+                if CursorHoldBehavior.shouldCancelForMissingButton(
+                    releaseMissCount: cursorHoldReleaseMissCount
+                ) {
+                    cancelInteraction()
+                    return
+                }
+            }
+        }
+
         updateOriginWindowAvailability()
         guard isOriginWindowAvailable else {
             cancelInteraction()
             return
+        }
+
+        if isOverlayVisible {
+            overlayWindow?.updateDragPoint(to: currentPoint)
         }
 
         let deltas = ScrollPhysics.deltas(
@@ -670,9 +911,10 @@ final class MouseMonitor {
 
         guard let scrollLocation = scrollDeliveryQuartzPoint(),
               let scrollEvent = ScrollEventFactory.makeScrollEvent(
-            deltas: deltas,
-            location: scrollLocation
-        ) else {
+                  deltas: deltas,
+                  location: scrollLocation,
+                  source: syntheticEventSource
+              ) else {
             return
         }
 
@@ -685,19 +927,32 @@ final class MouseMonitor {
             return
         }
 
-        let now = Date()
-        guard force || now.timeIntervalSince(lastWindowValidation) >= Constants.windowValidationInterval else {
+        let now = CACurrentMediaTime()
+        guard force || now - lastWindowValidation >= Constants.windowValidationInterval else {
             return
         }
 
         lastWindowValidation = now
 
-        if let refreshedWindow = windowSnapshot(matching: originWindow.identity) {
-            self.originWindow = refreshedWindow
-            setOriginWindowAvailable(true)
-        } else {
+        let snapshots = windowSnapshots()
+        guard let refreshedWindow = snapshots.first(where: { $0.identity == originWindow.identity }) else {
             setOriginWindowAvailable(false)
+            return
         }
+
+        self.originWindow = refreshedWindow
+        guard !isCursorHoldActive || refreshedWindow.bounds.contains(originQuartzPoint) else {
+            setOriginWindowAvailable(false)
+            return
+        }
+
+        guard let deliveryPoint = scrollDeliveryQuartzPoint() else {
+            setOriginWindowAvailable(false)
+            return
+        }
+
+        let frontmostWindow = snapshots.first { $0.bounds.contains(deliveryPoint) }
+        setOriginWindowAvailable(frontmostWindow?.identity == refreshedWindow.identity)
     }
 
     private func setOriginWindowAvailable(_ available: Bool) {
@@ -720,13 +975,8 @@ final class MouseMonitor {
         return CGPoint(x: originWindow.bounds.midX, y: originWindow.bounds.midY)
     }
 
-    private func windowAtPoint(_ point: CGPoint) -> WindowSnapshot? {
-        let quartzPoint = quartzPoint(fromAppKitPoint: point)
+    private func windowAtQuartzPoint(_ quartzPoint: CGPoint) -> WindowSnapshot? {
         return windowSnapshots().first { $0.bounds.contains(quartzPoint) }
-    }
-
-    private func windowSnapshot(matching identity: WindowIdentity) -> WindowSnapshot? {
-        windowSnapshots().first { $0.identity == identity }
     }
 
     private func windowSnapshots() -> [WindowSnapshot] {
@@ -736,41 +986,21 @@ final class MouseMonitor {
             return []
         }
 
-        return windowInfoList.compactMap { windowInfo -> WindowSnapshot? in
-            guard let ownerPID = int32Value(windowInfo[kCGWindowOwnerPID as String]),
-                  ownerPID != ProcessInfo.processInfo.processIdentifier,
-                  let windowNumber = intValue(windowInfo[kCGWindowNumber as String]),
-                  let layer = intValue(windowInfo[kCGWindowLayer as String]),
-                  layer == 0,
-                  let bounds = rectValue(windowInfo[kCGWindowBounds as String]),
-                  bounds.width > 1,
-                  bounds.height > 1 else {
-                return nil
-            }
-
-            let alpha = doubleValue(windowInfo[kCGWindowAlpha as String]) ?? 1.0
-            guard alpha > 0.01 else { return nil }
-
-            return WindowSnapshot(
-                identity: WindowIdentity(number: windowNumber, ownerPID: ownerPID),
-                bounds: bounds
-            )
-        }
+        return windowInfoList.compactMap(windowSnapshot(from:))
     }
 
     private func isOriginAppExcluded() -> Bool {
-        guard let originWindow else { return false }
-        return isAppExcluded(processIdentifier: originWindow.identity.ownerPID)
+        SettingsManager.shared.isAppExcluded(bundleIdentifier: originBundleIdentifier)
     }
 
-    private func isAppExcluded(processIdentifier: pid_t) -> Bool {
+    private func bundleIdentifier(forProcessIdentifier processIdentifier: pid_t) -> String? {
         let app = NSRunningApplication(processIdentifier: processIdentifier)
-        return SettingsManager.shared.isAppExcluded(bundleIdentifier: app?.bundleIdentifier)
+        return app?.bundleIdentifier
     }
 
     private func replayClick(_ pendingClick: PendingClick) {
         guard
-            let source = CGEventSource(stateID: .combinedSessionState),
+            let source = syntheticEventSource ?? CGEventSource(stateID: .combinedSessionState),
             let mouseButton = CGMouseButton(rawValue: UInt32(pendingClick.button)),
             let downEvent = CGEvent(
                 mouseEventSource: source,
@@ -800,6 +1030,41 @@ final class MouseMonitor {
         upEvent.post(tap: .cghidEventTap)
     }
 
+    private func beginUserInteractionActivity() {
+        guard userInteractionActivity == nil else { return }
+        userInteractionActivity = ProcessInfo.processInfo.beginActivity(
+            options: .userInteractive,
+            reason: "Mac Drag Scroll active drag scrolling"
+        )
+    }
+
+    private func endUserInteractionActivity() {
+        guard let userInteractionActivity else { return }
+        ProcessInfo.processInfo.endActivity(userInteractionActivity)
+        self.userInteractionActivity = nil
+    }
+
+    private func windowSnapshot(from windowInfo: [String: Any]) -> WindowSnapshot? {
+        guard let ownerPID = int32Value(windowInfo[kCGWindowOwnerPID as String]),
+              ownerPID != ProcessInfo.processInfo.processIdentifier,
+              let windowNumber = intValue(windowInfo[kCGWindowNumber as String]),
+              let layer = intValue(windowInfo[kCGWindowLayer as String]),
+              layer == 0,
+              let bounds = rectValue(windowInfo[kCGWindowBounds as String]),
+              bounds.width > 1,
+              bounds.height > 1 else {
+            return nil
+        }
+
+        let alpha = doubleValue(windowInfo[kCGWindowAlpha as String]) ?? 1.0
+        guard alpha > 0.01 else { return nil }
+
+        return WindowSnapshot(
+            identity: WindowIdentity(number: windowNumber, ownerPID: ownerPID),
+            bounds: bounds
+        )
+    }
+
     private func cgEventType(for button: Int, isDown: Bool) -> CGEventType {
         switch (button, isDown) {
         case (0, true):
@@ -824,25 +1089,6 @@ final class MouseMonitor {
         if modifiers.contains(.shift) { flags.insert(.maskShift) }
 
         return flags
-    }
-
-    private func quartzPoint(fromAppKitPoint point: CGPoint) -> CGPoint {
-        let screen = NSScreen.screens.first { NSMouseInRect(point, $0.frame, false) } ?? NSScreen.main
-
-        guard let screen,
-              let screenNumber = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber else {
-            let screenHeight = NSScreen.main?.frame.height ?? 0
-            return CGPoint(x: point.x, y: screenHeight - point.y)
-        }
-
-        let displayBounds = CGDisplayBounds(CGDirectDisplayID(screenNumber.uint32Value))
-        let xInScreen = point.x - screen.frame.minX
-        let yFromTop = screen.frame.maxY - point.y
-
-        return CGPoint(
-            x: displayBounds.minX + xInScreen,
-            y: displayBounds.minY + yFromTop
-        )
     }
 
     private func appKitPoint(fromQuartzPoint point: CGPoint) -> CGPoint {

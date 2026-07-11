@@ -21,6 +21,7 @@
 "reverse_direction" = "Direzione inversa";
 "horizontal_scrolling" = "Scorrimento orizzontale";
 "invert_horizontal" = "Inverti orizzontale";
+"keep_cursor_in_place" = "Mantieni il cursore in posizione";
 "acceleration_low" = "Basso";
 "acceleration_med" = "Med";
 "acceleration_high" = "Alto";
@@ -174,6 +175,7 @@
 "tooltip_reverse_direction" = "Inverti lo scorrimento tramite trascinamento se la direzione sembra al contrario.";
 "tooltip_horizontal_scrolling" = "Consenti il ​​movimento di trascinamento laterale per inviare eventi di scorrimento orizzontale.";
 "tooltip_invert_horizontal" = "Inverte solo la direzione di scorrimento orizzontale.";
+"tooltip_keep_cursor_in_place" = "Mantiene il puntatore nel punto di origine del trascinamento usando il clic centrale. Rilasciando il pulsante o in caso di interruzione, il movimento normale viene ripristinato subito.";
 "tooltip_show_indicator" = "Mostra l'indicatore visivo durante lo scorrimento del trascinamento.";
 "tooltip_visualizer_animation" = "Anima il visualizzatore quando appare, scompare e reagisce alla direzione del trascinamento.";
 "tooltip_visualizer_size" = "Controlla la dimensione del visualizzatore di trascinamento.";

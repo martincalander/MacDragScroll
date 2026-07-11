@@ -825,6 +825,87 @@ final class TriggerInputSourceTests: XCTestCase {
     }
 }
 
+final class CursorHoldBehaviorTests: XCTestCase {
+    func testCursorHoldOnlyActivatesForEnabledMiddleClick() {
+        XCTAssertTrue(CursorHoldBehavior.shouldActivate(isEnabled: true, mouseButton: 2))
+        XCTAssertFalse(CursorHoldBehavior.shouldActivate(isEnabled: false, mouseButton: 2))
+        XCTAssertFalse(CursorHoldBehavior.shouldActivate(isEnabled: true, mouseButton: 3))
+        XCTAssertFalse(CursorHoldBehavior.shouldActivate(isEnabled: true, mouseButton: 0))
+    }
+
+    func testVirtualPointAccumulatesMouseDeltasInAppKitCoordinates() {
+        let origin = CGPoint(x: 100, y: 100)
+        let first = CursorHoldBehavior.nextVirtualPoint(
+            current: origin,
+            origin: origin,
+            deltaX: 12,
+            deltaY: 8
+        )
+        let second = CursorHoldBehavior.nextVirtualPoint(
+            current: first,
+            origin: origin,
+            deltaX: -2,
+            deltaY: -5
+        )
+
+        XCTAssertEqual(first.x, 112, accuracy: 0.001)
+        XCTAssertEqual(first.y, 92, accuracy: 0.001)
+        XCTAssertEqual(second.x, 110, accuracy: 0.001)
+        XCTAssertEqual(second.y, 97, accuracy: 0.001)
+    }
+
+    func testVirtualPointIsClampedToSafeMaximumDistance() {
+        let origin = CGPoint(x: 20, y: 30)
+        let point = CursorHoldBehavior.nextVirtualPoint(
+            current: origin,
+            origin: origin,
+            deltaX: CursorHoldBehavior.maximumVirtualDistance * 4,
+            deltaY: 0
+        )
+
+        XCTAssertEqual(
+            ScrollPhysics.distance(from: origin, to: point),
+            CursorHoldBehavior.maximumVirtualDistance,
+            accuracy: 0.001
+        )
+    }
+
+    func testInvalidDeltasDoNotMoveVirtualPoint() {
+        let current = CGPoint(x: 120, y: 80)
+
+        XCTAssertEqual(
+            CursorHoldBehavior.nextVirtualPoint(
+                current: current,
+                origin: .zero,
+                deltaX: .infinity,
+                deltaY: 0
+            ),
+            current
+        )
+    }
+
+    func testButtonWatchdogRequiresTwoConsecutiveReleaseSamples() {
+        let firstMiss = CursorHoldBehavior.releaseMissCount(
+            afterButtonState: false,
+            previousCount: 0
+        )
+        XCTAssertEqual(firstMiss, 1)
+        XCTAssertFalse(CursorHoldBehavior.shouldCancelForMissingButton(releaseMissCount: firstMiss))
+
+        XCTAssertEqual(
+            CursorHoldBehavior.releaseMissCount(afterButtonState: true, previousCount: firstMiss),
+            0
+        )
+
+        let secondMiss = CursorHoldBehavior.releaseMissCount(
+            afterButtonState: false,
+            previousCount: firstMiss
+        )
+        XCTAssertEqual(secondMiss, 2)
+        XCTAssertTrue(CursorHoldBehavior.shouldCancelForMissingButton(releaseMissCount: secondMiss))
+    }
+}
+
 final class EventTapInterruptionTests: XCTestCase {
     func testDisabledEventTapRequiresInteractionCancellation() {
         XCTAssertTrue(EventTapInterruption.requiresInteractionCancellation(.tapDisabledByTimeout))

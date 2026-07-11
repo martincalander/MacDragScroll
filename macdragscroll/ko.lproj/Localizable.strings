@@ -21,6 +21,7 @@
 "reverse_direction" = "역방향";
 "horizontal_scrolling" = "수평 스크롤";
 "invert_horizontal" = "수평 반전";
+"keep_cursor_in_place" = "커서를 제자리에 유지";
 "acceleration_low" = "낮은";
 "acceleration_med" = "메드";
 "acceleration_high" = "높은";
@@ -174,6 +175,7 @@
 "tooltip_reverse_direction" = "방향이 반대로 느껴지면 드래그 스크롤 방향을 바꿉니다.";
 "tooltip_horizontal_scrolling" = "가로 스크롤 이벤트를 보내려면 옆으로 드래그 이동을 허용하세요.";
 "tooltip_invert_horizontal" = "가로 스크롤 방향만 뒤집습니다.";
+"tooltip_keep_cursor_in_place" = "가운데 클릭으로 드래그하는 동안 포인터를 시작 위치에 유지합니다. 버튼을 놓거나 작업이 중단되면 즉시 일반 포인터 이동으로 돌아갑니다.";
 "tooltip_show_indicator" = "드래그 스크롤하는 동안 시각적 표시기를 표시합니다.";
 "tooltip_visualizer_animation" = "시각화 장치가 나타나고 사라지고 드래그 방향에 반응할 때 애니메이션을 적용합니다.";
 "tooltip_visualizer_size" = "드래그 시각화 도우미의 크기를 제어합니다.";

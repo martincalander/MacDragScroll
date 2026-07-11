@@ -21,6 +21,7 @@
 "reverse_direction" = "Richtung umkehren";
 "horizontal_scrolling" = "Horizontales Scrollen";
 "invert_horizontal" = "Horizontal umkehren";
+"keep_cursor_in_place" = "Mauszeiger an Position halten";
 "acceleration_low" = "Niedrig";
 "acceleration_med" = "Med";
 "acceleration_high" = "Hoch";
@@ -174,6 +175,7 @@
 "tooltip_reverse_direction" = "Kehrt die Scrollrichtung um, wenn sie sich falsch herum anfühlt.";
 "tooltip_horizontal_scrolling" = "Lassen Sie eine seitliche Ziehbewegung zu, um horizontale Bildlaufereignisse zu senden.";
 "tooltip_invert_horizontal" = "Kehrt nur die horizontale Bildlaufrichtung um.";
+"tooltip_keep_cursor_in_place" = "Hält den Mauszeiger beim Ziehen mit der mittleren Maustaste am Ausgangspunkt. Beim Loslassen der Taste oder bei einer Unterbrechung bewegt er sich sofort wieder normal.";
 "tooltip_show_indicator" = "Zeigt beim Scrollen per Drag-and-Drop die visuelle Anzeige an.";
 "tooltip_visualizer_animation" = "Animiert den Visualizer, wenn er erscheint, verschwindet und auf die Ziehrichtung reagiert.";
 "tooltip_visualizer_size" = "Steuert die Größe des Drag-Visualizers.";

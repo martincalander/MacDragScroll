@@ -21,6 +21,7 @@
 "reverse_direction" = "Dirección inversa";
 "horizontal_scrolling" = "Desplazamiento horizontal";
 "invert_horizontal" = "Invertir horizontalmente";
+"keep_cursor_in_place" = "Mantener el cursor en su sitio";
 "acceleration_low" = "Bajo";
 "acceleration_med" = "médico";
 "acceleration_high" = "Alto";
@@ -174,6 +175,7 @@
 "tooltip_reverse_direction" = "Invierte el desplazamiento por arrastre si la dirección se siente al revés.";
 "tooltip_horizontal_scrolling" = "Permita el movimiento de arrastre lateral para enviar eventos de desplazamiento horizontal.";
 "tooltip_invert_horizontal" = "Voltee solo la dirección de desplazamiento horizontal.";
+"tooltip_keep_cursor_in_place" = "Mantén el puntero en el origen del arrastre al usar el clic central. Al soltar el botón o ante cualquier interrupción, el movimiento normal se restablece de inmediato.";
 "tooltip_show_indicator" = "Muestra el indicador visual mientras arrastras el desplazamiento.";
 "tooltip_visualizer_animation" = "Anima el visualizador cuando aparece, desaparece y reacciona a la dirección de arrastre.";
 "tooltip_visualizer_size" = "Controla el tamaño del visualizador de arrastre.";

@@ -21,6 +21,7 @@
 "reverse_direction" = "Omvänd riktning";
 "horizontal_scrolling" = "Horisontell rullning";
 "invert_horizontal" = "Invertera horisontellt";
+"keep_cursor_in_place" = "Håll pekaren på plats";
 "acceleration_low" = "Låg";
 "acceleration_med" = "Med";
 "acceleration_high" = "Hög";
@@ -174,6 +175,7 @@
 "tooltip_reverse_direction" = "Vänd rullningsriktningen om den känns bakvänd.";
 "tooltip_horizontal_scrolling" = "Tillåt sidledes dragrörelse för att skicka horisontella rullningshändelser.";
 "tooltip_invert_horizontal" = "Vänd endast den horisontella rullningsriktningen.";
+"tooltip_keep_cursor_in_place" = "Håll pekaren vid dragningens startpunkt när du använder mittenklick. När du släpper knappen eller om åtgärden avbryts återgår pekaren omedelbart till normal rörelse.";
 "tooltip_show_indicator" = "Visa den visuella indikatorn medan du drar rullar.";
 "tooltip_visualizer_animation" = "Animera visualiseraren när den visas, döljs och reagerar på dragriktningen.";
 "tooltip_visualizer_size" = "Styr storleken på dragvisualiseraren.";

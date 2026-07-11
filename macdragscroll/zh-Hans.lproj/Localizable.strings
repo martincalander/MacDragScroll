@@ -21,6 +21,7 @@
 "reverse_direction" = "反向";
 "horizontal_scrolling" = "水平滚动";
 "invert_horizontal" = "水平反转";
+"keep_cursor_in_place" = "保持光标位置";
 "acceleration_low" = "低的";
 "acceleration_med" = "医学";
 "acceleration_high" = "高的";
@@ -174,6 +175,7 @@
 "tooltip_reverse_direction" = "如果方向感觉相反，则反转拖动滚动方向。";
 "tooltip_horizontal_scrolling" = "允许侧向拖动移动以发送水平滚动事件。";
 "tooltip_invert_horizontal" = "仅翻转水平滚动方向。";
+"tooltip_keep_cursor_in_place" = "使用中键拖动时，将指针保持在拖动起点。松开按键或发生任何中断后，指针会立即恢复正常移动。";
 "tooltip_show_indicator" = "拖动滚动时显示视觉指示器。";
 "tooltip_visualizer_animation" = "在可视化工具出现、消失并响应拖动方向时启用动画。";
 "tooltip_visualizer_size" = "控制拖动可视化工具的大小。";

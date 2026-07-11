@@ -6,16 +6,29 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 
 ## [Unreleased]
 
-## [1.1.1] - 2026-07-11
+## [1.2.0] - 2026-07-11
+
+### Added
+
+- Added an optional, off-by-default Keep Cursor in Place mode for middle-button drag scrolling, with virtual visualizer movement and automatic release safeguards.
 
 ### Changed
 
 - Release builds now use one pinned, long-lived project code-signing identity so macOS can recognize later binaries as the same app.
 - Development builds now use a separate bundle identifier and display name so local testing cannot disturb production permissions or app-instance state.
+- Reduced idle mouse-monitor overhead and capped visualizer rendering work to the existing 60 Hz scroll loop.
+- Coalesced rapid settings backup writes and moved installed-app metadata discovery off the main thread while keeping AppKit icon loading main-thread safe.
+- Replaced the legacy GitHub glyph with GitHub's official current Invertocat vector while preserving its original proportions.
+- Made missing permissions a passive menu-bar state with a direct Settings guide instead of an automatic launch alert.
 
 ### Fixed
 
 - Prevent repeated Accessibility and Input Monitoring resets after normal updates by replacing per-build ad-hoc identities with a stable designated requirement.
+- Cancel stale drag sessions when the Mac sleeps, the user session resigns, another app activates, or another window covers the intended scroll target.
+- Recover event monitoring when an existing event tap becomes invalid or disabled.
+- Prevent failed Launch at Login changes from retrying recursively, prevent restart helpers from inheriting the single-instance lock, and keep the app running when a restart cannot be scheduled.
+- Make captured left or right mouse triggers add a safe modifier automatically and avoid coordinate round trips when selecting a target window across displays.
+- Prevent Accessibility and Input Monitoring requests from stacking multiple macOS prompts and System Settings windows.
 
 ## [1.1.0] - 2026-07-10
 

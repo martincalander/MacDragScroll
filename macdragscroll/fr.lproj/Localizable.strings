@@ -21,6 +21,7 @@
 "reverse_direction" = "Inverser la direction";
 "horizontal_scrolling" = "Défilement horizontal";
 "invert_horizontal" = "Inverser horizontalement";
+"keep_cursor_in_place" = "Maintenir le pointeur en place";
 "acceleration_low" = "Faible";
 "acceleration_med" = "Médical";
 "acceleration_high" = "Élevé";
@@ -174,6 +175,7 @@
 "tooltip_reverse_direction" = "Inversez le défilement par glisser-déposer si la direction semble être inversée.";
 "tooltip_horizontal_scrolling" = "Autorisez le mouvement de glissement latéral pour envoyer des événements de défilement horizontal.";
 "tooltip_invert_horizontal" = "Inversez uniquement la direction de défilement horizontal.";
+"tooltip_keep_cursor_in_place" = "Maintient le pointeur au point d’origine du glissement lors d’un clic central. Relâcher le bouton ou toute interruption rétablit immédiatement son mouvement normal.";
 "tooltip_show_indicator" = "Afficher l'indicateur visuel pendant le défilement par glisser-déplacer.";
 "tooltip_visualizer_animation" = "Anime le visualiseur lorsqu'il apparaît, disparaît et réagit à la direction du glissement.";
 "tooltip_visualizer_size" = "Contrôle la taille du visualiseur de glissement.";

@@ -141,7 +141,7 @@ struct WelcomeWindowView: View {
                     )
                 } else {
                     Button {
-                        AppDelegate.requestAccessibilityPermission()
+                        AppDelegate.requestNextPermission()
                     } label: {
                         Label(localized("grant_permissions", value: "Grant Permissions", comment: "Grant permissions button"), systemImage: "lock.open")
                     }
@@ -167,8 +167,10 @@ struct WelcomeWindowView: View {
                 Image("GitHubMark")
                     .resizable()
                     .renderingMode(.template)
+                    .scaledToFit()
                     .foregroundStyle(.primary)
                     .frame(width: 22, height: 22)
+                    .accessibilityHidden(true)
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(localized("welcome_star_title", value: "Star Mac Drag Scroll on GitHub", comment: "Welcome GitHub star title"))

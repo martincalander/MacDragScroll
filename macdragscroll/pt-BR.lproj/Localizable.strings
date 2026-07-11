@@ -21,6 +21,7 @@
 "reverse_direction" = "Direção reversa";
 "horizontal_scrolling" = "Rolagem horizontal";
 "invert_horizontal" = "Inverter horizontalmente";
+"keep_cursor_in_place" = "Manter o cursor no lugar";
 "acceleration_low" = "Baixo";
 "acceleration_med" = "Médio";
 "acceleration_high" = "Alto";
@@ -174,6 +175,7 @@
 "tooltip_reverse_direction" = "Inverta a rolagem por arrasto se a direção parecer ao contrário.";
 "tooltip_horizontal_scrolling" = "Permita o movimento de arrastar lateralmente para enviar eventos de rolagem horizontal.";
 "tooltip_invert_horizontal" = "Inverta apenas a direção de rolagem horizontal.";
+"tooltip_keep_cursor_in_place" = "Mantém o ponteiro na origem do arrasto ao usar o clique do meio. Ao soltar o botão ou em qualquer interrupção, o movimento normal do ponteiro é restaurado imediatamente.";
 "tooltip_show_indicator" = "Mostre o indicador visual enquanto arrasta a rolagem.";
 "tooltip_visualizer_animation" = "Anima o visualizador quando ele aparece, desaparece e reage à direção do arrasto.";
 "tooltip_visualizer_size" = "Controla o tamanho do visualizador de arrastar.";

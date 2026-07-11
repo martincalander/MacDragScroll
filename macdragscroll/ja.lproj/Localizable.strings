@@ -21,6 +21,7 @@
 "reverse_direction" = "逆方向";
 "horizontal_scrolling" = "横スクロール";
 "invert_horizontal" = "水平方向を反転";
+"keep_cursor_in_place" = "カーソルをその場に固定";
 "acceleration_low" = "低い";
 "acceleration_med" = "メッド";
 "acceleration_high" = "高い";
@@ -174,6 +175,7 @@
 "tooltip_reverse_direction" = "方向が逆に感じられる場合は、ドラッグしてスクロールを反転してください。";
 "tooltip_horizontal_scrolling" = "横方向のドラッグ移動で水平スクロール イベントを送信できるようにします。";
 "tooltip_invert_horizontal" = "水平スクロール方向のみを反転します。";
+"tooltip_keep_cursor_in_place" = "中クリックでドラッグしている間、ポインタを開始位置に保ちます。ボタンを離すか操作が中断されると、通常のポインタ移動にすぐ戻ります。";
 "tooltip_show_indicator" = "ドラッグスクロール中に視覚的なインジケーターを表示します。";
 "tooltip_visualizer_animation" = "ビジュアライザーの表示、非表示、ドラッグ方向への反応をアニメーションします。";
 "tooltip_visualizer_size" = "ドラッグ ビジュアライザのサイズを制御します。";

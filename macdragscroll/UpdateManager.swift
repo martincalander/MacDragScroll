@@ -104,13 +104,13 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
     static let websiteURL = URL(string: "https://martincalander.com")!
     static let versionHistory: [VersionHistoryEntry] = [
         VersionHistoryEntry(
-            version: "1.1.1",
-            build: "111",
+            version: "1.2.0",
+            build: "120",
             releaseDate: "2026-07-11",
             changes: [
-                "Updates now preserve Accessibility and Input Monitoring through a pinned project signing identity.",
-                "Development builds now use a separate identity so local testing cannot disturb production permissions.",
-                "Release archives verify the app and nested Sparkle signatures before publication."
+                "Added an optional Keep Cursor in Place mode that preserves visualizer feedback while anchoring the pointer safely.",
+                "Reduced permission prompts and preserved access across updates with a pinned production signing identity.",
+                "Improved monitoring recovery, background performance, preference writes, app discovery, and interruption safety."
             ]
         ),
         VersionHistoryEntry(

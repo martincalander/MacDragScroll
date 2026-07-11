@@ -100,7 +100,7 @@ Mac Drag Scroll needs two macOS permissions: **Input Monitoring** detects the ex
 
 Open **System Settings → Privacy & Security**, enable Mac Drag Scroll under both **Accessibility** and **Input Monitoring**, then reopen the app if macOS requests it. The Permissions tab shows live status and provides repair shortcuts.
 
-When upgrading from `1.1.0` or earlier to `1.1.1`, macOS requires one final permission grant because the earlier builds used changing ad-hoc identities. Later updates retain the pinned identity and should not require permissions again.
+When upgrading from `1.1.0` or earlier to `1.2.0`, macOS requires one final permission grant because the earlier builds used changing ad-hoc identities. Later updates retain the pinned identity and should not require permissions again.
 
 ## Tune the Feel
 
@@ -110,6 +110,7 @@ Open Settings from the menu bar icon.
 | --- | --- |
 | Speed and acceleration | Base scroll rate and how quickly it increases with drag distance. |
 | Dead zone | The neutral area around the gesture origin. |
+| Cursor hold | Optionally keep the pointer at the middle-click origin so pointer-sensitive content continues scrolling. |
 | Trigger | Middle click by default, with guarded alternatives for primary and secondary buttons. |
 | Visualizer | Size, opacity, tint, glass intensity, and motion effects. |
 | Excluded apps | Applications where drag scrolling should stay disabled. |

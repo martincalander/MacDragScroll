@@ -267,7 +267,9 @@ struct SettingsKeyboardMonitor: NSViewRepresentable {
         }
 
         deinit {
-            uninstall()
+            MainActor.assumeIsolated {
+                uninstall()
+            }
         }
     }
 }
@@ -513,9 +515,11 @@ struct AssetLinkRow: View {
             Image(assetName)
                 .resizable()
                 .renderingMode(.template)
+                .scaledToFit()
                 .foregroundStyle(.secondary)
                 .frame(width: 15, height: 15)
                 .frame(width: SettingsLayout.rowIconWidth)
+                .accessibilityHidden(true)
 
             Text(title)
                 .font(.system(size: 12))
@@ -725,19 +729,7 @@ struct TriggerCaptureButton: View {
 
     private func handleMouseEvent(_ event: NSEvent) {
         let button = Int(event.buttonNumber)
-        let modifiers = event.modifierFlags
-
-        var newConfig = TriggerConfig(
-            mouseButton: button,
-            requiresCommand: modifiers.contains(.command),
-            requiresOption: modifiers.contains(.option),
-            requiresControl: modifiers.contains(.control),
-            requiresShift: modifiers.contains(.shift)
-        )
-
-        if button == 0 && !newConfig.hasModifiers {
-            newConfig.requiresCommand = true
-        }
+        let newConfig = TriggerConfig.captured(button: button, modifiers: event.modifierFlags)
 
         DispatchQueue.main.async {
             triggerConfig = newConfig

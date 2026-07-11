@@ -45,7 +45,8 @@ struct SettingsWindowView: View {
 
                     ScrollView {
                         VStack(alignment: .leading, spacing: 16) {
-                            if !permissionState.hasRequiredPermissions {
+                            if !permissionState.hasRequiredPermissions,
+                               navigation.selectedTab != .permissions {
                                 permissionBanner
                             }
 
@@ -461,6 +462,19 @@ struct SettingsWindowView: View {
             )
             .disabled(!settings.horizontalScrollingEnabled)
             .opacity(settings.horizontalScrollingEnabled ? 1 : 0.55)
+
+            Divider()
+
+            ToggleRow(
+                icon: "scope",
+                title: localized("keep_cursor_in_place", value: "Keep Cursor in Place", comment: "Keep cursor in place toggle"),
+                isOn: $settings.keepCursorInPlace,
+                tooltip: localized(
+                    "tooltip_keep_cursor_in_place",
+                    value: "Keep the pointer at the drag origin while using Middle Click. Releasing the button or any interruption restores normal pointer movement immediately.",
+                    comment: "Keep cursor in place tooltip"
+                )
+            )
         }
     }
 
@@ -534,13 +548,15 @@ struct SettingsWindowView: View {
                 Divider()
 
                 HStack(spacing: 8) {
-                    Button {
-                        AppDelegate.requestAccessibilityPermission()
-                    } label: {
-                        Label(localized("grant_permissions", value: "Grant Permissions", comment: "Grant permissions button"), systemImage: "lock.open")
+                    if !permissionState.hasRequiredPermissions {
+                        Button {
+                            AppDelegate.openPrivacySettingsForMissingPermission()
+                        } label: {
+                            Label(localized("open_system_settings", value: "Open System Settings", comment: "Open System Settings button"), systemImage: "gear")
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.small)
 
                     Button {
                         AppDelegate.refreshAccessibilityPermission()
@@ -1081,8 +1097,13 @@ struct SettingsWindowView: View {
 
             Spacer()
 
-            Button(localized("grant_permissions", value: "Grant Permissions", comment: "Grant permissions button")) {
-                AppDelegate.requestAccessibilityPermission()
+            Button {
+                navigation.select(.permissions)
+            } label: {
+                Label(
+                    localized("settings_permissions", value: "Permissions", comment: "Permissions settings tab"),
+                    systemImage: "arrow.right"
+                )
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.small)

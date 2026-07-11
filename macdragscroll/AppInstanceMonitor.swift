@@ -37,11 +37,6 @@ final class AppInstanceMonitor: ObservableObject {
         lockPath = FileManager.default.temporaryDirectory.appendingPathComponent(lockName).path
     }
 
-    deinit {
-        stopMonitoring()
-        releasePrimaryInstanceLock()
-    }
-
     @discardableResult
     func claimPrimaryInstance() -> Bool {
         guard !isRunningUnderUnitTests else { return true }
@@ -83,7 +78,9 @@ final class AppInstanceMonitor: ObservableObject {
 
         if refreshTimer == nil {
             refreshTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
-                self?.refreshDuplicateInstances()
+                MainActor.assumeIsolated {
+                    self?.refreshDuplicateInstances()
+                }
             }
         }
 
@@ -95,14 +92,18 @@ final class AppInstanceMonitor: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            self?.refreshDuplicateInstances()
+            MainActor.assumeIsolated {
+                self?.refreshDuplicateInstances()
+            }
         }
         let terminateObserver = notificationCenter.addObserver(
             forName: NSWorkspace.didTerminateApplicationNotification,
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            self?.refreshDuplicateInstances()
+            MainActor.assumeIsolated {
+                self?.refreshDuplicateInstances()
+            }
         }
         workspaceObservers = [launchObserver, terminateObserver]
     }
@@ -127,7 +128,7 @@ final class AppInstanceMonitor: ObservableObject {
     private func acquirePrimaryInstanceLock() -> Bool {
         if lockFileDescriptor >= 0 { return true }
 
-        let descriptor = Darwin.open(lockPath, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR)
+        let descriptor = Darwin.open(lockPath, O_CREAT | O_RDWR | O_CLOEXEC, S_IRUSR | S_IWUSR)
         guard descriptor >= 0 else {
             NSLog("[MacDragScroll] Could not open instance lock at \(lockPath).")
             return false

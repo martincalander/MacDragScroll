@@ -29,6 +29,7 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 - Prevent failed Launch at Login changes from retrying recursively, prevent restart helpers from inheriting the single-instance lock, and keep the app running when a restart cannot be scheduled.
 - Make captured left or right mouse triggers add a safe modifier automatically and avoid coordinate round trips when selecting a target window across displays.
 - Prevent Accessibility and Input Monitoring requests from stacking multiple macOS prompts and System Settings windows.
+- Allow self-issued release builds to load the embedded Sparkle framework, and launch-test the signed app before publication.
 
 ## [1.1.0] - 2026-07-10
 

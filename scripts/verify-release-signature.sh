@@ -47,6 +47,18 @@ if ! grep -Eq '^CodeDirectory .*flags=.*\(runtime\)' <<< "$signature_details"; t
   exit 65
 fi
 
+entitlements="$(/usr/bin/codesign -d --entitlements :- "$APP_PATH" 2>/dev/null)"
+library_validation_disabled="$(
+  /usr/libexec/PlistBuddy \
+    -c 'Print :com.apple.security.cs.disable-library-validation' \
+    /dev/stdin <<< "$entitlements" 2>/dev/null || true
+)"
+if [[ "$library_validation_disabled" != "true" ]]; then
+  echo "Release app cannot load Sparkle with the self-issued signing identity." >&2
+  echo "The disable-library-validation entitlement is missing." >&2
+  exit 65
+fi
+
 expected_requirement="designated => identifier \"$EXPECTED_BUNDLE_ID\" and certificate root = H\"$expected_fingerprint\""
 actual_requirement="$(/usr/bin/codesign -d -r- "$APP_PATH" 2>&1 | awk '/^designated =>/ { print; exit }')"
 if [[ "$actual_requirement" != "$expected_requirement" ]]; then

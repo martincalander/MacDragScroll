@@ -98,7 +98,7 @@ SPARKLE_PRIVATE_KEY
 8496d972dae09a9b540399562e9d2385f16bd8bd
 ```
 
-The workflow imports the identity into an ephemeral keychain, validates that fingerprint, signs nested Sparkle code in dependency order, verifies the final designated requirement, and deletes the keychain before packaging continues. Keep at least one encrypted private-key backup outside GitHub. Replacing this identity breaks TCC continuity and forces users to grant protected permissions again.
+The workflow imports the identity into an ephemeral keychain, temporarily authorizes its root in the runner's admin trust store, validates the fingerprint, signs nested Sparkle code in dependency order, and verifies the final designated requirement. It removes the temporary trust record and keychain before packaging continues. Keep at least one encrypted private-key backup outside GitHub. Replacing this identity breaks TCC continuity and forces users to grant protected permissions again.
 
 `SPARKLE_PRIVATE_KEY` is the exported Sparkle EdDSA private key. The public key embedded in the app is:
 

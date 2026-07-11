@@ -181,6 +181,7 @@ jobs:
             status=$?
             trap - EXIT
             if [ "$status" -ne 0 ]; then
+              sudo security remove-trusted-cert -d "$certificate_path" >/dev/null 2>&1 || true
               security delete-keychain "$keychain_path" >/dev/null 2>&1 || true
               rm -f "$p12_path" "$certificate_path"
             fi
@@ -202,7 +203,7 @@ jobs:
             -P "$SIGNING_CERTIFICATE_PASSWORD" \
             -T /usr/bin/codesign >/dev/null
           security find-certificate -c "$SIGNING_IDENTITY_NAME" -p "$keychain_path" > "$certificate_path"
-          security add-trusted-cert -d -r trustRoot -k "$keychain_path" "$certificate_path"
+          sudo security add-trusted-cert -d -r trustRoot "$certificate_path"
           security set-key-partition-list \
             -S apple-tool:,apple: \
             -s \
@@ -231,6 +232,9 @@ jobs:
       - name: Remove release signing material from runner
         if: always()
         run: |
+          if [ -s "${SIGNING_CERTIFICATE_PATH:-}" ]; then
+            sudo security remove-trusted-cert -d "$SIGNING_CERTIFICATE_PATH" >/dev/null 2>&1 || true
+          fi
           if [ -n "${SIGNING_KEYCHAIN:-}" ]; then
             security delete-keychain "$SIGNING_KEYCHAIN" >/dev/null 2>&1 || true
           fi

@@ -9,7 +9,7 @@ Current public release archives are Sparkle-signed and include GitHub build prov
 ## Security Expectations
 
 - Mac Drag Scroll runs locally and does not send telemetry, input history, document contents, or browsing activity to the project.
-- Accessibility and Input Monitoring are required to observe the configured mouse trigger and emit scroll events. The app rejects trackpad/tablet input by default and marks synthetic events to prevent feedback loops.
+- Accessibility is required to observe the configured mouse trigger and emit scroll events. Input Monitoring is not required. The app rejects trackpad/tablet input by default and marks synthetic events to prevent feedback loops.
 - Ignored apps, trigger safety checks, permission loss, duplicate instances, and target-window changes fail closed by cancelling drag scrolling.
 - Sparkle verifies update archives with the public EdDSA key bundled in the app. GitHub Releases also publish checksums and build provenance for independent verification.
 - Every release bundle is signed with the same project-held identity and checked against the public certificate fingerprint `8496d972dae09a9b540399562e9d2385f16bd8bd`. This keeps the macOS designated requirement stable across updates.

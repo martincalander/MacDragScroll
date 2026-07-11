@@ -2,7 +2,7 @@
 
 Mac Drag Scroll ships with Sparkle-verified updates and a pinned, self-issued app code-signing identity.
 
-This release flow does not require a paid Apple Developer Program account. The stable project identity lets macOS recognize later releases as the same app, preserving Accessibility and Input Monitoring grants. Because the app is not Developer ID signed or notarized, macOS may still block the first launch for most users. The install instructions document the standard Finder bypass: right-click the app, choose **Open**, then confirm.
+This release flow does not require a paid Apple Developer Program account. The stable project identity lets macOS recognize later releases as the same app, preserving its Accessibility grant. Input Monitoring is not required. Because the app is not Developer ID signed or notarized, macOS may still block the first launch for most users. The install instructions document the standard Finder bypass: right-click the app, choose **Open**, then confirm.
 
 ## Strategy
 

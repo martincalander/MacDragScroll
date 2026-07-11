@@ -68,7 +68,7 @@ brew install --cask martincalander/tap/mac-drag-scroll
 1. 从[最新版本](https://github.com/martincalander/MacDragScroll/releases/latest)下载 `MacDragScroll.dmg`。
 2. 打开磁盘映像，将 **Mac Drag Scroll** 拖入**应用程序**文件夹。
 3. 在 Finder 中右键点击应用，选择**打开**，然后确认首次启动。
-4. 当 macOS 提示时，授予辅助功能和输入监控权限。
+4. 当 macOS 提示时，授予辅助功能权限。
 
 <p align="center">
   <img src="docs/assets/mac-drag-scroll-install-demo.gif" width="800" alt="将 Mac Drag Scroll 拖入应用程序文件夹">
@@ -79,7 +79,7 @@ brew install --cask martincalander/tap/mac-drag-scroll
 
 当前版本带有固定的项目代码签名，但没有使用需要付费 Apple Developer 会员资格的 Developer ID 签名或公证。因此，macOS 可能会阻止直接双击新下载的构建版本。请在 Finder 中右键点击 **Mac Drag Scroll**，选择**打开**并确认。每个手动下载的构建版本只需执行一次。
 
-固定的项目身份可让辅助功能和输入监控权限在更新后继续有效。项目也会发布 Sparkle 签名和 GitHub 构建来源证明，方便独立验证发布文件。详情请参阅[安全说明](SECURITY.md)和[发布流程](docs/RELEASING.md)。
+固定的项目身份可让辅助功能权限在更新后继续有效。项目也会发布 Sparkle 签名和 GitHub 构建来源证明，方便独立验证发布文件。详情请参阅[安全说明](SECURITY.md)和[发布流程](docs/RELEASING.md)。
 </details>
 
 <details>
@@ -92,13 +92,13 @@ curl -fsSL https://github.com/martincalander/MacDragScroll/raw/main/install.sh |
 
 ## 授予权限
 
-Mac Drag Scroll 需要两项 macOS 权限：**输入监控**用于全局检测外接鼠标按键，**辅助功能**用于向目标窗口发送滚动事件。应用不会利用这些权限记录键盘输入或查看内容。
+Mac Drag Scroll 使用**辅助功能**权限全局检测已配置的鼠标按键，并向目标窗口发送滚动事件。应用不会利用此权限记录键盘输入或查看内容，也不需要输入监控权限。
 
 <p align="center">
-  <img src="docs/assets/mac-drag-scroll-permission-demo.gif" width="800" alt="为 Mac Drag Scroll 启用辅助功能和输入监控权限">
+  <img src="docs/assets/mac-drag-scroll-permission-demo.gif" width="800" alt="为 Mac Drag Scroll 启用辅助功能权限">
 </p>
 
-打开**系统设置 → 隐私与安全性**，在**辅助功能**和**输入监控**中都启用 Mac Drag Scroll。如果 macOS 要求重新启动应用，请退出后重新打开。设置中的“权限”标签页会显示实时状态并提供修复快捷入口。
+打开**系统设置 → 隐私与安全性 → 辅助功能**并启用 Mac Drag Scroll。访问权限启用后，应用会自动检查并开始监控；只有 macOS 未立即激活事件监听时才会显示重新启动操作。
 
 ## 调整操作手感
 
@@ -168,7 +168,7 @@ xcodebuild -project macdragscroll.xcodeproj \
 
 - macOS 14 或更高版本
 - 带中键或可点击滚轮的外接鼠标
-- 辅助功能和输入监控权限
+- 辅助功能权限
 
 ## 致谢
 

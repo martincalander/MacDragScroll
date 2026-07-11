@@ -68,7 +68,7 @@ brew install --cask martincalander/tap/mac-drag-scroll
 1. [最新リリース](https://github.com/martincalander/MacDragScroll/releases/latest)から`MacDragScroll.dmg`をダウンロードします。
 2. ディスクイメージを開き、**Mac Drag Scroll**を**アプリケーション**へドラッグします。
 3. Finderでアプリを右クリックして**開く**を選び、初回起動を確認します。
-4. macOSに求められたら、アクセシビリティと入力監視を許可します。
+4. macOSに求められたら、アクセシビリティを許可します。
 
 <p align="center">
   <img src="docs/assets/mac-drag-scroll-install-demo.gif" width="800" alt="Mac Drag Scrollをアプリケーションフォルダへドラッグする手順">
@@ -79,7 +79,7 @@ brew install --cask martincalander/tap/mac-drag-scroll
 
 現在のリリースには固定されたプロジェクト用コード署名がありますが、有料のApple Developerメンバーシップが必要なDeveloper ID署名と公証は行っていません。そのため、新しくダウンロードしたビルドを通常どおりダブルクリックすると、macOSがブロックする場合があります。Finderで**Mac Drag Scroll**を右クリックし、**開く**を選んで確認してください。手動でダウンロードしたビルドごとに1回だけ必要です。
 
-固定されたプロジェクトIDにより、アップデート後もアクセシビリティと入力監視の許可が維持されます。リリースファイルを独立して検証できるよう、Sparkle署名とGitHubのビルド来歴も公開しています。詳しくは[セキュリティ](SECURITY.md)と[リリース手順](docs/RELEASING.md)を参照してください。
+固定されたプロジェクトIDにより、アップデート後もアクセシビリティの許可が維持されます。リリースファイルを独立して検証できるよう、Sparkle署名とGitHubのビルド来歴も公開しています。詳しくは[セキュリティ](SECURITY.md)と[リリース手順](docs/RELEASING.md)を参照してください。
 </details>
 
 <details>
@@ -92,13 +92,13 @@ curl -fsSL https://github.com/martincalander/MacDragScroll/raw/main/install.sh |
 
 ## 権限を許可する
 
-Mac Drag Scrollには2つのmacOS権限が必要です。**入力監視**は外部マウスのボタンをグローバルに検出し、**アクセシビリティ**は対象ウィンドウへスクロールイベントを送信します。これらの権限を、入力内容の記録やコンテンツの確認には使用しません。
+Mac Drag Scrollは、設定されたマウスボタンをグローバルに検出し、対象ウィンドウへスクロールイベントを送信するために**アクセシビリティ**権限を使用します。入力内容の記録やコンテンツの確認には使用しません。入力監視は不要です。
 
 <p align="center">
-  <img src="docs/assets/mac-drag-scroll-permission-demo.gif" width="800" alt="Mac Drag Scrollのアクセシビリティと入力監視を有効にする手順">
+  <img src="docs/assets/mac-drag-scroll-permission-demo.gif" width="800" alt="Mac Drag Scrollのアクセシビリティを有効にする手順">
 </p>
 
-**システム設定 → プライバシーとセキュリティ**を開き、**アクセシビリティ**と**入力監視**の両方でMac Drag Scrollを有効にします。macOSに求められた場合はアプリを開き直してください。設定の「権限」タブには現在の状態と修復用ショートカットが表示されます。
+**システム設定 → プライバシーとセキュリティ → アクセシビリティ**を開き、Mac Drag Scrollを有効にします。アクセスが有効になるとアプリが自動的に確認して監視を開始します。macOSがイベントタップをすぐに有効化しない場合にのみ、再起動操作が表示されます。
 
 ## 操作感を調整する
 
@@ -168,7 +168,7 @@ xcodebuild -project macdragscroll.xcodeproj \
 
 - macOS 14以降
 - 中ボタンまたはクリック可能なスクロールホイールを備えた外部マウス
-- アクセシビリティと入力監視の権限
+- アクセシビリティ権限
 
 ## クレジット
 

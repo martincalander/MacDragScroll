@@ -686,88 +686,47 @@ final class SettingsManagerTests: XCTestCase {
         let isTrusted = false
         let state = AppDelegate.PermissionState(
             accessibilityPermissionChecker: { isTrusted },
-            accessibilityPermissionRequester: { _ in isTrusted },
-            inputMonitoringPermissionChecker: { true },
-            inputMonitoringPermissionRequester: { true }
+            accessibilityPermissionRequester: { _ in isTrusted }
         )
 
         state.setEventMonitoringState(.active)
         state.refresh()
 
         XCTAssertFalse(state.hasAccessibilityPermission)
-        XCTAssertTrue(state.hasInputMonitoringPermission)
         XCTAssertFalse(state.hasRequiredPermissions)
         XCTAssertEqual(state.eventMonitoringState, .waiting)
     }
 
-    func testPermissionStateResetsMonitoringWhenInputMonitoringIsMissing() {
+    func testPermissionStateTreatsAccessibilityAsCompleteSetup() {
         let state = AppDelegate.PermissionState(
             accessibilityPermissionChecker: { true },
-            accessibilityPermissionRequester: { _ in true },
-            inputMonitoringPermissionChecker: { false },
-            inputMonitoringPermissionRequester: { false }
+            accessibilityPermissionRequester: { _ in true }
         )
 
         state.setEventMonitoringState(.active)
         state.refresh()
 
         XCTAssertTrue(state.hasAccessibilityPermission)
-        XCTAssertFalse(state.hasInputMonitoringPermission)
-        XCTAssertFalse(state.hasRequiredPermissions)
-        XCTAssertEqual(state.eventMonitoringState, .waiting)
+        XCTAssertTrue(state.hasRequiredPermissions)
+        XCTAssertEqual(state.eventMonitoringState, .active)
     }
 
-    func testPermissionStateRequestsOnlyAccessibilityWhenBothPermissionsAreMissing() {
+    func testPermissionStateRequestsAccessibilityWhenMissing() {
         var accessibilityWasRequested = false
-        var inputMonitoringWasRequested = false
         let state = AppDelegate.PermissionState(
             accessibilityPermissionChecker: { false },
             accessibilityPermissionRequester: { shouldPrompt in
                 accessibilityWasRequested = shouldPrompt
                 // Accessibility prompting is asynchronous and initially returns false.
                 return false
-            },
-            inputMonitoringPermissionChecker: { false },
-            inputMonitoringPermissionRequester: {
-                inputMonitoringWasRequested = true
-                return true
             }
         )
 
-        XCTAssertEqual(state.requestNextMissingPermission(), .accessibility)
+        XCTAssertFalse(state.requestAccessibilityPermission())
 
         XCTAssertTrue(accessibilityWasRequested)
-        XCTAssertFalse(inputMonitoringWasRequested)
         XCTAssertFalse(state.hasAccessibilityPermission)
-        XCTAssertFalse(state.hasInputMonitoringPermission)
         XCTAssertFalse(state.hasRequiredPermissions)
-        XCTAssertEqual(state.nextMissingPermission, .accessibility)
-    }
-
-    func testPermissionStateRequestsInputMonitoringAfterAccessibilityIsGranted() {
-        var accessibilityWasRequested = false
-        var inputMonitoringWasRequested = false
-        let state = AppDelegate.PermissionState(
-            accessibilityPermissionChecker: { true },
-            accessibilityPermissionRequester: { _ in
-                accessibilityWasRequested = true
-                return true
-            },
-            inputMonitoringPermissionChecker: { false },
-            inputMonitoringPermissionRequester: {
-                inputMonitoringWasRequested = true
-                return true
-            }
-        )
-
-        XCTAssertEqual(state.requestNextMissingPermission(), .inputMonitoring)
-
-        XCTAssertFalse(accessibilityWasRequested)
-        XCTAssertTrue(inputMonitoringWasRequested)
-        XCTAssertTrue(state.hasAccessibilityPermission)
-        XCTAssertTrue(state.hasInputMonitoringPermission)
-        XCTAssertTrue(state.hasRequiredPermissions)
-        XCTAssertNil(state.nextMissingPermission)
     }
 
     func testPermissionStateDoesNotRequestAnythingWhenSetupIsComplete() {
@@ -777,24 +736,17 @@ final class SettingsManagerTests: XCTestCase {
             accessibilityPermissionRequester: { _ in
                 requestCount += 1
                 return true
-            },
-            inputMonitoringPermissionChecker: { true },
-            inputMonitoringPermissionRequester: {
-                requestCount += 1
-                return true
             }
         )
 
-        XCTAssertNil(state.requestNextMissingPermission())
+        XCTAssertTrue(state.requestAccessibilityPermission())
         XCTAssertEqual(requestCount, 0)
     }
 
     func testPermissionStatePreservesFailedMonitoringStateWhileTrusted() {
         let state = AppDelegate.PermissionState(
             accessibilityPermissionChecker: { true },
-            accessibilityPermissionRequester: { _ in true },
-            inputMonitoringPermissionChecker: { true },
-            inputMonitoringPermissionRequester: { true }
+            accessibilityPermissionRequester: { _ in true }
         )
 
         state.setEventMonitoringState(.failed)

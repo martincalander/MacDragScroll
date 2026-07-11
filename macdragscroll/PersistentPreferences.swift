@@ -55,6 +55,12 @@ enum PersistentPreferences {
 
     static let userDefaults: UserDefaults = {
         _ = testCleanupRegistration
+
+        if !isRunningUnitTests,
+           Bundle.main.bundleIdentifier == storageDomainIdentifier {
+            return .standard
+        }
+
         return UserDefaults(suiteName: storageDomainIdentifier) ?? .standard
     }()
 

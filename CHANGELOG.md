@@ -20,15 +20,17 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 - Coalesced rapid settings backup writes and moved installed-app metadata discovery off the main thread while keeping AppKit icon loading main-thread safe.
 - Replaced the legacy GitHub glyph with GitHub's official current Invertocat vector while preserving its original proportions.
 - Made missing permissions a passive menu-bar state with a direct Settings guide instead of an automatic launch alert.
+- Removed the redundant Input Monitoring requirement; Accessibility alone authorizes the event listening and posting used by drag scrolling.
 
 ### Fixed
 
-- Prevent repeated Accessibility and Input Monitoring resets after normal updates by replacing per-build ad-hoc identities with a stable designated requirement.
+- Prevent repeated Accessibility resets after normal updates by replacing per-build ad-hoc identities with a stable designated requirement.
 - Cancel stale drag sessions when the Mac sleeps, the user session resigns, another app activates, or another window covers the intended scroll target.
 - Recover event monitoring when an existing event tap becomes invalid or disabled.
 - Prevent failed Launch at Login changes from retrying recursively, prevent restart helpers from inheriting the single-instance lock, and keep the app running when a restart cannot be scheduled.
 - Make captured left or right mouse triggers add a safe modifier automatically and avoid coordinate round trips when selecting a target window across displays.
-- Prevent Accessibility and Input Monitoring requests from stacking multiple macOS prompts and System Settings windows.
+- Reduce permission setup to one Accessibility request and prevent stacked macOS prompts or System Settings windows.
+- Use the app's standard preferences domain directly instead of reopening its own bundle identifier as a redundant suite.
 - Allow self-issued release builds to load the embedded Sparkle framework, and launch-test the signed app before publication.
 
 ## [1.1.0] - 2026-07-10

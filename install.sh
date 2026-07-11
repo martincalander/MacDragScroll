@@ -127,4 +127,4 @@ else
 fi
 
 echo "Installed Mac Drag Scroll to $destination_app"
-echo "Open it from Applications and grant Accessibility and Input Monitoring permissions if macOS asks."
+echo "Open it from Applications and grant Accessibility permission if macOS asks."

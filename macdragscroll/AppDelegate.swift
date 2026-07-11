@@ -12,7 +12,7 @@ import Combine
 
 class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDelegate {
     private static let showWelcomeNotification = Notification.Name("MacDragScrollShowWelcomeWindow")
-    private static let requestNextPermissionNotification = Notification.Name("MacDragScrollRequestNextPermission")
+    private static let requestAccessibilityPermissionNotification = Notification.Name("MacDragScrollRequestAccessibilityPermission")
     private static let refreshAccessibilityPermissionNotification = Notification.Name("MacDragScrollRefreshAccessibilityPermission")
     private static let revealApplicationNotification = Notification.Name("MacDragScrollRevealApplication")
     private static let restartApplicationNotification = Notification.Name("MacDragScrollRestartApplication")
@@ -33,8 +33,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         NotificationCenter.default.post(name: showWelcomeNotification, object: nil)
     }
 
-    static func requestNextPermission() {
-        NotificationCenter.default.post(name: requestNextPermissionNotification, object: nil)
+    static func requestAccessibilityPermission() {
+        NotificationCenter.default.post(name: requestAccessibilityPermissionNotification, object: nil)
     }
 
     static func refreshAccessibilityPermission() {
@@ -77,59 +77,32 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         case failed
     }
 
-    enum RequiredPermission: Equatable {
-        case accessibility
-        case inputMonitoring
-    }
-
     class PermissionState: ObservableObject {
         private let accessibilityPermissionChecker: @MainActor () -> Bool
         private let accessibilityPermissionRequester: @MainActor (Bool) -> Bool
-        private let inputMonitoringPermissionChecker: @MainActor () -> Bool
-        private let inputMonitoringPermissionRequester: @MainActor () -> Bool
 
         @Published private(set) var hasAccessibilityPermission: Bool
-        @Published private(set) var hasInputMonitoringPermission: Bool
         @Published private(set) var eventMonitoringState: EventMonitoringState = .waiting
 
         var hasRequiredPermissions: Bool {
-            hasAccessibilityPermission && hasInputMonitoringPermission
-        }
-
-        var nextMissingPermission: RequiredPermission? {
-            if !hasAccessibilityPermission {
-                return .accessibility
-            }
-            if !hasInputMonitoringPermission {
-                return .inputMonitoring
-            }
-            return nil
+            hasAccessibilityPermission
         }
 
         init(
             accessibilityPermissionChecker: @escaping @MainActor () -> Bool = AXIsProcessTrusted,
-            accessibilityPermissionRequester: @escaping @MainActor (Bool) -> Bool = AppDelegate.checkAccessibilityPermission(prompt:),
-            inputMonitoringPermissionChecker: @escaping @MainActor () -> Bool = AppDelegate.checkInputMonitoringPermission,
-            inputMonitoringPermissionRequester: @escaping @MainActor () -> Bool = AppDelegate.requestInputMonitoringPermission
+            accessibilityPermissionRequester: @escaping @MainActor (Bool) -> Bool = AppDelegate.checkAccessibilityPermission(prompt:)
         ) {
             self.accessibilityPermissionChecker = accessibilityPermissionChecker
             self.accessibilityPermissionRequester = accessibilityPermissionRequester
-            self.inputMonitoringPermissionChecker = inputMonitoringPermissionChecker
-            self.inputMonitoringPermissionRequester = inputMonitoringPermissionRequester
             self.hasAccessibilityPermission = accessibilityPermissionChecker()
-            self.hasInputMonitoringPermission = inputMonitoringPermissionChecker()
         }
         
         @discardableResult
         func refresh() -> Bool {
             let accessibilityPermission = accessibilityPermissionChecker()
-            let inputMonitoringPermission = inputMonitoringPermissionChecker()
 
             if hasAccessibilityPermission != accessibilityPermission {
                 hasAccessibilityPermission = accessibilityPermission
-            }
-            if hasInputMonitoringPermission != inputMonitoringPermission {
-                hasInputMonitoringPermission = inputMonitoringPermission
             }
             if !hasRequiredPermissions, eventMonitoringState != .waiting {
                 eventMonitoringState = .waiting
@@ -138,20 +111,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         }
 
         @discardableResult
-        func requestNextMissingPermission() -> RequiredPermission? {
-            guard let permission = nextMissingPermission else { return nil }
+        func requestAccessibilityPermission() -> Bool {
+            guard !hasAccessibilityPermission else { return true }
 
-            switch permission {
-            case .accessibility:
-                hasAccessibilityPermission = accessibilityPermissionRequester(true)
-            case .inputMonitoring:
-                hasInputMonitoringPermission = inputMonitoringPermissionRequester()
-            }
+            hasAccessibilityPermission = accessibilityPermissionRequester(true)
 
             if !hasRequiredPermissions, eventMonitoringState != .waiting {
                 eventMonitoringState = .waiting
             }
-            return permission
+            return hasAccessibilityPermission
         }
 
         func setEventMonitoringState(_ state: EventMonitoringState) {
@@ -209,14 +177,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
 
         let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
         return AXIsProcessTrustedWithOptions(options)
-    }
-
-    private static func checkInputMonitoringPermission() -> Bool {
-        CGPreflightListenEventAccess()
-    }
-
-    private static func requestInputMonitoringPermission() -> Bool {
-        CGRequestListenEventAccess()
     }
 
     private func synchronizeAccessibilityState() {
@@ -289,14 +249,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         AppDelegate.permissionState.setEventMonitoringState(eventMonitoringState)
     }
 
-    private func requestNextRequiredPermissionFromUser() {
-        guard AppDelegate.permissionState.requestNextMissingPermission() != nil else {
-            hadPermissionPreviously = true
-            startMouseMonitor()
-            return
-        }
-
-        if AppDelegate.permissionState.hasRequiredPermissions {
+    private func requestAccessibilityPermissionFromUser() {
+        if AppDelegate.permissionState.requestAccessibilityPermission() {
             hadPermissionPreviously = true
             startMouseMonitor()
         } else {
@@ -331,16 +285,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         openPrivacySettings(anchor: "Privacy_Accessibility")
     }
 
-    static func openInputMonitoringSettings() {
-        openPrivacySettings(anchor: "Privacy_ListenEvent")
-    }
-
     static func openPrivacySettingsForMissingPermission() {
-        if !permissionState.hasAccessibilityPermission {
-            openAccessibilitySettings()
-        } else {
-            openInputMonitoringSettings()
-        }
+        openAccessibilitySettings()
     }
 
     private static func openPrivacySettings(anchor: String) {
@@ -454,13 +400,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             .sink { [weak self] _ in self?.applyAppearanceMode() }
             .store(in: &cancellables)
 
-        Publishers.CombineLatest(
-            AppDelegate.permissionState.$hasAccessibilityPermission,
-            AppDelegate.permissionState.$hasInputMonitoringPermission
-        )
-        .receive(on: DispatchQueue.main)
-        .sink { [weak self] _ in self?.refreshPermissionPresentation() }
-        .store(in: &cancellables)
+        AppDelegate.permissionState.$hasAccessibilityPermission
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.refreshPermissionPresentation() }
+            .store(in: &cancellables)
 
         AppInstanceMonitor.shared.$duplicateInstanceCount
             .receive(on: DispatchQueue.main)
@@ -472,9 +415,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             .sink { [weak self] _ in self?.showWelcomeWindow() }
             .store(in: &cancellables)
 
-        NotificationCenter.default.publisher(for: Self.requestNextPermissionNotification)
+        NotificationCenter.default.publisher(for: Self.requestAccessibilityPermissionNotification)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in self?.requestNextRequiredPermissionFromUser() }
+            .sink { [weak self] _ in self?.requestAccessibilityPermissionFromUser() }
             .store(in: &cancellables)
 
         NotificationCenter.default.publisher(for: Self.refreshAccessibilityPermissionNotification)
@@ -736,7 +679,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
 
         let permissionTitle = localized(
             "permissions_required_title",
-            value: "Permissions Required",
+            value: "Accessibility Required",
             comment: "Permissions required title"
         )
         let statusDescription = needsPermission
@@ -764,7 +707,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
                     systemSymbolName: "exclamationmark.triangle.fill",
                     accessibilityDescription: localized(
                         "permissions_required_title",
-                        value: "Permissions Required",
+                        value: "Accessibility Required",
                         comment: "Permissions required title"
                     )
                 )
@@ -777,13 +720,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
 
             let permissionTitle = localized(
                 "permissions_required_title",
-                value: "Permissions Required",
+                value: "Accessibility Required",
                 comment: "Permissions required title"
             )
             item.title = "\(permissionTitle)..."
             item.toolTip = localized(
                 "permissions_required_message",
-                value: "Mac Drag Scroll needs Accessibility and Input Monitoring to listen for the mouse trigger.",
+                value: "Mac Drag Scroll needs Accessibility to listen for the mouse trigger and send scroll events.",
                 comment: "Permissions required message"
             )
             item.isEnabled = true

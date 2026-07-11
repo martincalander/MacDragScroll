@@ -109,7 +109,7 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
             releaseDate: "2026-07-11",
             changes: [
                 "Added an optional Keep Cursor in Place mode that preserves visualizer feedback while anchoring the pointer safely.",
-                "Reduced permission prompts and preserved access across updates with a pinned production signing identity.",
+                "Removed the redundant Input Monitoring requirement; Accessibility now activates drag scrolling automatically.",
                 "Improved monitoring recovery, background performance, preference writes, app discovery, and interruption safety."
             ]
         ),

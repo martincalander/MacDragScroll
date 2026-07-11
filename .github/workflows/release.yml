@@ -181,7 +181,6 @@ jobs:
             status=$?
             trap - EXIT
             if [ "$status" -ne 0 ]; then
-              sudo security remove-trusted-cert -d "$certificate_path" >/dev/null 2>&1 || true
               security delete-keychain "$keychain_path" >/dev/null 2>&1 || true
               rm -f "$p12_path" "$certificate_path"
             fi
@@ -235,9 +234,6 @@ jobs:
       - name: Remove release signing material from runner
         if: always()
         run: |
-          if [ -s "${SIGNING_CERTIFICATE_PATH:-}" ]; then
-            sudo security remove-trusted-cert -d "$SIGNING_CERTIFICATE_PATH" >/dev/null 2>&1 || true
-          fi
           if [ -n "${SIGNING_KEYCHAIN:-}" ]; then
             security delete-keychain "$SIGNING_KEYCHAIN" >/dev/null 2>&1 || true
           fi

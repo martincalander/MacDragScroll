@@ -66,6 +66,15 @@ Release builds use:
 
 Debug builds use `com.martincalander.macdragscroll.development` and a separate Application Support folder. Tests use per-process test domains. This keeps local development from overwriting a user's production settings.
 
+## Branches
+
+The repository has two long-lived branches:
+
+- `dev` is the integration branch. Start short-lived feature, fix, and documentation branches from `dev`, and open pull requests back into `dev`.
+- `main` is the stable release branch. Only promote tested changes from `dev` to `main` through a pull request. Releases, public status badges, and the OpenSSF Scorecard workflow use `main`.
+
+Do not push directly to either branch. Keep other branches short-lived and delete them after merge. If an urgent fix must start from `main`, merge the fix back into `dev` promptly so the branches do not diverge.
+
 ## Pull Requests
 
 Before opening a pull request:
@@ -76,7 +85,7 @@ Before opening a pull request:
 - Add or update tests when changing scroll math, settings persistence, permissions, or update behavior.
 - Update `README.md`, localized READMEs, `SUPPORT.md`, or `PRIVACY.md` when behavior changes what users need to know.
 
-Changes to `main` require two approvals, including code-owner review. New pushes dismiss stale reviews, the latest push needs independent approval, and all review conversations must be resolved before merge.
+Changes to `dev` and `main` require two approvals, including code-owner review. New pushes dismiss stale reviews, the latest push needs independent approval, and all review conversations must be resolved before merge. Required build/test and secret-scan checks must pass.
 
 Maintainer responsibilities and the decision process are documented in [Governance](GOVERNANCE.md).
 

@@ -69,6 +69,8 @@ This check is independent of Apple Developer ID signing and notarization. It doe
 
 Changes to `main` require a pull request, two approvals, code-owner review, approval after the latest push, resolved review conversations, and strict build/test and secret-scan checks. Stale approvals are dismissed and no bypass actors are configured.
 
+The long-lived `dev` integration branch uses the same review and required-check protections. CI, CodeQL, and secret scanning run for both `dev` and `main`, while Scorecard publishing and the public checks badge remain scoped to `main`. OpenSSF's Branch-Protection check evaluates the default and release branches; `main` remains both the default branch and the only release branch.
+
 Scorecard evaluates a rolling history of recent changes, so the Code-Review score will rise as genuinely reviewed pull requests replace older direct commits. Historical changes are not rewritten or backfilled merely to improve the score.
 
 ## Quality And Compatibility

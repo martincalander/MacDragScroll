@@ -108,6 +108,45 @@ enum CursorHoldBehavior {
     }
 }
 
+enum PrecisionModeBehavior {
+    static func isActive(
+        isEnabled: Bool,
+        precisionModifier: PrecisionModifier,
+        currentModifiers: NSEvent.ModifierFlags,
+        triggerModifiers: NSEvent.ModifierFlags
+    ) -> Bool {
+        guard isEnabled else { return false }
+
+        let flag = precisionModifier.modifierFlag
+        // A precision modifier must be additional to the trigger chord. This
+        // prevents a configured trigger modifier from making every drag slow.
+        guard !triggerModifiers.contains(flag) else { return false }
+        return currentModifiers.contains(flag)
+    }
+
+    static func effectiveScrollSpeed(
+        baseSpeed: Double,
+        isEnabled: Bool,
+        precisionModifier: PrecisionModifier,
+        currentModifiers: NSEvent.ModifierFlags,
+        triggerModifiers: NSEvent.ModifierFlags,
+        multiplier: Double
+    ) -> Double {
+        guard baseSpeed.isFinite, baseSpeed >= 0 else { return 0 }
+        guard multiplier.isFinite, multiplier > 0, multiplier < 1 else { return baseSpeed }
+        guard isActive(
+            isEnabled: isEnabled,
+            precisionModifier: precisionModifier,
+            currentModifiers: currentModifiers,
+            triggerModifiers: triggerModifiers
+        ) else {
+            return baseSpeed
+        }
+
+        return baseSpeed * multiplier
+    }
+}
+
 enum ScrollDeliveryDestination: Equatable {
     case global
     case application(processIdentifier: pid_t)
@@ -315,6 +354,7 @@ final class MouseMonitor {
     private var originWindow: WindowSnapshot?
     private var originBundleIdentifier: String?
     private var activeTriggerConfig: TriggerConfig?
+    private var activeModifiers: NSEvent.ModifierFlags = []
     private var pendingClick: PendingClick?
     private var lastQuickClick: TriggerClickSample?
     private var didShowReactionForActivePress = false
@@ -596,11 +636,13 @@ final class MouseMonitor {
     }
 
     private func handleFlagsChanged(_ modifiers: NSEvent.ModifierFlags) {
-        guard isTriggerActive, let activeConfig = activeTriggerConfig, activeConfig.hasModifiers else {
+        guard isTriggerActive, let activeConfig = activeTriggerConfig else {
             return
         }
 
-        if !activeConfig.modifiersStillHeld(modifiers) {
+        activeModifiers = modifiers
+
+        if activeConfig.hasModifiers && !activeConfig.modifiersStillHeld(modifiers) {
             handleTriggerRelease(shouldReplayClick: false)
         }
     }
@@ -629,6 +671,7 @@ final class MouseMonitor {
         )
         cursorHoldReleaseMissCount = 0
         activeTriggerConfig = config
+        activeModifiers = modifiers
         pendingClick = PendingClick(
             button: button,
             modifiers: modifiers,
@@ -663,6 +706,7 @@ final class MouseMonitor {
 
         isTriggerActive = false
         activeTriggerConfig = nil
+        activeModifiers = []
         pendingClick = nil
         overlayShowTimer?.invalidate()
         overlayShowTimer = nil
@@ -682,6 +726,7 @@ final class MouseMonitor {
     private func cancelInteraction() {
         isTriggerActive = false
         activeTriggerConfig = nil
+        activeModifiers = []
         pendingClick = nil
         didShowReactionForActivePress = false
         overlayShowTimer?.invalidate()
@@ -812,6 +857,7 @@ final class MouseMonitor {
         isOverlayVisible = false
         hasMovedOutsideDeadZone = false
         isCursorHoldActive = false
+        activeModifiers = []
         cursorHoldReleaseMissCount = 0
         originWindow = nil
         originBundleIdentifier = nil
@@ -939,10 +985,24 @@ final class MouseMonitor {
             overlayWindow?.updateDragPoint(to: currentPoint)
         }
 
+        guard let activeTriggerConfig else {
+            cancelInteraction()
+            return
+        }
+
+        let effectiveScrollSpeed = PrecisionModeBehavior.effectiveScrollSpeed(
+            baseSpeed: scrollSpeed,
+            isEnabled: SettingsManager.shared.precisionModeEnabled,
+            precisionModifier: SettingsManager.shared.precisionModifier,
+            currentModifiers: activeModifiers,
+            triggerModifiers: activeTriggerConfig.modifierFlags,
+            multiplier: SettingsManager.shared.precisionSpeedMultiplier
+        )
+
         let deltas = ScrollPhysics.deltas(
             from: originPoint,
             to: currentPoint,
-            scrollSpeed: scrollSpeed,
+            scrollSpeed: effectiveScrollSpeed,
             deadZoneRadius: deadZoneRadius,
             acceleration: acceleration,
             reversesDirection: reverseScrollDirection,

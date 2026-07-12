@@ -214,3 +214,14 @@
 "error_occurred_title" = "Произошла ошибка";
 "error_occurred_message" = "Произошла ошибка при %@:\n\n%@";
 "fatal_error_title" = "Неустранимая ошибка";
+"precision_mode" = "Точный режим";
+"precision_modifier" = "Модификатор точности";
+"precision_speed" = "Точная скорость";
+"precision_modifier_command" = "Command (⌘)";
+"precision_modifier_option" = "Option (⌥)";
+"precision_modifier_control" = "Control (⌃)";
+"precision_modifier_shift" = "Shift (⇧)";
+"tooltip_precision_mode" = "Временно замедляет активное перетаскивание при удержании дополнительного модификатора.";
+"tooltip_precision_modifier" = "Удерживайте этот модификатор после начала прокрутки, чтобы временно снизить скорость.";
+"tooltip_precision_speed" = "Скорость прокрутки при удержании модификатора точности.";
+"precision_modifier_conflict" = "Выберите модификатор, который не входит в триггер. При совпадении точный режим неактивен.";

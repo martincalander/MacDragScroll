@@ -31,6 +31,9 @@ final class SettingsManagerTests: XCTestCase {
     private var originalHorizontalScrollingEnabled = true
     private var originalInvertHorizontalScroll = false
     private var originalKeepCursorInPlace = false
+    private var originalPrecisionModeEnabled = false
+    private var originalPrecisionModifier: PrecisionModifier = .option
+    private var originalPrecisionSpeedMultiplier = 0.25
     private var originalTriggerConfig = TriggerConfig.default
     
     override func setUp() {
@@ -54,6 +57,9 @@ final class SettingsManagerTests: XCTestCase {
         originalHorizontalScrollingEnabled = settings.horizontalScrollingEnabled
         originalInvertHorizontalScroll = settings.invertHorizontalScroll
         originalKeepCursorInPlace = settings.keepCursorInPlace
+        originalPrecisionModeEnabled = settings.precisionModeEnabled
+        originalPrecisionModifier = settings.precisionModifier
+        originalPrecisionSpeedMultiplier = settings.precisionSpeedMultiplier
         originalTriggerConfig = settings.triggerConfig
     }
     
@@ -70,6 +76,9 @@ final class SettingsManagerTests: XCTestCase {
         settings.horizontalScrollingEnabled = originalHorizontalScrollingEnabled
         settings.invertHorizontalScroll = originalInvertHorizontalScroll
         settings.keepCursorInPlace = originalKeepCursorInPlace
+        settings.precisionModeEnabled = originalPrecisionModeEnabled
+        settings.precisionModifier = originalPrecisionModifier
+        settings.precisionSpeedMultiplier = originalPrecisionSpeedMultiplier
         settings.triggerConfig = originalTriggerConfig
         settings.hasCompletedWelcome = originalHasCompletedWelcome
         settings.appLanguage = originalAppLanguage
@@ -397,6 +406,7 @@ final class SettingsManagerTests: XCTestCase {
         settings.overlayOpacity = .nan
         settings.visualizerSize = .infinity
         settings.liquidGlassIntensity = -.infinity
+        settings.precisionSpeedMultiplier = .nan
 
         XCTAssertEqual(settings.scrollSpeed, 2.0, accuracy: 0.001)
         XCTAssertEqual(settings.deadZoneRadius, 20.0, accuracy: 0.001)
@@ -404,6 +414,7 @@ final class SettingsManagerTests: XCTestCase {
         XCTAssertEqual(settings.overlayOpacity, 1.0, accuracy: 0.001)
         XCTAssertEqual(settings.visualizerSize, 1.0, accuracy: 0.001)
         XCTAssertEqual(settings.liquidGlassIntensity, 1.35, accuracy: 0.001)
+        XCTAssertEqual(settings.precisionSpeedMultiplier, 0.25, accuracy: 0.001)
     }
 
     func testNumericNormalizationRejectsNonFiniteValuesAndClampsFiniteValues() {
@@ -474,6 +485,37 @@ final class SettingsManagerTests: XCTestCase {
 
         settings.resetToDefaults()
         XCTAssertFalse(settings.keepCursorInPlace)
+    }
+
+    func testPrecisionModeDefaultsAndPersistence() {
+        settings.precisionModeEnabled = true
+        settings.precisionModifier = .shift
+        settings.precisionSpeedMultiplier = 0.4
+
+        XCTAssertTrue(settings.precisionModeEnabled)
+        XCTAssertEqual(settings.precisionModifier, .shift)
+        XCTAssertEqual(settings.precisionSpeedMultiplier, 0.4, accuracy: 0.001)
+
+        settings.resetToDefaults()
+        XCTAssertFalse(settings.precisionModeEnabled)
+        XCTAssertEqual(settings.precisionModifier, .option)
+        XCTAssertEqual(settings.precisionSpeedMultiplier, 0.25, accuracy: 0.001)
+    }
+
+    func testPrecisionSpeedClampsToSupportedRange() {
+        settings.precisionSpeedMultiplier = 0
+        XCTAssertEqual(
+            settings.precisionSpeedMultiplier,
+            SettingsManager.precisionSpeedMultiplierRange.lowerBound,
+            accuracy: 0.001
+        )
+
+        settings.precisionSpeedMultiplier = 2
+        XCTAssertEqual(
+            settings.precisionSpeedMultiplier,
+            SettingsManager.precisionSpeedMultiplierRange.upperBound,
+            accuracy: 0.001
+        )
     }
 
     func testLanguageSelectionCanBePersisted() {

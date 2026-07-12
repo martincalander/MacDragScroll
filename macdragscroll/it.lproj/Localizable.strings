@@ -214,3 +214,14 @@
 "error_occurred_title" = "Si è verificato un errore";
 "error_occurred_message" = "Si è verificato un errore durante %@:\n\n%@";
 "fatal_error_title" = "Errore fatale";
+"precision_mode" = "Modalità precisione";
+"precision_modifier" = "Modificatore precisione";
+"precision_speed" = "Velocità di precisione";
+"precision_modifier_command" = "Comando (⌘)";
+"precision_modifier_option" = "Opzione (⌥)";
+"precision_modifier_control" = "Ctrl (⌃)";
+"precision_modifier_shift" = "Maiuscole (⇧)";
+"tooltip_precision_mode" = "Rallenta temporaneamente un trascinamento attivo tenendo premuto un modificatore aggiuntivo.";
+"tooltip_precision_modifier" = "Tieni premuto questo modificatore dopo l'inizio dello scorrimento per ridurne temporaneamente la velocità.";
+"tooltip_precision_speed" = "Controlla la velocità mentre il modificatore di precisione è premuto.";
+"precision_modifier_conflict" = "Scegli un modificatore che non faccia già parte dell'attivazione. La modalità precisione resta inattiva in caso di conflitto.";

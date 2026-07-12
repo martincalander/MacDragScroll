@@ -214,3 +214,14 @@
 "error_occurred_title" = "发生错误";
 "error_occurred_message" = "%@ 时发生错误：\n\n%@";
 "fatal_error_title" = "致命错误";
+"precision_mode" = "精细模式";
+"precision_modifier" = "精细模式修饰键";
+"precision_speed" = "精细模式速度";
+"precision_modifier_command" = "Command (⌘)";
+"precision_modifier_option" = "Option (⌥)";
+"precision_modifier_control" = "Control (⌃)";
+"precision_modifier_shift" = "Shift (⇧)";
+"tooltip_precision_mode" = "按住额外的修饰键，可临时降低正在进行的拖动滚动速度。";
+"tooltip_precision_modifier" = "开始拖动滚动后按住此额外修饰键，以临时降低滚动速度。";
+"tooltip_precision_speed" = "设置按住精细模式修饰键时的滚动速度。";
+"precision_modifier_conflict" = "请选择尚未用于触发器的修饰键。设置重叠时，精细模式保持关闭。";

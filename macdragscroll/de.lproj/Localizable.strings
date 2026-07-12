@@ -214,3 +214,14 @@
 "error_occurred_title" = "Es ist ein Fehler aufgetreten";
 "error_occurred_message" = "Beim %@ ist ein Fehler aufgetreten:\n\n%@";
 "fatal_error_title" = "Fataler Fehler";
+"precision_mode" = "Präzisionsmodus";
+"precision_modifier" = "Präzisions-Sondertaste";
+"precision_speed" = "Präzisionsgeschwindigkeit";
+"precision_modifier_command" = "Befehl (⌘)";
+"precision_modifier_option" = "Wahltaste (⌥)";
+"precision_modifier_control" = "Control (⌃)";
+"precision_modifier_shift" = "Umschalt (⇧)";
+"tooltip_precision_mode" = "Verlangsamt einen aktiven Ziehvorgang vorübergehend mit einer zusätzlichen Sondertaste.";
+"tooltip_precision_modifier" = "Diese zusätzliche Taste nach Beginn des Ziehscrollens gedrückt halten, um die Geschwindigkeit vorübergehend zu reduzieren.";
+"tooltip_precision_speed" = "Legt die Scrollgeschwindigkeit bei gedrückter Präzisionstaste fest.";
+"precision_modifier_conflict" = "Wähle eine Taste, die nicht bereits Teil des Auslösers ist. Bei einer Überschneidung bleibt der Präzisionsmodus inaktiv.";

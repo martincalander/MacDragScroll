@@ -214,3 +214,14 @@
 "error_occurred_title" = "Ett fel uppstod";
 "error_occurred_message" = "Ett fel uppstod när %@:\n\n%@";
 "fatal_error_title" = "Fatalt fel";
+"precision_mode" = "Precisionsläge";
+"precision_modifier" = "Precisionsmodifierare";
+"precision_speed" = "Precisionshastighet";
+"precision_modifier_command" = "Kommando (⌘)";
+"precision_modifier_option" = "Alternativ (⌥)";
+"precision_modifier_control" = "Kontroll (⌃)";
+"precision_modifier_shift" = "Skift (⇧)";
+"tooltip_precision_mode" = "Sakta tillfälligt ner en aktiv dragning genom att hålla ned en extra modifierartangent.";
+"tooltip_precision_modifier" = "Håll ned denna extra modifierare efter att dragrullningen har börjat för att tillfälligt minska rullningshastigheten.";
+"tooltip_precision_speed" = "Styr rullningshastigheten medan precisionsmodifieraren hålls ned.";
+"precision_modifier_conflict" = "Välj en modifierare som inte redan ingår i utlösaren. Precisionsläget förblir inaktivt medan inställningarna överlappar.";

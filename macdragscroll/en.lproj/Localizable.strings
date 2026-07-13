@@ -214,3 +214,14 @@
 "error_occurred_title" = "An Error Occurred";
 "error_occurred_message" = "An error occurred while %@:\n\n%@";
 "fatal_error_title" = "Fatal Error";
+"precision_mode" = "Precision Mode";
+"precision_modifier" = "Precision Modifier";
+"precision_speed" = "Precision Speed";
+"precision_modifier_command" = "Command (⌘)";
+"precision_modifier_option" = "Option (⌥)";
+"precision_modifier_control" = "Control (⌃)";
+"precision_modifier_shift" = "Shift (⇧)";
+"tooltip_precision_mode" = "Temporarily slow an active drag by holding an additional modifier key.";
+"tooltip_precision_modifier" = "Hold this additional modifier after drag scrolling begins to temporarily reduce the scroll speed.";
+"tooltip_precision_speed" = "Controls scroll speed while the precision modifier is held.";
+"precision_modifier_conflict" = "Choose a modifier that is not already part of the trigger. Precision mode remains inactive while these settings overlap.";

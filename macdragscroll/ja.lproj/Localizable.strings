@@ -214,3 +214,14 @@
 "error_occurred_title" = "エラーが発生しました";
 "error_occurred_message" = "%@ 中にエラーが発生しました:\n\n%@";
 "fatal_error_title" = "致命的なエラー";
+"precision_mode" = "精密モード";
+"precision_modifier" = "精密モード修飾キー";
+"precision_speed" = "精密モードの速度";
+"precision_modifier_command" = "Command (⌘)";
+"precision_modifier_option" = "Option (⌥)";
+"precision_modifier_control" = "Control (⌃)";
+"precision_modifier_shift" = "Shift (⇧)";
+"tooltip_precision_mode" = "追加の修飾キーを押し続けると、ドラッグ中のスクロールを一時的に遅くします。";
+"tooltip_precision_modifier" = "ドラッグスクロールの開始後にこの追加修飾キーを押し続けると、速度が一時的に低下します。";
+"tooltip_precision_speed" = "精密モード修飾キーを押している間のスクロール速度を調整します。";
+"precision_modifier_conflict" = "トリガーに含まれていない修飾キーを選択してください。設定が重複している間、精密モードは無効です。";

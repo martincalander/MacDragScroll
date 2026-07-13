@@ -243,6 +243,43 @@ struct TriggerConfig: Codable, Equatable {
     }
 }
 
+// MARK: - Precision Mode
+
+enum PrecisionModifier: String, CaseIterable, Identifiable, Codable {
+    case command
+    case option
+    case control
+    case shift
+
+    var id: String { rawValue }
+
+    var modifierFlag: NSEvent.ModifierFlags {
+        switch self {
+        case .command: return .command
+        case .option: return .option
+        case .control: return .control
+        case .shift: return .shift
+        }
+    }
+
+    var displayName: String {
+        switch self {
+        case .command:
+            return localized("precision_modifier_command", value: "Command (⌘)", comment: "Command precision modifier")
+        case .option:
+            return localized("precision_modifier_option", value: "Option (⌥)", comment: "Option precision modifier")
+        case .control:
+            return localized("precision_modifier_control", value: "Control (⌃)", comment: "Control precision modifier")
+        case .shift:
+            return localized("precision_modifier_shift", value: "Shift (⇧)", comment: "Shift precision modifier")
+        }
+    }
+
+    private func localized(_ key: String, value: String, comment: String) -> String {
+        AppLocalization.shared.localizedString(key, value: value, comment: comment)
+    }
+}
+
 // MARK: - Visualizer Appearance
 
 enum VisualizerTintStyle: String, CaseIterable, Identifiable, Codable {
@@ -294,6 +331,7 @@ class SettingsManager: ObservableObject {
     static let shared = SettingsManager()
     static let visualizerSizeRange: ClosedRange<Double> = 0.45...1.5
     static let liquidGlassIntensityRange: ClosedRange<Double> = 0.7...2.0
+    static let precisionSpeedMultiplierRange: ClosedRange<Double> = 0.1...0.5
     private static let migratablePreferenceKeys: Set<String> = [
         "isEnabled",
         "keepRunningInMenuBar",
@@ -311,6 +349,9 @@ class SettingsManager: ObservableObject {
         "horizontalScrollingEnabled",
         "invertHorizontalScroll",
         "keepCursorInPlace",
+        "precisionModeEnabled",
+        "precisionModifier",
+        "precisionSpeedMultiplier",
         "triggerConfig",
         "hasCompletedWelcome",
         "appLanguage",
@@ -345,6 +386,9 @@ class SettingsManager: ObservableObject {
     private let horizontalScrollingEnabledKey = "horizontalScrollingEnabled"
     private let invertHorizontalScrollKey = "invertHorizontalScroll"
     private let keepCursorInPlaceKey = "keepCursorInPlace"
+    private let precisionModeEnabledKey = "precisionModeEnabled"
+    private let precisionModifierKey = "precisionModifier"
+    private let precisionSpeedMultiplierKey = "precisionSpeedMultiplier"
     private let triggerConfigKey = "triggerConfig"
     private let hasCompletedWelcomeKey = "hasCompletedWelcome"
     private let appLanguageKey = "appLanguage"
@@ -389,6 +433,26 @@ class SettingsManager: ObservableObject {
 
     @Published var keepCursorInPlace: Bool {
         didSet { persist(keepCursorInPlace, forKey: keepCursorInPlaceKey) }
+    }
+
+    @Published var precisionModeEnabled: Bool {
+        didSet { persist(precisionModeEnabled, forKey: precisionModeEnabledKey) }
+    }
+
+    @Published var precisionModifier: PrecisionModifier {
+        didSet { persist(precisionModifier.rawValue, forKey: precisionModifierKey) }
+    }
+
+    @Published var precisionSpeedMultiplier: Double {
+        didSet {
+            let normalized = Self.normalizedDouble(
+                precisionSpeedMultiplier,
+                defaultValue: 0.25,
+                range: Self.precisionSpeedMultiplierRange
+            )
+            if normalized != precisionSpeedMultiplier { precisionSpeedMultiplier = normalized }
+            persist(normalized, forKey: precisionSpeedMultiplierKey)
+        }
     }
     
     @Published var excludedApps: [String] {
@@ -493,6 +557,9 @@ class SettingsManager: ObservableObject {
             horizontalScrollingEnabledKey: true,
             invertHorizontalScrollKey: false,
             keepCursorInPlaceKey: false,
+            precisionModeEnabledKey: false,
+            precisionModifierKey: PrecisionModifier.option.rawValue,
+            precisionSpeedMultiplierKey: 0.25,
             hasCompletedWelcomeKey: false,
             appLanguageKey: AppLanguage.system.rawValue,
             appAppearanceKey: AppAppearance.system.rawValue
@@ -506,6 +573,13 @@ class SettingsManager: ObservableObject {
         self.horizontalScrollingEnabled = Self.boolValue(from: defaults, forKey: horizontalScrollingEnabledKey, defaultValue: true)
         self.invertHorizontalScroll = Self.boolValue(from: defaults, forKey: invertHorizontalScrollKey, defaultValue: false)
         self.keepCursorInPlace = Self.boolValue(from: defaults, forKey: keepCursorInPlaceKey, defaultValue: false)
+        self.precisionModeEnabled = Self.boolValue(from: defaults, forKey: precisionModeEnabledKey, defaultValue: false)
+        let precisionModifierRawValue = Self.stringValue(
+            from: defaults,
+            forKey: precisionModifierKey,
+            defaultValue: PrecisionModifier.option.rawValue
+        )
+        self.precisionModifier = PrecisionModifier(rawValue: precisionModifierRawValue) ?? .option
         self.hasCompletedWelcome = Self.boolValue(from: defaults, forKey: hasCompletedWelcomeKey, defaultValue: false)
         let appLanguageRawValue = Self.stringValue(from: defaults, forKey: appLanguageKey, defaultValue: AppLanguage.system.rawValue)
         self.appLanguage = AppLanguage(rawValue: appLanguageRawValue) ?? .system
@@ -524,6 +598,12 @@ class SettingsManager: ObservableObject {
         self.visualizerTintStyle = VisualizerTintStyle(rawValue: tintRawValue) ?? .clear
 
         self.liquidGlassIntensity = Self.doubleValue(from: defaults, forKey: liquidGlassIntensityKey, defaultValue: 1.35, range: Self.liquidGlassIntensityRange)
+        self.precisionSpeedMultiplier = Self.doubleValue(
+            from: defaults,
+            forKey: precisionSpeedMultiplierKey,
+            defaultValue: 0.25,
+            range: Self.precisionSpeedMultiplierRange
+        )
 
         self.triggerConfig = Self.loadTriggerConfig(from: defaults)
         
@@ -685,6 +765,9 @@ class SettingsManager: ObservableObject {
         horizontalScrollingEnabled = true
         invertHorizontalScroll = false
         keepCursorInPlace = false
+        precisionModeEnabled = false
+        precisionModifier = .option
+        precisionSpeedMultiplier = 0.25
         scrollSpeed = 2.0
         deadZoneRadius = 20.0
         acceleration = 1.8

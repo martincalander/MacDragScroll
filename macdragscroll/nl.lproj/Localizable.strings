@@ -214,3 +214,14 @@
 "error_occurred_title" = "Er is een fout opgetreden";
 "error_occurred_message" = "Er is een fout opgetreden tijdens het formatteren van %@:\n\n%@";
 "fatal_error_title" = "Fatale fout";
+"precision_mode" = "Precisiemodus";
+"precision_modifier" = "Precisietoets";
+"precision_speed" = "Precisiesnelheid";
+"precision_modifier_command" = "Command (⌘)";
+"precision_modifier_option" = "Option (⌥)";
+"precision_modifier_control" = "Control (⌃)";
+"precision_modifier_shift" = "Shift (⇧)";
+"tooltip_precision_mode" = "Vertraag een actieve sleepbeweging tijdelijk met een extra speciale toets.";
+"tooltip_precision_modifier" = "Houd deze extra toets ingedrukt nadat sleepscrollen begint om de snelheid tijdelijk te verlagen.";
+"tooltip_precision_speed" = "Regelt de scrollsnelheid terwijl de precisietoets is ingedrukt.";
+"precision_modifier_conflict" = "Kies een toets die nog geen deel van de activering is. De precisiemodus blijft bij overlap inactief.";

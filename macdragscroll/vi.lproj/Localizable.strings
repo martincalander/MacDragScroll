@@ -214,3 +214,14 @@
 "error_occurred_title" = "Đã xảy ra lỗi";
 "error_occurred_message" = "Đã xảy ra lỗi khi %@:\n\n%@";
 "fatal_error_title" = "Lỗi nghiêm trọng";
+"precision_mode" = "Chế độ chính xác";
+"precision_modifier" = "Phím bổ trợ chính xác";
+"precision_speed" = "Tốc độ chính xác";
+"precision_modifier_command" = "Command (⌘)";
+"precision_modifier_option" = "Option (⌥)";
+"precision_modifier_control" = "Control (⌃)";
+"precision_modifier_shift" = "Shift (⇧)";
+"tooltip_precision_mode" = "Tạm thời làm chậm thao tác kéo đang hoạt động bằng cách giữ thêm phím bổ trợ.";
+"tooltip_precision_modifier" = "Giữ phím bổ trợ này sau khi bắt đầu cuộn kéo để tạm thời giảm tốc độ.";
+"tooltip_precision_speed" = "Điều khiển tốc độ cuộn khi giữ phím bổ trợ chính xác.";
+"precision_modifier_conflict" = "Chọn phím bổ trợ chưa thuộc thao tác kích hoạt. Chế độ chính xác sẽ không hoạt động khi các cài đặt trùng nhau.";

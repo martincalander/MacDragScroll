@@ -214,3 +214,14 @@
 "error_occurred_title" = "오류가 발생했습니다";
 "error_occurred_message" = "%@ 중에 오류가 발생했습니다.\n\n%@";
 "fatal_error_title" = "치명적인 오류";
+"precision_mode" = "정밀 모드";
+"precision_modifier" = "정밀 보조 키";
+"precision_speed" = "정밀 속도";
+"precision_modifier_command" = "Command (⌘)";
+"precision_modifier_option" = "Option (⌥)";
+"precision_modifier_control" = "Control (⌃)";
+"precision_modifier_shift" = "Shift (⇧)";
+"tooltip_precision_mode" = "추가 보조 키를 누르면 활성 드래그의 속도를 잠시 낮춥니다.";
+"tooltip_precision_modifier" = "드래그 스크롤을 시작한 후 이 추가 보조 키를 눌러 속도를 잠시 줄입니다.";
+"tooltip_precision_speed" = "정밀 보조 키를 누르는 동안의 스크롤 속도를 조절합니다.";
+"precision_modifier_conflict" = "트리거에 이미 포함된 키가 아닌 보조 키를 선택하세요. 설정이 겹치면 정밀 모드가 비활성화됩니다.";

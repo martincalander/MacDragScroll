@@ -214,3 +214,14 @@
 "error_occurred_title" = "發生錯誤";
 "error_occurred_message" = "%@ 時發生錯誤：\n\n%@";
 "fatal_error_title" = "致命錯誤";
+"precision_mode" = "精細模式";
+"precision_modifier" = "精細模式修飾鍵";
+"precision_speed" = "精細模式速度";
+"precision_modifier_command" = "Command (⌘)";
+"precision_modifier_option" = "Option (⌥)";
+"precision_modifier_control" = "Control (⌃)";
+"precision_modifier_shift" = "Shift (⇧)";
+"tooltip_precision_mode" = "按住額外的修飾鍵，可暫時降低進行中的拖曳捲動速度。";
+"tooltip_precision_modifier" = "開始拖曳捲動後按住此額外修飾鍵，以暫時降低捲動速度。";
+"tooltip_precision_speed" = "設定按住精細模式修飾鍵時的捲動速度。";
+"precision_modifier_conflict" = "請選擇尚未用於觸發器的修飾鍵。設定重疊時，精細模式保持關閉。";

@@ -18,7 +18,7 @@ Mac Drag Scroll is a native macOS menu bar utility. It converts a configured ext
 1. The event tap receives a mouse event.
 2. `MouseMonitor` rejects trackpad/tablet input, unsafe primary-button triggers, excluded apps, missing permissions, and events marked as synthetic by Mac Drag Scroll.
 3. A valid press records the origin, target process, target window, and trigger state.
-4. Mouse movement is converted by `ScrollPhysics`; the overlay follows the same session state.
+4. Mouse movement is converted by `ScrollPhysics`; an optional additional precision modifier scales the active session's speed, and the overlay follows the same session state.
 5. Synthetic scroll events carry a private marker so the event tap cannot consume its own output.
 6. Release, cancellation, permission loss, app changes, or target-window changes end the session and restore normal pointer behavior.
 
@@ -26,6 +26,7 @@ Mac Drag Scroll is a native macOS menu bar utility. It converts a configured ext
 
 - Default activation accepts only an external mouse middle button. Trackpad and tablet events never begin a session.
 - Left- or right-button triggers require a modifier and must not replace ordinary clicks.
+- Precision mode only accepts a modifier additional to the active trigger chord; overlapping trigger modifiers cannot silently slow every drag.
 - A session remains scoped to the process and window where it began.
 - Ignored apps are checked before activation and while a session is active.
 - Permission loss, event-tap failure, display changes, and duplicate app instances fail closed.

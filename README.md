@@ -110,6 +110,7 @@ Open Settings from the menu bar icon.
 | --- | --- |
 | Speed and acceleration | Base scroll rate and how quickly it increases with drag distance. |
 | Dead zone | The neutral area around the gesture origin. |
+| Precision mode | Hold an additional configurable modifier during a drag for temporarily slower, finer scrolling. |
 | Cursor hold | Optionally keep the pointer at the middle-click origin so pointer-sensitive content continues scrolling. |
 | Trigger | Middle click by default, with guarded alternatives for primary and secondary buttons. |
 | Visualizer | Size, opacity, tint, glass intensity, and motion effects. |

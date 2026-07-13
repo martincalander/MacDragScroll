@@ -437,6 +437,58 @@ struct SettingsWindowView: View {
             Divider()
 
             ToggleRow(
+                icon: "scope",
+                title: localized("precision_mode", value: "Precision Mode", comment: "Precision mode toggle"),
+                isOn: $settings.precisionModeEnabled,
+                tooltip: localized(
+                    "tooltip_precision_mode",
+                    value: "Temporarily slow an active drag by holding an additional modifier key.",
+                    comment: "Precision mode tooltip"
+                )
+            )
+
+            PrecisionModifierRow(selection: $settings.precisionModifier)
+                .disabled(!settings.precisionModeEnabled)
+                .opacity(settings.precisionModeEnabled ? 1 : 0.55)
+
+            SliderRow(
+                icon: "tortoise",
+                title: localized("precision_speed", value: "Precision Speed", comment: "Precision speed setting"),
+                value: $settings.precisionSpeedMultiplier,
+                range: SettingsManager.precisionSpeedMultiplierRange,
+                step: 0.05,
+                format: { value in "\(Int((value * 100).rounded()))%" },
+                tooltip: localized(
+                    "tooltip_precision_speed",
+                    value: "Controls scroll speed while the precision modifier is held.",
+                    comment: "Precision speed tooltip"
+                )
+            )
+            .disabled(!settings.precisionModeEnabled)
+            .opacity(settings.precisionModeEnabled ? 1 : 0.55)
+
+            if settings.precisionModeEnabled && precisionModifierConflictsWithTrigger {
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.orange)
+
+                    Text(localized(
+                        "precision_modifier_conflict",
+                        value: "Choose a modifier that is not already part of the trigger. Precision mode remains inactive while these settings overlap.",
+                        comment: "Precision modifier trigger conflict warning"
+                    ))
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                    Spacer(minLength: 0)
+                }
+            }
+
+            Divider()
+
+            ToggleRow(
                 icon: "arrow.up.arrow.down",
                 title: localized("reverse_direction", value: "Reverse Direction", comment: "Reverse Direction toggle"),
                 isOn: $settings.reverseScrollDirection,
@@ -476,6 +528,10 @@ struct SettingsWindowView: View {
                 )
             )
         }
+    }
+
+    private var precisionModifierConflictsWithTrigger: Bool {
+        settings.triggerConfig.modifierFlags.contains(settings.precisionModifier.modifierFlag)
     }
 
     private var appSettings: some View {

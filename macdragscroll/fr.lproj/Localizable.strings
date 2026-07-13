@@ -214,3 +214,14 @@
 "error_occurred_title" = "Une erreur s'est produite";
 "error_occurred_message" = "Une erreur s'est produite lors de %@ :\n\n%@";
 "fatal_error_title" = "Erreur fatale";
+"precision_mode" = "Mode précision";
+"precision_modifier" = "Touche de précision";
+"precision_speed" = "Vitesse de précision";
+"precision_modifier_command" = "Commande (⌘)";
+"precision_modifier_option" = "Option (⌥)";
+"precision_modifier_control" = "Contrôle (⌃)";
+"precision_modifier_shift" = "Maj (⇧)";
+"tooltip_precision_mode" = "Ralentit temporairement un glissement actif en maintenant une touche de modification supplémentaire.";
+"tooltip_precision_modifier" = "Maintenez cette touche supplémentaire après le début du défilement pour réduire temporairement sa vitesse.";
+"tooltip_precision_speed" = "Contrôle la vitesse lorsque la touche de précision est maintenue.";
+"precision_modifier_conflict" = "Choisissez une touche qui ne fait pas déjà partie du déclencheur. Le mode précision reste inactif en cas de conflit.";

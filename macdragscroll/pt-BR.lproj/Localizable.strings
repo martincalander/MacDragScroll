@@ -214,3 +214,14 @@
 "error_occurred_title" = "Ocorreu um erro";
 "error_occurred_message" = "Ocorreu um erro ao %@:\n\n%@";
 "fatal_error_title" = "Erro fatal";
+"precision_mode" = "Modo de precisão";
+"precision_modifier" = "Modificador de precisão";
+"precision_speed" = "Velocidade de precisão";
+"precision_modifier_command" = "Comando (⌘)";
+"precision_modifier_option" = "Opção (⌥)";
+"precision_modifier_control" = "Controle (⌃)";
+"precision_modifier_shift" = "Shift (⇧)";
+"tooltip_precision_mode" = "Reduz temporariamente a velocidade de um arrasto ativo mantendo outro modificador pressionado.";
+"tooltip_precision_modifier" = "Mantenha este modificador pressionado após iniciar a rolagem para reduzir temporariamente a velocidade.";
+"tooltip_precision_speed" = "Controla a velocidade enquanto o modificador de precisão está pressionado.";
+"precision_modifier_conflict" = "Escolha um modificador que ainda não faça parte do acionador. O modo de precisão permanece inativo enquanto houver conflito.";

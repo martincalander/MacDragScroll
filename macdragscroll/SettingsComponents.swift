@@ -403,6 +403,28 @@ struct AppearancePickerRow: View {
     }
 }
 
+struct PrecisionModifierRow: View {
+    @Binding var selection: PrecisionModifier
+
+    var body: some View {
+        SettingRow(
+            icon: "command",
+            title: localized("precision_modifier", value: "Precision Modifier", comment: "Precision modifier setting"),
+            tooltip: localized(
+                "tooltip_precision_modifier",
+                value: "Hold this additional modifier after drag scrolling begins to temporarily reduce the scroll speed.",
+                comment: "Precision modifier tooltip"
+            )
+        ) {
+            SettingsOptionMenu(
+                selection: $selection,
+                options: PrecisionModifier.allCases,
+                title: \.displayName
+            )
+        }
+    }
+}
+
 private struct SettingsOptionMenu<Option: Identifiable & Hashable>: View {
     @Binding var selection: Option
     let options: [Option]

@@ -569,6 +569,65 @@ final class ProductionScrollPhysicsTests: XCTestCase {
     }
 }
 
+// MARK: - Precision Mode Tests
+
+final class PrecisionModeBehaviorTests: XCTestCase {
+    func testAdditionalModifierActivatesPrecisionMode() {
+        XCTAssertTrue(PrecisionModeBehavior.isActive(
+            isEnabled: true,
+            precisionModifier: .option,
+            currentModifiers: [.command, .option],
+            triggerModifiers: [.command]
+        ))
+    }
+
+    func testPrecisionModeDoesNotActivateWhenDisabled() {
+        XCTAssertFalse(PrecisionModeBehavior.isActive(
+            isEnabled: false,
+            precisionModifier: .option,
+            currentModifiers: [.option],
+            triggerModifiers: []
+        ))
+    }
+
+    func testTriggerModifierCannotAlsoActivatePrecisionMode() {
+        XCTAssertFalse(PrecisionModeBehavior.isActive(
+            isEnabled: true,
+            precisionModifier: .option,
+            currentModifiers: [.option],
+            triggerModifiers: [.option]
+        ))
+    }
+
+    func testPrecisionModeScalesScrollSpeed() {
+        let speed = PrecisionModeBehavior.effectiveScrollSpeed(
+            baseSpeed: 4,
+            isEnabled: true,
+            precisionModifier: .shift,
+            currentModifiers: [.shift],
+            triggerModifiers: [],
+            multiplier: 0.25
+        )
+
+        XCTAssertEqual(speed, 1, accuracy: 0.001)
+    }
+
+    func testInvalidPrecisionMultiplierFailsBackToNormalSpeed() {
+        for multiplier: Double in [.nan, -.infinity, 0, 1, 2] {
+            let speed = PrecisionModeBehavior.effectiveScrollSpeed(
+                baseSpeed: 4,
+                isEnabled: true,
+                precisionModifier: .shift,
+                currentModifiers: [.shift],
+                triggerModifiers: [],
+                multiplier: multiplier
+            )
+
+            XCTAssertEqual(speed, 4, accuracy: 0.001)
+        }
+    }
+}
+
 // MARK: - Scroll Event Tests
 
 final class ScrollEventFactoryTests: XCTestCase {

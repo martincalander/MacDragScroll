@@ -6,10 +6,18 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-07-27
+
 ### Added
 
 - Added an optional precision mode that temporarily reduces drag-scroll speed while an additional configurable modifier is held, with trigger-conflict protection and an adjustable precision speed.
 - Added independent per-app Ignore and Allow lists, with the existing Ignore behavior remaining the default.
+
+### Fixed
+
+- Cancel active drag scrolling when trigger capture begins so a released mouse button cannot leave scrolling active.
+- Allow Sparkle installation and system shutdown to terminate promptly, and make in-app restarts wait for the previous process to exit.
+- Corrected the installation demo so the dragged Mac Drag Scroll icon remains above the Applications folder.
 
 ## [1.2.0] - 2026-07-11
 

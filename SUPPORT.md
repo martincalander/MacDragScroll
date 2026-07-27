@@ -6,7 +6,7 @@ If Mac Drag Scroll is not working as expected, check these first:
 2. Confirm your mouse has a working middle button or scroll-wheel click.
 3. Open **System Settings -> Privacy & Security -> Accessibility** and make sure **Mac Drag Scroll** is enabled.
 4. Open Mac Drag Scroll Settings and confirm the app is enabled.
-5. Check whether the current app is listed under **Excluded Apps**.
+5. Check whether the current app matches the active rule under **App Rules**.
 
 ## Common Fixes
 

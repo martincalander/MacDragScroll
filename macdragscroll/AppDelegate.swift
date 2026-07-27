@@ -59,7 +59,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     private var welcomeWindow: NSWindow?
     private weak var activeMenuItem: NSMenuItem?
     private weak var updateMenuItem: NSMenuItem?
-    private weak var ignoreCurrentAppMenuItem: NSMenuItem?
+    private weak var currentAppRuleMenuItem: NSMenuItem?
     private var currentMenuTargetBundleIdentifier: String?
     private var permissionMenuItem: NSMenuItem?
     private var duplicateInstanceMenuItem: NSMenuItem?
@@ -357,14 +357,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         updateMenuItem = updateItem
         refreshUpdateMenuItem()
 
-        let ignoreItem = NSMenuItem(
+        let appRuleItem = NSMenuItem(
             title: localized("menu_ignore_current_app", value: "Ignore Current App", comment: "Ignore current app menu item"),
-            action: #selector(toggleCurrentAppIgnoredState(_:)),
+            action: #selector(toggleCurrentAppListedState(_:)),
             keyEquivalent: ""
         )
-        ignoreItem.target = self
-        menu.addItem(ignoreItem)
-        ignoreCurrentAppMenuItem = ignoreItem
+        appRuleItem.target = self
+        menu.addItem(appRuleItem)
+        currentAppRuleMenuItem = appRuleItem
 
         menu.addItem(NSMenuItem.separator())
 
@@ -451,7 +451,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         AppInstanceMonitor.shared.refreshDuplicateInstances()
         refreshDuplicateInstanceMenuItem()
         refreshUpdateMenuItem()
-        refreshIgnoreCurrentAppMenuItem()
+        refreshCurrentAppRuleMenuItem()
     }
 
     @objc private func primaryInstanceActivationRequested(_ notification: Notification) {
@@ -475,11 +475,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         UpdateManager.shared.checkForUpdates()
     }
 
-    @objc private func toggleCurrentAppIgnoredState(_ sender: Any?) {
+    @objc private func toggleCurrentAppListedState(_ sender: Any?) {
         guard let bundleId = currentMenuTargetBundleIdentifier else { return }
 
-        SettingsManager.shared.toggleExcludedApp(bundleId)
-        refreshIgnoreCurrentAppMenuItem()
+        SettingsManager.shared.toggleListedApp(bundleId)
+        refreshCurrentAppRuleMenuItem()
     }
 
     @objc private func quit(_ sender: Any?) {
@@ -816,21 +816,43 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         updateMenuItem?.action = #selector(openUpdates(_:))
     }
 
-    private func refreshIgnoreCurrentAppMenuItem() {
-        guard let item = ignoreCurrentAppMenuItem else { return }
-        guard let bundleId = SettingsManager.shared.getFrontmostAppBundleId() else {
+    private func refreshCurrentAppRuleMenuItem() {
+        guard let item = currentAppRuleMenuItem else { return }
+        let settings = SettingsManager.shared
+
+        guard let bundleId = settings.getFrontmostAppBundleId() else {
             currentMenuTargetBundleIdentifier = nil
-            item.title = localized("menu_ignore_current_app", value: "Ignore Current App", comment: "Ignore current app menu item")
+            switch settings.appListMode {
+            case .ignore:
+                item.title = localized(
+                    "menu_ignore_current_app",
+                    value: "Ignore Current App",
+                    comment: "Ignore current app menu item"
+                )
+            case .allow:
+                item.title = localized(
+                    "menu_allow_current_app",
+                    value: "Allow Current App",
+                    comment: "Allow current app menu item"
+                )
+            }
             item.isEnabled = false
             return
         }
 
         currentMenuTargetBundleIdentifier = bundleId
         let appName = displayName(forBundleIdentifier: bundleId) ?? localized("current_app", value: "Current App", comment: "Current app fallback")
-        if SettingsManager.shared.isAppExcluded(bundleIdentifier: bundleId) {
-            item.title = String(format: localized("menu_enable_in_app", value: "Enable in %@", comment: "Enable in ignored app menu item"), appName)
-        } else {
-            item.title = String(format: localized("menu_ignore_app", value: "Ignore %@", comment: "Ignore app menu item"), appName)
+        let isListed = settings.isAppListed(bundleIdentifier: bundleId)
+
+        switch settings.appListMode {
+        case .ignore:
+            item.title = isListed
+                ? String(format: localized("menu_enable_in_app", value: "Enable in %@", comment: "Enable in ignored app menu item"), appName)
+                : String(format: localized("menu_ignore_app", value: "Ignore %@", comment: "Ignore app menu item"), appName)
+        case .allow:
+            item.title = isListed
+                ? String(format: localized("menu_disable_in_app", value: "Disable in %@", comment: "Disable in allowed app menu item"), appName)
+                : String(format: localized("menu_allow_app", value: "Allow %@", comment: "Allow app menu item"), appName)
         }
         item.isEnabled = true
     }
@@ -855,7 +877,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         refreshPermissionPresentation()
         refreshDuplicateInstanceMenuItem()
         refreshUpdateMenuItem()
-        refreshIgnoreCurrentAppMenuItem()
+        refreshCurrentAppRuleMenuItem()
     }
 
     private func statusBarImage(isEnabled: Bool, needsPermission: Bool) -> NSImage {

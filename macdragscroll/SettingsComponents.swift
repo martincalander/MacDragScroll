@@ -403,6 +403,34 @@ struct AppearancePickerRow: View {
     }
 }
 
+struct AppListModeRow: View {
+    @Binding var selection: AppListMode
+
+    var body: some View {
+        SettingRow(
+            icon: "list.bullet.rectangle",
+            title: localized("app_list_mode", value: "List Mode", comment: "App list mode setting"),
+            tooltip: selection == .ignore
+                ? localized(
+                    "ignore_list_detail",
+                    value: "Drag scrolling works everywhere except listed apps.",
+                    comment: "Ignore list mode detail"
+                )
+                : localized(
+                    "allow_list_detail",
+                    value: "Drag scrolling works only in listed apps.",
+                    comment: "Allow list mode detail"
+                )
+        ) {
+            SettingsOptionMenu(
+                selection: $selection,
+                options: AppListMode.allCases,
+                title: \.displayName
+            )
+        }
+    }
+}
+
 struct PrecisionModifierRow: View {
     @Binding var selection: PrecisionModifier
 

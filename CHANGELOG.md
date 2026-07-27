@@ -9,6 +9,7 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 ### Added
 
 - Added an optional precision mode that temporarily reduces drag-scroll speed while an additional configurable modifier is held, with trigger-conflict protection and an adjustable precision speed.
+- Added independent per-app Ignore and Allow lists, with the existing Ignore behavior remaining the default.
 
 ## [1.2.0] - 2026-07-11
 

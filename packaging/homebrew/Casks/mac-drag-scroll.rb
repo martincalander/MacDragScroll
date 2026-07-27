@@ -1,6 +1,6 @@
 cask "mac-drag-scroll" do
-  version "1.2.0"
-  sha256 "f98729233becb3aa1c4a253e509bebf86eeac3a835d6ec2c8319f4f1a1fef9d6"
+  version "1.3.0"
+  sha256 "baf0c2e8324755bf7fed4bc2a31e145c5e67bd00cc83e6a581fe09dc7611c2af"
 
   url "https://github.com/martincalander/MacDragScroll/releases/download/v#{version}/MacDragScroll.zip"
   name "Mac Drag Scroll"

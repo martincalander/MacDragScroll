@@ -1,6 +1,6 @@
 cask "mac-drag-scroll" do
-  version "1.0.7"
-  sha256 "140757c1bb5db0ede2c48e99033528de59e912ce8df830850175bdfabd99bb96"
+  version "1.2.0"
+  sha256 "f98729233becb3aa1c4a253e509bebf86eeac3a835d6ec2c8319f4f1a1fef9d6"
 
   url "https://github.com/martincalander/MacDragScroll/releases/download/v#{version}/MacDragScroll.zip"
   name "Mac Drag Scroll"
@@ -8,7 +8,7 @@ cask "mac-drag-scroll" do
   homepage "https://github.com/martincalander/MacDragScroll"
 
   auto_updates true
-  depends_on macos: :tahoe
+  depends_on macos: :sonoma
 
   app "Mac Drag Scroll.app"
 

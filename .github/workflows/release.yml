@@ -322,10 +322,12 @@ jobs:
 
           appcast_source="$RUNNER_TEMP/appcast-source"
           sparkle_key="$RUNNER_TEMP/sparkle_private_key"
+          trap 'rm -f "$sparkle_key"' EXIT
           mkdir -p "$appcast_source"
 
           printf "%s" "$SPARKLE_PRIVATE_KEY" > "$sparkle_key"
           chmod 600 "$sparkle_key"
+          unset SPARKLE_PRIVATE_KEY
 
           cp "$ZIP_PATH" "$appcast_source/$APP_ZIP"
           cp "$RELEASE_NOTES" "$appcast_source/MacDragScroll.md"

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { mkdir, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, rename, rm } from "node:fs/promises";
 import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import path from "node:path";
@@ -8,7 +8,6 @@ import path from "node:path";
 const root = path.resolve(import.meta.dirname, "..");
 const source = path.join(root, "docs/assets/source/readme-demos.html");
 const output = path.join(root, "docs/assets");
-const framesRoot = path.join(root, ".readme-demo-frames");
 const playwrightPath = process.env.PLAYWRIGHT_PATH;
 
 if (!playwrightPath) {
@@ -16,24 +15,25 @@ if (!playwrightPath) {
 }
 
 const { chromium } = await import(pathToFileURL(path.join(playwrightPath, "index.mjs")));
-const browser = await chromium.launch({
-  executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-  headless: true,
-});
-const page = await browser.newPage({ viewport: { width: 960, height: 540 }, deviceScaleFactor: 1 });
-await page.goto(pathToFileURL(source).href);
-await page.evaluate(() => document.fonts.ready);
-
 const demos = [
   { name: "install", seconds: 4.8, output: "mac-drag-scroll-install-demo.gif" },
   { name: "permissions", seconds: 4.8, output: "mac-drag-scroll-permission-demo.gif" },
   { name: "usage", seconds: 5.4, output: "mac-drag-scroll-usage-demo.gif" },
 ];
 const fps = 10;
+const stagingRoot = await mkdtemp(path.join(output, ".readme-demo-render-"));
+const framesRoot = path.join(stagingRoot, "frames");
+const stagedOutput = path.join(stagingRoot, "output");
+let browser;
 
 try {
-  await rm(framesRoot, { recursive: true, force: true });
+  browser = await chromium.launch({ headless: true });
+  const page = await browser.newPage({ viewport: { width: 960, height: 540 }, deviceScaleFactor: 1 });
+  await page.goto(pathToFileURL(source).href);
+  await page.evaluate(() => document.fonts.ready);
+
   await mkdir(framesRoot, { recursive: true });
+  await mkdir(stagedOutput, { recursive: true });
 
   for (const demo of demos) {
     const directory = path.join(framesRoot, demo.name);
@@ -50,7 +50,7 @@ try {
     }
 
     const input = path.join(directory, "%04d.png");
-    const destination = path.join(output, demo.output);
+    const destination = path.join(stagedOutput, demo.output);
     execFileSync("ffmpeg", [
       "-y", "-hide_banner", "-loglevel", "error",
       "-framerate", String(fps), "-i", input,
@@ -59,7 +59,17 @@ try {
       "-map", "[v]", "-loop", "0", destination,
     ]);
   }
+
+  for (const demo of demos) {
+    await rename(
+      path.join(stagedOutput, demo.output),
+      path.join(output, demo.output),
+    );
+  }
 } finally {
-  await browser.close();
-  await rm(framesRoot, { recursive: true, force: true });
+  try {
+    await browser?.close();
+  } finally {
+    await rm(stagingRoot, { recursive: true, force: true });
+  }
 }

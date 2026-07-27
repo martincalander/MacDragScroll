@@ -1,6 +1,6 @@
 # Architecture
 
-Mac Drag Scroll is a native macOS menu bar utility. It converts a configured external-mouse drag into marked synthetic scroll events while preserving normal clicks, trackpad gestures, and app-specific exclusions.
+Mac Drag Scroll is a native macOS menu bar utility. It converts a configured external-mouse drag into marked synthetic scroll events while preserving normal clicks, trackpad gestures, and app-specific availability rules.
 
 ## Components
 
@@ -8,7 +8,7 @@ Mac Drag Scroll is a native macOS menu bar utility. It converts a configured ext
 - `MouseMonitor` owns the global event tap. It validates the trigger, input source, active application, target window, and permission state before starting a drag session.
 - `ScrollPhysics` converts cursor displacement from the drag origin into bounded horizontal and vertical scroll deltas.
 - `ScrollOverlayWindow` renders the optional visualizer without accepting input or becoming the active app. macOS 26 uses native Liquid Glass; macOS 14 and 15 use a native vibrancy fallback behind the same custom reflections and motion.
-- `SettingsWindow` owns the settings shell and tab navigation. Reusable rows, ignored-app picking, and the visualizer preview live in focused companion files.
+- `SettingsWindow` owns the settings shell and tab navigation. Reusable rows, per-app rule picking, and the visualizer preview live in focused companion files.
 - `SettingsManager` exposes user preferences. `PersistentPreferences` keeps the production domain stable and mirrors recoverable values to Application Support. Debug builds use a separate `.development` bundle identity and preference domain so they cannot collide with production TCC grants.
 - `UpdateManager` integrates Sparkle with the GitHub-hosted appcast and release history.
 - `CrashHandler` stores local exception reports and imports matching macOS DiagnosticReports for user-controlled sharing.
@@ -16,7 +16,7 @@ Mac Drag Scroll is a native macOS menu bar utility. It converts a configured ext
 ## Input Flow
 
 1. The event tap receives a mouse event.
-2. `MouseMonitor` rejects trackpad/tablet input, unsafe primary-button triggers, excluded apps, missing permissions, and events marked as synthetic by Mac Drag Scroll.
+2. `MouseMonitor` rejects trackpad/tablet input, unsafe primary-button triggers, apps disabled by the active Ignore or Allow rule, missing permissions, and events marked as synthetic by Mac Drag Scroll.
 3. A valid press records the origin, target process, target window, and trigger state.
 4. Mouse movement is converted by `ScrollPhysics`; an optional additional precision modifier scales the active session's speed, and the overlay follows the same session state.
 5. Synthetic scroll events carry a private marker so the event tap cannot consume its own output.
@@ -28,7 +28,7 @@ Mac Drag Scroll is a native macOS menu bar utility. It converts a configured ext
 - Left- or right-button triggers require a modifier and must not replace ordinary clicks.
 - Precision mode only accepts a modifier additional to the active trigger chord; overlapping trigger modifiers cannot silently slow every drag.
 - A session remains scoped to the process and window where it began.
-- Ignored apps are checked before activation and while a session is active.
+- The active per-app rule is checked before activation and while a session is active; unidentified apps fail closed in Allow mode.
 - Permission loss, event-tap failure, display changes, and duplicate app instances fail closed.
 - Settings and visualizer animation choices affect presentation, not input-source safety.
 

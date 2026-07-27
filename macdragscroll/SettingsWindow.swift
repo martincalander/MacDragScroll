@@ -536,22 +536,32 @@ struct SettingsWindowView: View {
 
     private var appSettings: some View {
         GlassSection {
-            Label(localized("ignored_apps_list", value: "Ignored Apps", comment: "Ignored apps list title"), systemImage: "hand.raised.slash")
-                .font(.system(size: 12, weight: .semibold))
-                .frame(maxWidth: .infinity, alignment: .leading)
+            AppListModeRow(selection: $settings.appListMode)
 
-            if !settings.excludedApps.isEmpty {
+            Divider()
+
+            VStack(alignment: .leading, spacing: 3) {
+                Label(appListTitle, systemImage: settings.appListMode == .ignore ? "hand.raised.slash" : "checkmark.shield")
+                    .font(.system(size: 12, weight: .semibold))
+
+                Text(appListDetail)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            if !settings.listedApps.isEmpty {
                 VStack(spacing: 4) {
-                    ForEach(settings.excludedApps, id: \.self) { bundleId in
+                    ForEach(settings.listedApps, id: \.self) { bundleId in
                         CompactAppRow(bundleId: bundleId) {
                             withAnimation(.easeOut(duration: 0.15)) {
-                                settings.removeExcludedApp(bundleId)
+                                settings.removeListedApp(bundleId)
                             }
                         }
                     }
                 }
             } else {
-                Text(localized("no_excluded_apps", value: "No ignored apps yet.", comment: "No excluded apps message"))
+                Text(emptyAppListMessage)
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -560,17 +570,57 @@ struct SettingsWindowView: View {
             Divider()
 
             InlineAppPickerView(
-                excludedApps: settings.excludedApps,
+                listedApps: settings.listedApps,
+                appListMode: settings.appListMode,
                 frontmostBundleId: capturedFrontmostBundleId,
                 onAdd: { bundleId in
                     withAnimation(.easeOut(duration: 0.15)) {
-                        settings.addExcludedApp(bundleId)
+                        settings.addListedApp(bundleId)
                     }
                 }
             )
         }
         .onAppear {
             capturedFrontmostBundleId = SettingsManager.shared.getFrontmostAppBundleId()
+        }
+    }
+
+    private var appListTitle: String {
+        switch settings.appListMode {
+        case .ignore:
+            return localized("ignored_apps_list", value: "Ignored Apps", comment: "Ignored apps list title")
+        case .allow:
+            return localized("allowed_apps_list", value: "Allowed Apps", comment: "Allowed apps list title")
+        }
+    }
+
+    private var appListDetail: String {
+        switch settings.appListMode {
+        case .ignore:
+            return localized(
+                "ignore_list_detail",
+                value: "Drag scrolling works everywhere except listed apps.",
+                comment: "Ignore list mode detail"
+            )
+        case .allow:
+            return localized(
+                "allow_list_detail",
+                value: "Drag scrolling works only in listed apps.",
+                comment: "Allow list mode detail"
+            )
+        }
+    }
+
+    private var emptyAppListMessage: String {
+        switch settings.appListMode {
+        case .ignore:
+            return localized("no_excluded_apps", value: "No ignored apps yet.", comment: "No excluded apps message")
+        case .allow:
+            return localized(
+                "no_allowed_apps",
+                value: "No allowed apps yet. Drag scrolling is disabled everywhere.",
+                comment: "No allowed apps message"
+            )
         }
     }
 
@@ -1358,7 +1408,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         case .scrolling:
             return localized("settings_scrolling", value: "Scrolling", comment: "Scrolling settings tab")
         case .apps:
-            return localized("settings_apps", value: "Ignored Apps", comment: "Apps settings tab")
+            return localized("settings_apps", value: "App Rules", comment: "Apps settings tab")
         case .permissions:
             return localized("settings_permissions", value: "Permissions", comment: "Permissions settings tab")
         case .updates:
@@ -1377,7 +1427,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         case .scrolling:
             return localized("settings_scrolling_subtitle", value: "Adjust speed, acceleration, and dead zone.", comment: "Scrolling settings subtitle")
         case .apps:
-            return localized("settings_apps_subtitle", value: "Disable drag scrolling in selected apps.", comment: "Apps settings subtitle")
+            return localized("settings_apps_subtitle", value: "Choose where drag scrolling is enabled.", comment: "Apps settings subtitle")
         case .permissions:
             return localized("settings_permissions_subtitle", value: "Check Accessibility access and runtime status.", comment: "Permissions settings subtitle")
         case .updates:

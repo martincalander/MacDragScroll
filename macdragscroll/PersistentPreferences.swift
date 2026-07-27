@@ -64,7 +64,7 @@ enum PersistentPreferences {
         return UserDefaults(suiteName: storageDomainIdentifier) ?? .standard
     }()
 
-    fileprivate static var isRunningUnitTests: Bool {
+    static var isRunningUnitTests: Bool {
         ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
     }
 
@@ -84,6 +84,8 @@ enum PersistentPreferences {
     }
 
     static var migrationDomainIdentifiers: [String] {
+        guard !isRunningUnitTests else { return [] }
+
         var domains = legacyDomainIdentifiers
 
         if storageDomainIdentifier != domainIdentifier {

@@ -19,7 +19,7 @@ Mac Drag Scroll may contact GitHub when you check for updates or when Auto Updat
 
 ## Local Settings
 
-Settings such as speed, visualizer size, launch-at-login preference, and excluded apps are stored locally on your Mac.
+Settings such as speed, visualizer size, launch-at-login preference, and per-app Ignore or Allow lists are stored locally on your Mac.
 
 Release builds store preferences at:
 

@@ -134,6 +134,32 @@ enum AppAppearance: String, CaseIterable, Identifiable, Codable {
     }
 }
 
+// MARK: - Per-App Rules
+
+enum AppListMode: String, CaseIterable, Identifiable, Codable {
+    case ignore
+    case allow
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .ignore:
+            return AppLocalization.shared.localizedString(
+                "ignore_list",
+                value: "Ignore List",
+                comment: "Ignore list mode"
+            )
+        case .allow:
+            return AppLocalization.shared.localizedString(
+                "allow_list",
+                value: "Allow List",
+                comment: "Allow list mode"
+            )
+        }
+    }
+}
+
 // MARK: - Scroll Trigger Configuration
 
 struct TriggerConfig: Codable, Equatable {
@@ -337,7 +363,9 @@ class SettingsManager: ObservableObject {
         "keepRunningInMenuBar",
         "animationsEnabled",
         "visualizerAnimationsEnabled",
+        "appListMode",
         "excludedApps",
+        "allowedApps",
         "scrollSpeed",
         "deadZoneRadius",
         "acceleration",
@@ -374,7 +402,9 @@ class SettingsManager: ObservableObject {
     private let keepRunningInMenuBarKey = "keepRunningInMenuBar"
     private let showIndicatorKey = "animationsEnabled" // Legacy key name, kept to preserve existing preferences.
     private let visualizerAnimationsEnabledKey = "visualizerAnimationsEnabled"
+    private let appListModeKey = "appListMode"
     private let excludedAppsKey = "excludedApps"
+    private let allowedAppsKey = "allowedApps"
     private let scrollSpeedKey = "scrollSpeed"
     private let deadZoneRadiusKey = "deadZoneRadius"
     private let accelerationKey = "acceleration"
@@ -419,6 +449,10 @@ class SettingsManager: ObservableObject {
         didSet { persist(visualizerAnimationsEnabled, forKey: visualizerAnimationsEnabledKey) }
     }
 
+    @Published var appListMode: AppListMode {
+        didSet { persist(appListMode.rawValue, forKey: appListModeKey) }
+    }
+
     @Published var reverseScrollDirection: Bool {
         didSet { persist(reverseScrollDirection, forKey: reverseScrollDirectionKey) }
     }
@@ -457,6 +491,10 @@ class SettingsManager: ObservableObject {
     
     @Published var excludedApps: [String] {
         didSet { persist(excludedApps, forKey: excludedAppsKey) }
+    }
+
+    @Published var allowedApps: [String] {
+        didSet { persist(allowedApps, forKey: allowedAppsKey) }
     }
     
     @Published var scrollSpeed: Double {
@@ -545,7 +583,9 @@ class SettingsManager: ObservableObject {
             keepRunningInMenuBarKey: true,
             showIndicatorKey: true,
             visualizerAnimationsEnabledKey: true,
+            appListModeKey: AppListMode.ignore.rawValue,
             excludedAppsKey: [String](),
+            allowedAppsKey: [String](),
             scrollSpeedKey: 2.0,
             deadZoneRadiusKey: 20.0,
             accelerationKey: 1.8,
@@ -569,6 +609,12 @@ class SettingsManager: ObservableObject {
         self.keepRunningInMenuBar = Self.boolValue(from: defaults, forKey: keepRunningInMenuBarKey, defaultValue: true)
         self.showIndicator = Self.boolValue(from: defaults, forKey: showIndicatorKey, defaultValue: true)
         self.visualizerAnimationsEnabled = Self.boolValue(from: defaults, forKey: visualizerAnimationsEnabledKey, defaultValue: true)
+        let appListModeRawValue = Self.stringValue(
+            from: defaults,
+            forKey: appListModeKey,
+            defaultValue: AppListMode.ignore.rawValue
+        )
+        self.appListMode = Self.resolvedAppListMode(from: appListModeRawValue)
         self.reverseScrollDirection = Self.boolValue(from: defaults, forKey: reverseScrollDirectionKey, defaultValue: false)
         self.horizontalScrollingEnabled = Self.boolValue(from: defaults, forKey: horizontalScrollingEnabledKey, defaultValue: true)
         self.invertHorizontalScroll = Self.boolValue(from: defaults, forKey: invertHorizontalScrollKey, defaultValue: false)
@@ -586,6 +632,7 @@ class SettingsManager: ObservableObject {
         let appAppearanceRawValue = Self.stringValue(from: defaults, forKey: appAppearanceKey, defaultValue: AppAppearance.system.rawValue)
         self.appAppearance = AppAppearance(rawValue: appAppearanceRawValue) ?? .system
         self.excludedApps = Self.stringArrayValue(from: defaults, forKey: excludedAppsKey, defaultValue: [])
+        self.allowedApps = Self.stringArrayValue(from: defaults, forKey: allowedAppsKey, defaultValue: [])
 
         // Load and clamp values to valid ranges (protects against corrupted UserDefaults)
         self.scrollSpeed = Self.doubleValue(from: defaults, forKey: scrollSpeedKey, defaultValue: 2.0, range: 0.5...5.0)
@@ -686,10 +733,33 @@ class SettingsManager: ObservableObject {
         hasCompletedWelcome = true
     }
     
-    // Check if app is excluded by bundle identifier
+    var listedApps: [String] {
+        switch appListMode {
+        case .ignore:
+            return excludedApps
+        case .allow:
+            return allowedApps
+        }
+    }
+
+    func isAppListed(bundleIdentifier: String) -> Bool {
+        let normalizedBundleId = Self.normalizedBundleIdentifier(bundleIdentifier)
+        guard !normalizedBundleId.isEmpty else { return false }
+        return listedApps.contains(normalizedBundleId)
+    }
+
+    // Check whether the active per-app policy disables drag scrolling.
     func isAppExcluded(bundleIdentifier: String?) -> Bool {
-        guard let bundleId = bundleIdentifier else { return false }
-        return excludedApps.contains(bundleId)
+        guard let bundleId = bundleIdentifier else {
+            return appListMode == .allow
+        }
+
+        switch appListMode {
+        case .ignore:
+            return excludedApps.contains(bundleId)
+        case .allow:
+            return !allowedApps.contains(bundleId)
+        }
     }
     
     // Get the bundle identifier of the currently frontmost app (excluding our own app)
@@ -723,35 +793,54 @@ class SettingsManager: ObservableObject {
         return nil
     }
     
-    func addExcludedApp(_ bundleId: String) {
+    func addListedApp(_ bundleId: String) {
         let normalizedBundleId = Self.normalizedBundleIdentifier(bundleId)
         guard !normalizedBundleId.isEmpty else { return }
 
-        if !excludedApps.contains(normalizedBundleId) {
-            excludedApps.append(normalizedBundleId)
+        switch appListMode {
+        case .ignore:
+            if !excludedApps.contains(normalizedBundleId) {
+                excludedApps.append(normalizedBundleId)
+            }
+        case .allow:
+            if !allowedApps.contains(normalizedBundleId) {
+                allowedApps.append(normalizedBundleId)
+            }
         }
     }
     
-    func removeExcludedApp(_ bundleId: String) {
-        excludedApps.removeAll { $0 == bundleId }
+    func removeListedApp(_ bundleId: String) {
+        let normalizedBundleId = Self.normalizedBundleIdentifier(bundleId)
+        guard !normalizedBundleId.isEmpty else { return }
+
+        switch appListMode {
+        case .ignore:
+            excludedApps.removeAll { $0 == normalizedBundleId }
+        case .allow:
+            allowedApps.removeAll { $0 == normalizedBundleId }
+        }
     }
 
     @discardableResult
-    func toggleExcludedApp(_ bundleId: String) -> Bool {
+    func toggleListedApp(_ bundleId: String) -> Bool {
         let normalizedBundleId = Self.normalizedBundleIdentifier(bundleId)
         guard !normalizedBundleId.isEmpty else { return false }
 
-        if excludedApps.contains(normalizedBundleId) {
-            removeExcludedApp(normalizedBundleId)
+        if isAppListed(bundleIdentifier: normalizedBundleId) {
+            removeListedApp(normalizedBundleId)
             return false
         }
 
-        addExcludedApp(normalizedBundleId)
+        addListedApp(normalizedBundleId)
         return true
     }
 
     static func normalizedBundleIdentifier(_ bundleId: String) -> String {
         bundleId.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    static func resolvedAppListMode(from rawValue: String?) -> AppListMode {
+        rawValue.flatMap(AppListMode.init(rawValue:)) ?? .ignore
     }
     
     // MARK: - Reset to Defaults
@@ -778,7 +867,9 @@ class SettingsManager: ObservableObject {
         appLanguage = .system
         appAppearance = .system
         triggerConfig = .default
+        appListMode = .ignore
         excludedApps = []
+        allowedApps = []
         // Note: launchAtLogin is not reset as it's a system preference
     }
     

@@ -3,6 +3,8 @@ set -euo pipefail
 
 version="${1:-}"
 repo="${GITHUB_REPOSITORY:-martincalander/MacDragScroll}"
+release_notes_file="$(mktemp "${TMPDIR:-/tmp}/mac-drag-scroll-release-notes-check.XXXXXX")"
+trap 'rm -f "$release_notes_file"' EXIT
 
 if [[ -z "$version" ]]; then
   echo "Usage: $0 <version>" >&2
@@ -41,12 +43,12 @@ fi
 
 echo "App version: ${marketing_version} (${build_number})"
 
-if ! scripts/extract-release-notes.sh "$version" >/tmp/mac-drag-scroll-release-notes-check.md; then
+if ! scripts/extract-release-notes.sh "$version" >"$release_notes_file"; then
   echo "Missing CHANGELOG.md notes for $version" >&2
   exit 66
 fi
 
-if [[ ! -s /tmp/mac-drag-scroll-release-notes-check.md ]]; then
+if [[ ! -s "$release_notes_file" ]]; then
   echo "CHANGELOG.md notes for $version are empty" >&2
   exit 66
 fi

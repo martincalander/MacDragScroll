@@ -19,7 +19,9 @@ final class SettingsManagerTests: XCTestCase {
     private var originalShowIndicator = true
     private var originalVisualizerAnimationsEnabled = true
     private var originalKeepRunningInMenuBar = true
+    private var originalAppListMode: AppListMode = .ignore
     private var originalExcludedApps: [String] = []
+    private var originalAllowedApps: [String] = []
     private var originalScrollSpeed = 2.0
     private var originalDeadZoneRadius = 20.0
     private var originalAcceleration = 1.8
@@ -45,7 +47,9 @@ final class SettingsManagerTests: XCTestCase {
         originalShowIndicator = settings.showIndicator
         originalVisualizerAnimationsEnabled = settings.visualizerAnimationsEnabled
         originalKeepRunningInMenuBar = settings.keepRunningInMenuBar
+        originalAppListMode = settings.appListMode
         originalExcludedApps = settings.excludedApps
+        originalAllowedApps = settings.allowedApps
         originalScrollSpeed = settings.scrollSpeed
         originalDeadZoneRadius = settings.deadZoneRadius
         originalAcceleration = settings.acceleration
@@ -65,6 +69,8 @@ final class SettingsManagerTests: XCTestCase {
     
     override func tearDown() {
         settings.excludedApps = originalExcludedApps
+        settings.allowedApps = originalAllowedApps
+        settings.appListMode = originalAppListMode
         settings.scrollSpeed = originalScrollSpeed
         settings.deadZoneRadius = originalDeadZoneRadius
         settings.acceleration = originalAcceleration
@@ -89,81 +95,132 @@ final class SettingsManagerTests: XCTestCase {
         super.tearDown()
     }
     
-    // MARK: - App Exclusion Tests
+    // MARK: - Per-App Rule Tests
     
-    func testIsAppExcludedWithNilBundleId() {
-        let result = settings.isAppExcluded(bundleIdentifier: nil)
-        XCTAssertFalse(result, "Nil bundle identifier should return false")
+    func testIgnoreListAllowsMissingBundleIdentifier() {
+        settings.appListMode = .ignore
+
+        XCTAssertFalse(settings.isAppExcluded(bundleIdentifier: nil))
     }
-    
-    func testIsAppExcludedWithNonExcludedApp() {
-        settings.excludedApps = []
-        let result = settings.isAppExcluded(bundleIdentifier: "com.example.nonexcluded")
-        XCTAssertFalse(result, "Non-excluded app should return false")
+
+    func testAllowListRejectsMissingBundleIdentifier() {
+        settings.appListMode = .allow
+
+        XCTAssertTrue(settings.isAppExcluded(bundleIdentifier: nil))
     }
-    
-    func testIsAppExcludedWithExcludedApp() {
-        let testBundleId = "com.example.testapp"
-        settings.excludedApps = [testBundleId]
-        
-        let result = settings.isAppExcluded(bundleIdentifier: testBundleId)
-        XCTAssertTrue(result, "Excluded app should return true")
+
+    func testIgnoreListDisablesOnlyListedApps() {
+        settings.appListMode = .ignore
+        settings.excludedApps = ["com.example.ignored"]
+
+        XCTAssertTrue(settings.isAppExcluded(bundleIdentifier: "com.example.ignored"))
+        XCTAssertFalse(settings.isAppExcluded(bundleIdentifier: "com.example.other"))
     }
-    
-    func testAddExcludedAppNoDuplicates() {
+
+    func testAllowListEnablesOnlyListedApps() {
+        settings.appListMode = .allow
+        settings.allowedApps = ["com.example.allowed"]
+
+        XCTAssertFalse(settings.isAppExcluded(bundleIdentifier: "com.example.allowed"))
+        XCTAssertTrue(settings.isAppExcluded(bundleIdentifier: "com.example.other"))
+    }
+
+    func testEmptyAllowListDisablesEveryApp() {
+        settings.appListMode = .allow
+        settings.allowedApps = []
+
+        XCTAssertTrue(settings.isAppExcluded(bundleIdentifier: "com.example.any"))
+    }
+
+    func testSwitchingModesPreservesIndependentLists() {
+        settings.excludedApps = ["com.example.ignored"]
+        settings.allowedApps = ["com.example.allowed"]
+
+        settings.appListMode = .ignore
+        XCTAssertEqual(settings.listedApps, ["com.example.ignored"])
+
+        settings.appListMode = .allow
+        XCTAssertEqual(settings.listedApps, ["com.example.allowed"])
+
+        settings.appListMode = .ignore
+        XCTAssertEqual(settings.listedApps, ["com.example.ignored"])
+        XCTAssertEqual(settings.allowedApps, ["com.example.allowed"])
+    }
+
+    func testAddListedAppNoDuplicates() {
+        settings.appListMode = .ignore
         settings.excludedApps = []
         let testBundleId = "com.example.duplicatetest"
-        
-        settings.addExcludedApp(testBundleId)
-        settings.addExcludedApp(testBundleId)
-        settings.addExcludedApp(testBundleId)
+
+        settings.addListedApp(testBundleId)
+        settings.addListedApp(testBundleId)
+        settings.addListedApp(testBundleId)
         
         let count = settings.excludedApps.filter { $0 == testBundleId }.count
         XCTAssertEqual(count, 1, "Should not create duplicate entries")
     }
 
-    func testAddExcludedAppTrimsCustomBundleIdentifier() {
-        settings.excludedApps = []
+    func testAddListedAppUsesActiveAllowListAndTrimsIdentifier() {
+        settings.appListMode = .allow
+        settings.allowedApps = []
 
-        settings.addExcludedApp("  com.example.CustomApp\n")
+        settings.addListedApp("  com.example.CustomApp\n")
 
-        XCTAssertEqual(settings.excludedApps, ["com.example.CustomApp"])
+        XCTAssertEqual(settings.allowedApps, ["com.example.CustomApp"])
     }
     
-    func testRemoveExcludedApp() {
+    func testRemoveListedAppUsesActiveListAndNormalizesIdentifier() {
+        settings.appListMode = .ignore
         let testBundleId = "com.example.removetest"
         settings.excludedApps = [testBundleId, "com.other.app"]
         
-        settings.removeExcludedApp(testBundleId)
+        settings.removeListedApp(" \(testBundleId)\n")
         
         XCTAssertFalse(settings.excludedApps.contains(testBundleId), "Removed app should not be in list")
         XCTAssertTrue(settings.excludedApps.contains("com.other.app"), "Other apps should remain")
     }
     
-    func testRemoveExcludedAppThatDoesNotExist() {
+    func testRemoveListedAppThatDoesNotExist() {
+        settings.appListMode = .ignore
         settings.excludedApps = ["com.existing.app"]
         let initialCount = settings.excludedApps.count
         
-        settings.removeExcludedApp("com.nonexistent.app")
+        settings.removeListedApp("com.nonexistent.app")
         
         XCTAssertEqual(settings.excludedApps.count, initialCount, "Removing non-existent app should not change list")
     }
 
-    func testToggleExcludedAppAddsThenRemovesNormalizedIdentifier() {
-        settings.excludedApps = []
+    func testToggleListedAppAddsThenRemovesFromActiveList() {
+        settings.appListMode = .allow
+        settings.allowedApps = []
 
-        XCTAssertTrue(settings.toggleExcludedApp("  com.example.toggle\n"))
-        XCTAssertEqual(settings.excludedApps, ["com.example.toggle"])
+        XCTAssertTrue(settings.toggleListedApp("  com.example.toggle\n"))
+        XCTAssertEqual(settings.allowedApps, ["com.example.toggle"])
 
-        XCTAssertFalse(settings.toggleExcludedApp("com.example.toggle"))
-        XCTAssertTrue(settings.excludedApps.isEmpty)
+        XCTAssertFalse(settings.toggleListedApp("com.example.toggle"))
+        XCTAssertTrue(settings.allowedApps.isEmpty)
     }
 
-    func testToggleExcludedAppRejectsEmptyIdentifier() {
-        settings.excludedApps = ["com.example.existing"]
+    func testToggleListedAppRejectsEmptyIdentifier() {
+        settings.appListMode = .allow
+        settings.allowedApps = ["com.example.existing"]
 
-        XCTAssertFalse(settings.toggleExcludedApp(" \n "))
-        XCTAssertEqual(settings.excludedApps, ["com.example.existing"])
+        XCTAssertFalse(settings.toggleListedApp(" \n "))
+        XCTAssertEqual(settings.allowedApps, ["com.example.existing"])
+    }
+
+    func testAppListModeAndAllowedAppsPersistImmediately() {
+        settings.appListMode = .allow
+        settings.allowedApps = ["com.example.allowed"]
+
+        XCTAssertEqual(PersistentPreferences.userDefaults.string(forKey: "appListMode"), AppListMode.allow.rawValue)
+        XCTAssertEqual(PersistentPreferences.userDefaults.stringArray(forKey: "allowedApps"), ["com.example.allowed"])
+    }
+
+    func testMissingOrInvalidAppListModeFallsBackToIgnore() {
+        XCTAssertEqual(SettingsManager.resolvedAppListMode(from: nil), .ignore)
+        XCTAssertEqual(SettingsManager.resolvedAppListMode(from: "invalid"), .ignore)
+        XCTAssertEqual(SettingsManager.resolvedAppListMode(from: AppListMode.allow.rawValue), .allow)
     }
     
     // MARK: - Default Settings Tests
@@ -191,6 +248,11 @@ final class SettingsManagerTests: XCTestCase {
             PersistentPreferences.userDefaults.persistentDomain(forName: PersistentPreferences.storageDomainIdentifier)?[probeKey] as? String,
             "ok"
         )
+    }
+
+    func testUnitTestsDoNotAutomaticallyMigrateProductionPreferences() {
+        XCTAssertTrue(PersistentPreferences.isRunningUnitTests)
+        XCTAssertTrue(PersistentPreferences.migrationDomainIdentifiers.isEmpty)
     }
 
     func testPreferenceBackupRestoresMissingCanonicalValues() throws {
@@ -252,18 +314,22 @@ final class SettingsManagerTests: XCTestCase {
 
         defaults.setPersistentDomain([
             "visualizerSize": 0.55,
+            "appListMode": AppListMode.allow.rawValue,
             "excludedApps": ["com.example.Editor"],
+            "allowedApps": ["com.example.Terminal"],
             "unrelatedPreference": "ignored"
         ], forName: canonicalDomain)
 
         PersistentPreferences.refreshBackup(
             at: backupURL,
-            allowedKeys: ["visualizerSize", "excludedApps"]
+            allowedKeys: ["visualizerSize", "appListMode", "excludedApps", "allowedApps"]
         )
 
         let backup = try readPropertyList(from: backupURL)
         XCTAssertEqual(numberValue(in: backup, forKey: "visualizerSize"), 0.55)
+        XCTAssertEqual(backup["appListMode"] as? String, AppListMode.allow.rawValue)
         XCTAssertEqual(backup["excludedApps"] as? [String], ["com.example.Editor"])
+        XCTAssertEqual(backup["allowedApps"] as? [String], ["com.example.Terminal"])
         XCTAssertNil(backup["unrelatedPreference"])
     }
 
@@ -672,6 +738,60 @@ final class SettingsManagerTests: XCTestCase {
         XCTAssertFalse(UpdateManager.isNoUpdateError(downloadError))
     }
 
+    func testUpdateInstallationControlsImmediateTermination() {
+        let manager = UpdateManager.shared
+        manager.endUpdateInstallation()
+        defer { manager.endUpdateInstallation() }
+
+        XCTAssertFalse(manager.isInstallingUpdate)
+        XCTAssertFalse(
+            AppDelegate.shouldTerminateImmediately(
+                allowsImmediateTermination: false,
+                isInstallingUpdate: manager.isInstallingUpdate
+            )
+        )
+
+        manager.beginUpdateInstallation()
+
+        XCTAssertTrue(manager.isInstallingUpdate)
+        XCTAssertTrue(
+            AppDelegate.shouldTerminateImmediately(
+                allowsImmediateTermination: false,
+                isInstallingUpdate: manager.isInstallingUpdate
+            )
+        )
+
+        manager.endUpdateInstallation()
+
+        XCTAssertFalse(manager.isInstallingUpdate)
+    }
+
+    func testExplicitTerminationOverrideStillTerminatesImmediately() {
+        XCTAssertTrue(
+            AppDelegate.shouldTerminateImmediately(
+                allowsImmediateTermination: true,
+                isInstallingUpdate: false
+            )
+        )
+    }
+
+    func testRestartHelperPassesPathAsPositionalArgumentAndWaitsForParent() {
+        let applicationPath = "/Applications/Mac Drag Scroll's Test.app"
+        let arguments = AppDelegate.restartHelperArguments(
+            parentProcessIdentifier: 4_242,
+            applicationPath: applicationPath
+        )
+
+        XCTAssertEqual(arguments.count, 5)
+        XCTAssertEqual(arguments[0], "-c")
+        XCTAssertEqual(arguments[2], "mac-drag-scroll-restart")
+        XCTAssertEqual(arguments[3], "4242")
+        XCTAssertEqual(arguments[4], applicationPath)
+        XCTAssertFalse(arguments[1].contains(applicationPath))
+        XCTAssertTrue(arguments[1].contains("/bin/kill -0"))
+        XCTAssertTrue(arguments[1].contains("exec /usr/bin/open"))
+    }
+
     func testLaunchUpdateCheckRunsWhenAutomaticChecksAreEnabled() {
         XCTAssertTrue(
             UpdateManager.shouldCheckForUpdatesOnLaunch(
@@ -845,6 +965,9 @@ final class SettingsManagerTests: XCTestCase {
         settings.showIndicator = false
         settings.visualizerAnimationsEnabled = false
         settings.keepRunningInMenuBar = false
+        settings.appListMode = .allow
+        settings.excludedApps = ["com.example.ignored"]
+        settings.allowedApps = ["com.example.allowed"]
 
         settings.resetToDefaults()
 
@@ -859,6 +982,9 @@ final class SettingsManagerTests: XCTestCase {
         XCTAssertTrue(settings.showIndicator)
         XCTAssertTrue(settings.visualizerAnimationsEnabled)
         XCTAssertTrue(settings.keepRunningInMenuBar)
+        XCTAssertEqual(settings.appListMode, .ignore)
+        XCTAssertTrue(settings.excludedApps.isEmpty)
+        XCTAssertTrue(settings.allowedApps.isEmpty)
     }
 
     func testSettingsTabKeyboardShortcutsMatchSidebarOrder() {
@@ -1082,6 +1208,7 @@ final class SettingsManagerTests: XCTestCase {
     
     func testExcludedAppsMultipleEntries() {
         let apps = ["com.app1.test", "com.app2.test", "com.app3.test"]
+        settings.appListMode = .ignore
         settings.excludedApps = apps
         
         XCTAssertEqual(settings.excludedApps.count, 3, "Should store all excluded apps")

@@ -1131,3 +1131,29 @@ final class EventTapInterruptionTests: XCTestCase {
         XCTAssertFalse(EventTapInterruption.requiresInteractionCancellation(.otherMouseUp))
     }
 }
+
+final class TriggerCaptureBehaviorTests: XCTestCase {
+    func testActiveInteractionIsCancelledDuringTriggerCapture() {
+        XCTAssertTrue(
+            TriggerCaptureBehavior.shouldCancelActiveInteraction(
+                isCapturingTrigger: true,
+                isInteractionActive: true
+            )
+        )
+    }
+
+    func testCaptureDoesNotCancelWithoutAnActiveInteraction() {
+        XCTAssertFalse(
+            TriggerCaptureBehavior.shouldCancelActiveInteraction(
+                isCapturingTrigger: true,
+                isInteractionActive: false
+            )
+        )
+        XCTAssertFalse(
+            TriggerCaptureBehavior.shouldCancelActiveInteraction(
+                isCapturingTrigger: false,
+                isInteractionActive: true
+            )
+        )
+    }
+}

@@ -47,13 +47,13 @@ The app has two version fields:
 - `MARKETING_VERSION` -> `CFBundleShortVersionString`, shown to users.
 - `CURRENT_PROJECT_VERSION` -> `CFBundleVersion`, used by Sparkle and must increase on every shipped build.
 
-For `1.0.0`, the build number starts at `100`. The current public line is:
+For `1.0.0`, the build number starts at `100`. The current public release is:
 
-- `1.1.1` -> build `111`
+- `1.2.0` -> build `120`
 
 A practical next sequence is:
 
-- `1.1.2` -> build `112`
+- `1.2.1` -> build `121`
 - `2.0.0` -> build `200`
 
 ## Changelog
@@ -98,7 +98,7 @@ SPARKLE_PRIVATE_KEY
 8496d972dae09a9b540399562e9d2385f16bd8bd
 ```
 
-The workflow imports the identity into an ephemeral keychain, temporarily authorizes its root in the runner's admin trust store, validates the fingerprint, signs nested Sparkle code in dependency order, and verifies the final designated requirement. It removes the temporary trust record and keychain before packaging continues. Keep at least one encrypted private-key backup outside GitHub. Replacing this identity breaks TCC continuity and forces users to grant protected permissions again.
+The workflow imports the identity into an ephemeral keychain, temporarily authorizes its root in the runner's admin trust store, validates the fingerprint, signs nested Sparkle code in dependency order, and verifies the final designated requirement. It removes the temporary keychain and credential files before packaging continues; runner teardown discards the ephemeral trust-store state. Keep at least one encrypted private-key backup outside GitHub. Replacing this identity breaks TCC continuity and forces users to grant protected permissions again.
 
 `SPARKLE_PRIVATE_KEY` is the exported Sparkle EdDSA private key. The public key embedded in the app is:
 

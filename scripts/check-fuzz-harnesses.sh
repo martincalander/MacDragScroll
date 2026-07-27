@@ -2,10 +2,8 @@
 set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-tmp_dir="${TMPDIR:-/tmp}/mac-drag-scroll-fuzz-check"
-
-rm -rf "$tmp_dir"
-mkdir -p "$tmp_dir"
+tmp_dir="$(mktemp -d "${TMPDIR:-/tmp}/mac-drag-scroll-fuzz-check.XXXXXX")"
+trap 'rm -rf "$tmp_dir"' EXIT
 
 while IFS= read -r -d '' harness; do
   name="$(basename "$harness" .swift)"

@@ -114,7 +114,7 @@ Open Settings from the menu bar icon.
 | Cursor hold | Optionally keep the pointer at the middle-click origin so pointer-sensitive content continues scrolling. |
 | Trigger | Middle click by default, with guarded alternatives for primary and secondary buttons. |
 | Visualizer | Size, opacity, tint, glass intensity, and motion effects. |
-| Excluded apps | Applications where drag scrolling should stay disabled. |
+| App rules | Use an Ignore list to disable selected apps, or an Allow list to enable only selected apps. |
 | Launch behavior | Login startup and whether the helper remains in the menu bar. |
 | Updates | Automatic checks, release history, and manual update controls. |
 

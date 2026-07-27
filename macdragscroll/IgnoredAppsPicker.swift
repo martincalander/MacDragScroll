@@ -2,7 +2,7 @@
 //  IgnoredAppsPicker.swift
 //  macdragscroll
 //
-//  Ignored-app discovery and picker controls.
+//  Per-app rule discovery and picker controls.
 //
 
 import AppKit
@@ -153,7 +153,8 @@ struct CompactAppRow: View {
 }
 
 struct InlineAppPickerView: View {
-    let excludedApps: [String]
+    let listedApps: [String]
+    let appListMode: AppListMode
     let frontmostBundleId: String?
     let onAdd: (String) -> Void
 
@@ -163,7 +164,7 @@ struct InlineAppPickerView: View {
     @State private var isLoading = true
 
     private var filteredApps: [InstalledAppRecord] {
-        let available = apps.filter { !excludedApps.contains($0.bundleId) }
+        let available = apps.filter { !listedApps.contains($0.bundleId) }
 
         guard !searchText.isEmpty else {
             return Array(available.prefix(7))
@@ -181,12 +182,12 @@ struct InlineAppPickerView: View {
 
     private var canAddCustomBundleId: Bool {
         let bundleId = normalizedCustomBundleId
-        return !bundleId.isEmpty && !excludedApps.contains(bundleId)
+        return !bundleId.isEmpty && !listedApps.contains(bundleId)
     }
 
     var body: some View {
         VStack(spacing: 7) {
-            Label(localized("add_ignored_app", value: "Add Ignored App", comment: "Add ignored app title"), systemImage: "plus.app")
+            Label(addAppTitle, systemImage: "plus.app")
                 .font(.system(size: 12, weight: .semibold))
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -216,6 +217,15 @@ struct InlineAppPickerView: View {
         }
         .padding(.top, 4)
         .onAppear(perform: loadApps)
+    }
+
+    private var addAppTitle: String {
+        switch appListMode {
+        case .ignore:
+            return localized("add_ignored_app", value: "Add Ignored App", comment: "Add ignored app title")
+        case .allow:
+            return localized("add_allowed_app", value: "Add Allowed App", comment: "Add allowed app title")
+        }
     }
 
     private var searchField: some View {

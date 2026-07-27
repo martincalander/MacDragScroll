@@ -53,13 +53,47 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         NotificationCenter.default.post(name: restartApplicationNotification, object: nil)
     }
 
+    static func shouldTerminateImmediately(
+        allowsImmediateTermination: Bool,
+        isInstallingUpdate: Bool
+    ) -> Bool {
+        allowsImmediateTermination || isInstallingUpdate
+    }
+
+    static func restartHelperArguments(
+        parentProcessIdentifier: pid_t,
+        applicationPath: String
+    ) -> [String] {
+        [
+            "-c",
+            """
+            parent_pid="$1"
+            app_path="$2"
+            attempts=0
+
+            while /bin/kill -0 "$parent_pid" 2>/dev/null; do
+                if [ "$attempts" -ge 200 ]; then
+                    exit 75
+                fi
+                /bin/sleep 0.05
+                attempts=$((attempts + 1))
+            done
+
+            exec /usr/bin/open "$app_path"
+            """,
+            "mac-drag-scroll-restart",
+            String(parentProcessIdentifier),
+            applicationPath
+        ]
+    }
+
     private var statusItem: NSStatusItem!
     private var mouseMonitor: MouseMonitor!
     private var settingsWindow: NSWindow?
     private var welcomeWindow: NSWindow?
     private weak var activeMenuItem: NSMenuItem?
     private weak var updateMenuItem: NSMenuItem?
-    private weak var ignoreCurrentAppMenuItem: NSMenuItem?
+    private weak var currentAppRuleMenuItem: NSMenuItem?
     private var currentMenuTargetBundleIdentifier: String?
     private var permissionMenuItem: NSMenuItem?
     private var duplicateInstanceMenuItem: NSMenuItem?
@@ -130,6 +164,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     }
     
     func applicationDidFinishLaunching(_ notification: Notification) {
+        guard !PersistentPreferences.isRunningUnitTests else { return }
+
         ProcessInfo.processInfo.processName = Self.appName
 
         guard AppInstanceMonitor.shared.claimPrimaryInstance() else {
@@ -163,6 +199,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        if PersistentPreferences.isRunningUnitTests {
+            PersistentPreferences.flushPendingWrites()
+            return
+        }
+
         DistributedNotificationCenter.default().removeObserver(self)
         permissionCheckTimer?.invalidate()
         permissionCheckTimer = nil
@@ -266,10 +307,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     private func restartRunningApplication() {
         allowsImmediateTermination = true
         let appPath = Bundle.main.bundleURL.path
-        let escapedPath = appPath.replacingOccurrences(of: "'", with: "'\\''")
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/bin/sh")
-        process.arguments = ["-c", "sleep 0.35; /usr/bin/open '\(escapedPath)'"]
+        process.arguments = Self.restartHelperArguments(
+            parentProcessIdentifier: ProcessInfo.processInfo.processIdentifier,
+            applicationPath: appPath
+        )
 
         do {
             try process.run()
@@ -357,14 +400,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         updateMenuItem = updateItem
         refreshUpdateMenuItem()
 
-        let ignoreItem = NSMenuItem(
+        let appRuleItem = NSMenuItem(
             title: localized("menu_ignore_current_app", value: "Ignore Current App", comment: "Ignore current app menu item"),
-            action: #selector(toggleCurrentAppIgnoredState(_:)),
+            action: #selector(toggleCurrentAppListedState(_:)),
             keyEquivalent: ""
         )
-        ignoreItem.target = self
-        menu.addItem(ignoreItem)
-        ignoreCurrentAppMenuItem = ignoreItem
+        appRuleItem.target = self
+        menu.addItem(appRuleItem)
+        currentAppRuleMenuItem = appRuleItem
 
         menu.addItem(NSMenuItem.separator())
 
@@ -435,6 +478,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.restartRunningApplication() }
             .store(in: &cancellables)
+
+        NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.willPowerOffNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.allowsImmediateTermination = true }
+            .store(in: &cancellables)
     }
 
     private func observePrimaryInstanceActivationRequests() {
@@ -451,7 +499,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         AppInstanceMonitor.shared.refreshDuplicateInstances()
         refreshDuplicateInstanceMenuItem()
         refreshUpdateMenuItem()
-        refreshIgnoreCurrentAppMenuItem()
+        refreshCurrentAppRuleMenuItem()
     }
 
     @objc private func primaryInstanceActivationRequested(_ notification: Notification) {
@@ -475,11 +523,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         UpdateManager.shared.checkForUpdates()
     }
 
-    @objc private func toggleCurrentAppIgnoredState(_ sender: Any?) {
+    @objc private func toggleCurrentAppListedState(_ sender: Any?) {
         guard let bundleId = currentMenuTargetBundleIdentifier else { return }
 
-        SettingsManager.shared.toggleExcludedApp(bundleId)
-        refreshIgnoreCurrentAppMenuItem()
+        SettingsManager.shared.toggleListedApp(bundleId)
+        refreshCurrentAppRuleMenuItem()
     }
 
     @objc private func quit(_ sender: Any?) {
@@ -488,7 +536,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        guard !allowsImmediateTermination else {
+        guard !PersistentPreferences.isRunningUnitTests else {
+            return .terminateNow
+        }
+
+        guard !Self.shouldTerminateImmediately(
+            allowsImmediateTermination: allowsImmediateTermination,
+            isInstallingUpdate: UpdateManager.shared.isInstallingUpdate
+        ) else {
             return .terminateNow
         }
 
@@ -816,21 +871,43 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         updateMenuItem?.action = #selector(openUpdates(_:))
     }
 
-    private func refreshIgnoreCurrentAppMenuItem() {
-        guard let item = ignoreCurrentAppMenuItem else { return }
-        guard let bundleId = SettingsManager.shared.getFrontmostAppBundleId() else {
+    private func refreshCurrentAppRuleMenuItem() {
+        guard let item = currentAppRuleMenuItem else { return }
+        let settings = SettingsManager.shared
+
+        guard let bundleId = settings.getFrontmostAppBundleId() else {
             currentMenuTargetBundleIdentifier = nil
-            item.title = localized("menu_ignore_current_app", value: "Ignore Current App", comment: "Ignore current app menu item")
+            switch settings.appListMode {
+            case .ignore:
+                item.title = localized(
+                    "menu_ignore_current_app",
+                    value: "Ignore Current App",
+                    comment: "Ignore current app menu item"
+                )
+            case .allow:
+                item.title = localized(
+                    "menu_allow_current_app",
+                    value: "Allow Current App",
+                    comment: "Allow current app menu item"
+                )
+            }
             item.isEnabled = false
             return
         }
 
         currentMenuTargetBundleIdentifier = bundleId
         let appName = displayName(forBundleIdentifier: bundleId) ?? localized("current_app", value: "Current App", comment: "Current app fallback")
-        if SettingsManager.shared.isAppExcluded(bundleIdentifier: bundleId) {
-            item.title = String(format: localized("menu_enable_in_app", value: "Enable in %@", comment: "Enable in ignored app menu item"), appName)
-        } else {
-            item.title = String(format: localized("menu_ignore_app", value: "Ignore %@", comment: "Ignore app menu item"), appName)
+        let isListed = settings.isAppListed(bundleIdentifier: bundleId)
+
+        switch settings.appListMode {
+        case .ignore:
+            item.title = isListed
+                ? String(format: localized("menu_enable_in_app", value: "Enable in %@", comment: "Enable in ignored app menu item"), appName)
+                : String(format: localized("menu_ignore_app", value: "Ignore %@", comment: "Ignore app menu item"), appName)
+        case .allow:
+            item.title = isListed
+                ? String(format: localized("menu_disable_in_app", value: "Disable in %@", comment: "Disable in allowed app menu item"), appName)
+                : String(format: localized("menu_allow_app", value: "Allow %@", comment: "Allow app menu item"), appName)
         }
         item.isEnabled = true
     }
@@ -855,7 +932,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         refreshPermissionPresentation()
         refreshDuplicateInstanceMenuItem()
         refreshUpdateMenuItem()
-        refreshIgnoreCurrentAppMenuItem()
+        refreshCurrentAppRuleMenuItem()
     }
 
     private func statusBarImage(isEnabled: Bool, needsPermission: Bool) -> NSImage {

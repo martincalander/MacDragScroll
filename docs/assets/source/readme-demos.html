@@ -126,9 +126,10 @@
     .sidebar-row.selected { background: rgba(89, 105, 126, 0.12); color: #2f3741; font-weight: 600; }
     .sidebar-icon { width: 15px; height: 15px; border: 2px solid #788493; border-radius: 4px; }
 
-    .install-area { position: absolute; inset: 0 0 0 166px; }
+    .install-area { position: absolute; inset: 0 0 0 166px; isolation: isolate; }
     .install-target {
       position: absolute;
+      z-index: 1;
       top: 96px;
       right: 102px;
       width: 148px;
@@ -158,6 +159,7 @@
 
     .draggable-app {
       position: absolute;
+      z-index: 2;
       top: 101px;
       left: 78px;
       width: 138px;

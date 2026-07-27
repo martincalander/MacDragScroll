@@ -64,6 +64,15 @@ enum EventTapInterruption {
     }
 }
 
+enum TriggerCaptureBehavior {
+    static func shouldCancelActiveInteraction(
+        isCapturingTrigger: Bool,
+        isInteractionActive: Bool
+    ) -> Bool {
+        isCapturingTrigger && isInteractionActive
+    }
+}
+
 enum CursorHoldBehavior {
     static let middleMouseButton = 2
     static let maximumVirtualDistance: CGFloat = 2_048
@@ -552,6 +561,12 @@ final class MouseMonitor {
         }
 
         if SettingsManager.shared.isCapturingTrigger {
+            if TriggerCaptureBehavior.shouldCancelActiveInteraction(
+                isCapturingTrigger: true,
+                isInteractionActive: isTriggerActive
+            ) {
+                cancelInteraction()
+            }
             return pass(event)
         }
 
@@ -944,7 +959,12 @@ final class MouseMonitor {
     private func performScroll() {
         guard isActivated else { return }
 
-        if !SettingsManager.shared.isEnabled || isOriginAppExcluded() {
+        if !SettingsManager.shared.isEnabled
+            || TriggerCaptureBehavior.shouldCancelActiveInteraction(
+                isCapturingTrigger: SettingsManager.shared.isCapturingTrigger,
+                isInteractionActive: isActivated
+            )
+            || isOriginAppExcluded() {
             cancelInteraction()
             return
         }

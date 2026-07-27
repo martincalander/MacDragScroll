@@ -250,6 +250,11 @@ final class SettingsManagerTests: XCTestCase {
         )
     }
 
+    func testUnitTestsDoNotAutomaticallyMigrateProductionPreferences() {
+        XCTAssertTrue(PersistentPreferences.isRunningUnitTests)
+        XCTAssertTrue(PersistentPreferences.migrationDomainIdentifiers.isEmpty)
+    }
+
     func testPreferenceBackupRestoresMissingCanonicalValues() throws {
         let defaults = UserDefaults.standard
         let canonicalDomain = PersistentPreferences.storageDomainIdentifier
@@ -731,6 +736,60 @@ final class SettingsManagerTests: XCTestCase {
         )
 
         XCTAssertFalse(UpdateManager.isNoUpdateError(downloadError))
+    }
+
+    func testUpdateInstallationControlsImmediateTermination() {
+        let manager = UpdateManager.shared
+        manager.endUpdateInstallation()
+        defer { manager.endUpdateInstallation() }
+
+        XCTAssertFalse(manager.isInstallingUpdate)
+        XCTAssertFalse(
+            AppDelegate.shouldTerminateImmediately(
+                allowsImmediateTermination: false,
+                isInstallingUpdate: manager.isInstallingUpdate
+            )
+        )
+
+        manager.beginUpdateInstallation()
+
+        XCTAssertTrue(manager.isInstallingUpdate)
+        XCTAssertTrue(
+            AppDelegate.shouldTerminateImmediately(
+                allowsImmediateTermination: false,
+                isInstallingUpdate: manager.isInstallingUpdate
+            )
+        )
+
+        manager.endUpdateInstallation()
+
+        XCTAssertFalse(manager.isInstallingUpdate)
+    }
+
+    func testExplicitTerminationOverrideStillTerminatesImmediately() {
+        XCTAssertTrue(
+            AppDelegate.shouldTerminateImmediately(
+                allowsImmediateTermination: true,
+                isInstallingUpdate: false
+            )
+        )
+    }
+
+    func testRestartHelperPassesPathAsPositionalArgumentAndWaitsForParent() {
+        let applicationPath = "/Applications/Mac Drag Scroll's Test.app"
+        let arguments = AppDelegate.restartHelperArguments(
+            parentProcessIdentifier: 4_242,
+            applicationPath: applicationPath
+        )
+
+        XCTAssertEqual(arguments.count, 5)
+        XCTAssertEqual(arguments[0], "-c")
+        XCTAssertEqual(arguments[2], "mac-drag-scroll-restart")
+        XCTAssertEqual(arguments[3], "4242")
+        XCTAssertEqual(arguments[4], applicationPath)
+        XCTAssertFalse(arguments[1].contains(applicationPath))
+        XCTAssertTrue(arguments[1].contains("/bin/kill -0"))
+        XCTAssertTrue(arguments[1].contains("exec /usr/bin/open"))
     }
 
     func testLaunchUpdateCheckRunsWhenAutomaticChecksAreEnabled() {

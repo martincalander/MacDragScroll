@@ -232,6 +232,7 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
     @Published private(set) var status: UpdateStatus = .upToDate
     @Published private(set) var lastChecked: Date?
     @Published private(set) var history: [UpdateHistoryEntry]
+    @Published private(set) var isInstallingUpdate = false
 
     var currentVersion: String {
         AppDelegate.appVersion
@@ -324,10 +325,13 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
     }
 
     func updater(_ updater: SPUUpdater, willInstallUpdate item: SUAppcastItem) {
+        beginUpdateInstallation()
         appendHistory("Installing update \(item.displayVersionString).")
     }
 
     func updater(_ updater: SPUUpdater, didAbortWithError error: Error) {
+        endUpdateInstallation()
+
         if Self.isNoUpdateError(error) {
             markUpToDate()
             return
@@ -336,6 +340,14 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
         let message = "Update failed: \(error.localizedDescription)"
         status = .failed(message: message)
         appendHistory(message)
+    }
+
+    func beginUpdateInstallation() {
+        isInstallingUpdate = true
+    }
+
+    func endUpdateInstallation() {
+        isInstallingUpdate = false
     }
 
     static func isNoUpdateError(_ error: Error) -> Bool {
@@ -420,6 +432,6 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
     }
 
     private static var isRunningUnitTests: Bool {
-        ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+        PersistentPreferences.isRunningUnitTests
     }
 }

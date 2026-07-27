@@ -53,6 +53,40 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         NotificationCenter.default.post(name: restartApplicationNotification, object: nil)
     }
 
+    static func shouldTerminateImmediately(
+        allowsImmediateTermination: Bool,
+        isInstallingUpdate: Bool
+    ) -> Bool {
+        allowsImmediateTermination || isInstallingUpdate
+    }
+
+    static func restartHelperArguments(
+        parentProcessIdentifier: pid_t,
+        applicationPath: String
+    ) -> [String] {
+        [
+            "-c",
+            """
+            parent_pid="$1"
+            app_path="$2"
+            attempts=0
+
+            while /bin/kill -0 "$parent_pid" 2>/dev/null; do
+                if [ "$attempts" -ge 200 ]; then
+                    exit 75
+                fi
+                /bin/sleep 0.05
+                attempts=$((attempts + 1))
+            done
+
+            exec /usr/bin/open "$app_path"
+            """,
+            "mac-drag-scroll-restart",
+            String(parentProcessIdentifier),
+            applicationPath
+        ]
+    }
+
     private var statusItem: NSStatusItem!
     private var mouseMonitor: MouseMonitor!
     private var settingsWindow: NSWindow?
@@ -130,6 +164,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     }
     
     func applicationDidFinishLaunching(_ notification: Notification) {
+        guard !PersistentPreferences.isRunningUnitTests else { return }
+
         ProcessInfo.processInfo.processName = Self.appName
 
         guard AppInstanceMonitor.shared.claimPrimaryInstance() else {
@@ -163,6 +199,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        if PersistentPreferences.isRunningUnitTests {
+            PersistentPreferences.flushPendingWrites()
+            return
+        }
+
         DistributedNotificationCenter.default().removeObserver(self)
         permissionCheckTimer?.invalidate()
         permissionCheckTimer = nil
@@ -266,10 +307,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     private func restartRunningApplication() {
         allowsImmediateTermination = true
         let appPath = Bundle.main.bundleURL.path
-        let escapedPath = appPath.replacingOccurrences(of: "'", with: "'\\''")
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/bin/sh")
-        process.arguments = ["-c", "sleep 0.35; /usr/bin/open '\(escapedPath)'"]
+        process.arguments = Self.restartHelperArguments(
+            parentProcessIdentifier: ProcessInfo.processInfo.processIdentifier,
+            applicationPath: appPath
+        )
 
         do {
             try process.run()
@@ -435,6 +478,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.restartRunningApplication() }
             .store(in: &cancellables)
+
+        NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.willPowerOffNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.allowsImmediateTermination = true }
+            .store(in: &cancellables)
     }
 
     private func observePrimaryInstanceActivationRequests() {
@@ -488,7 +536,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        guard !allowsImmediateTermination else {
+        guard !PersistentPreferences.isRunningUnitTests else {
+            return .terminateNow
+        }
+
+        guard !Self.shouldTerminateImmediately(
+            allowsImmediateTermination: allowsImmediateTermination,
+            isInstallingUpdate: UpdateManager.shared.isInstallingUpdate
+        ) else {
             return .terminateNow
         }
 

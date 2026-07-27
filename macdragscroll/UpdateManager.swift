@@ -104,6 +104,16 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
     static let websiteURL = URL(string: "https://martincalander.com")!
     static let versionHistory: [VersionHistoryEntry] = [
         VersionHistoryEntry(
+            version: "1.3.0",
+            build: "130",
+            releaseDate: "2026-07-27",
+            changes: [
+                "Added configurable precision scrolling for temporarily slower, finer drag movements.",
+                "Added independent per-app Ignore and Allow lists while preserving Ignore as the default.",
+                "Improved trigger-capture cancellation, update and shutdown termination, and in-app restart reliability."
+            ]
+        ),
+        VersionHistoryEntry(
             version: "1.2.0",
             build: "120",
             releaseDate: "2026-07-11",

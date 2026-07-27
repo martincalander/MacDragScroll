@@ -49,11 +49,11 @@ The app has two version fields:
 
 For `1.0.0`, the build number starts at `100`. The current public release is:
 
-- `1.2.0` -> build `120`
+- `1.3.0` -> build `130`
 
 A practical next sequence is:
 
-- `1.2.1` -> build `121`
+- `1.3.1` -> build `131`
 - `2.0.0` -> build `200`
 
 ## Changelog
@@ -152,7 +152,7 @@ scripts/validate-homebrew-cask.sh
 scripts/check-release-readiness.sh <version>
 ```
 
-2. Commit and push the release changes to `main`.
+2. Merge the reviewed release changes into `main`, then synchronize a clean local `main` with `origin/main`.
 
 3. Publish the release tag:
 

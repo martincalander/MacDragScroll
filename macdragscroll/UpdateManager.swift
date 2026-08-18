@@ -104,6 +104,14 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
     static let websiteURL = URL(string: "https://martincalander.com")!
     static let versionHistory: [VersionHistoryEntry] = [
         VersionHistoryEntry(
+            version: "1.4.0",
+            build: "140",
+            releaseDate: "2026-08-18",
+            changes: [
+                "Added independent vertical and horizontal drag-scrolling controls, with a warning when both axes are disabled."
+            ]
+        ),
+        VersionHistoryEntry(
             version: "1.3.0",
             build: "130",
             releaseDate: "2026-07-27",

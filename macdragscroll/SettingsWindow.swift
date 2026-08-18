@@ -498,6 +498,15 @@ struct SettingsWindowView: View {
             Divider()
 
             ToggleRow(
+                icon: "arrow.up.and.down",
+                title: localized("vertical_scrolling", value: "Vertical Scrolling", comment: "Vertical scrolling toggle"),
+                isOn: $settings.verticalScrollingEnabled,
+                tooltip: localized("tooltip_vertical_scrolling", value: "Allow up and down drag movement to send vertical scroll events.", comment: "Vertical scrolling tooltip")
+            )
+
+            Divider()
+
+            ToggleRow(
                 icon: "arrow.left.and.right",
                 title: localized("horizontal_scrolling", value: "Horizontal Scrolling", comment: "Horizontal scrolling toggle"),
                 isOn: $settings.horizontalScrollingEnabled,
@@ -514,6 +523,25 @@ struct SettingsWindowView: View {
             )
             .disabled(!settings.horizontalScrollingEnabled)
             .opacity(settings.horizontalScrollingEnabled ? 1 : 0.55)
+
+            if !settings.verticalScrollingEnabled && !settings.horizontalScrollingEnabled {
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.orange)
+
+                    Text(localized(
+                        "both_axes_disabled",
+                        value: "Both scroll axes are disabled. Drag scrolling will not move content until you enable at least one axis.",
+                        comment: "Both scroll axes disabled warning"
+                    ))
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                    Spacer(minLength: 0)
+                }
+            }
 
             Divider()
 

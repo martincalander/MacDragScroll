@@ -19,6 +19,7 @@
 "acceleration" = "加速";
 "dead_zone" = "死區";
 "reverse_direction" = "反向";
+"vertical_scrolling" = "垂直捲動";
 "horizontal_scrolling" = "水平捲動";
 "invert_horizontal" = "水平反轉";
 "keep_cursor_in_place" = "保持游標位置";
@@ -182,6 +183,7 @@
 "tooltip_acceleration" = "控制滾動的速度。";
 "tooltip_dead_zone" = "滾動開始前的滑鼠移動。";
 "tooltip_reverse_direction" = "如果方向感覺相反，則反轉拖曳捲動方向。";
+"tooltip_vertical_scrolling" = "允許上下拖曳移動以發送垂直滾動事件。";
 "tooltip_horizontal_scrolling" = "允許側向拖曳移動以發送水平滾動事件。";
 "tooltip_invert_horizontal" = "僅翻轉水平滾動方向。";
 "tooltip_keep_cursor_in_place" = "使用中鍵拖移時，將指標保持在拖移起點。放開按鍵或發生任何中斷後，指標會立即恢復正常移動。";
@@ -236,3 +238,4 @@
 "tooltip_precision_modifier" = "開始拖曳捲動後按住此額外修飾鍵，以暫時降低捲動速度。";
 "tooltip_precision_speed" = "設定按住精細模式修飾鍵時的捲動速度。";
 "precision_modifier_conflict" = "請選擇尚未用於觸發器的修飾鍵。設定重疊時，精細模式保持關閉。";
+"both_axes_disabled" = "兩個捲動軸均已停用。在至少啟用一個軸之前，拖曳不會捲動內容。";

@@ -19,6 +19,7 @@
 "acceleration" = "加速度";
 "dead_zone" = "デッドゾーン";
 "reverse_direction" = "逆方向";
+"vertical_scrolling" = "縦スクロール";
 "horizontal_scrolling" = "横スクロール";
 "invert_horizontal" = "水平方向を反転";
 "keep_cursor_in_place" = "カーソルをその場に固定";
@@ -182,6 +183,7 @@
 "tooltip_acceleration" = "スクロールの速度を制御します。";
 "tooltip_dead_zone" = "スクロールが始まる前のマウスの動き。";
 "tooltip_reverse_direction" = "方向が逆に感じられる場合は、ドラッグしてスクロールを反転してください。";
+"tooltip_vertical_scrolling" = "上下方向のドラッグ移動で垂直スクロール イベントを送信できるようにします。";
 "tooltip_horizontal_scrolling" = "横方向のドラッグ移動で水平スクロール イベントを送信できるようにします。";
 "tooltip_invert_horizontal" = "水平スクロール方向のみを反転します。";
 "tooltip_keep_cursor_in_place" = "中クリックでドラッグしている間、ポインタを開始位置に保ちます。ボタンを離すか操作が中断されると、通常のポインタ移動にすぐ戻ります。";
@@ -236,3 +238,4 @@
 "tooltip_precision_modifier" = "ドラッグスクロールの開始後にこの追加修飾キーを押し続けると、速度が一時的に低下します。";
 "tooltip_precision_speed" = "精密モード修飾キーを押している間のスクロール速度を調整します。";
 "precision_modifier_conflict" = "トリガーに含まれていない修飾キーを選択してください。設定が重複している間、精密モードは無効です。";
+"both_axes_disabled" = "両方のスクロール軸が無効です。少なくとも一方の軸を有効にするまで、ドラッグしてもコンテンツはスクロールしません。";

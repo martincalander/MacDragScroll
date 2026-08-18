@@ -19,6 +19,7 @@
 "acceleration" = "가속";
 "dead_zone" = "데드존";
 "reverse_direction" = "역방향";
+"vertical_scrolling" = "수직 스크롤";
 "horizontal_scrolling" = "수평 스크롤";
 "invert_horizontal" = "수평 반전";
 "keep_cursor_in_place" = "커서를 제자리에 유지";
@@ -182,6 +183,7 @@
 "tooltip_acceleration" = "스크롤이 얼마나 빠르게 증가하는지 제어합니다.";
 "tooltip_dead_zone" = "스크롤이 시작되기 전의 마우스 움직임.";
 "tooltip_reverse_direction" = "방향이 반대로 느껴지면 드래그 스크롤 방향을 바꿉니다.";
+"tooltip_vertical_scrolling" = "세로 스크롤 이벤트를 보내려면 위아래로 드래그 이동을 허용하세요.";
 "tooltip_horizontal_scrolling" = "가로 스크롤 이벤트를 보내려면 옆으로 드래그 이동을 허용하세요.";
 "tooltip_invert_horizontal" = "가로 스크롤 방향만 뒤집습니다.";
 "tooltip_keep_cursor_in_place" = "가운데 클릭으로 드래그하는 동안 포인터를 시작 위치에 유지합니다. 버튼을 놓거나 작업이 중단되면 즉시 일반 포인터 이동으로 돌아갑니다.";
@@ -236,3 +238,4 @@
 "tooltip_precision_modifier" = "드래그 스크롤을 시작한 후 이 추가 보조 키를 눌러 속도를 잠시 줄입니다.";
 "tooltip_precision_speed" = "정밀 보조 키를 누르는 동안의 스크롤 속도를 조절합니다.";
 "precision_modifier_conflict" = "트리거에 이미 포함된 키가 아닌 보조 키를 선택하세요. 설정이 겹치면 정밀 모드가 비활성화됩니다.";
+"both_axes_disabled" = "두 스크롤 축이 모두 비활성화되었습니다. 축을 하나 이상 활성화할 때까지 드래그해도 콘텐츠가 스크롤되지 않습니다.";

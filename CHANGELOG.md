@@ -6,6 +6,10 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 
 ## [Unreleased]
 
+### Added
+
+- Added an optional toggle to disable vertical drag scrolling, matching the existing horizontal scrolling toggle, so a drag can be constrained to a single axis. Settings warns when both axes are off.
+
 ## [1.3.0] - 2026-07-27
 
 ### Added

@@ -30,6 +30,7 @@ final class SettingsManagerTests: XCTestCase {
     private var originalVisualizerTintStyle: VisualizerTintStyle = .clear
     private var originalLiquidGlassIntensity = 1.35
     private var originalReverseScrollDirection = false
+    private var originalVerticalScrollingEnabled = true
     private var originalHorizontalScrollingEnabled = true
     private var originalInvertHorizontalScroll = false
     private var originalKeepCursorInPlace = false
@@ -58,6 +59,7 @@ final class SettingsManagerTests: XCTestCase {
         originalVisualizerTintStyle = settings.visualizerTintStyle
         originalLiquidGlassIntensity = settings.liquidGlassIntensity
         originalReverseScrollDirection = settings.reverseScrollDirection
+        originalVerticalScrollingEnabled = settings.verticalScrollingEnabled
         originalHorizontalScrollingEnabled = settings.horizontalScrollingEnabled
         originalInvertHorizontalScroll = settings.invertHorizontalScroll
         originalKeepCursorInPlace = settings.keepCursorInPlace
@@ -79,6 +81,7 @@ final class SettingsManagerTests: XCTestCase {
         settings.visualizerTintStyle = originalVisualizerTintStyle
         settings.liquidGlassIntensity = originalLiquidGlassIntensity
         settings.reverseScrollDirection = originalReverseScrollDirection
+        settings.verticalScrollingEnabled = originalVerticalScrollingEnabled
         settings.horizontalScrollingEnabled = originalHorizontalScrollingEnabled
         settings.invertHorizontalScroll = originalInvertHorizontalScroll
         settings.keepCursorInPlace = originalKeepCursorInPlace
@@ -215,6 +218,24 @@ final class SettingsManagerTests: XCTestCase {
 
         XCTAssertEqual(PersistentPreferences.userDefaults.string(forKey: "appListMode"), AppListMode.allow.rawValue)
         XCTAssertEqual(PersistentPreferences.userDefaults.stringArray(forKey: "allowedApps"), ["com.example.allowed"])
+    }
+
+    func testScrollAxisTogglesPersistImmediately() {
+        settings.verticalScrollingEnabled = false
+        settings.horizontalScrollingEnabled = false
+
+        XCTAssertFalse(PersistentPreferences.userDefaults.bool(forKey: "verticalScrollingEnabled"))
+        XCTAssertFalse(PersistentPreferences.userDefaults.bool(forKey: "horizontalScrollingEnabled"))
+
+        settings.verticalScrollingEnabled = true
+
+        XCTAssertTrue(PersistentPreferences.userDefaults.bool(forKey: "verticalScrollingEnabled"))
+    }
+
+    func testVerticalScrollingIsEnabledByDefault() {
+        settings.resetToDefaults()
+
+        XCTAssertTrue(settings.verticalScrollingEnabled, "Vertical scrolling should be on unless the user turns it off")
     }
 
     func testMissingOrInvalidAppListModeFallsBackToIgnore() {
@@ -955,6 +976,7 @@ final class SettingsManagerTests: XCTestCase {
 
     func testResetToDefaultsUsesNormalScrollDirection() {
         settings.reverseScrollDirection = true
+        settings.verticalScrollingEnabled = false
         settings.horizontalScrollingEnabled = false
         settings.invertHorizontalScroll = true
         settings.keepCursorInPlace = true
@@ -972,6 +994,7 @@ final class SettingsManagerTests: XCTestCase {
         settings.resetToDefaults()
 
         XCTAssertFalse(settings.reverseScrollDirection, "Default drag scroll direction should not be reversed")
+        XCTAssertTrue(settings.verticalScrollingEnabled, "Vertical scrolling should be enabled by default")
         XCTAssertTrue(settings.horizontalScrollingEnabled, "Horizontal scrolling should be enabled by default")
         XCTAssertFalse(settings.invertHorizontalScroll, "Horizontal scrolling should not be inverted by default")
         XCTAssertFalse(settings.keepCursorInPlace, "Cursor holding should be opt-in")

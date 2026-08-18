@@ -19,6 +19,7 @@
 "acceleration" = "Acceleration";
 "dead_zone" = "Dead Zone";
 "reverse_direction" = "Reverse Direction";
+"vertical_scrolling" = "Vertical Scrolling";
 "horizontal_scrolling" = "Horizontal Scrolling";
 "invert_horizontal" = "Invert Horizontal";
 "keep_cursor_in_place" = "Keep Cursor in Place";
@@ -182,6 +183,7 @@
 "tooltip_acceleration" = "Controls how quickly scrolling ramps up.";
 "tooltip_dead_zone" = "Mouse movement before scrolling starts.";
 "tooltip_reverse_direction" = "Flip drag scrolling if the direction feels backwards.";
+"tooltip_vertical_scrolling" = "Allow up and down drag movement to send vertical scroll events.";
 "tooltip_horizontal_scrolling" = "Allow sideways drag movement to send horizontal scroll events.";
 "tooltip_invert_horizontal" = "Flip only the horizontal scroll direction.";
 "tooltip_keep_cursor_in_place" = "Keep the pointer at the drag origin while using Middle Click. Releasing the button or any interruption restores normal pointer movement immediately.";
@@ -236,3 +238,4 @@
 "tooltip_precision_modifier" = "Hold this additional modifier after drag scrolling begins to temporarily reduce the scroll speed.";
 "tooltip_precision_speed" = "Controls scroll speed while the precision modifier is held.";
 "precision_modifier_conflict" = "Choose a modifier that is not already part of the trigger. Precision mode remains inactive while these settings overlap.";
+"both_axes_disabled" = "Both scroll axes are disabled. Drag scrolling will not move content until you enable at least one axis.";

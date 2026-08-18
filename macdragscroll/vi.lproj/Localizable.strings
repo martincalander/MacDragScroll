@@ -19,6 +19,7 @@
 "acceleration" = "Tăng tốc";
 "dead_zone" = "Vùng chết";
 "reverse_direction" = "Hướng ngược lại";
+"vertical_scrolling" = "Cuộn dọc";
 "horizontal_scrolling" = "Cuộn ngang";
 "invert_horizontal" = "Đảo ngược theo chiều ngang";
 "keep_cursor_in_place" = "Giữ con trỏ tại chỗ";
@@ -182,6 +183,7 @@
 "tooltip_acceleration" = "Kiểm soát tốc độ cuộn tăng lên.";
 "tooltip_dead_zone" = "Chuyển động của chuột trước khi bắt đầu cuộn.";
 "tooltip_reverse_direction" = "Đảo hướng cuộn kéo nếu hướng bị ngược.";
+"tooltip_vertical_scrolling" = "Cho phép chuyển động kéo lên xuống để gửi các sự kiện cuộn dọc.";
 "tooltip_horizontal_scrolling" = "Cho phép chuyển động kéo sang một bên để gửi các sự kiện cuộn ngang.";
 "tooltip_invert_horizontal" = "Chỉ lật theo hướng cuộn ngang.";
 "tooltip_keep_cursor_in_place" = "Giữ con trỏ tại điểm bắt đầu kéo khi dùng nút chuột giữa. Khi nhả nút hoặc có gián đoạn, con trỏ sẽ lập tức trở lại cách di chuyển bình thường.";
@@ -236,3 +238,4 @@
 "tooltip_precision_modifier" = "Giữ phím bổ trợ này sau khi bắt đầu cuộn kéo để tạm thời giảm tốc độ.";
 "tooltip_precision_speed" = "Điều khiển tốc độ cuộn khi giữ phím bổ trợ chính xác.";
 "precision_modifier_conflict" = "Chọn phím bổ trợ chưa thuộc thao tác kích hoạt. Chế độ chính xác sẽ không hoạt động khi các cài đặt trùng nhau.";
+"both_axes_disabled" = "Cả hai trục cuộn đều đã tắt. Thao tác kéo sẽ không cuộn nội dung cho đến khi bạn bật ít nhất một trục.";

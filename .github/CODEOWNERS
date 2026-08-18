@@ -1,5 +1,5 @@
 # Default maintainers for every repository path.
-* @martincalander @uglykatsuki @freddell97
+* @martincalander @uglykatsuki @freddell97 @casketclue
 
 # Keep changes to the ownership policy under maintainer review.
-/.github/CODEOWNERS @martincalander @uglykatsuki @freddell97
+/.github/CODEOWNERS @martincalander @uglykatsuki @freddell97 @casketclue

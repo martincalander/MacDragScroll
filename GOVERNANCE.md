@@ -5,7 +5,7 @@ Mac Drag Scroll is maintained in public through GitHub issues and pull requests.
 ## Roles
 
 - **Project lead and release owner:** [Martin Calander](https://github.com/martincalander) sets product direction, manages releases and signing material, and handles private security reports.
-- **Maintainers:** [uglykatsuki](https://github.com/uglykatsuki) and [freddell97](https://github.com/freddell97) provide independent review and help maintain project quality. Repository write access does not grant access to private signing material or user diagnostics.
+- **Maintainers:** [uglykatsuki](https://github.com/uglykatsuki), [freddell97](https://github.com/freddell97), and [casketclue](https://github.com/casketclue) provide independent review and help maintain project quality. Repository write access does not grant access to private signing material or user diagnostics.
 - **Contributors:** anyone may propose issues or pull requests under the Code of Conduct and contribution guidelines.
 
 ## Changes

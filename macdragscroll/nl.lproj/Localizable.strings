@@ -19,6 +19,7 @@
 "acceleration" = "Acceleratie";
 "dead_zone" = "Dode zone";
 "reverse_direction" = "Omgekeerde richting";
+"vertical_scrolling" = "Verticaal scrollen";
 "horizontal_scrolling" = "Horizontaal scrollen";
 "invert_horizontal" = "Horizontaal omkeren";
 "keep_cursor_in_place" = "Cursor op zijn plaats houden";
@@ -182,6 +183,7 @@
 "tooltip_acceleration" = "Bepaalt hoe snel scrollen toeneemt.";
 "tooltip_dead_zone" = "Muisbeweging voordat het scrollen begint.";
 "tooltip_reverse_direction" = "Keer de sleeprichting om als deze verkeerd aanvoelt.";
+"tooltip_vertical_scrolling" = "Sta op- en neergaande sleepbewegingen toe om verticale schuifgebeurtenissen te verzenden.";
 "tooltip_horizontal_scrolling" = "Sta zijwaartse sleepbewegingen toe om horizontale schuifgebeurtenissen te verzenden.";
 "tooltip_invert_horizontal" = "Draai alleen de horizontale schuifrichting om.";
 "tooltip_keep_cursor_in_place" = "Houdt de aanwijzer bij het beginpunt van de sleepbeweging wanneer je de middelste muisknop gebruikt. Zodra je de knop loslaat of de actie wordt onderbroken, beweegt de aanwijzer direct weer normaal.";
@@ -236,3 +238,4 @@
 "tooltip_precision_modifier" = "Houd deze extra toets ingedrukt nadat sleepscrollen begint om de snelheid tijdelijk te verlagen.";
 "tooltip_precision_speed" = "Regelt de scrollsnelheid terwijl de precisietoets is ingedrukt.";
 "precision_modifier_conflict" = "Kies een toets die nog geen deel van de activering is. De precisiemodus blijft bij overlap inactief.";
+"both_axes_disabled" = "Beide schuifassen zijn uitgeschakeld. Slepen verschuift geen inhoud totdat je minstens één as inschakelt.";

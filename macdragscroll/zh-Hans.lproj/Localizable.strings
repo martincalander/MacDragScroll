@@ -19,6 +19,7 @@
 "acceleration" = "加速";
 "dead_zone" = "死区";
 "reverse_direction" = "反向";
+"vertical_scrolling" = "垂直滚动";
 "horizontal_scrolling" = "水平滚动";
 "invert_horizontal" = "水平反转";
 "keep_cursor_in_place" = "保持光标位置";
@@ -182,6 +183,7 @@
 "tooltip_acceleration" = "控制滚动的速度。";
 "tooltip_dead_zone" = "滚动开始前的鼠标移动。";
 "tooltip_reverse_direction" = "如果方向感觉相反，则反转拖动滚动方向。";
+"tooltip_vertical_scrolling" = "允许上下拖动移动以发送垂直滚动事件。";
 "tooltip_horizontal_scrolling" = "允许侧向拖动移动以发送水平滚动事件。";
 "tooltip_invert_horizontal" = "仅翻转水平滚动方向。";
 "tooltip_keep_cursor_in_place" = "使用中键拖动时，将指针保持在拖动起点。松开按键或发生任何中断后，指针会立即恢复正常移动。";
@@ -236,3 +238,4 @@
 "tooltip_precision_modifier" = "开始拖动滚动后按住此额外修饰键，以临时降低滚动速度。";
 "tooltip_precision_speed" = "设置按住精细模式修饰键时的滚动速度。";
 "precision_modifier_conflict" = "请选择尚未用于触发器的修饰键。设置重叠时，精细模式保持关闭。";
+"both_axes_disabled" = "两个滚动轴均已停用。在至少启用一个轴之前，拖动不会滚动内容。";

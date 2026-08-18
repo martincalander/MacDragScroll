@@ -19,6 +19,7 @@
 "acceleration" = "Accélération";
 "dead_zone" = "Zone morte";
 "reverse_direction" = "Inverser la direction";
+"vertical_scrolling" = "Défilement vertical";
 "horizontal_scrolling" = "Défilement horizontal";
 "invert_horizontal" = "Inverser horizontalement";
 "keep_cursor_in_place" = "Maintenir le pointeur en place";
@@ -182,6 +183,7 @@
 "tooltip_acceleration" = "Contrôle la rapidité avec laquelle le défilement s'accélère.";
 "tooltip_dead_zone" = "Mouvement de la souris avant le début du défilement.";
 "tooltip_reverse_direction" = "Inversez le défilement par glisser-déposer si la direction semble être inversée.";
+"tooltip_vertical_scrolling" = "Autorisez le mouvement de glissement vers le haut et vers le bas pour envoyer des événements de défilement vertical.";
 "tooltip_horizontal_scrolling" = "Autorisez le mouvement de glissement latéral pour envoyer des événements de défilement horizontal.";
 "tooltip_invert_horizontal" = "Inversez uniquement la direction de défilement horizontal.";
 "tooltip_keep_cursor_in_place" = "Maintient le pointeur au point d’origine du glissement lors d’un clic central. Relâcher le bouton ou toute interruption rétablit immédiatement son mouvement normal.";
@@ -236,3 +238,4 @@
 "tooltip_precision_modifier" = "Maintenez cette touche supplémentaire après le début du défilement pour réduire temporairement sa vitesse.";
 "tooltip_precision_speed" = "Contrôle la vitesse lorsque la touche de précision est maintenue.";
 "precision_modifier_conflict" = "Choisissez une touche qui ne fait pas déjà partie du déclencheur. Le mode précision reste inactif en cas de conflit.";
+"both_axes_disabled" = "Les deux axes de défilement sont désactivés. Le glissement ne fera défiler aucun contenu tant que vous n'activez pas au moins un axe.";

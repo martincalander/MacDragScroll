@@ -110,6 +110,7 @@ Open Settings from the menu bar icon.
 | --- | --- |
 | Speed and acceleration | Base scroll rate and how quickly it increases with drag distance. |
 | Dead zone | The neutral area around the gesture origin. |
+| Scroll axes | Enable or disable the vertical and horizontal axes independently to constrain a drag to one direction. |
 | Precision mode | Hold an additional configurable modifier during a drag for temporarily slower, finer scrolling. |
 | Cursor hold | Optionally keep the pointer at the middle-click origin so pointer-sensitive content continues scrolling. |
 | Trigger | Middle click by default, with guarded alternatives for primary and secondary buttons. |

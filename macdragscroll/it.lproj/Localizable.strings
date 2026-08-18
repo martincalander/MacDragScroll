@@ -19,6 +19,7 @@
 "acceleration" = "Accelerazione";
 "dead_zone" = "Zona morta";
 "reverse_direction" = "Direzione inversa";
+"vertical_scrolling" = "Scorrimento verticale";
 "horizontal_scrolling" = "Scorrimento orizzontale";
 "invert_horizontal" = "Inverti orizzontale";
 "keep_cursor_in_place" = "Mantieni il cursore in posizione";
@@ -182,6 +183,7 @@
 "tooltip_acceleration" = "Controlla la velocità con cui aumenta lo scorrimento.";
 "tooltip_dead_zone" = "Movimento del mouse prima dell'inizio dello scorrimento.";
 "tooltip_reverse_direction" = "Inverti lo scorrimento tramite trascinamento se la direzione sembra al contrario.";
+"tooltip_vertical_scrolling" = "Consenti il movimento di trascinamento verso l'alto e verso il basso per inviare eventi di scorrimento verticale.";
 "tooltip_horizontal_scrolling" = "Consenti il ​​movimento di trascinamento laterale per inviare eventi di scorrimento orizzontale.";
 "tooltip_invert_horizontal" = "Inverte solo la direzione di scorrimento orizzontale.";
 "tooltip_keep_cursor_in_place" = "Mantiene il puntatore nel punto di origine del trascinamento usando il clic centrale. Rilasciando il pulsante o in caso di interruzione, il movimento normale viene ripristinato subito.";
@@ -236,3 +238,4 @@
 "tooltip_precision_modifier" = "Tieni premuto questo modificatore dopo l'inizio dello scorrimento per ridurne temporaneamente la velocità.";
 "tooltip_precision_speed" = "Controlla la velocità mentre il modificatore di precisione è premuto.";
 "precision_modifier_conflict" = "Scegli un modificatore che non faccia già parte dell'attivazione. La modalità precisione resta inattiva in caso di conflitto.";
+"both_axes_disabled" = "Entrambi gli assi di scorrimento sono disattivati. Il trascinamento non scorrerà i contenuti finché non attivi almeno un asse.";

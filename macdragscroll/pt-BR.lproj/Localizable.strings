@@ -19,6 +19,7 @@
 "acceleration" = "Aceleração";
 "dead_zone" = "Zona Morta";
 "reverse_direction" = "Direção reversa";
+"vertical_scrolling" = "Rolagem vertical";
 "horizontal_scrolling" = "Rolagem horizontal";
 "invert_horizontal" = "Inverter horizontalmente";
 "keep_cursor_in_place" = "Manter o cursor no lugar";
@@ -182,6 +183,7 @@
 "tooltip_acceleration" = "Controla a rapidez com que a rolagem aumenta.";
 "tooltip_dead_zone" = "Movimento do mouse antes do início da rolagem.";
 "tooltip_reverse_direction" = "Inverta a rolagem por arrasto se a direção parecer ao contrário.";
+"tooltip_vertical_scrolling" = "Permita o movimento de arrastar para cima e para baixo para enviar eventos de rolagem vertical.";
 "tooltip_horizontal_scrolling" = "Permita o movimento de arrastar lateralmente para enviar eventos de rolagem horizontal.";
 "tooltip_invert_horizontal" = "Inverta apenas a direção de rolagem horizontal.";
 "tooltip_keep_cursor_in_place" = "Mantém o ponteiro na origem do arrasto ao usar o clique do meio. Ao soltar o botão ou em qualquer interrupção, o movimento normal do ponteiro é restaurado imediatamente.";
@@ -236,3 +238,4 @@
 "tooltip_precision_modifier" = "Mantenha este modificador pressionado após iniciar a rolagem para reduzir temporariamente a velocidade.";
 "tooltip_precision_speed" = "Controla a velocidade enquanto o modificador de precisão está pressionado.";
 "precision_modifier_conflict" = "Escolha um modificador que ainda não faça parte do acionador. O modo de precisão permanece inativo enquanto houver conflito.";
+"both_axes_disabled" = "Ambos os eixos de rolagem estão desativados. Arrastar não rolará o conteúdo até você ativar pelo menos um eixo.";

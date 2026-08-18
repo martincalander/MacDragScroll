@@ -374,6 +374,7 @@ class SettingsManager: ObservableObject {
         "visualizerTintStyle",
         "liquidGlassIntensity",
         "reverseScrollDirection",
+        "verticalScrollingEnabled",
         "horizontalScrollingEnabled",
         "invertHorizontalScroll",
         "keepCursorInPlace",
@@ -413,6 +414,7 @@ class SettingsManager: ObservableObject {
     private let visualizerTintStyleKey = "visualizerTintStyle"
     private let liquidGlassIntensityKey = "liquidGlassIntensity"
     private let reverseScrollDirectionKey = "reverseScrollDirection"
+    private let verticalScrollingEnabledKey = "verticalScrollingEnabled"
     private let horizontalScrollingEnabledKey = "horizontalScrollingEnabled"
     private let invertHorizontalScrollKey = "invertHorizontalScroll"
     private let keepCursorInPlaceKey = "keepCursorInPlace"
@@ -455,6 +457,10 @@ class SettingsManager: ObservableObject {
 
     @Published var reverseScrollDirection: Bool {
         didSet { persist(reverseScrollDirection, forKey: reverseScrollDirectionKey) }
+    }
+
+    @Published var verticalScrollingEnabled: Bool {
+        didSet { persist(verticalScrollingEnabled, forKey: verticalScrollingEnabledKey) }
     }
 
     @Published var horizontalScrollingEnabled: Bool {
@@ -594,6 +600,7 @@ class SettingsManager: ObservableObject {
             visualizerTintStyleKey: VisualizerTintStyle.clear.rawValue,
             liquidGlassIntensityKey: 1.35,
             reverseScrollDirectionKey: false,
+            verticalScrollingEnabledKey: true,
             horizontalScrollingEnabledKey: true,
             invertHorizontalScrollKey: false,
             keepCursorInPlaceKey: false,
@@ -616,6 +623,7 @@ class SettingsManager: ObservableObject {
         )
         self.appListMode = Self.resolvedAppListMode(from: appListModeRawValue)
         self.reverseScrollDirection = Self.boolValue(from: defaults, forKey: reverseScrollDirectionKey, defaultValue: false)
+        self.verticalScrollingEnabled = Self.boolValue(from: defaults, forKey: verticalScrollingEnabledKey, defaultValue: true)
         self.horizontalScrollingEnabled = Self.boolValue(from: defaults, forKey: horizontalScrollingEnabledKey, defaultValue: true)
         self.invertHorizontalScroll = Self.boolValue(from: defaults, forKey: invertHorizontalScrollKey, defaultValue: false)
         self.keepCursorInPlace = Self.boolValue(from: defaults, forKey: keepCursorInPlaceKey, defaultValue: false)
@@ -851,6 +859,7 @@ class SettingsManager: ObservableObject {
         showIndicator = true
         visualizerAnimationsEnabled = true
         reverseScrollDirection = false
+        verticalScrollingEnabled = true
         horizontalScrollingEnabled = true
         invertHorizontalScroll = false
         keepCursorInPlace = false

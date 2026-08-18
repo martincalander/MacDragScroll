@@ -19,6 +19,7 @@
 "acceleration" = "aceleración";
 "dead_zone" = "Zona muerta";
 "reverse_direction" = "Dirección inversa";
+"vertical_scrolling" = "Desplazamiento vertical";
 "horizontal_scrolling" = "Desplazamiento horizontal";
 "invert_horizontal" = "Invertir horizontalmente";
 "keep_cursor_in_place" = "Mantener el cursor en su sitio";
@@ -182,6 +183,7 @@
 "tooltip_acceleration" = "Controla la rapidez con la que aumenta el desplazamiento.";
 "tooltip_dead_zone" = "Movimiento del mouse antes de que comience el desplazamiento.";
 "tooltip_reverse_direction" = "Invierte el desplazamiento por arrastre si la dirección se siente al revés.";
+"tooltip_vertical_scrolling" = "Permita el movimiento de arrastre hacia arriba y hacia abajo para enviar eventos de desplazamiento vertical.";
 "tooltip_horizontal_scrolling" = "Permita el movimiento de arrastre lateral para enviar eventos de desplazamiento horizontal.";
 "tooltip_invert_horizontal" = "Voltee solo la dirección de desplazamiento horizontal.";
 "tooltip_keep_cursor_in_place" = "Mantén el puntero en el origen del arrastre al usar el clic central. Al soltar el botón o ante cualquier interrupción, el movimiento normal se restablece de inmediato.";
@@ -236,3 +238,4 @@
 "tooltip_precision_modifier" = "Mantén este modificador después de iniciar el desplazamiento para reducir temporalmente la velocidad.";
 "tooltip_precision_speed" = "Controla la velocidad mientras se mantiene el modificador de precisión.";
 "precision_modifier_conflict" = "Elige un modificador que no forme parte del activador. El modo de precisión permanece inactivo mientras coincidan.";
+"both_axes_disabled" = "Ambos ejes de desplazamiento están desactivados. El arrastre no desplazará el contenido hasta que actives al menos un eje.";

@@ -241,6 +241,7 @@ enum ScrollPhysics {
         deadZoneRadius: Double,
         acceleration: Double,
         reversesDirection: Bool,
+        allowsVertical: Bool = true,
         allowsHorizontal: Bool = true,
         invertsHorizontal: Bool = false
     ) -> ScrollDeltas {
@@ -261,7 +262,9 @@ enum ScrollPhysics {
         let horizontal = allowsHorizontal
             ? wheelDelta(directionComponent: direction.x, intensity: intensity, reversesDirection: horizontalReverses)
             : 0
-        let vertical = wheelDelta(directionComponent: direction.y, intensity: intensity, reversesDirection: reversesDirection)
+        let vertical = allowsVertical
+            ? wheelDelta(directionComponent: direction.y, intensity: intensity, reversesDirection: reversesDirection)
+            : 0
 
         return ScrollDeltas(horizontal: horizontal, vertical: vertical)
     }
@@ -376,6 +379,7 @@ final class MouseMonitor {
     private var deadZoneRadius: Double { SettingsManager.shared.deadZoneRadius }
     private var acceleration: Double { SettingsManager.shared.acceleration }
     private var reverseScrollDirection: Bool { SettingsManager.shared.reverseScrollDirection }
+    private var verticalScrollingEnabled: Bool { SettingsManager.shared.verticalScrollingEnabled }
     private var horizontalScrollingEnabled: Bool { SettingsManager.shared.horizontalScrollingEnabled }
     private var invertHorizontalScroll: Bool { SettingsManager.shared.invertHorizontalScroll }
     private var triggerConfig: TriggerConfig { SettingsManager.shared.triggerConfig }
@@ -1026,6 +1030,7 @@ final class MouseMonitor {
             deadZoneRadius: deadZoneRadius,
             acceleration: acceleration,
             reversesDirection: reverseScrollDirection,
+            allowsVertical: verticalScrollingEnabled,
             allowsHorizontal: horizontalScrollingEnabled,
             invertsHorizontal: invertHorizontalScroll
         )

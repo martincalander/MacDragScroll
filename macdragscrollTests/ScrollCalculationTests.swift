@@ -14,6 +14,7 @@ struct ScrollCalculator {
     let deadZoneRadius: Double
     let acceleration: Double
     var reversesDirection = false
+    var allowsVertical = true
     var allowsHorizontal = true
     var invertsHorizontal = false
     
@@ -51,6 +52,7 @@ struct ScrollCalculator {
             deadZoneRadius: deadZoneRadius,
             acceleration: acceleration,
             reversesDirection: reversesDirection,
+            allowsVertical: allowsVertical,
             allowsHorizontal: allowsHorizontal,
             invertsHorizontal: invertsHorizontal
         )
@@ -354,6 +356,41 @@ final class ScrollDeltaTests: XCTestCase {
         XCTAssertNotEqual(deltas.deltaY, 0)
     }
 
+    func testVerticalScrollingCanBeDisabled() {
+        let calculator = ScrollCalculator(
+            scrollSpeed: 2.0,
+            deadZoneRadius: 20.0,
+            acceleration: 1.8,
+            allowsVertical: false
+        )
+
+        let deltas = calculator.calculateScrollDeltas(
+            from: CGPoint(x: 100, y: 100),
+            to: CGPoint(x: 220, y: 140)
+        )
+
+        XCTAssertEqual(deltas.deltaY, 0)
+        XCTAssertNotEqual(deltas.deltaX, 0)
+    }
+
+    func testDisablingBothAxesProducesNoScrolling() {
+        let calculator = ScrollCalculator(
+            scrollSpeed: 2.0,
+            deadZoneRadius: 20.0,
+            acceleration: 1.8,
+            allowsVertical: false,
+            allowsHorizontal: false
+        )
+
+        let deltas = calculator.calculateScrollDeltas(
+            from: CGPoint(x: 100, y: 100),
+            to: CGPoint(x: 220, y: 140)
+        )
+
+        XCTAssertEqual(deltas.deltaX, 0)
+        XCTAssertEqual(deltas.deltaY, 0)
+    }
+
     func testHorizontalScrollingCanBeInvertedIndependently() {
         let normal = ScrollCalculator(scrollSpeed: 2.0, deadZoneRadius: 20.0, acceleration: 1.8)
         let inverted = ScrollCalculator(
@@ -540,6 +577,37 @@ final class ProductionScrollPhysicsTests: XCTestCase {
 
         XCTAssertEqual(diagonal.horizontal, 0)
         XCTAssertGreaterThan(diagonal.vertical, 0)
+    }
+
+    func testProductionPhysicsCanDisableVerticalAxis() {
+        let diagonal = ScrollPhysics.deltas(
+            from: CGPoint(x: 100, y: 100),
+            to: CGPoint(x: 220, y: 160),
+            scrollSpeed: 2.0,
+            deadZoneRadius: 20.0,
+            acceleration: 1.8,
+            reversesDirection: false,
+            allowsVertical: false
+        )
+
+        XCTAssertEqual(diagonal.vertical, 0)
+        XCTAssertGreaterThan(diagonal.horizontal, 0)
+    }
+
+    func testProductionPhysicsCanDisableBothAxes() {
+        let diagonal = ScrollPhysics.deltas(
+            from: CGPoint(x: 100, y: 100),
+            to: CGPoint(x: 220, y: 160),
+            scrollSpeed: 2.0,
+            deadZoneRadius: 20.0,
+            acceleration: 1.8,
+            reversesDirection: false,
+            allowsVertical: false,
+            allowsHorizontal: false
+        )
+
+        XCTAssertEqual(diagonal.vertical, 0)
+        XCTAssertEqual(diagonal.horizontal, 0)
     }
 
     func testProductionPhysicsCanInvertHorizontalAxisOnly() {

@@ -76,7 +76,7 @@ Before opening a pull request:
 - Add or update tests when changing scroll math, settings persistence, permissions, or update behavior.
 - Update `README.md`, localized READMEs, `SUPPORT.md`, or `PRIVACY.md` when behavior changes what users need to know.
 
-Changes to `main` require two approvals, including code-owner review. New pushes dismiss stale reviews, the latest push needs independent approval, and all review conversations must be resolved before merge.
+Changes to `main` require a pull request and passing required checks. Maintainer and code-owner reviews may be requested and are welcome, but human approval and resolution of review conversations are optional rather than merge requirements.
 
 Maintainer responsibilities and the decision process are documented in [Governance](GOVERNANCE.md).
 

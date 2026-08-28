@@ -12,7 +12,7 @@ Current state:
 - The project earned the Passing badge on July 9, 2026, which Scorecard awards 5/10.
 - The README badge points to `https://www.bestpractices.dev/projects/13546`.
 - The repository includes `.bestpractices.json` so BadgeApp can prefill evidence-backed proposed answers.
-- Strict warnings, Guard Malloc fuzz execution, dependency review, governance, and two-person review now have repository evidence for the maintainer to assess in the Silver/Gold forms.
+- Strict warnings, Guard Malloc fuzz execution, dependency review, and governance have repository evidence for the maintainer to assess in the Silver/Gold forms.
 
 To improve the check:
 
@@ -67,9 +67,9 @@ This check is independent of Apple Developer ID signing and notarization. It doe
 
 ## Code Review
 
-Changes to `main` require a pull request, two approvals, code-owner review, approval after the latest push, resolved review conversations, and strict build/test and secret-scan checks. Stale approvals are dismissed and no bypass actors are configured.
+Changes to `main` require a pull request and strict build/test and secret-scan checks. The ruleset does not require approvals, code-owner review, approval after the latest push, or resolved review conversations. `CODEOWNERS` remains configured so maintainers can still be requested and review voluntarily.
 
-Scorecard evaluates a rolling history of recent changes, so the Code-Review score will rise as genuinely reviewed pull requests replace older direct commits. Historical changes are not rewritten or backfilled merely to improve the score.
+Scorecard evaluates a rolling history of recent changes. Making human review optional may reduce the Code-Review score; the project intentionally prioritizes fast maintainer merges over that score. Historical changes are not rewritten or backfilled merely to improve it.
 
 ## Quality And Compatibility
 

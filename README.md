@@ -92,7 +92,7 @@ curl -fsSL https://github.com/martincalander/MacDragScroll/raw/main/install.sh |
 
 ## Grant Permissions
 
-Mac Drag Scroll needs **Accessibility** permission to detect the configured mouse button globally and send scroll events to the target window. It does not use this permission to record typing or inspect content. Input Monitoring is not required.
+Mac Drag Scroll needs **Accessibility** permission to detect the configured mouse button globally and send scroll events to the target window. It does not record typing or inspect page content. When website rules are used, it reads the current Safari or Google Chrome page address locally and compares only its hostname; full page addresses are not stored. Input Monitoring is not required.
 
 <p align="center">
   <img src="docs/assets/mac-drag-scroll-permission-demo.gif" width="800" alt="Enable Accessibility for Mac Drag Scroll">
@@ -115,7 +115,7 @@ Open Settings from the menu bar icon.
 | Cursor hold | Optionally keep the pointer at the middle-click origin so pointer-sensitive content continues scrolling. |
 | Trigger | Middle click by default, with guarded alternatives for primary and secondary buttons. |
 | Visualizer | Size, opacity, tint, glass intensity, and motion effects. |
-| App rules | Use an Ignore list to disable selected apps, or an Allow list to enable only selected apps. |
+| App rules | Use an Ignore list to disable selected apps, an Allow list to enable only selected apps, and website rules to disable matching Safari or Google Chrome tabs and windows without disabling the whole browser. |
 | Launch behavior | Login startup and whether the helper remains in the menu bar. |
 | Updates | Automatic checks, release history, and manual update controls. |
 

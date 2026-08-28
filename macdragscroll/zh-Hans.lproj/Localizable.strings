@@ -55,6 +55,14 @@
 "show_picker" = "显示选择器";
 "no_excluded_apps" = "还没有被忽略的应用程序。";
 "no_allowed_apps" = "还没有允许的应用程序。拖动滚动已在所有应用程序中禁用。";
+"ignored_websites_list" = "已忽略的网站";
+"ignored_websites_detail" = "在与这些网站匹配的 Safari 和 Google Chrome 标签页中，拖动滚动会保持关闭。其他网站仍可正常使用。";
+"no_ignored_websites" = "尚无已忽略的网站。";
+"add_ignored_website" = "添加要忽略的网站";
+"website_domain_or_url" = "域名或 URL";
+"invalid_website" = "请输入有效的域名或 HTTP(S) 网址。";
+"website_already_ignored" = "该网站已被忽略。";
+"tooltip_website_domain_or_url" = "请输入域名或网址，例如 notion.so 或 https://www.notion.so。";
 "search" = "搜索";
 "no_apps_found" = "没有找到应用程序";
 "custom_bundle_id" = "自定义捆绑包 ID";
@@ -157,6 +165,12 @@
 "menu_ignored_app" = "忽略 %@";
 "menu_enable_in_app" = "在 %@ 中启用";
 "menu_disable_in_app" = "在 %@ 中禁用";
+"menu_ignore_current_website" = "忽略当前网站";
+"menu_website_rule_tooltip" = "网站规则仅适用于显示该主机名的 Safari 或 Google Chrome 标签页和窗口。";
+"menu_enable_on_website" = "在 %@ 上启用";
+"menu_ignore_website" = "忽略 %@";
+"menu_current_tab_not_website" = "当前标签页不是网站";
+"menu_current_website_unavailable" = "当前网站不可用";
 "current_app" = "当前应用程序";
 "quit" = "辞职";
 "trigger_middle_click" = "中键单击";

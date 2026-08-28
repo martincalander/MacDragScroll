@@ -55,6 +55,14 @@
 "show_picker" = "Выбор шоу";
 "no_excluded_apps" = "Игнорируемых приложений пока нет.";
 "no_allowed_apps" = "Разрешенных приложений пока нет. Прокрутка перетаскиванием отключена везде.";
+"ignored_websites_list" = "Игнорируемые сайты";
+"ignored_websites_detail" = "Прокрутка перетаскиванием отключена во вкладках Safari и Google Chrome, соответствующих этим сайтам. На других сайтах она продолжает работать.";
+"no_ignored_websites" = "Игнорируемых сайтов пока нет.";
+"add_ignored_website" = "Добавить игнорируемый сайт";
+"website_domain_or_url" = "Домен или URL";
+"invalid_website" = "Введите допустимый домен или веб-адрес HTTP(S).";
+"website_already_ignored" = "Этот сайт уже игнорируется.";
+"tooltip_website_domain_or_url" = "Введите домен или веб-адрес, например notion.so или https://www.notion.so.";
 "search" = "Поиск";
 "no_apps_found" = "Приложения не найдены";
 "custom_bundle_id" = "Пользовательский идентификатор пакета";
@@ -157,6 +165,12 @@
 "menu_ignored_app" = "%@ игнорируется";
 "menu_enable_in_app" = "Включить в %@";
 "menu_disable_in_app" = "Отключить в %@";
+"menu_ignore_current_website" = "Игнорировать текущий сайт";
+"menu_website_rule_tooltip" = "Правила для сайтов применяются только к вкладкам и окнам Safari или Google Chrome, в которых отображается это имя хоста.";
+"menu_enable_on_website" = "Включить на %@";
+"menu_ignore_website" = "Игнорировать %@";
+"menu_current_tab_not_website" = "Текущая вкладка не является сайтом";
+"menu_current_website_unavailable" = "Текущий сайт недоступен";
 "current_app" = "Текущее приложение";
 "quit" = "Выйти";
 "trigger_middle_click" = "Средний щелчок";

@@ -94,7 +94,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     private weak var activeMenuItem: NSMenuItem?
     private weak var updateMenuItem: NSMenuItem?
     private weak var currentAppRuleMenuItem: NSMenuItem?
+    private weak var currentWebsiteRuleMenuItem: NSMenuItem?
     private var currentMenuTargetBundleIdentifier: String?
+    private var currentMenuTargetWebsiteHost: String?
+    private let browserPageContextResolver = AccessibilityBrowserPageContextResolver()
     private var permissionMenuItem: NSMenuItem?
     private var duplicateInstanceMenuItem: NSMenuItem?
     private var permissionCheckTimer: Timer?
@@ -409,6 +412,21 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         menu.addItem(appRuleItem)
         currentAppRuleMenuItem = appRuleItem
 
+        let websiteRuleItem = NSMenuItem(
+            title: localized("menu_ignore_current_website", value: "Ignore Current Website", comment: "Ignore current website menu item"),
+            action: #selector(toggleCurrentWebsiteIgnoredState(_:)),
+            keyEquivalent: ""
+        )
+        websiteRuleItem.target = self
+        websiteRuleItem.isHidden = true
+        websiteRuleItem.toolTip = localized(
+            "menu_website_rule_tooltip",
+            value: "Website rules apply only to Safari or Google Chrome tabs and windows showing that hostname.",
+            comment: "Website rule menu tooltip"
+        )
+        menu.addItem(websiteRuleItem)
+        currentWebsiteRuleMenuItem = websiteRuleItem
+
         menu.addItem(NSMenuItem.separator())
 
         let quitItem = NSMenuItem(
@@ -500,6 +518,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         refreshDuplicateInstanceMenuItem()
         refreshUpdateMenuItem()
         refreshCurrentAppRuleMenuItem()
+        refreshCurrentWebsiteRuleMenuItem()
     }
 
     @objc private func primaryInstanceActivationRequested(_ notification: Notification) {
@@ -528,6 +547,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
 
         SettingsManager.shared.toggleListedApp(bundleId)
         refreshCurrentAppRuleMenuItem()
+    }
+
+    @objc private func toggleCurrentWebsiteIgnoredState(_ sender: Any?) {
+        guard let host = currentMenuTargetWebsiteHost else { return }
+
+        SettingsManager.shared.toggleIgnoredWebsite(host)
     }
 
     @objc private func quit(_ sender: Any?) {
@@ -912,6 +937,69 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         item.isEnabled = true
     }
 
+    private func refreshCurrentWebsiteRuleMenuItem() {
+        guard let item = currentWebsiteRuleMenuItem else { return }
+        let settings = SettingsManager.shared
+        item.toolTip = localized(
+            "menu_website_rule_tooltip",
+            value: "Website rules apply only to Safari or Google Chrome tabs and windows showing that hostname.",
+            comment: "Website rule menu tooltip"
+        )
+
+        guard let appIdentity = settings.getFrontmostAppIdentity(),
+              BrowserApplication.classify(bundleIdentifier: appIdentity.bundleIdentifier) != nil else {
+            currentMenuTargetWebsiteHost = nil
+            item.isHidden = true
+            item.isEnabled = false
+            return
+        }
+
+        item.isHidden = false
+
+        switch browserPageContextResolver.resolveFocusedPage(
+            processIdentifier: appIdentity.processIdentifier,
+            bundleIdentifier: appIdentity.bundleIdentifier
+        ) {
+        case .page(let context):
+            currentMenuTargetWebsiteHost = context.host
+            let matchingRule = settings.matchingIgnoredWebsiteRule(for: context.host)
+            item.title = matchingRule != nil
+                ? String(
+                    format: localized(
+                        "menu_enable_on_website",
+                        value: "Enable on %@",
+                        comment: "Enable drag scrolling on website menu item"
+                    ),
+                    matchingRule ?? context.host
+                )
+                : String(
+                    format: localized(
+                        "menu_ignore_website",
+                        value: "Ignore %@",
+                        comment: "Ignore website menu item"
+                    ),
+                    context.host
+                )
+            item.isEnabled = true
+        case .nonHTTPContent:
+            currentMenuTargetWebsiteHost = nil
+            item.title = localized(
+                "menu_current_tab_not_website",
+                value: "Current Tab Is Not a Website",
+                comment: "Current browser tab is not an HTTP website menu item"
+            )
+            item.isEnabled = false
+        case .unavailable:
+            currentMenuTargetWebsiteHost = nil
+            item.title = localized(
+                "menu_current_website_unavailable",
+                value: "Current Website Unavailable",
+                comment: "Current website cannot be resolved menu item"
+            )
+            item.isEnabled = false
+        }
+    }
+
     private func displayName(forBundleIdentifier bundleId: String) -> String? {
         guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleId) else {
             return nil
@@ -933,6 +1021,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         refreshDuplicateInstanceMenuItem()
         refreshUpdateMenuItem()
         refreshCurrentAppRuleMenuItem()
+        currentWebsiteRuleMenuItem?.toolTip = localized(
+            "menu_website_rule_tooltip",
+            value: "Website rules apply only to Safari or Google Chrome tabs and windows showing that hostname.",
+            comment: "Website rule menu tooltip"
+        )
     }
 
     private func statusBarImage(isEnabled: Bool, needsPermission: Bool) -> NSImage {

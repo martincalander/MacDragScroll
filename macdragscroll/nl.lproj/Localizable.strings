@@ -55,6 +55,14 @@
 "show_picker" = "Toon kiezer";
 "no_excluded_apps" = "Nog geen genegeerde apps.";
 "no_allowed_apps" = "Nog geen toegestane apps. Sleep-scrollen is overal uitgeschakeld.";
+"ignored_websites_list" = "Genegeerde websites";
+"ignored_websites_detail" = "Sleep-scrollen blijft uitgeschakeld in tabbladen van Safari en Google Chrome die met deze websites overeenkomen. Andere websites blijven werken.";
+"no_ignored_websites" = "Nog geen genegeerde websites.";
+"add_ignored_website" = "Genegeerde website toevoegen";
+"website_domain_or_url" = "Domein of URL";
+"invalid_website" = "Voer een geldig domein of HTTP(S)-webadres in.";
+"website_already_ignored" = "Die website wordt al genegeerd.";
+"tooltip_website_domain_or_url" = "Voer een domein of webadres in, bijvoorbeeld notion.so of https://www.notion.so.";
 "search" = "Zoeken";
 "no_apps_found" = "Geen apps gevonden";
 "custom_bundle_id" = "Aangepaste bundel-ID";
@@ -157,6 +165,12 @@
 "menu_ignored_app" = "%@ Genegeerd";
 "menu_enable_in_app" = "Inschakelen in %@";
 "menu_disable_in_app" = "Uitschakelen in %@";
+"menu_ignore_current_website" = "Huidige website negeren";
+"menu_website_rule_tooltip" = "Websiteregels gelden alleen voor tabbladen en vensters in Safari of Google Chrome die deze hostnaam weergeven.";
+"menu_enable_on_website" = "Inschakelen op %@";
+"menu_ignore_website" = "%@ negeren";
+"menu_current_tab_not_website" = "Huidig tabblad is geen website";
+"menu_current_website_unavailable" = "Huidige website niet beschikbaar";
 "current_app" = "Huidige app";
 "quit" = "Stoppen";
 "trigger_middle_click" = "Middelste klik";

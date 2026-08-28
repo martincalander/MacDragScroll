@@ -55,6 +55,14 @@
 "show_picker" = "Auswahl anzeigen";
 "no_excluded_apps" = "Noch keine ignorierten Apps.";
 "no_allowed_apps" = "Noch keine zugelassenen Apps. Drag-Scrolling ist überall deaktiviert.";
+"ignored_websites_list" = "Ignorierte Websites";
+"ignored_websites_detail" = "Drag-Scrolling bleibt in Tabs von Safari und Google Chrome deaktiviert, die diesen Websites entsprechen. Andere Websites funktionieren weiterhin.";
+"no_ignored_websites" = "Noch keine ignorierten Websites.";
+"add_ignored_website" = "Ignorierte Website hinzufügen";
+"website_domain_or_url" = "Domain oder URL";
+"invalid_website" = "Geben Sie eine gültige Domain oder eine HTTP(S)-Webadresse ein.";
+"website_already_ignored" = "Diese Website wird bereits ignoriert.";
+"tooltip_website_domain_or_url" = "Geben Sie eine Domain oder Webadresse ein, z. B. notion.so oder https://www.notion.so.";
 "search" = "Suchen";
 "no_apps_found" = "Keine Apps gefunden";
 "custom_bundle_id" = "Benutzerdefinierte Bundle-ID";
@@ -157,6 +165,12 @@
 "menu_ignored_app" = "%@ wird ignoriert";
 "menu_enable_in_app" = "In %@ aktivieren";
 "menu_disable_in_app" = "In %@ deaktivieren";
+"menu_ignore_current_website" = "Aktuelle Website ignorieren";
+"menu_website_rule_tooltip" = "Website-Regeln gelten nur für Tabs und Fenster in Safari oder Google Chrome, die diesen Hostnamen anzeigen.";
+"menu_enable_on_website" = "Auf %@ aktivieren";
+"menu_ignore_website" = "%@ ignorieren";
+"menu_current_tab_not_website" = "Aktueller Tab zeigt keine Website";
+"menu_current_website_unavailable" = "Aktuelle Website nicht verfügbar";
 "current_app" = "Aktuelle App";
 "quit" = "Hör auf";
 "trigger_middle_click" = "Mittlerer Klick";

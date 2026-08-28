@@ -7,6 +7,7 @@ If Mac Drag Scroll is not working as expected, check these first:
 3. Open **System Settings -> Privacy & Security -> Accessibility** and make sure **Mac Drag Scroll** is enabled.
 4. Open Mac Drag Scroll Settings and confirm the app is enabled.
 5. Check whether the current app matches the active rule under **App Rules**.
+6. In Safari or Google Chrome, check whether the current hostname is listed under **Ignored Websites**.
 
 ## Common Fixes
 
@@ -14,6 +15,7 @@ If Mac Drag Scroll is not working as expected, check these first:
 - Remove and re-add Mac Drag Scroll in Accessibility if macOS shows stale permission state.
 - Try a lower speed or larger dead zone if scrolling starts too aggressively.
 - Disable the visualizer if a specific full-screen app does not like overlays.
+- If the menu says the current website is unavailable, make sure a normal HTTP(S) page is selected and Accessibility access is still enabled. Browser-internal pages are not website-rule targets.
 
 The first update from `1.1.0` or earlier to `1.2.0` requires one final Accessibility grant. Normal updates after that retain the same macOS code identity and should not reset it. Input Monitoring is not required.
 

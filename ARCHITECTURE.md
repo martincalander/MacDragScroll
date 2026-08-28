@@ -6,6 +6,7 @@ Mac Drag Scroll is a native macOS menu bar utility. It converts a configured ext
 
 - `AppDelegate` owns application lifecycle, permissions, menu bar state, the settings and welcome windows, and the single-instance guard.
 - `MouseMonitor` owns the global event tap. It validates the trigger, input source, active application, target window, and permission state before starting a drag session.
+- `BrowserWebsiteRules` normalizes local hostname rules and resolves the selected page in an exact Safari or Google Chrome window through bounded Accessibility queries. It returns only a hostname; full page addresses are not retained.
 - `ScrollPhysics` converts cursor displacement from the drag origin into bounded horizontal and vertical scroll deltas.
 - `ScrollOverlayWindow` renders the optional visualizer without accepting input or becoming the active app. macOS 26 uses native Liquid Glass; macOS 14 and 15 use a native vibrancy fallback behind the same custom reflections and motion.
 - `SettingsWindow` owns the settings shell and tab navigation. Reusable rows, per-app rule picking, and the visualizer preview live in focused companion files.
@@ -16,7 +17,7 @@ Mac Drag Scroll is a native macOS menu bar utility. It converts a configured ext
 ## Input Flow
 
 1. The event tap receives a mouse event.
-2. `MouseMonitor` rejects trackpad/tablet input, unsafe primary-button triggers, apps disabled by the active Ignore or Allow rule, missing permissions, and events marked as synthetic by Mac Drag Scroll.
+2. `MouseMonitor` rejects trackpad/tablet input, unsafe primary-button triggers, apps disabled by the active Ignore or Allow rule, matching website rules in supported browser windows, missing permissions, and events marked as synthetic by Mac Drag Scroll.
 3. A valid press records the origin, target process, target window, and trigger state.
 4. Mouse movement is converted by `ScrollPhysics`; an optional additional precision modifier scales the active session's speed, and the overlay follows the same session state.
 5. Synthetic scroll events carry a private marker so the event tap cannot consume its own output.
@@ -29,12 +30,15 @@ Mac Drag Scroll is a native macOS menu bar utility. It converts a configured ext
 - Precision mode only accepts a modifier additional to the active trigger chord; overlapping trigger modifiers cannot silently slow every drag.
 - A session remains scoped to the process and window where it began.
 - The active per-app rule is checked before activation and while a session is active; unidentified apps fail closed in Allow mode.
+- Website rules are evaluated against the selected page in the exact Safari or Google Chrome window receiving the gesture. Accessibility window geometry must agree with the hit-tested system window, which prevents browser thumbnails or hidden windows from being mistaken for the target. Navigation or a tab change to an ignored hostname cancels the active session on the next periodic validation; other browser tabs and windows remain enabled.
+- Browser page lookup has a strict cross-process timeout and bounded tree traversal. If an opted-in website rule cannot be checked, the physical mouse event is passed through instead of being consumed for drag scrolling.
+- Full browser addresses remain transient in memory. Only normalized hostnames explicitly chosen by the user are persisted, and matching requires an exact host or a dot-delimited subdomain.
 - Permission loss, event-tap failure, display changes, and duplicate app instances fail closed.
 - Settings and visualizer animation choices affect presentation, not input-source safety.
 
 ## Storage And Distribution
 
-- Preferences: `~/Library/Preferences/com.martincalander.macdragscroll.plist`
+- Preferences, including ignored website hostnames: `~/Library/Preferences/com.martincalander.macdragscroll.plist`
 - Recoverable preference backup: `~/Library/Application Support/Mac Drag Scroll/Preferences.plist`
 - Crash reports: `~/Library/Application Support/Mac Drag Scroll/Crash Reports`
 - Updates: Sparkle verifies the signed ZIP from GitHub Releases. The app bundle uses a pinned project code-signing identity to keep its macOS designated requirement stable, and releases also include checksums and GitHub build provenance.

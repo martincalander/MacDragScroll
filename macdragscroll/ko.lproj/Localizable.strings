@@ -55,6 +55,14 @@
 "show_picker" = "선택도구 표시";
 "no_excluded_apps" = "아직 무시된 앱이 없습니다.";
 "no_allowed_apps" = "아직 허용된 앱이 없습니다. 드래그 스크롤이 모든 앱에서 비활성화되어 있습니다.";
+"ignored_websites_list" = "무시할 웹사이트";
+"ignored_websites_detail" = "이 웹사이트와 일치하는 Safari 및 Google Chrome 탭에서는 드래그 스크롤이 꺼집니다. 다른 웹사이트에서는 계속 작동합니다.";
+"no_ignored_websites" = "아직 무시할 웹사이트가 없습니다.";
+"add_ignored_website" = "무시할 웹사이트 추가";
+"website_domain_or_url" = "도메인 또는 URL";
+"invalid_website" = "올바른 도메인 또는 HTTP(S) 웹 주소를 입력하세요.";
+"website_already_ignored" = "해당 웹사이트는 이미 무시되고 있습니다.";
+"tooltip_website_domain_or_url" = "도메인 또는 웹 주소를 입력하세요. 예: notion.so 또는 https://www.notion.so";
 "search" = "찾다";
 "no_apps_found" = "앱을 찾을 수 없습니다.";
 "custom_bundle_id" = "맞춤 번들 ID";
@@ -157,6 +165,12 @@
 "menu_ignored_app" = "%@이 무시되었습니다.";
 "menu_enable_in_app" = "%@에서 활성화";
 "menu_disable_in_app" = "%@에서 비활성화";
+"menu_ignore_current_website" = "현재 웹사이트 무시";
+"menu_website_rule_tooltip" = "웹사이트 규칙은 해당 호스트 이름을 표시하는 Safari 또는 Google Chrome 탭과 창에만 적용됩니다.";
+"menu_enable_on_website" = "%@에서 활성화";
+"menu_ignore_website" = "%@ 무시";
+"menu_current_tab_not_website" = "현재 탭은 웹사이트가 아닙니다";
+"menu_current_website_unavailable" = "현재 웹사이트를 확인할 수 없습니다";
 "current_app" = "현재 앱";
 "quit" = "그만두다";
 "trigger_middle_click" = "가운데 클릭";

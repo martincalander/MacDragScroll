@@ -6,6 +6,8 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-08-29
+
 ### Added
 
 - Added local hostname rules for Safari and Google Chrome, with a menu-bar toggle for the current website and per-tab/window enforcement that leaves other browser pages enabled.

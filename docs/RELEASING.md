@@ -49,11 +49,11 @@ The app has two version fields:
 
 For `1.0.0`, the build number starts at `100`. The current public release is:
 
-- `1.4.0` -> build `140`
+- `1.5.0` -> build `150`
 
 A practical next sequence is:
 
-- `1.4.1` -> build `141`
+- `1.5.1` -> build `151`
 - `2.0.0` -> build `200`
 
 ## Changelog

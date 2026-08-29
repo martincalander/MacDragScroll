@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "Reproducible tooling for the Mac Drag Scroll README demos.",
   "devDependencies": {
-    "playwright": "1.61.1"
+    "playwright": "1.62.1"
   },
   "engines": {
     "node": ">=20"

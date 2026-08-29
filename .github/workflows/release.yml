@@ -26,8 +26,8 @@ env:
   PROVENANCE_FILE: "MacDragScroll.intoto.jsonl"
   BUNDLE_ID: "com.martincalander.macdragscroll"
   SIGNING_IDENTITY_NAME: "Mac Drag Scroll Release Signing"
-  SPARKLE_VERSION: "2.9.4"
-  SPARKLE_ARCHIVE_SHA256: "ce89daf967db1e1893ed3ebd67575ed82d3902563e3191ca92aaec9164fbdef9"
+  SPARKLE_VERSION: "2.9.6"
+  SPARKLE_ARCHIVE_SHA256: "52bf9e88cdd972fc0c81501377a880e90d47031bd8ca5462488f843e2609e192"
 
 jobs:
   release:
@@ -354,8 +354,8 @@ jobs:
 
       - name: Attest release artifacts
         id: attest_release
-        # actions/attest-build-provenance@v4.1.1
-        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373
+        # actions/attest-build-provenance@v4.2.2
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
         with:
           subject-path: |
             ${{ env.ZIP_PATH }}
@@ -388,8 +388,8 @@ jobs:
           fi
 
       - name: Set up Go for GoReleaser
-        # actions/setup-go@v6.5.0
-        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16
+        # actions/setup-go@v7.0.0
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
         with:
           go-version: "1.25.5"
           cache: false

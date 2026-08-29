@@ -49,7 +49,7 @@
   "repo_track_status": "Met",
   "repo_track_justification": "The project uses git history on GitHub to track changes, authors, and timestamps.",
   "repo_interim_status": "Met",
-  "repo_interim_justification": "Interim development changes are committed to git and reviewed through pull requests before merging to main.",
+  "repo_interim_justification": "Interim development changes are committed to git and submitted through pull requests with required automated checks before merging to main.",
   "repo_distributed_status": "Met",
   "repo_distributed_justification": "The project uses git, a distributed version control system.",
   "version_unique_status": "Met",
@@ -127,10 +127,10 @@
   "roles_responsibilities_status": "Met",
   "roles_responsibilities_justification": "GOVERNANCE.md identifies the project lead, release owner, maintainers, contributors, and the responsibilities of each role.",
   "code_review_standards_status": "Met",
-  "code_review_standards_justification": "CONTRIBUTING.md and GOVERNANCE.md define review criteria. The protected main ruleset enforces code-owner review, latest-push approval, resolved conversations, and required checks.",
-  "two_person_review_status": "Met",
-  "two_person_review_justification": "The protected main ruleset requires two independent approvals for every pull request, including code-owner review, and does not allow bypass actors.",
+  "code_review_standards_justification": "CONTRIBUTING.md and GOVERNANCE.md define review criteria and state that human review is optional; the protected main ruleset continues to enforce required automated checks.",
+  "two_person_review_status": "Unmet",
+  "two_person_review_justification": "Human approvals, including code-owner and latest-push approvals, are optional; the protected main ruleset requires no approving reviews.",
   "installation_common_status": "Met",
   "installation_common_justification": "Users can install through a standard Homebrew cask or a drag-to-Applications DMG, both documented in README.md.",
-  "general_comments": "These are evidence-backed proposals for maintainer review in BadgeApp. Access continuity and bus-factor criteria remain intentionally unclaimed while release signing and private security response still depend on the project lead."
+  "general_comments": "These are evidence-backed proposals for maintainer review in BadgeApp. Two-person review, access continuity, and bus-factor criteria remain intentionally unclaimed while human review is optional and release signing and private security response still depend on the project lead."
 }

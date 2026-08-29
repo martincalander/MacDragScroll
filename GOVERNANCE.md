@@ -10,7 +10,7 @@ Mac Drag Scroll is maintained in public through GitHub issues and pull requests.
 
 ## Changes
 
-All changes to `main` go through a pull request. Merging requires two approvals, code-owner review, approval of the latest push, passing required checks, and resolved review conversations. The pull request author cannot approve their own work.
+All changes to `main` go through a pull request and must pass the required build, test, and secret-scan checks. Maintainer and code-owner reviews are welcome and may be requested automatically, but human approval, approval of the latest push, and resolution of review conversations are not required before merge. The project lead may merge once the required checks pass.
 
 Maintainers evaluate changes for user safety, trackpad isolation, permission scope, persistence compatibility, test coverage, localization impact, and release risk. Product and architecture disagreements should be discussed on the pull request or a linked issue; the project lead makes the final decision when consensus is not reached.
 

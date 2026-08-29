@@ -55,6 +55,14 @@
 "show_picker" = "Visa Väljare";
 "no_excluded_apps" = "Inga ignorerade appar ännu.";
 "no_allowed_apps" = "Inga tillåtna appar ännu. Dragrullning är inaktiverad överallt.";
+"ignored_websites_list" = "Ignorerade webbplatser";
+"ignored_websites_detail" = "Dragrullning är avstängd på flikar i Safari och Google Chrome som matchar dessa webbplatser. Andra webbplatser fortsätter att fungera.";
+"no_ignored_websites" = "Inga ignorerade webbplatser ännu.";
+"add_ignored_website" = "Lägg till ignorerad webbplats";
+"website_domain_or_url" = "Domän eller URL";
+"invalid_website" = "Ange en giltig domän eller HTTP(S)-webbadress.";
+"website_already_ignored" = "Webbplatsen ignoreras redan.";
+"tooltip_website_domain_or_url" = "Ange en domän eller webbadress, till exempel notion.so eller https://www.notion.so.";
 "search" = "Sök";
 "no_apps_found" = "Inga appar hittades";
 "custom_bundle_id" = "Anpassat paket-ID";
@@ -157,6 +165,12 @@
 "menu_ignored_app" = "%@ Ignoreras";
 "menu_enable_in_app" = "Aktivera i %@";
 "menu_disable_in_app" = "Inaktivera i %@";
+"menu_ignore_current_website" = "Ignorera aktuell webbplats";
+"menu_website_rule_tooltip" = "Webbplatsregler gäller endast för flikar och fönster i Safari eller Google Chrome som visar det värdnamnet.";
+"menu_enable_on_website" = "Aktivera på %@";
+"menu_ignore_website" = "Ignorera %@";
+"menu_current_tab_not_website" = "Den aktuella fliken är inte en webbplats";
+"menu_current_website_unavailable" = "Den aktuella webbplatsen är inte tillgänglig";
 "current_app" = "Aktuell app";
 "quit" = "Avsluta";
 "trigger_middle_click" = "Mellanklick";

@@ -10,6 +10,7 @@
 		B7E64F93298956F62A4BDC9D /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 48BCE060DC55820969946713 /* Sparkle */; };
 		5BTEST0012F1AB49400A09C9E /* SettingsManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BTEST0022F1AB49400A09C9E /* SettingsManagerTests.swift */; };
 		5BTEST0032F1AB49400A09C9E /* ScrollCalculationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BTEST0042F1AB49400A09C9E /* ScrollCalculationTests.swift */; };
+		5BWEBT0012F1AB49400A09C9E /* BrowserWebsiteRuleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BWEBT0022F1AB49400A09C9E /* BrowserWebsiteRuleTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -26,6 +27,7 @@
 		5B5EA2482F1AB49400A09C9E /* Mac Drag Scroll.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Mac Drag Scroll.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5BTEST0022F1AB49400A09C9E /* SettingsManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManagerTests.swift; sourceTree = "<group>"; };
 		5BTEST0042F1AB49400A09C9E /* ScrollCalculationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollCalculationTests.swift; sourceTree = "<group>"; };
+		5BWEBT0022F1AB49400A09C9E /* BrowserWebsiteRuleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserWebsiteRuleTests.swift; sourceTree = "<group>"; };
 		5BTEST0062F1AB49400A09C9E /* macdragscrollTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = macdragscrollTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -92,6 +94,7 @@
 			children = (
 				5BTEST0022F1AB49400A09C9E /* SettingsManagerTests.swift */,
 				5BTEST0042F1AB49400A09C9E /* ScrollCalculationTests.swift */,
+				5BWEBT0022F1AB49400A09C9E /* BrowserWebsiteRuleTests.swift */,
 			);
 			path = macdragscrollTests;
 			sourceTree = "<group>";
@@ -226,6 +229,7 @@
 			files = (
 				5BTEST0012F1AB49400A09C9E /* SettingsManagerTests.swift in Sources */,
 				5BTEST0032F1AB49400A09C9E /* ScrollCalculationTests.swift in Sources */,
+				5BWEBT0012F1AB49400A09C9E /* BrowserWebsiteRuleTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

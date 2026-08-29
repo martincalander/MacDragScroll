@@ -323,6 +323,7 @@ final class MouseMonitor {
         static let doubleClickReactionMaxTravel: CGFloat = 8
         static let doubleClickReactionDuration: TimeInterval = 0.42
         static let windowValidationInterval: TimeInterval = 0.15
+        static let websiteValidationInterval: TimeInterval = 0.35
         static let cursorHoldWatchdogGracePeriod: CFTimeInterval = 0.12
     }
 
@@ -352,6 +353,7 @@ final class MouseMonitor {
     private var clickReactionWindow: ScrollOverlayWindow?
     private var clickReactionHideTimer: Timer?
     private let syntheticEventSource = CGEventSource(stateID: .combinedSessionState)
+    private let browserPageContextResolver = AccessibilityBrowserPageContextResolver()
     private var userInteractionActivity: NSObjectProtocol?
 
     private var isTriggerActive = false
@@ -374,6 +376,7 @@ final class MouseMonitor {
     private var cursorHoldReleaseMissCount = 0
     private var isOriginWindowAvailable = false
     private var lastWindowValidation: CFTimeInterval = 0
+    private var lastWebsiteValidation: CFTimeInterval = 0
 
     private var scrollSpeed: Double { SettingsManager.shared.scrollSpeed }
     private var deadZoneRadius: Double { SettingsManager.shared.deadZoneRadius }
@@ -617,6 +620,14 @@ final class MouseMonitor {
                 forProcessIdentifier: targetWindow.identity.ownerPID
             )
             guard !SettingsManager.shared.isAppExcluded(bundleIdentifier: targetBundleIdentifier) else {
+                return pass(event)
+            }
+            guard canStartDragScrollingOnWebsite(
+                at: quartzPoint,
+                expectedWindowBounds: targetWindow.bounds,
+                processIdentifier: targetWindow.identity.ownerPID,
+                bundleIdentifier: targetBundleIdentifier
+            ) else {
                 return pass(event)
             }
 
@@ -884,6 +895,7 @@ final class MouseMonitor {
         currentQuartzPoint = .zero
         isOriginWindowAvailable = false
         lastWindowValidation = 0
+        lastWebsiteValidation = 0
 
         endUserInteractionActivity()
 
@@ -1005,6 +1017,11 @@ final class MouseMonitor {
             return
         }
 
+        if shouldCancelForOriginWebsite() {
+            cancelInteraction()
+            return
+        }
+
         if isOverlayVisible {
             overlayWindow?.updateDragPoint(to: currentPoint)
         }
@@ -1121,6 +1138,57 @@ final class MouseMonitor {
 
     private func isOriginAppExcluded() -> Bool {
         SettingsManager.shared.isAppExcluded(bundleIdentifier: originBundleIdentifier)
+    }
+
+    private func canStartDragScrollingOnWebsite(
+        at screenPoint: CGPoint,
+        expectedWindowBounds: CGRect,
+        processIdentifier: pid_t,
+        bundleIdentifier: String?
+    ) -> Bool {
+        let ignoredHosts = SettingsManager.shared.ignoredWebsiteHosts
+        guard !ignoredHosts.isEmpty,
+              BrowserApplication.classify(bundleIdentifier: bundleIdentifier) != nil else {
+            return true
+        }
+
+        let resolution = browserPageContextResolver.resolvePage(
+            at: screenPoint,
+            expectedWindowBounds: expectedWindowBounds,
+            processIdentifier: processIdentifier,
+            bundleIdentifier: bundleIdentifier
+        )
+        lastWebsiteValidation = CACurrentMediaTime()
+        return !BrowserWebsitePolicy.blocksDragScrolling(
+            resolution: resolution,
+            ignoredHosts: ignoredHosts
+        )
+    }
+
+    private func shouldCancelForOriginWebsite() -> Bool {
+        let ignoredHosts = SettingsManager.shared.ignoredWebsiteHosts
+        guard !ignoredHosts.isEmpty,
+              BrowserApplication.classify(bundleIdentifier: originBundleIdentifier) != nil,
+              let originWindow else {
+            return false
+        }
+
+        let now = CACurrentMediaTime()
+        guard now - lastWebsiteValidation >= Constants.websiteValidationInterval else {
+            return false
+        }
+        lastWebsiteValidation = now
+
+        let resolution = browserPageContextResolver.resolvePage(
+            at: originQuartzPoint,
+            expectedWindowBounds: originWindow.bounds,
+            processIdentifier: originWindow.identity.ownerPID,
+            bundleIdentifier: originBundleIdentifier
+        )
+        return BrowserWebsitePolicy.blocksDragScrolling(
+            resolution: resolution,
+            ignoredHosts: ignoredHosts
+        )
     }
 
     private func bundleIdentifier(forProcessIdentifier processIdentifier: pid_t) -> String? {

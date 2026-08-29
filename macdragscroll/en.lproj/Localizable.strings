@@ -55,6 +55,14 @@
 "show_picker" = "Show Picker";
 "no_excluded_apps" = "No ignored apps yet.";
 "no_allowed_apps" = "No allowed apps yet. Drag scrolling is disabled everywhere.";
+"ignored_websites_list" = "Ignored Websites";
+"ignored_websites_detail" = "Drag scrolling stays off in Safari and Google Chrome tabs that match these websites. Other websites keep working.";
+"no_ignored_websites" = "No ignored websites yet.";
+"add_ignored_website" = "Add Ignored Website";
+"website_domain_or_url" = "Domain or URL";
+"invalid_website" = "Enter a valid domain or an HTTP(S) web address.";
+"website_already_ignored" = "That website is already ignored.";
+"tooltip_website_domain_or_url" = "Enter a domain or web address, for example notion.so or https://www.notion.so.";
 "search" = "Search";
 "no_apps_found" = "No apps found";
 "custom_bundle_id" = "Custom bundle ID";
@@ -157,6 +165,12 @@
 "menu_ignored_app" = "%@ Ignored";
 "menu_enable_in_app" = "Enable in %@";
 "menu_disable_in_app" = "Disable in %@";
+"menu_ignore_current_website" = "Ignore Current Website";
+"menu_website_rule_tooltip" = "Website rules apply only to Safari or Google Chrome tabs and windows showing that hostname.";
+"menu_enable_on_website" = "Enable on %@";
+"menu_ignore_website" = "Ignore %@";
+"menu_current_tab_not_website" = "Current Tab Is Not a Website";
+"menu_current_website_unavailable" = "Current Website Unavailable";
 "current_app" = "Current App";
 "quit" = "Quit";
 "trigger_middle_click" = "Middle Click";

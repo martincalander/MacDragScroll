@@ -104,6 +104,14 @@ final class UpdateManager: NSObject, ObservableObject, SPUUpdaterDelegate {
     static let websiteURL = URL(string: "https://martincalander.com")!
     static let versionHistory: [VersionHistoryEntry] = [
         VersionHistoryEntry(
+            version: "1.5.0",
+            build: "150",
+            releaseDate: "2026-08-29",
+            changes: [
+                "Added per-website exclusions for Safari and Google Chrome while keeping other browser pages enabled."
+            ]
+        ),
+        VersionHistoryEntry(
             version: "1.4.0",
             build: "140",
             releaseDate: "2026-08-18",

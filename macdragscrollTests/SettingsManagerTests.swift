@@ -689,10 +689,10 @@ final class SettingsManagerTests: XCTestCase {
     func testAppBundleVersionMetadataUsesStableReleaseValues() {
         let appBundle = Bundle(for: AppDelegate.self)
 
-        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "1.4.0")
-        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String, "140")
-        XCTAssertEqual(AppDelegate.appVersion, "1.4.0")
-        XCTAssertEqual(AppDelegate.appBuild, "140")
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "1.5.0")
+        XCTAssertEqual(appBundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String, "150")
+        XCTAssertEqual(AppDelegate.appVersion, "1.5.0")
+        XCTAssertEqual(AppDelegate.appBuild, "150")
     }
 
     func testAppBundleSupportsMacOS14AndLater() {
@@ -870,7 +870,7 @@ final class SettingsManagerTests: XCTestCase {
 
         XCTAssertEqual(latest?.version, AppDelegate.appVersion)
         XCTAssertEqual(latest?.build, AppDelegate.appBuild)
-        XCTAssertEqual(latest?.releaseDate, "2026-08-18")
+        XCTAssertEqual(latest?.releaseDate, "2026-08-29")
         XCTAssertEqual(latest?.isCurrent, true)
         XCTAssertFalse(latest?.changes.isEmpty ?? true)
     }

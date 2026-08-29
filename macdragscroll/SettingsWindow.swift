@@ -563,50 +563,68 @@ struct SettingsWindowView: View {
     }
 
     private var appSettings: some View {
-        GlassSection {
-            AppListModeRow(selection: $settings.appListMode)
+        VStack(spacing: 14) {
+            GlassSection {
+                AppListModeRow(selection: $settings.appListMode)
 
-            Divider()
+                Divider()
 
-            VStack(alignment: .leading, spacing: 3) {
-                Label(appListTitle, systemImage: settings.appListMode == .ignore ? "hand.raised.slash" : "checkmark.shield")
-                    .font(.system(size: 12, weight: .semibold))
+                VStack(alignment: .leading, spacing: 3) {
+                    Label(appListTitle, systemImage: settings.appListMode == .ignore ? "hand.raised.slash" : "checkmark.shield")
+                        .font(.system(size: 12, weight: .semibold))
 
-                Text(appListDetail)
-                    .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+                    Text(appListDetail)
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-            if !settings.listedApps.isEmpty {
-                VStack(spacing: 4) {
-                    ForEach(settings.listedApps, id: \.self) { bundleId in
-                        CompactAppRow(bundleId: bundleId) {
-                            withAnimation(.easeOut(duration: 0.15)) {
-                                settings.removeListedApp(bundleId)
+                if !settings.listedApps.isEmpty {
+                    VStack(spacing: 4) {
+                        ForEach(settings.listedApps, id: \.self) { bundleId in
+                            CompactAppRow(bundleId: bundleId) {
+                                withAnimation(.easeOut(duration: 0.15)) {
+                                    settings.removeListedApp(bundleId)
+                                }
                             }
                         }
                     }
+                } else {
+                    Text(emptyAppListMessage)
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
-            } else {
-                Text(emptyAppListMessage)
-                    .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                Divider()
+
+                InlineAppPickerView(
+                    listedApps: settings.listedApps,
+                    appListMode: settings.appListMode,
+                    frontmostBundleId: capturedFrontmostBundleId,
+                    onAdd: { bundleId in
+                        withAnimation(.easeOut(duration: 0.15)) {
+                            settings.addListedApp(bundleId)
+                        }
+                    }
+                )
             }
 
-            Divider()
-
-            InlineAppPickerView(
-                listedApps: settings.listedApps,
-                appListMode: settings.appListMode,
-                frontmostBundleId: capturedFrontmostBundleId,
-                onAdd: { bundleId in
-                    withAnimation(.easeOut(duration: 0.15)) {
-                        settings.addListedApp(bundleId)
+            GlassSection {
+                IgnoredWebsitesPicker(
+                    ignoredWebsites: settings.ignoredWebsiteHosts,
+                    onAdd: { host in
+                        withAnimation(.easeOut(duration: 0.15)) {
+                            settings.addIgnoredWebsite(host)
+                        }
+                    },
+                    onRemove: { host in
+                        withAnimation(.easeOut(duration: 0.15)) {
+                            settings.removeIgnoredWebsite(host)
+                        }
                     }
-                }
-            )
+                )
+            }
         }
         .onAppear {
             capturedFrontmostBundleId = SettingsManager.shared.getFrontmostAppBundleId()

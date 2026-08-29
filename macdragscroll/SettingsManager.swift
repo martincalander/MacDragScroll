@@ -366,6 +366,7 @@ class SettingsManager: ObservableObject {
         "appListMode",
         "excludedApps",
         "allowedApps",
+        "ignoredWebsiteHosts",
         "scrollSpeed",
         "deadZoneRadius",
         "acceleration",
@@ -406,6 +407,7 @@ class SettingsManager: ObservableObject {
     private let appListModeKey = "appListMode"
     private let excludedAppsKey = "excludedApps"
     private let allowedAppsKey = "allowedApps"
+    private let ignoredWebsiteHostsKey = "ignoredWebsiteHosts"
     private let scrollSpeedKey = "scrollSpeed"
     private let deadZoneRadiusKey = "deadZoneRadius"
     private let accelerationKey = "acceleration"
@@ -502,6 +504,16 @@ class SettingsManager: ObservableObject {
     @Published var allowedApps: [String] {
         didSet { persist(allowedApps, forKey: allowedAppsKey) }
     }
+
+    @Published var ignoredWebsiteHosts: [String] {
+        didSet {
+            let normalizedHosts = Self.normalizedWebsiteHosts(ignoredWebsiteHosts)
+            if normalizedHosts != ignoredWebsiteHosts {
+                ignoredWebsiteHosts = normalizedHosts
+            }
+            persist(normalizedHosts, forKey: ignoredWebsiteHostsKey)
+        }
+    }
     
     @Published var scrollSpeed: Double {
         didSet {
@@ -592,6 +604,7 @@ class SettingsManager: ObservableObject {
             appListModeKey: AppListMode.ignore.rawValue,
             excludedAppsKey: [String](),
             allowedAppsKey: [String](),
+            ignoredWebsiteHostsKey: [String](),
             scrollSpeedKey: 2.0,
             deadZoneRadiusKey: 20.0,
             accelerationKey: 1.8,
@@ -641,6 +654,13 @@ class SettingsManager: ObservableObject {
         self.appAppearance = AppAppearance(rawValue: appAppearanceRawValue) ?? .system
         self.excludedApps = Self.stringArrayValue(from: defaults, forKey: excludedAppsKey, defaultValue: [])
         self.allowedApps = Self.stringArrayValue(from: defaults, forKey: allowedAppsKey, defaultValue: [])
+        self.ignoredWebsiteHosts = Self.normalizedWebsiteHosts(
+            Self.stringArrayValue(
+                from: defaults,
+                forKey: ignoredWebsiteHostsKey,
+                defaultValue: []
+            )
+        )
 
         // Load and clamp values to valid ranges (protects against corrupted UserDefaults)
         self.scrollSpeed = Self.doubleValue(from: defaults, forKey: scrollSpeedKey, defaultValue: 2.0, range: 0.5...5.0)
@@ -664,6 +684,10 @@ class SettingsManager: ObservableObject {
         
         // Check actual launch at login status from system
         self.launchAtLogin = SMAppService.mainApp.status == .enabled
+
+        // Replace migrated or externally edited values with the canonical,
+        // host-only representation used by the runtime policy.
+        persist(ignoredWebsiteHosts, forKey: ignoredWebsiteHostsKey)
     }
     
     // MARK: - Trigger Config Persistence
@@ -770,35 +794,45 @@ class SettingsManager: ObservableObject {
         }
     }
     
-    // Get the bundle identifier of the currently frontmost app (excluding our own app)
-    func getFrontmostAppBundleId() -> String? {
-        // Get the frontmost app that isn't our own app
-        if let frontmost = NSWorkspace.shared.frontmostApplication,
-           let bundleId = frontmost.bundleIdentifier,
-           bundleId != Bundle.main.bundleIdentifier {
-            return bundleId
-        }
-        
-        // If frontmost is our app, try to find the most recently active app
-        // by looking at running apps with windows (menuBarOwningApplication is another option)
-        if let menuBarApp = NSWorkspace.shared.menuBarOwningApplication,
-           let bundleId = menuBarApp.bundleIdentifier,
-           bundleId != Bundle.main.bundleIdentifier {
-            return bundleId
-        }
-        
-        // Fallback: find any regular app that isn't ours
-        let runningApps = NSWorkspace.shared.runningApplications
-        for app in runningApps {
-            if app.activationPolicy == .regular,
-               let bundleId = app.bundleIdentifier,
-               bundleId != Bundle.main.bundleIdentifier,
-               app.isActive || app.ownsMenuBar {
-                return bundleId
+    // Get the currently active app (excluding our own app). The process ID is
+    // retained for browser page resolution so a menu action cannot target a
+    // different browser instance with the same bundle identifier.
+    func getFrontmostAppIdentity() -> (bundleIdentifier: String, processIdentifier: pid_t)? {
+        let candidates = [
+            NSWorkspace.shared.frontmostApplication,
+            NSWorkspace.shared.menuBarOwningApplication
+        ]
+
+        for app in candidates.compactMap({ $0 }) {
+            if let identity = appIdentity(for: app) {
+                return identity
             }
         }
-        
+
+        for app in NSWorkspace.shared.runningApplications where app.activationPolicy == .regular {
+            guard app.isActive || app.ownsMenuBar else { continue }
+            if let identity = appIdentity(for: app) {
+                return identity
+            }
+        }
+
         return nil
+    }
+
+    func getFrontmostAppBundleId() -> String? {
+        getFrontmostAppIdentity()?.bundleIdentifier
+    }
+
+    private func appIdentity(
+        for app: NSRunningApplication
+    ) -> (bundleIdentifier: String, processIdentifier: pid_t)? {
+        guard let bundleIdentifier = app.bundleIdentifier,
+              bundleIdentifier != Bundle.main.bundleIdentifier,
+              app.processIdentifier > 0 else {
+            return nil
+        }
+
+        return (bundleIdentifier, app.processIdentifier)
     }
     
     func addListedApp(_ bundleId: String) {
@@ -847,6 +881,78 @@ class SettingsManager: ObservableObject {
         bundleId.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    static func normalizedWebsiteHosts(_ rawValues: [String]) -> [String] {
+        var seenHosts: Set<String> = []
+        var normalizedHosts: [String] = []
+
+        for rawValue in rawValues {
+            guard let host = WebsiteHost.normalized(rawValue),
+                  seenHosts.insert(host).inserted,
+                  !normalizedHosts.contains(where: { existingRule in
+                      WebsiteHost.matches(host: host, rule: existingRule)
+                  }) else {
+                continue
+            }
+
+            normalizedHosts.removeAll { existingRule in
+                WebsiteHost.matches(host: existingRule, rule: host)
+            }
+            normalizedHosts.append(host)
+        }
+
+        return normalizedHosts
+    }
+
+    func isWebsiteIgnored(host rawHost: String?) -> Bool {
+        matchingIgnoredWebsiteRule(for: rawHost) != nil
+    }
+
+    func matchingIgnoredWebsiteRule(for rawHost: String?) -> String? {
+        guard let rawHost,
+              let host = WebsiteHost.normalized(rawHost) else {
+            return nil
+        }
+
+        return ignoredWebsiteHosts.first { ruleHost in
+            WebsiteHost.matches(host: host, rule: ruleHost)
+        }
+    }
+
+    func addIgnoredWebsite(_ rawValue: String) {
+        guard let host = WebsiteHost.normalized(rawValue),
+              !ignoredWebsiteHosts.contains(where: { existingRule in
+                  WebsiteHost.matches(host: host, rule: existingRule)
+              }) else {
+            return
+        }
+
+        ignoredWebsiteHosts.removeAll { existingRule in
+            WebsiteHost.matches(host: existingRule, rule: host)
+        }
+        ignoredWebsiteHosts.append(host)
+    }
+
+    func removeIgnoredWebsite(_ rawValue: String) {
+        guard let host = WebsiteHost.normalized(rawValue) else { return }
+        ignoredWebsiteHosts.removeAll { $0 == host }
+    }
+
+    @discardableResult
+    func toggleIgnoredWebsite(_ rawValue: String) -> Bool {
+        guard let host = WebsiteHost.normalized(rawValue) else { return false }
+
+        let matchingRules = ignoredWebsiteHosts.filter { ruleHost in
+            WebsiteHost.matches(host: host, rule: ruleHost)
+        }
+        if !matchingRules.isEmpty {
+            ignoredWebsiteHosts.removeAll { matchingRules.contains($0) }
+            return false
+        }
+
+        addIgnoredWebsite(host)
+        return true
+    }
+
     static func resolvedAppListMode(from rawValue: String?) -> AppListMode {
         rawValue.flatMap(AppListMode.init(rawValue:)) ?? .ignore
     }
@@ -879,6 +985,7 @@ class SettingsManager: ObservableObject {
         appListMode = .ignore
         excludedApps = []
         allowedApps = []
+        ignoredWebsiteHosts = []
         // Note: launchAtLogin is not reset as it's a system preference
     }
     

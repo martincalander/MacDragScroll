@@ -55,6 +55,14 @@
 "show_picker" = "Mostrar selector";
 "no_excluded_apps" = "Aún no hay aplicaciones ignoradas.";
 "no_allowed_apps" = "Aún no hay aplicaciones permitidas. El desplazamiento por arrastre está desactivado en todas partes.";
+"ignored_websites_list" = "Sitios web ignorados";
+"ignored_websites_detail" = "El desplazamiento por arrastre permanece desactivado en las pestañas de Safari y Google Chrome que coincidan con estos sitios web. Los demás sitios web siguen funcionando.";
+"no_ignored_websites" = "Aún no hay sitios web ignorados.";
+"add_ignored_website" = "Añadir sitio web ignorado";
+"website_domain_or_url" = "Dominio o URL";
+"invalid_website" = "Introduce un dominio válido o una dirección web HTTP(S).";
+"website_already_ignored" = "Ese sitio web ya está ignorado.";
+"tooltip_website_domain_or_url" = "Introduce un dominio o una dirección web, por ejemplo, notion.so o https://www.notion.so.";
 "search" = "Buscar";
 "no_apps_found" = "No se encontraron aplicaciones";
 "custom_bundle_id" = "ID de paquete personalizado";
@@ -157,6 +165,12 @@
 "menu_ignored_app" = "%@ Ignorado";
 "menu_enable_in_app" = "Activar en %@";
 "menu_disable_in_app" = "Desactivar en %@";
+"menu_ignore_current_website" = "Ignorar el sitio web actual";
+"menu_website_rule_tooltip" = "Las reglas de sitios web solo se aplican a las pestañas y ventanas de Safari o Google Chrome que muestran ese nombre de host.";
+"menu_enable_on_website" = "Activar en %@";
+"menu_ignore_website" = "Ignorar %@";
+"menu_current_tab_not_website" = "La pestaña actual no es un sitio web";
+"menu_current_website_unavailable" = "El sitio web actual no está disponible";
 "current_app" = "Aplicación actual";
 "quit" = "dejar de fumar";
 "trigger_middle_click" = "Clic medio";

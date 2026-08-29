@@ -55,6 +55,14 @@
 "show_picker" = "Hiển thị bộ chọn";
 "no_excluded_apps" = "Chưa có ứng dụng nào bị bỏ qua.";
 "no_allowed_apps" = "Chưa có ứng dụng nào được phép. Tính năng cuộn bằng cách kéo bị tắt ở mọi nơi.";
+"ignored_websites_list" = "Trang web bị bỏ qua";
+"ignored_websites_detail" = "Tính năng cuộn bằng cách kéo sẽ tắt trong các tab Safari và Google Chrome khớp với những trang web này. Các trang web khác vẫn hoạt động bình thường.";
+"no_ignored_websites" = "Chưa có trang web nào bị bỏ qua.";
+"add_ignored_website" = "Thêm trang web bị bỏ qua";
+"website_domain_or_url" = "Miền hoặc URL";
+"invalid_website" = "Nhập một miền hợp lệ hoặc địa chỉ web HTTP(S).";
+"website_already_ignored" = "Trang web đó đã bị bỏ qua.";
+"tooltip_website_domain_or_url" = "Nhập miền hoặc địa chỉ web, ví dụ notion.so hoặc https://www.notion.so.";
 "search" = "Tìm kiếm";
 "no_apps_found" = "Không tìm thấy ứng dụng nào";
 "custom_bundle_id" = "ID gói tùy chỉnh";
@@ -157,6 +165,12 @@
 "menu_ignored_app" = "%@ Đã bỏ qua";
 "menu_enable_in_app" = "Bật trong %@";
 "menu_disable_in_app" = "Tắt trong %@";
+"menu_ignore_current_website" = "Bỏ qua trang web hiện tại";
+"menu_website_rule_tooltip" = "Quy tắc trang web chỉ áp dụng cho các tab và cửa sổ Safari hoặc Google Chrome hiển thị tên máy chủ đó.";
+"menu_enable_on_website" = "Bật trên %@";
+"menu_ignore_website" = "Bỏ qua %@";
+"menu_current_tab_not_website" = "Tab hiện tại không phải là trang web";
+"menu_current_website_unavailable" = "Trang web hiện tại không khả dụng";
 "current_app" = "Ứng dụng hiện tại";
 "quit" = "Thoát";
 "trigger_middle_click" = "Nhấp chuột giữa";

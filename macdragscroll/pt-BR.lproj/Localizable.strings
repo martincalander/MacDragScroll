@@ -55,6 +55,14 @@
 "show_picker" = "Mostrar seletor";
 "no_excluded_apps" = "Nenhum aplicativo ignorado ainda.";
 "no_allowed_apps" = "Nenhum aplicativo permitido ainda. A rolagem por arrastar está desativada em todos os aplicativos.";
+"ignored_websites_list" = "Sites ignorados";
+"ignored_websites_detail" = "A rolagem por arrastar permanece desativada nas abas do Safari e do Google Chrome que correspondem a estes sites. Os outros sites continuam funcionando.";
+"no_ignored_websites" = "Nenhum site ignorado ainda.";
+"add_ignored_website" = "Adicionar site ignorado";
+"website_domain_or_url" = "Domínio ou URL";
+"invalid_website" = "Insira um domínio válido ou um endereço HTTP(S).";
+"website_already_ignored" = "Esse site já está sendo ignorado.";
+"tooltip_website_domain_or_url" = "Insira um domínio ou endereço da web, por exemplo, notion.so ou https://www.notion.so.";
 "search" = "Pesquisar";
 "no_apps_found" = "Nenhum aplicativo encontrado";
 "custom_bundle_id" = "ID do pacote personalizado";
@@ -157,6 +165,12 @@
 "menu_ignored_app" = "%@ ignorado";
 "menu_enable_in_app" = "Ativar no %@";
 "menu_disable_in_app" = "Desativar em %@";
+"menu_ignore_current_website" = "Ignorar site atual";
+"menu_website_rule_tooltip" = "As regras de sites se aplicam somente às abas e janelas do Safari ou Google Chrome que exibem esse nome de host.";
+"menu_enable_on_website" = "Ativar em %@";
+"menu_ignore_website" = "Ignorar %@";
+"menu_current_tab_not_website" = "A aba atual não é um site";
+"menu_current_website_unavailable" = "Site atual indisponível";
 "current_app" = "Aplicativo atual";
 "quit" = "Sair";
 "trigger_middle_click" = "Clique do meio";

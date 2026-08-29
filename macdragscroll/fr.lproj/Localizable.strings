@@ -55,6 +55,14 @@
 "show_picker" = "Afficher le sélecteur";
 "no_excluded_apps" = "Aucune application ignorée pour l’instant.";
 "no_allowed_apps" = "Aucune application autorisée pour l’instant. Le défilement par glissement est désactivé partout.";
+"ignored_websites_list" = "Sites web ignorés";
+"ignored_websites_detail" = "Le défilement par glissement reste désactivé dans les onglets Safari et Google Chrome correspondant à ces sites. Les autres sites continuent de fonctionner.";
+"no_ignored_websites" = "Aucun site web ignoré pour l’instant.";
+"add_ignored_website" = "Ajouter un site web ignoré";
+"website_domain_or_url" = "Domaine ou URL";
+"invalid_website" = "Saisissez un domaine valide ou une adresse web HTTP(S).";
+"website_already_ignored" = "Ce site web est déjà ignoré.";
+"tooltip_website_domain_or_url" = "Saisissez un domaine ou une adresse web, par exemple notion.so ou https://www.notion.so.";
 "search" = "Rechercher";
 "no_apps_found" = "Aucune application trouvée";
 "custom_bundle_id" = "ID de paquet personnalisé";
@@ -157,6 +165,12 @@
 "menu_ignored_app" = "%@ ignoré";
 "menu_enable_in_app" = "Activer dans %@";
 "menu_disable_in_app" = "Désactiver dans %@";
+"menu_ignore_current_website" = "Ignorer le site web actuel";
+"menu_website_rule_tooltip" = "Les règles de site web s’appliquent uniquement aux onglets et fenêtres Safari ou Google Chrome affichant ce nom d’hôte.";
+"menu_enable_on_website" = "Activer sur %@";
+"menu_ignore_website" = "Ignorer %@";
+"menu_current_tab_not_website" = "L’onglet actuel n’est pas un site web";
+"menu_current_website_unavailable" = "Site web actuel indisponible";
 "current_app" = "Application actuelle";
 "quit" = "Quitter";
 "trigger_middle_click" = "Clic du milieu";

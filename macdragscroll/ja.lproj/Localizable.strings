@@ -55,6 +55,14 @@
 "show_picker" = "ショーピッカー";
 "no_excluded_apps" = "無視されたアプリはまだありません。";
 "no_allowed_apps" = "許可されたアプリはまだありません。ドラッグスクロールはすべてのアプリで無効です。";
+"ignored_websites_list" = "無視するWebサイト";
+"ignored_websites_detail" = "これらのWebサイトに一致するSafariおよびGoogle Chromeのタブでは、ドラッグスクロールが無効になります。その他のWebサイトでは引き続き使用できます。";
+"no_ignored_websites" = "無視するWebサイトはまだありません。";
+"add_ignored_website" = "無視するWebサイトを追加";
+"website_domain_or_url" = "ドメインまたはURL";
+"invalid_website" = "有効なドメインまたはHTTP(S)のWebアドレスを入力してください。";
+"website_already_ignored" = "このWebサイトはすでに無視されています。";
+"tooltip_website_domain_or_url" = "ドメインまたはWebアドレスを入力してください（例：notion.so または https://www.notion.so）。";
 "search" = "検索";
 "no_apps_found" = "アプリが見つかりませんでした";
 "custom_bundle_id" = "カスタムバンドルID";
@@ -157,6 +165,12 @@
 "menu_ignored_app" = "%@ は無視されました";
 "menu_enable_in_app" = "%@ で有効にする";
 "menu_disable_in_app" = "%@ で無効にする";
+"menu_ignore_current_website" = "現在のWebサイトを無視";
+"menu_website_rule_tooltip" = "Webサイトルールは、そのホスト名を表示しているSafariまたはGoogle Chromeのタブとウインドウにのみ適用されます。";
+"menu_enable_on_website" = "%@ で有効にする";
+"menu_ignore_website" = "%@ を無視";
+"menu_current_tab_not_website" = "現在のタブはWebサイトではありません";
+"menu_current_website_unavailable" = "現在のWebサイトを取得できません";
 "current_app" = "現在のアプリ";
 "quit" = "やめる";
 "trigger_middle_click" = "中クリック";
